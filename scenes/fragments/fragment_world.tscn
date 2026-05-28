@@ -1,0 +1,43 @@
+[gd_scene load_steps=5 format=3 uid="uid://fragment_world"]
+
+[ext_resource type="Script" path="res://scripts/fragment/fragment_base.gd" id="1_base"]
+[ext_resource type="Script" path="res://scripts/player/player_controller.gd" id="2_player"]
+[ext_resource type="Script" path="res://scripts/ui/dialogue.gd" id="3_dialogue"]
+
+[sub_resource type="CircleShape2D" id="Circle_player"]
+radius = 14.0
+
+[node name="FragmentWorld" type="Node2D"]
+script = ExtResource("1_base")
+
+[node name="Player" type="CharacterBody2D" parent="."]
+script = ExtResource("2_player")
+
+[node name="Sprite2D" type="Sprite2D" parent="Player"]
+scale = Vector2(2, 2)
+modulate = Color(0.3, 0.7, 1, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player"]
+shape = SubResource("Circle_player")
+
+[node name="NPCs" type="Node2D" parent="."]
+
+[node name="Map" type="TileMapLayer" parent="."]
+
+[node name="Camera2D" type="Camera2D" parent="Player"]
+position_smoothing_enabled = true
+
+[node name="UILayer" type="CanvasLayer" parent="."]
+
+[node name="DialogueUI" type="Control" parent="UILayer"]
+layout_mode = 0
+script = ExtResource("3_dialogue")
+
+[node name="WantedIndicator" type="Control" parent="UILayer"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 600.0
+
+[node name="ClueNotification" type="Control" parent="UILayer"]
+layout_mode = 0
+visible = false

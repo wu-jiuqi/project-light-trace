@@ -1,0 +1,42 @@
+# ============================================================
+# Godot 4 项目 .gitignore
+# ============================================================
+
+# --- Godot 引擎自动生成 ---
+.godot/
+
+# --- 构建/导出产物 ---
+build/
+
+# --- Node.js 依赖 (package.json 存在) ---
+node_modules/
+
+# --- 外部资源 / 自动生成 ---
+# 插件自动生成的 NPC 场景
+generated/
+# 外部下载的 Godot 插件（需在 README 中注明安装来源）
+addons/
+# 外部下载的角色素材包
+AI资源库/
+
+# --- 备份文件 ---
+*.bak
+
+# --- 操作系统自动生成 ---
+.DS_Store
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# --- IDE / 编辑器 ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- 临时文件 ---
+tmp/
+temp/
+*.tmp
+*.log

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1a3a5c"/>
+      <stop offset="100%" stop-color="#0d0d1f"/>
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="128" height="128" rx="12" fill="url(#bg)"/>
+  <g filter="url(#glow)" fill="none" stroke="#4a9eff" stroke-width="2" stroke-linecap="round">
+    <!-- 碎片晶体 -->
+    <polygon points="64,20 90,40 78,70 50,70 38,40" stroke-opacity="0.9"/>
+    <polygon points="64,48 50,70 78,70" stroke-opacity="0.5"/>
+    <!-- 光束 -->
+    <line x1="64" y1="20" x2="64" y2="100" stroke="#6ac8ff" stroke-width="3" stroke-opacity="0.7"/>
+    <circle cx="64" cy="100" r="3" fill="#6ac8ff" stroke="none"/>
+  </g>
+  <!-- 源印 -->
+  <g transform="translate(64,108)">
+    <circle r="6" fill="none" stroke="#ff6a6a" stroke-width="1.5" opacity="0.8"/>
+    <line x1="-3" y1="-3" x2="3" y2="3" stroke="#ff6a6a" stroke-width="1" opacity="0.6"/>
+    <line x1="3" y1="-3" x2="-3" y2="3" stroke="#ff6a6a" stroke-width="1" opacity="0.6"/>
+  </g>
+</svg>

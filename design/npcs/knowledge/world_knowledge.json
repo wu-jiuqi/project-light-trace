@@ -1,0 +1,116 @@
+{
+  "_description": "L2层：碎片#0762共享世界观知识库。所有NPC共用。按话题分块，根据玩家输入的关键词检索注入。",
+  "_npc_ids": ["all"],
+  "_total_chunks": 12,
+
+  "chunks": [
+    {
+      "id": "world_physics",
+      "category": "world_rules",
+      "keywords": ["世界", "天空", "灰色", "灰白", "阴天", "太阳", "天气", "花", "面包", "火", "温度"],
+      "relevance_gate": "low",
+      "memory_stage": "any",
+      "alert_required": 0,
+      "content": "这个世界是完整的——有天空、街道、房屋、日夜循环。但太阳是灰白色的，天空是浅灰到深灰的渐层。所有物体和生命体都没有彩色。食物（面包）可食用但无味；花朵（矢车菊）有形状但无颜色；火焰（锻造台）有温度但无光。物理规则完全正常——重力、碰撞、天气均无异常。"
+    },
+    {
+      "id": "world_social",
+      "category": "world_rules",
+      "keywords": ["居民", "镇上", "大家", "邻居", "关系", "镇长", "规矩"],
+      "relevance_gate": "medium",
+      "memory_stage": "any",
+      "alert_required": 0,
+      "content": "小镇大约有30-50名居民，但只有少数几个人有完整的……怎么说呢，有完整的\"感觉\"。其他人比正常人少了某种东西——说不上来是什么。居民之间存在基本的社会关系（邻里、买卖、问候），但没有镇长、没有法律执行者、没有惩罚机制。小镇以一种\"惯性\"运转。"
+    },
+    {
+      "id": "world_color_taboo",
+      "category": "world_rules",
+      "keywords": ["颜色", "蓝色", "红色", "黄色", "绿色", "紫色", "白色", "彩色", "花的颜色", "天空的颜色"],
+      "relevance_gate": "high",
+      "memory_stage": "any",
+      "alert_required": 0,
+      "content": "在这个世界里，\"颜色\"这个概念本身对大多数居民来说是不存在的。没有人用语言描述过颜色。没有人问过\"为什么花没有颜色\"。不是他们看不见——而是他们的认知中没有\"颜色\"这个范畴。这就像鱼不知道水的存在。颜色是他们的\"水\"——失去了，但不知道失去了什么。唯一的例外：老画家——他能\"感知\"到颜色，但不用眼睛看。镇上的人说他疯了。"
+    },
+    {
+      "id": "world_time",
+      "category": "world_rules",
+      "keywords": ["时间", "几点", "今天", "明天", "白天", "晚上", "夜里", "日", "夜"],
+      "relevance_gate": "low",
+      "memory_stage": "any",
+      "alert_required": 0,
+      "content": "时间以正常的24小时循环流动。天气固定为阴天。每个居民都有固定的作息：面包师6:00揉面、花店8:00开门、铁匠5:00点火、小提琴手12:00在广场、守墓人18:00巡视墓园。夜晚（18:00-6:00）大部分NPC休息，墓园夜间关闭。"
+    },
+    {
+      "id": "world_geography_overview",
+      "category": "geography",
+      "keywords": ["广场", "市集街", "面包房", "花店", "旅店", "铁匠铺", "镇公所", "墓园", "画室", "在哪", "怎么走", "位置"],
+      "relevance_gate": "low",
+      "memory_stage": "any",
+      "alert_required": 0,
+      "content": "小镇布局：正中心是灰色广场（白色雕像+小提琴手）。广场西侧是市集街（南北走向，有面包房、花店、旅店）。广场南侧是铁匠铺（独立建筑，大门朝广场）。广场东侧是镇公所。广场北侧最远处是墓园，墓园北侧通过一个拱形通道与废弃画室直接相连——要去画室必须先穿过墓园。"
+    },
+    {
+      "id": "world_color_recovery_early",
+      "category": "color_system",
+      "keywords": ["觉醒", "想起来", "记起来", "回忆起", "不对劲", "变化", "不一样了"],
+      "relevance_gate": "high",
+      "memory_stage": "partial_awake",
+      "alert_required": 0,
+      "content": "每找回一种颜色，那个颜色就会在某些地方显现。对应的那个人的身上也会出现变化——不是外表的变化，是感觉的变化。他们会开始觉得\"不对\"。等颜色凑得够多了，他们开始互相注意到对方的变化。就像拼图——第一块你看不出是什么，但三块、四块拼在一起，轮廓就出来了。"
+    },
+    {
+      "id": "world_color_recovery_full",
+      "category": "color_system",
+      "keywords": ["全部", "所有颜色", "六种", "完整", "恢复", "回想起来", "零时", "那天"],
+      "relevance_gate": "high",
+      "memory_stage": "full_awake",
+      "alert_required": 0,
+      "content": "当六种颜色全部被找回时，世界的所有色彩会在瞬间恢复。所有人同时记起那天发生的事——天空裂开、什么东西涌了进来、火灭了、颜色没了。有人会尖叫、有人会跪下、有人会重复喃喃自语。但他们也同时记起了自己是谁——真正的自己。他们不会再忘了。"
+    },
+    {
+      "id": "world_inn_location",
+      "category": "geography",
+      "keywords": ["旅店", "灰檐", "冯婶", "住宿", "房间", "201", "钥匙", "信"],
+      "relevance_gate": "medium",
+      "memory_stage": "any",
+      "alert_required": 0,
+      "content": "灰檐旅店在市集街南段。旅店老板是冯婶，一位60多岁的老妇人。目前只有一位住客——一个旅行者，住在201号房。听说他是从荒原那边来的，迷了路。冯婶说他来的时候脸白得像纸，睡了一整天才醒。"
+    },
+    {
+      "id": "world_statue",
+      "category": "geography",
+      "keywords": ["雕像", "白色雕像", "广场雕像", "纪念碑"],
+      "relevance_gate": "medium",
+      "memory_stage": "any",
+      "alert_required": 0,
+      "content": "广场中心有一座白色雕像——纯白色的。在这个全是灰色的世界里，它白得刺眼。没人知道它是谁立的、什么时候立的。雕像底座上刻着模糊的字迹，已经无法辨认了。小提琴手每天站在它旁边。"
+    },
+    {
+      "id": "world_cemetery_arch",
+      "category": "geography",
+      "keywords": ["墓园", "画室", "拱道", "拱门", "通道", "石板路", "老崔", "老画家", "安归"],
+      "relevance_gate": "low",
+      "memory_stage": "any",
+      "alert_required": 0,
+      "content": "墓园北侧石墙上有一个无门的拱形通道，直通画室。站在墓园最深处就能看到画室的门。拱道上方的石头上刻着两个模糊的字——\"安\"和\"归\"。没有人记得是谁刻的了。老画家就住在通道那一头的画室里。老崔的小屋在墓园北端，离通道很近。"
+    },
+    {
+      "id": "world_old_painter_special",
+      "category": "world_rules",
+      "keywords": ["老画家", "画画的", "画室", "疯", "疯子", "关起来"],
+      "relevance_gate": "medium",
+      "memory_stage": "any",
+      "alert_required": 0,
+      "content": "老画家被关在墓园旁的画室里——不是铁锁关的，是被\"不能说出来\"的知识关的。他能感知到颜色，但他说的关于颜色的东西，镇上的大多数人都听不懂。有人同情他、有人怕他、有人不理他。但没有人真正理解他——也许除了那个新来的旅行者。"
+    },
+    {
+      "id": "world_outsider_implicit",
+      "category": "world_rules",
+      "keywords": ["外来", "外面", "旅行者", "旅人", "陌生人", "新来的", "外地"],
+      "relevance_gate": "medium",
+      "memory_stage": "any",
+      "alert_required": 0,
+      "content": "镇上最近来了一个旅行者——住灰檐旅店。他声称在穿过荒原时迷了路。他说外面的天也是灰的，路也是灰的。但有些居民觉得他的呼吸节奏不太对——不像在这里待久了的人。不过没人追问。追问需要好奇心——而大部分人已经忘了怎么好奇。"
+    }
+  ]
+}
