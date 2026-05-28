@@ -101,6 +101,8 @@ backpack={
 [layer_names]
 
 2d_physics/layer_1="人物层"
+2d_physics/layer_2="land"
+2d_physics/layer_3="building"
 
 [rendering]
 
