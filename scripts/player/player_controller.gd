@@ -80,8 +80,8 @@ func _try_spawn(spawn_name: String) -> void:
 
 
 func _physics_process(_delta: float) -> void:
-	# 对话或背包打开时锁定移动
-	if ChatDialogue.is_open or InventoryManager.backpack_open:
+	# 对话、背包打开或场景过渡时锁定移动
+	if ChatDialogue.is_open or InventoryManager.backpack_open or SceneFader.is_fading:
 		velocity = Vector2.ZERO
 		move_and_slide()
 		return
