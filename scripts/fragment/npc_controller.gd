@@ -117,6 +117,15 @@ func _get_alert_profile() -> Dictionary:
 				"safe_actions": [],
 				"trust_modifier": -20.0
 			}
+		"innkeeper":
+			return {
+				"thresholds": {0:0, 1:10, 2:20, 3:30, 4:38, 5:45},
+				"hot_topics": ["源印", "天枢", "织女", "太一", "万象", "归源",
+							  "为什么没有颜色", "不对劲", "你是谁", "你不属于"],
+				"personality": "冯婶——半睡半醒的旅店老板娘。她的警觉上限极低（40），且超过20就不再闲聊——你将失去情报来源。警觉每天衰减3点。",
+				"safe_actions": ["付房钱", "天气", "饿了", "累了", "老唐"],
+				"trust_modifier": -10.0
+			}
 	return {
 		"thresholds": {0:0, 1:20, 2:40, 3:60, 4:80, 5:95},
 		"hot_topics": ["为什么没有颜色", "源印", "天枢", "不对劲", "奇怪"],
@@ -156,9 +165,8 @@ var idle_timer: float = 0.0
 ## RAG状态引用
 var _fragment_state: Node = null
 
-## 对话历史（最多保留最近10轮）
-var _chat_history: Array[String] = []
-const MAX_HISTORY: int = 10
+## 对话历史（通过ChatDatabase SQLite持久化，不再使用内存数组）
+const DIALOGUE_HISTORY_LIMIT: int = 10  # 注入LLM的最大历史条数
 
 ## 情绪状态追踪
 var _npc_mood: String = ""                # 当前情绪描述
@@ -172,6 +180,9 @@ signal npc_state_changed(new_state: int)
 func _ready() -> void:
 	add_to_group("npc")
 	target_position = global_position
+	
+	# 创建交互提示标签（显示在NPC头顶）
+	_create_interact_label()
 	
 	# 查找碎片状态管理器
 	var states = get_tree().get_nodes_in_group("fragment_state")
@@ -192,6 +203,7 @@ func _ready() -> void:
 		doubts_player_identity = saved.get("doubts", false)
 		target_position = global_position
 		_own_color_was_awakened = _is_own_color_awakened()
+		_update_behavior_from_alert()  # 恢复后同步行为状态（IDLE/SUSPICIOUS/SHUTDOWN等）
 		print("[NPC] %s 从缓存恢复: pos=(%.0f,%.0f) sus=%.0f phase=%d" % 
 			  [npc_name, global_position.x, global_position.y, npc_suspicion, npc_alert_phase])
 	else:
@@ -203,6 +215,12 @@ func _ready() -> void:
 				print("[NPC] %s 初始警觉: %.0f (天生多疑)" % [npc_name, npc_suspicion])
 	
 	print("[NPC] %s (%s) 已生成 | kb=%s rag=%s" % [npc_name, npc_role, npc_kb_id, use_rag])
+	
+	# 冯婶：更高的警觉衰减率（每天衰减3点，与其他NPC区别）
+	if npc_kb_id == "innkeeper":
+		_alert_decay_rate = 3.0
+		_alert_decay_delay = 5.0  # 更快开始衰减
+	
 	if system_prompt != "":
 		print("[NPC] %s 静态system_prompt 已加载 (%d 字符)" % [npc_name, system_prompt.length()])
 	
@@ -243,7 +261,9 @@ func _physics_process(_delta: float) -> void:
 		var direction = (target_position - global_position).normalized()
 		var speed = chase_speed if current_state in [NPCState.CHASING, NPCState.FLEEING] else walk_speed
 		velocity = direction * speed
-		move_and_slide()
+	else:
+		velocity = Vector2.ZERO
+	move_and_slide()  # 始终调用——非移动状态也需处理物理碰撞（不穿透地形/TileMapLayer）
 
 func _process_idle(delta: float) -> void:
 	idle_timer -= delta
@@ -292,7 +312,6 @@ func set_state(new_state: int) -> void:
 
 func start_dialogue() -> void:
 	set_state(NPCState.TALKING)
-	_chat_history.clear()  # 每次新对话清空历史
 	# 记录拜访（老崔需要计数）
 	if _fragment_state and _fragment_state.has_method("record_npc_visit") and npc_kb_id != "":
 		_fragment_state.record_npc_visit(npc_kb_id)
@@ -517,6 +536,7 @@ func alert_react_to_player_action(action_type: String) -> String:
 				"baker":      return "（老唐的笑容收了一点点。只是一点点。）"
 				"gravekeeper":return "（老崔盯着你看了很久。他没说话——他不需要说话。）"
 				"violinist":  return "（薇拉把琴盒往自己身边挪了挪。）"
+				"innkeeper":  return "（冯婶托着腮帮子的手换了一边——她还在打瞌睡，但眼睛眯开了一条缝。）"
 		NPCAlertPhase.SUSPICIOUS:
 			match npc_kb_id:
 				"blacksmith": return "（老霍停下锤子。沉默。）……你问这个干什么。"
@@ -524,6 +544,7 @@ func alert_react_to_player_action(action_type: String) -> String:
 				"baker":      return "（老唐没有笑。）……你问的东西——不是该问的。"
 				"gravekeeper":return "（老崔往铁门靠了一步。）你最好走。现在。"
 				"violinist":  return "（薇拉合上了琴盒。她没有看你。）"
+				"innkeeper":  return "（冯婶睁开了眼睛。她没有抬头——但翻登记簿的手停了。）……你——不是来续房的，对吧。"
 		NPCAlertPhase.ALARMED:
 			match npc_kb_id:
 				"blacksmith": return "（老霍把锤子举了起来——不是要打人，是防御。）不买东西就走。"
@@ -531,6 +552,7 @@ func alert_react_to_player_action(action_type: String) -> String:
 				"baker":      return "（老唐挡在烤炉前面。）面包还没好。——走吧。"
 				"gravekeeper":return "（老崔打开了铁门——不是让你进去，是让自己能退进去。）够了。"
 				"violinist":  return "（薇拉站起来，抱着琴盒，转身——）"
+				"innkeeper":  return "（冯婶把登记簿合上了。她看着你——不是生气，是失望。）……早点睡吧。你累了。"
 		NPCAlertPhase.HOSTILE:
 			match npc_kb_id:
 				"blacksmith": return "（老霍怒吼。）滚！——这不是你该来的地方！"
@@ -538,6 +560,7 @@ func alert_react_to_player_action(action_type: String) -> String:
 				"baker":      return "（老唐抓起一根擀面杖。）走——别让我说第二遍。"
 				"gravekeeper":return "（老崔消失在铁门后面。门砰地关上——从里面反锁了。）"
 				"violinist":  return "（薇拉跑掉了。琴盒撞在门框上——她甚至没有回头。）"
+				"innkeeper":  return "（冯婶站起来——慢慢地把椅子推进柜台下面。）……退房吧。今晚不留客了。"
 	return ""
 
 func on_alert_level_changed(alert_level: int) -> void:
@@ -736,6 +759,7 @@ func _is_own_color_awakened() -> bool:
 		"baker":      return GameManager.is_color_awakened(GameManager.ColorType.YELLOW)
 		"gravekeeper":return GameManager.is_color_awakened(GameManager.ColorType.GREEN)
 		"violinist":  return GameManager.is_color_awakened(GameManager.ColorType.PURPLE)
+		"innkeeper":  return false  # 冯婶不承载颜色
 	return false
 
 
@@ -754,6 +778,8 @@ func _get_initial_greeting() -> String:
 			return "（她没有看你。琴弓停在半空中——一直没有放下。）"
 		"oldpainter":
 			return "你来了。坐。先去看那些颜色——不是我的颜色，是他们的。"
+		"innkeeper":
+			return "（冯婶托着腮帮子，头一点一点地在打瞌睡。听到脚步声，她迷迷糊糊地抬起眼皮。）……哦——醒了啊。没事吧现在？饿不饿？"
 	return "……"
 
 
@@ -778,6 +804,9 @@ func _get_partial_awake_greeting(count: int) -> String:
 		"oldpainter":
 			if count <= 2: return "颜色们在互相寻找对方——只是他们还不会说话。"
 			return "四个了。还差两个——其中一个在等我。"
+		"innkeeper":
+			if count <= 2: return "（冯婶多翻了一页登记簿——虽然还是空的。）今天镇上好像不太一样——我说不上来。你也感觉到了？"
+			return "登记簿有字的那页——墨好像深了一点。你说奇怪不奇怪。算了——管它呢。"
 	return "镇上有些不对劲——你感觉到了吗？"
 
 
@@ -820,6 +849,8 @@ func _get_world_changed_greeting() -> String:
 			return "琴弦响了。不是我拉的——是六个人的声音在弦上汇到了一起。"
 		"oldpainter":
 			return "六色齐全了。画布上的裂痕合上了——不是被我补的。是被她们拼好的。"
+		"innkeeper":
+			return "今早我打开旅店大门——街上的颜色多得晃眼。我活了六十多年，第一次知道这条街长什么样。登记簿上——多了一行字。不是我的笔迹。但我认识它。"
 	return "世界完整了——你做到了。"
 
 
@@ -832,6 +863,7 @@ func _get_alt_greeting(count: int) -> String:
 		"gravekeeper":return "你又来了。这次想听什么？"
 		"violinist":  return "（她点了点头，没有说话。）"
 		"oldpainter": return "颜色们在等你。进来吧。"
+		"innkeeper":  return "（冯婶翻了一页登记簿。）嗯？——哦，是你。饿了没？"
 	return "嗯？"
 
 
@@ -853,6 +885,7 @@ func _update_npc_mood(count: int, own_awake: bool) -> void:
 			"gravekeeper":_npc_mood = "铁门后面有声音。不是风。你又关了一次门——但你知道那东西还在等。"
 			"violinist":  _npc_mood = "琴盒里多了一根弦。你不确定从哪来的——但你认识那根弦的颜色。"
 			"oldpainter": _npc_mood = "画布上出现了裂痕。不像是画笔留下的——像是画布自己在告别什么。"
+			"innkeeper":  _npc_mood = "你注意到镇上有些不对劲。有人从旅店门口经过时脚步比平时快了——不是急事，是心情。你很久没见过有'心情'的人了。"
 
 
 func _collect_game_state() -> Dictionary:
@@ -885,8 +918,8 @@ func send_player_message(message: String) -> void:
 	print("[NPC] %s 收到: \"%s\"" % [npc_name, message])
 	_llm_last_input = message  # 记下玩家输入，等LLM回复后分析
 	
-	# 记录对话历史
-	_add_history("玩家: %s" % message)
+	# 记录对话历史到SQLite数据库
+	ChatDatabase.log_message(npc_kb_id, "player", message, npc_alert_phase, npc_suspicion)
 	
 	# 检查LLM是否繁忙
 	if LLMClient.has_method("is_busy") and LLMClient.is_busy():
@@ -896,7 +929,7 @@ func send_player_message(message: String) -> void:
 	
 	# 收集游戏状态（包含当前警觉阶段作为LLM上下文）
 	var game_state = _collect_game_state()
-	game_state["chat_history"] = _get_history_text()
+	game_state["chat_history"] = ChatDatabase.get_history_as_text(npc_kb_id, DIALOGUE_HISTORY_LIMIT)
 	
 	# 根据警觉等级决定回应方式——LLM会根据上下文自然地调整语气
 	match npc_alert_phase:
@@ -956,6 +989,7 @@ func _get_alert_escalation_reaction(old_phase: int, new_phase: int) -> String:
 			"baker":      return "（老唐的笑容收了一分。他的手在围裙上擦了擦。）"
 			"gravekeeper":return "（老崔的呼吸变重了一拍。他没有动，但他的眼神锁定了你。）"
 			"violinist":  return "（薇拉的琴弓停在半空中。她没有看你——但她不再看琴了。）"
+			"innkeeper":  return "（冯婶的打鼾声停了一拍。她没睁眼——但你知道她醒着。）"
 		return "（%s看了你一眼，没有说话。）" % npc_name
 	
 	# 从谨慎到怀疑
@@ -966,6 +1000,7 @@ func _get_alert_escalation_reaction(old_phase: int, new_phase: int) -> String:
 			"baker":      return "（老唐不再笑了。他往烤炉靠了一步——不是取暖，是防备。）"
 			"gravekeeper":return "（老崔的手放在了铁门上。不是推——是准备关。）你在找什么。"
 			"violinist":  return "（薇拉合上了琴盒。她的手指在扣子上停留了很久。）……别问。"
+			"innkeeper":  return "（冯婶终于抬起了头。她没有笑。）……你问的这些东西——不是一个旅客该问的。"
 		return "（%s盯着你。空气突然变冷了。）" % npc_name
 	
 	# 从怀疑到警觉
@@ -976,6 +1011,7 @@ func _get_alert_escalation_reaction(old_phase: int, new_phase: int) -> String:
 			"baker":      return "（老唐挡在了烤炉前。他的声音不再带着笑意。）够了。——走吧。"
 			"gravekeeper":return "（老崔拉开了铁门——不是请你进去。是准备自己退进去。）你最好走。"
 			"violinist":  return "（薇拉站起来。琴盒紧紧抱在胸前。）……我喊人了。"
+			"innkeeper":  return "（冯婶把登记簿往怀里收了收。她的声音比平时轻——不是在哄你睡觉，是在给自己壮胆。）……我这儿没什么好看的。"
 		return "（%s的语气变得冰冷。）你在问不该问的东西。"
 	
 	# 从警报到敌对
@@ -986,6 +1022,7 @@ func _get_alert_escalation_reaction(old_phase: int, new_phase: int) -> String:
 			"baker":      return "（老唐抓起了擀面杖。）出去！别让我说第三遍！"
 			"gravekeeper":return "（老崔消失在铁门后面。门砰地关上——里面传来反锁的声音。）"
 			"violinist":  return "（薇拉跑了。琴盒撞在门框上——她甚至没有回头。）"
+			"innkeeper":  return "（冯婶慢慢站起来。她没有喊——她只是把登记簿抱在胸前，看着你。那个眼神不是愤怒——是\"我早就知道会有这么一天\"。）……走吧。今晚不留客了。"
 		return "（%s不再和你说话。他转身就走。）"
 	
 	return ""
@@ -999,6 +1036,7 @@ func _get_hostile_warning() -> String:
 		"baker":      return "（老唐把擀面杖往桌上一拍。）最后一次。——你走不走？"
 		"gravekeeper":return "（老崔已经半身退入铁门。他只说了一句。）趁你还记得。走吧。"
 		"violinist":  return "（薇拉已经不在原地了。琴盒也带走了——只剩一张空椅子。）"
+		"innkeeper":  return "（冯婶把登记簿放进抽屉——慢慢地，像在安放什么东西。然后她转身走进了后面的房间。门没关——但你不会再进去了。）"
 	return "（%s转身离开了——他不会回来了。）" % npc_name
 
 
@@ -1080,8 +1118,8 @@ func _on_stream_token(token: String) -> void:
 func _on_stream_completed(full_text: String) -> void:
 	_disconnect_stream_signals()
 	ChatDialogue.stream_end(full_text)
-	# 记录NPC回复
-	_add_history("%s: %s" % [npc_name, full_text])
+	# 记录NPC回复到SQLite数据库
+	ChatDatabase.log_message(npc_kb_id, "npc", full_text, npc_alert_phase, npc_suspicion)
 	print("[NPC] %s 流式完成 (%d chars)" % [npc_name, full_text.length()])
 	
 	# === LLM判断警觉：分析LLM的回复内容，而不是做关键词匹配 ===
@@ -1154,18 +1192,29 @@ func _get_awakening_reaction() -> String:
 
 
 # ============================================================
-# 对话历史（Fix 2）
+# 交互提示标签（Task 9 — 提示显示在NPC头上）
 # ============================================================
 
-func _add_history(text: String) -> void:
-	_chat_history.append(text)
-	if _chat_history.size() > MAX_HISTORY:
-		_chat_history.pop_front()
+func _create_interact_label() -> void:
+	var label = Label.new()
+	label.name = "InteractHint"
+	label.text = "[E] %s" % npc_name
+	label.position = Vector2(-30, -36)
+	label.add_theme_color_override("font_color", Color(1, 1, 0.85, 0.9))
+	label.add_theme_font_size_override("font_size", 11)
+	label.hide()
+	add_child(label)
 
-func _get_history_text() -> String:
-	if _chat_history.is_empty(): return ""
-	var lines: Array[String] = []
-	lines.append("## 最近对话")
-	for line in _chat_history:
-		lines.append(line)
-	return "\n".join(lines)
+func show_interact_hint() -> void:
+	var label = get_node_or_null("InteractHint")
+	if label:
+		label.show()
+
+func hide_interact_hint() -> void:
+	var label = get_node_or_null("InteractHint")
+	if label:
+		label.hide()
+
+
+# ============================================================
+# 交互提示标签（Task 9 — 提示显示在NPC头上）

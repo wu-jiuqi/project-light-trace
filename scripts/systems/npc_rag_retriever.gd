@@ -68,10 +68,11 @@ func _load_all_knowledge() -> void:
 		"baker_knowledge.json",
 		"gravekeeper_knowledge.json",
 		"violinist_knowledge.json",
-		"oldpainter_knowledge.json"
+		"oldpainter_knowledge.json",
+		"innkeeper_knowledge.json"
 	]
 	
-	var npc_ids = ["blacksmith", "florist", "baker", "gravekeeper", "violinist", "oldpainter"]
+	var npc_ids = ["blacksmith", "florist", "baker", "gravekeeper", "violinist", "oldpainter", "innkeeper"]
 	
 	for i in range(npc_files.size()):
 		var data = _load_json(base_path + npc_files[i])
@@ -185,7 +186,8 @@ func extract_keywords(player_input: String) -> Dictionary:
 		"老唐": "baker", "面包师": "baker", "做面包的": "baker", "面包": "baker",
 		"老崔": "gravekeeper", "守墓": "gravekeeper", "墓园": "gravekeeper",
 		"薇拉": "violinist", "拉琴": "violinist", "小提琴": "violinist",
-		"老画家": "oldpainter", "老顾": "oldpainter", "画画的": "oldpainter", "画室": "oldpainter"
+		"老画家": "oldpainter", "老顾": "oldpainter", "画画的": "oldpainter", "画室": "oldpainter",
+		"冯婶": "innkeeper", "旅店": "innkeeper", "老板娘": "innkeeper", "客栈": "innkeeper", "灰檐旅店": "innkeeper", "旅店老板": "innkeeper"
 	}
 	for name in npc_names:
 		if name in input_lower:
@@ -513,6 +515,11 @@ func _build_state_context(npc_id: String, game_state: Dictionary) -> String:
 						parts.append("老顾的画布上出现了第一道裂痕——不是他画的，是画布自己裂开的。他没有修补。")
 					if count >= 3:
 						parts.append("他今天在画室里哼了一段旋律。他不记得从哪听来的——但这个镇上没有人会拉琴。")
+				"innkeeper":
+					if count >= 1:
+						parts.append("冯婶今天多翻了几页登记簿——虽然还是空的。她说不清为什么，但觉得今天应该是个\"好日子\"。")
+					if count >= 3:
+						parts.append("旅店的门铃响了——不是有人按，是风。但冯婶抬头看了三次。她已经很久没抬头看门了。")
 		
 		# 全局氛围（所有NPC共享的感知）
 		if count >= 5:
@@ -556,6 +563,7 @@ func _get_npc_color(npc_id: String) -> String:
 		"baker": return "YELLOW"
 		"gravekeeper": return "GREEN"
 		"violinist": return "PURPLE"
+		"innkeeper": return ""  # 冯婶不承载颜色
 	return ""
 
 
@@ -650,6 +658,10 @@ func _get_alert_reaction(npc_id: String, level: String) -> String:
 			if level == "high": return "你盯着画看了太久。不是每幅画都经得起看的——有些东西在画框里动。"
 			if level == "medium": return "你在找什么？颜料的气味？还是颜料里藏着的东西？"
 			return "你来了。画室的门开着——但很少人走进来。你不一样。"
+		"innkeeper":
+			if level == "high": return "这个住客今天一直在柜台前晃——不是来续房的。你在看什么？登记簿上没有你要找的东西。"
+			if level == "medium": return "你问得太多了。冯婶不习惯被问这么多问题。她开始假装打瞌睡。"
+			return "这个客人跟以前那些不太一样——但反正旅店也没别的客人。你决定继续打瞌睡。"
 	return ""
 
 
@@ -734,6 +746,13 @@ const FALLBACK_TEMPLATES: Dictionary = {
 		"先去看那些颜色。不是我的颜色——是他们的。",
 		"画里的不对——你看到了吗？",
 		""
+	],
+	"innkeeper": [
+		"嗯？……哦，是你啊。",
+		"饿了没？柜台上有半个面团——老唐的。",
+		"反正空房多得是——要续住的话说一声。",
+		"楼梯第三级咯吱得特别响——你踩左边就不会。",
+		"……嗯？（打了个哈欠）"
 	]
 }
 

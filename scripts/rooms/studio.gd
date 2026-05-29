@@ -13,6 +13,6 @@ func _setup_exits() -> void:
 
 func _setup_npcs() -> void:
 	var npc = preload("res://scenes/characters/id0762/npc_laogu.tscn").instantiate()
-	npc.position = Vector2(350, 250)
+	npc.position = Vector2(475, 239)
 	add_child(npc)
-	print("[Studio] 老顾(老画家) 已登场")
+	print("[Studio] 老顾(475,239) 已登场")

@@ -12,11 +12,11 @@ var _closest_npc: Node2D = null
 func _ready() -> void:
 	add_to_group("player")
 	
+	# 俯视角游戏使用 FLOATING 模式，避免地板检测导致NPC被粘在玩家头上
+	motion_mode = MOTION_MODE_FLOATING
+	
 	# 创建交互检测区域
 	_create_interaction_detector()
-	
-	# 创建 "[E] 交谈" HUD
-	_create_interact_hud()
 
 	# 跨场景出生点定位（由 SceneManager 设定）
 	var spawn_name = SceneManager.pending_spawn_point
@@ -36,7 +36,7 @@ func _create_interaction_detector() -> void:
 	
 	var shape = CollisionShape2D.new()
 	var circle = CircleShape2D.new()
-	circle.radius = 45.0  # 比NPC交互半径(30)略大
+	circle.radius = 35.0  # 比NPC交互半径(21)略大
 	shape.shape = circle
 	detector.add_child(shape)
 	
@@ -44,18 +44,6 @@ func _create_interaction_detector() -> void:
 	detector.area_exited.connect(_on_interaction_zone_exited)
 	
 	add_child(detector)
-
-
-func _create_interact_hud() -> void:
-	## 创建 "[E] 交谈" HUD标签（挂在玩家身上）
-	var hud = Label.new()
-	hud.name = "InteractHUD"
-	hud.text = "[E] 交谈"
-	hud.position = Vector2(-30, -30)
-	hud.add_theme_color_override("font_color", Color(1, 1, 1, 0.8))
-	hud.add_theme_font_size_override("font_size", 11)
-	hud.hide()
-	add_child(hud)
 
 
 func _try_spawn(spawn_name: String) -> void:
@@ -137,20 +125,13 @@ func _update_closest_npc() -> void:
 			closest = npc
 	
 	if _closest_npc != closest:
+		# 隐藏旧最近NPC的提示
+		if _closest_npc and _closest_npc.has_method("hide_interact_hint"):
+			_closest_npc.hide_interact_hint()
+		# 显示新最近NPC的提示
+		if closest and closest.has_method("show_interact_hint"):
+			closest.show_interact_hint()
 		_closest_npc = closest
-		_update_hud_visibility()
-
-
-func _update_hud_visibility() -> void:
-	var hud = get_node_or_null("InteractHUD")
-	if not hud:
-		return
-	
-	if _closest_npc != null:
-		hud.text = "[E] %s" % _closest_npc.npc_name
-		hud.show()
-	else:
-		hud.hide()
 
 
 func _interact_with_nearest_npc() -> void:

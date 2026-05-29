@@ -13,15 +13,19 @@ func _setup_exits() -> void:
 
 
 func _setup_npcs() -> void:
-	var alian = preload("res://scenes/characters/id0762/npc_alian.tscn").instantiate()
-	alian.position = Vector2(180, 350)
-	add_child(alian)
+	var fengshen = preload("res://scenes/characters/id0762/npc_fengshen.tscn").instantiate()
+	fengshen.position = Vector2(230, 77)
+	add_child(fengshen)
 
 	var laotang = preload("res://scenes/characters/id0762/npc_laotang.tscn").instantiate()
-	laotang.position = Vector2(620, 350)
+	laotang.position = Vector2(250, 260)
 	add_child(laotang)
 
-	print("[Market] 阿莲(花店) 老唐(面包房) 已登场")
+	var alian = preload("res://scenes/characters/id0762/npc_alian.tscn").instantiate()
+	alian.position = Vector2(573, 107)
+	add_child(alian)
+
+	print("[Market] 冯婶(旅店230,77) 老唐(面包房250,260) 阿莲(花店573,107) 已登场")
 
 
 func _setup_pickups() -> void:

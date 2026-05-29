@@ -17,7 +17,21 @@ var _input_bar: Panel
 var _input_box: LineEdit
 var _send_btn: Button
 var _give_btn: Button
+var _history_btn: Button
 var _think_label: Label
+
+# 历史模式
+var _history_mode: bool = false
+var _history_panel: Panel
+var _history_display: RichTextLabel
+var _history_title: Label
+var _history_prev: Button
+var _history_next: Button
+var _history_close: Button
+var _history_page: int = 0
+var _history_total_pages: int = 0
+var _history_page_info: Label
+const HISTORY_PAGE_SIZE: int = 30
 
 # 状态
 var is_open: bool = false
@@ -163,6 +177,90 @@ func _build_ui() -> void:
 	_give_btn.pressed.connect(_do_give)
 	_give_btn.visible = false
 	_input_bar.add_child(_give_btn)
+	
+	# 历史按钮
+	_history_btn = Button.new()
+	_history_btn.position = Vector2(vs.x - 272, 16)
+	_history_btn.size = Vector2(80, 52)
+	_history_btn.text = "历史"
+	_history_btn.add_theme_font_size_override("font_size", 13)
+	_history_btn.add_theme_color_override("font_color", Color(0.6, 0.8, 1, 1))
+	_history_btn.pressed.connect(_show_history)
+	_input_bar.add_child(_history_btn)
+	
+	# === 全屏历史面板 ===
+	_build_history_panel(vs)
+
+
+func _build_history_panel(vs: Vector2) -> void:
+	_history_panel = Panel.new()
+	_history_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_history_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	var hps = StyleBoxFlat.new()
+	hps.bg_color = Color(0.08, 0.08, 0.1, 0.95)
+	hps.set_corner_radius_all(0)
+	_history_panel.add_theme_stylebox_override("panel", hps)
+	_history_panel.visible = false
+	_canvas.add_child(_history_panel)
+	
+	# 标题
+	_history_title = Label.new()
+	_history_title.position = Vector2(20, 16)
+	_history_title.text = "对话历史"
+	_history_title.add_theme_color_override("font_color", Color(0.5, 0.85, 1, 1))
+	_history_title.add_theme_font_size_override("font_size", 18)
+	_history_panel.add_child(_history_title)
+	
+	# 分页信息
+	_history_page_info = Label.new()
+	_history_page_info.position = Vector2(160, 20)
+	_history_page_info.add_theme_color_override("font_color", Color(0.6, 0.65, 0.7, 1))
+	_history_page_info.add_theme_font_size_override("font_size", 12)
+	_history_panel.add_child(_history_page_info)
+	
+	# 关闭按钮
+	_history_close = Button.new()
+	_history_close.position = Vector2(vs.x - 120, 14)
+	_history_close.size = Vector2(100, 36)
+	_history_close.text = "关闭 (Esc)"
+	_history_close.add_theme_font_size_override("font_size", 12)
+	_history_close.pressed.connect(_close_history)
+	_history_panel.add_child(_history_close)
+	
+	# 历史内容区
+	var content_top = 60
+	var content_bottom = 60
+	_history_display = RichTextLabel.new()
+	_history_display.position = Vector2(20, content_top)
+	_history_display.size = Vector2(vs.x - 40, vs.y - content_top - content_bottom)
+	_history_display.bbcode_enabled = true
+	_history_display.scroll_active = true
+	_history_display.selection_enabled = true
+	_history_display.add_theme_font_size_override("normal_font_size", 13)
+	var hds = StyleBoxFlat.new()
+	hds.bg_color = Color(0.12, 0.12, 0.14, 0.5)
+	hds.set_corner_radius_all(8)
+	_history_display.add_theme_stylebox_override("normal", hds)
+	_history_panel.add_child(_history_display)
+	
+	# 翻页按钮
+	var btn_w = 120
+	var btn_y = vs.y - 48
+	_history_prev = Button.new()
+	_history_prev.position = Vector2(vs.x / 2 - btn_w - 20, btn_y)
+	_history_prev.size = Vector2(btn_w, 36)
+	_history_prev.text = "◀ 上一页"
+	_history_prev.add_theme_font_size_override("font_size", 13)
+	_history_prev.pressed.connect(_prev_page)
+	_history_panel.add_child(_history_prev)
+	
+	_history_next = Button.new()
+	_history_next.position = Vector2(vs.x / 2 + 20, btn_y)
+	_history_next.size = Vector2(btn_w, 36)
+	_history_next.text = "下一页 ▶"
+	_history_next.add_theme_font_size_override("font_size", 13)
+	_history_next.pressed.connect(_next_page)
+	_history_panel.add_child(_history_next)
 
 
 func _process(_delta: float) -> void:
@@ -179,7 +277,10 @@ func _input(event: InputEvent) -> void:
 	if not is_open:
 		return
 	if event.is_action_pressed("ui_cancel") or event.is_action_pressed("escape"):
-		close()
+		if _history_mode:
+			_close_history()
+		else:
+			close()
 		get_viewport().set_input_as_handled()
 
 
@@ -187,7 +288,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not is_open:
 		return
 	if event.is_action_pressed("ui_cancel") or event.is_action_pressed("escape"):
-		close()
+		if _history_mode:
+			_close_history()
+		else:
+			close()
 		get_viewport().set_input_as_handled()
 
 
@@ -253,6 +357,99 @@ func close() -> void:
 	_chat_display.text = ""
 	print("[Chat] 关闭: %s" % name)
 	dialogue_closed.emit()
+	_close_history()
+
+
+# ============================================================
+# 历史对话查看
+# ============================================================
+
+func _show_history() -> void:
+	if not _npc or npc_name == "":
+		return
+	var kb_id = _npc.npc_kb_id
+	if kb_id == "":
+		return
+	
+	_history_page = 0
+	_history_mode = true
+	
+	_panel.visible = false
+	_overlay.visible = true
+	_history_panel.visible = true
+	_history_title.text = "对话历史 —— %s" % npc_name
+	
+	_load_history_page(kb_id)
+
+
+func _close_history() -> void:
+	if not _history_mode:
+		return
+	_history_mode = false
+	_history_panel.visible = false
+	if is_open:
+		_panel.visible = true
+
+
+func _load_history_page(kb_id: String) -> void:
+	var result = ChatDatabase.get_page(kb_id, _history_page, HISTORY_PAGE_SIZE)
+	_history_total_pages = result["total_pages"]
+	_history_page = result["page"]
+	var messages: Array = result["messages"]
+	var total = result["total"]
+	
+	_history_page_info.text = "第 %d/%d 页 (共 %d 条)" % [_history_page + 1, _history_total_pages, total]
+	_history_prev.disabled = _history_page <= 0
+	_history_next.disabled = _history_page >= _history_total_pages - 1
+	
+	if messages.is_empty():
+		_history_display.text = "[center][color=#555555]暂无对话记录[/color][/center]"
+		return
+	
+	var text: String = ""
+	for msg in messages:
+		var role = msg.get("role", "")
+		var content = msg.get("content", "")
+		var ts = msg.get("timestamp", 0)
+		var time_str = _format_time(ts)
+		var phase = msg.get("alert_phase", 0)
+		
+		if role == "player":
+			text += "[right][color=#777777]%s[/color]  [color=#5599cc][ 你 ][/color] %s[/right]\n" % [time_str, content]
+		else:
+			var phase_tag = _alert_phase_tag(phase)
+			text += "[color=#777777]%s[/color]  [color=#88aacc][%s][/color]%s %s\n" % [time_str, npc_name, phase_tag, content]
+	
+	_history_display.text = text
+
+
+func _prev_page() -> void:
+	if _history_page <= 0 or not _npc:
+		return
+	_history_page -= 1
+	_load_history_page(_npc.npc_kb_id)
+
+
+func _next_page() -> void:
+	if _history_page >= _history_total_pages - 1 or not _npc:
+		return
+	_history_page += 1
+	_load_history_page(_npc.npc_kb_id)
+
+
+func _format_time(ts: int) -> String:
+	var dt = Time.get_datetime_dict_from_unix_time(ts)
+	return "%02d:%02d" % [dt["hour"], dt["minute"]]
+
+
+func _alert_phase_tag(phase: int) -> String:
+	match phase:
+		1: return "[color=#cccc44](谨慎)[/color] "
+		2: return "[color=#cc8822](怀疑)[/color] "
+		3: return "[color=#cc4444](警觉)[/color] "
+		4: return "[color=#cc2222](敌对)[/color] "
+		5: return "[color=#882222](封闭)[/color] "
+	return ""
 
 
 func stream_begin() -> void:

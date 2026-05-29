@@ -13,9 +13,9 @@ func _setup_exits() -> void:
 
 func _setup_npcs() -> void:
 	var npc = preload("res://scenes/characters/id0762/npc_laocui.tscn").instantiate()
-	npc.position = Vector2(400, 320)
+	npc.position = Vector2(66, 168)
 	add_child(npc)
-	print("[Graveyard] 老崔(守墓人) 已登场")
+	print("[Graveyard] 老崔(66,168) 已登场")
 
 
 func _setup_pickups() -> void:

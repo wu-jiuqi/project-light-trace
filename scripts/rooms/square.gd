@@ -20,6 +20,6 @@ func _setup_exits() -> void:
 
 func _setup_npcs() -> void:
 	var npc = preload("res://scenes/characters/id0762/npc_weila.tscn").instantiate()
-	npc.position = Vector2(416, 350)
+	npc.position = Vector2(375, 126)
 	add_child(npc)
-	print("[Square] 薇拉(小提琴手) 已登场")
+	print("[Square] 薇拉(375,126) 已登场")
