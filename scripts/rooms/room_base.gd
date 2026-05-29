@@ -60,15 +60,38 @@ func _ensure_fragment_state() -> void:
 
 func _ensure_player() -> void:
 	if has_node("Player"):
-		print("[%s] Player 已存在，跳过创建" % name)
+		print("[%s] Player 已存在" % name)
+		_ensure_camera($Player)
 		return
 	var p = PlayerScene.instantiate()
 	p.name = "Player"
 	p.position = _default_player_position()
 	add_child(p)
-	# Player 入树后 _ready() 会立即触发 _try_spawn()
-	# 此时 SpawnPoints 已填充完毕，出生点应精确落在边缘
+	_ensure_camera(p)
 	print("[%s] Player 创建于默认位置 %s，等待 _try_spawn 修正" % [name, p.position])
+
+
+func _ensure_camera(player: Node2D) -> void:
+	# 清除旧相机（可能由 player.tscn 自带或残留）
+	var old = player.get_node_or_null("Camera2D")
+	if old:
+		old.queue_free()
+
+	var cam = Camera2D.new()
+	cam.name = "Camera2D"
+	cam.zoom = Vector2(2.0, 2.0)
+	cam.position_smoothing_enabled = true
+	cam.position_smoothing_speed = 5.0
+
+	# 地图边界 832×512，视口 1280×720，zoom 2x 可视 640×360
+	cam.limit_left = 0
+	cam.limit_top = 0
+	cam.limit_right = 832
+	cam.limit_bottom = 512
+
+	player.add_child(cam)
+	cam.make_current()
+	print("[%s] 相机已绑定 Player (zoom=%.1f)" % [name, cam.zoom.x])
 
 
 func _ensure_spawn_points() -> void:
