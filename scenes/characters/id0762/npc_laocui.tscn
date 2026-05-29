@@ -1,38 +1,31 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene format=3 uid="uid://ksmgodhasfxx"]
 
-[ext_resource type="Script" path="res://scripts/fragment/npc_controller.gd" id="1_npc_script"]
+[ext_resource type="Script" uid="uid://ldw7x5fltxna" path="res://scripts/fragment/npc_controller.gd" id="1_npc_script"]
 
 [sub_resource type="RectangleShape2D" id="Rect_body"]
 size = Vector2(32, 32)
 
 [sub_resource type="CircleShape2D" id="Circle_interact"]
-radius = 30.0
+radius = 21.0
 
-[sub_resource type="RectangleShape2D" id="Rect_visual"]
-size = Vector2(24, 24)
-
-[node name="NPC_Laocui" type="CharacterBody2D"]
-collision_layer = 1
-collision_mask = 1
+[node name="NPC_Laocui" type="CharacterBody2D" unique_id=1400254376]
+collision_mask = 14
 script = ExtResource("1_npc_script")
 npc_name = "老崔"
 npc_role = "守墓人"
 npc_kb_id = "gravekeeper"
-use_rag = true
 
-[node name="BodyCollision" type="CollisionShape2D" parent="."]
-position = Vector2(0, 0)
+[node name="BodyCollision" type="CollisionShape2D" parent="." unique_id=1694275116]
 shape = SubResource("Rect_body")
 
-[node name="InteractionZone" type="Area2D" parent="."]
+[node name="InteractionZone" type="Area2D" parent="." unique_id=1567472872]
 collision_layer = 4
 collision_mask = 0
 
-[node name="InteractionCollision" type="CollisionShape2D" parent="InteractionZone"]
-position = Vector2(0, 0)
+[node name="InteractionCollision" type="CollisionShape2D" parent="InteractionZone" unique_id=797377783]
 shape = SubResource("Circle_interact")
 
-[node name="Visual" type="ColorRect" parent="."]
+[node name="Visual" type="ColorRect" parent="." unique_id=1911127606]
 offset_left = -12.0
 offset_top = -12.0
 offset_right = 12.0

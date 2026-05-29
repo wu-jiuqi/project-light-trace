@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://dneffggbnjbnh"]
+
+[ext_resource type="Script" uid="uid://ldw7x5fltxna" path="res://scripts/fragment/npc_controller.gd" id="1_npc_script"]
+
+[sub_resource type="RectangleShape2D" id="Rect_body"]
+size = Vector2(32, 32)
+
+[sub_resource type="CircleShape2D" id="Circle_interact"]
+radius = 21.0
+
+[node name="NPC_Fengshen" type="CharacterBody2D" unique_id=647084982]
+collision_mask = 14
+script = ExtResource("1_npc_script")
+npc_name = "冯婶"
+npc_role = "旅店老板"
+npc_kb_id = "innkeeper"
+
+[node name="BodyCollision" type="CollisionShape2D" parent="." unique_id=5738729]
+shape = SubResource("Rect_body")
+
+[node name="InteractionZone" type="Area2D" parent="." unique_id=1377254729]
+collision_layer = 4
+collision_mask = 0
+
+[node name="InteractionCollision" type="CollisionShape2D" parent="InteractionZone" unique_id=637497975]
+shape = SubResource("Circle_interact")
+
+[node name="Visual" type="ColorRect" parent="." unique_id=492521891]
+offset_left = -12.0
+offset_top = -12.0
+offset_right = 12.0
+offset_bottom = 12.0
+color = Color(0.45, 0.4, 0.35, 1)
