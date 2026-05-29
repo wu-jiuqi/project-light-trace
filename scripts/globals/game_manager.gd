@@ -29,6 +29,7 @@ var company_trust: float = 1.0            # 公司信任度（影响暗线B）
 # === 已收集的线索（跨副本） ===
 var collected_clues: Array[String] = []
 var source_mark_log: Array[Dictionary] = []  # 已解码的源印记录
+var items_used: Dictionary = {}             # 已被消耗的物品（交给NPC后标记）
 
 # === 碎片 #0762 六色觉醒系统（全局共享，跨场景） ===
 enum ColorType { RED, BLUE, YELLOW, GREEN, PURPLE, WHITE }
@@ -76,6 +77,12 @@ func _count_awakened() -> int:
 	var c = 0
 	for a in awakened_colors: if a: c += 1
 	return c
+
+func mark_item_used(key: String) -> void:
+	items_used[key] = true
+
+func is_item_used(key: String) -> bool:
+	return items_used.get(key, false)
 
 func record_npc_visit(npc_kb_id: String) -> void:
 	if not npc_visit_count.has(npc_kb_id): return

@@ -36,7 +36,7 @@ func _create_interaction_detector() -> void:
 	
 	var shape = CollisionShape2D.new()
 	var circle = CircleShape2D.new()
-	circle.radius = 55.0  # 比NPC的交互半径略大
+	circle.radius = 45.0  # 比NPC交互半径(30)略大
 	shape.shape = circle
 	detector.add_child(shape)
 	

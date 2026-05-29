@@ -356,8 +356,14 @@ func show_alert_popup(amount: float, reason: String, npc_name: String, alert_pha
 	
 	_ensure_ui()
 	
+	# 清除旧弹窗（避免叠加遮满屏幕）
+	for c in _canvas.get_children():
+		if c is ColorRect and c.has_meta("alert_popup"):
+			c.queue_free()
+	
 	# 生成弹窗
 	var popup = _build_alert_popup(amount, reason, npc_name, alert_phase, suspicion)
+	popup.set_meta("alert_popup", true)
 	_canvas.add_child(popup)
 	
 	# 入场动画：从右侧滑入

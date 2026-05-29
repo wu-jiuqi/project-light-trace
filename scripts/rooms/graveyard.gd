@@ -16,3 +16,15 @@ func _setup_npcs() -> void:
 	npc.position = Vector2(400, 320)
 	add_child(npc)
 	print("[Graveyard] 老崔(守墓人) 已登场")
+
+
+func _setup_pickups() -> void:
+	# 已拾取（在背包中）或已消耗（交给NPC后）→ 不再生成
+	if InventoryManager.has_item(InventoryManager.ItemID.CORNFLOWER):
+		return
+	if GameManager.is_item_used("cornflower"):
+		return
+	var p = preload("res://scenes/items/id0762/cornflower.tscn").instantiate()
+	p.position = Vector2(740, 70)
+	add_child(p)
+	print("[Graveyard] 矢车菊 就绪")

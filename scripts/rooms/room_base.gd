@@ -44,6 +44,7 @@ func _ready() -> void:
 	# SpawnPoints 必须已存在且包含所有标记点
 	_ensure_player()
 	_setup_npcs()
+	_setup_pickups()
 	print("[RoomBase] %s 就绪" % name)
 
 	# 淡入，交出控制权
@@ -114,6 +115,10 @@ func _setup_npcs() -> void:
 	pass
 
 
+func _setup_pickups() -> void:
+	pass
+
+
 func _default_player_position() -> Vector2:
 	return Vector2(416, 256)
 
@@ -181,3 +186,21 @@ func _spawn(side: String, by_room: String) -> void:
 	m.position = pos
 	$SpawnPoints.add_child(m)
 	print("[%s] 出生点 %s → %s" % [self.name, m.name, pos])
+
+
+## 创建一个可拾取道具 Area2D（供 fragment_0762_state 挂载 pickup_item.gd）
+func _add_pickup(pickup_name: String, pos: Vector2) -> void:
+	var area = Area2D.new()
+	area.name = pickup_name
+	area.position = pos
+	area.collision_layer = 0
+	area.collision_mask = 1
+
+	var shape = CollisionShape2D.new()
+	var rect = RectangleShape2D.new()
+	rect.size = Vector2(32, 32)
+	shape.shape = rect
+	area.add_child(shape)
+
+	add_child(area)
+	print("[%s] 拾取道具 %s → %s" % [self.name, pickup_name, pos])

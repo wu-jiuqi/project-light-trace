@@ -36,6 +36,8 @@ func _check_red() -> bool:
 	if is_color_awakened(GameManager.ColorType.RED): return false
 	if not InventoryManager.has_item(InventoryManager.ItemID.FORGE_LOG): return false
 	awaken_color(GameManager.ColorType.RED)
+	InventoryManager.remove_item(InventoryManager.ItemID.FORGE_LOG)
+	GameManager.mark_item_used("forge_log")
 	InventoryManager.add_item(InventoryManager.ItemID.FIRE_SEED)
 	return true
 
@@ -43,6 +45,8 @@ func _check_blue() -> bool:
 	if is_color_awakened(GameManager.ColorType.BLUE): return false
 	if not InventoryManager.has_item(InventoryManager.ItemID.CORNFLOWER): return false
 	awaken_color(GameManager.ColorType.BLUE)
+	InventoryManager.remove_item(InventoryManager.ItemID.CORNFLOWER)
+	GameManager.mark_item_used("cornflower")
 	return true
 
 func _check_yellow() -> bool:
@@ -135,29 +139,9 @@ func _ready() -> void:
 func _init_room_pickup() -> void:
 	var root = get_parent()
 	if root == null: return
-	var s = load("res://scripts/items/pickup_item.gd")
 	var rn = root.name
 	
-	if rn == "Townhall":
-		var n = root.get_node_or_null("ForgeLog")
-		if n == null: return
-		if InventoryManager.has_item(InventoryManager.ItemID.FORGE_LOG):
-			n.queue_free(); print("[PickupInit] 铸造日志: 已收集，移除"); return
-		if n is Area2D and n.get_script() == null:
-			n.set_script(s)
-			n.item_id = 0; n.item_name = "铸造日志"
-			n.item_color = Color(0.9, 0.3, 0.3, 1); n.item_pos_x = 550.0; n.item_pos_y = 400.0
-			n._ready()
-			print("[PickupInit] 铸造日志 就绪")
-	
-	elif rn == "Market":
-		var n = root.get_node_or_null("Cornflower")
-		if n == null: return
-		if InventoryManager.has_item(InventoryManager.ItemID.CORNFLOWER):
-			n.queue_free(); print("[PickupInit] 矢车菊: 已收集，移除"); return
-		print("[PickupInit] 矢车菊 已配置 (tscn)")
-	
-	elif rn == "Square":
+	if rn == "Square":
 		# 检查是否应该显示源印（6色觉醒后）
 		if _count_awakened() >= 6 or GameManager.is_color_awakened(GameManager.ColorType.WHITE):
 			_create_source_mark()

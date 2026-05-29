@@ -24,6 +24,10 @@ func _setup_npcs() -> void:
 	print("[Market] 阿莲(花店) 老唐(面包房) 已登场")
 
 
+func _setup_pickups() -> void:
+	pass
+
+
 func _add_spawn_marker(spawn_name: String, position: Vector2) -> void:
 	var m = Marker2D.new()
 	m.name = spawn_name

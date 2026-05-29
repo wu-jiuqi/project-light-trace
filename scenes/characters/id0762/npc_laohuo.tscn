@@ -6,7 +6,7 @@
 size = Vector2(32, 32)
 
 [sub_resource type="CircleShape2D" id="Circle_interact"]
-radius = 50.0
+radius = 30.0
 
 [sub_resource type="RectangleShape2D" id="Rect_visual"]
 size = Vector2(24, 24)
