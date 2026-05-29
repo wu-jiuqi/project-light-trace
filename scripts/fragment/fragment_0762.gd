@@ -61,4 +61,4 @@ func _play_cutscene() -> void:
 
 func _enter_game() -> void:
 	print("[Fragment0762] 进入市集街")
-	SceneManager.change_scene("res://scenes/rooms/MarketStreet.tscn", "SpawnFrom_Cutscene")
+	SceneManager.change_scene("res://scenes/rooms/id0762/Market.tscn", "from_cutscene")

@@ -43,6 +43,7 @@ func _ready() -> void:
 	# Player 必须最后创建 —— 其 _ready() 触发 _try_spawn() 时
 	# SpawnPoints 必须已存在且包含所有标记点
 	_ensure_player()
+	_setup_npcs()
 	print("[RoomBase] %s 就绪" % name)
 
 	# 淡入，交出控制权
@@ -106,6 +107,10 @@ func _ensure_spawn_points() -> void:
 # ============================================================
 
 func _setup_exits() -> void:
+	pass
+
+
+func _setup_npcs() -> void:
 	pass
 
 

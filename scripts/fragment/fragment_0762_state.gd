@@ -138,7 +138,7 @@ func _init_room_pickup() -> void:
 	var s = load("res://scripts/items/pickup_item.gd")
 	var rn = root.name
 	
-	if rn == "TownHall":
+	if rn == "Townhall":
 		var n = root.get_node_or_null("ForgeLog")
 		if n == null: return
 		if InventoryManager.has_item(InventoryManager.ItemID.FORGE_LOG):
@@ -150,7 +150,7 @@ func _init_room_pickup() -> void:
 			n._ready()
 			print("[PickupInit] 铸造日志 就绪")
 	
-	elif rn == "MarketStreet":
+	elif rn == "Market":
 		var n = root.get_node_or_null("Cornflower")
 		if n == null: return
 		if InventoryManager.has_item(InventoryManager.ItemID.CORNFLOWER):

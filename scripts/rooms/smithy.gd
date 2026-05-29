@@ -1,9 +1,15 @@
 extends "res://scripts/rooms/room_base.gd"
 ## 铁匠铺 — 老霍的铁砧
-## 出口：上→广场
-## 入境：广场下→铁匠铺上
+## 传送：上→广场
 
 
 func _setup_exits() -> void:
 	_exit("top", "Square")
-	_spawn("top", "Square")    # 广场下出 → 铁匠铺上入
+	_spawn("top", "Square")
+
+
+func _setup_npcs() -> void:
+	var npc = preload("res://scenes/characters/id0762/npc_laohuo.tscn").instantiate()
+	npc.position = Vector2(416, 256)
+	add_child(npc)
+	print("[Smithy] 老霍 已登场")
