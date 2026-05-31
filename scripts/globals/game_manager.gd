@@ -105,6 +105,42 @@ signal clue_collected(clue: String)
 func _ready() -> void:
 	print("[GameManager] 溯光计划启动 - 归源计划 V0.1.0")
 
+func new_game() -> void:
+	## 重置所有状态到初始值（开始新游戏/重新挑战）
+	current_phase = GamePhase.INIT
+	repair_progress = 0.0
+	repaired_fragments = 0
+	company_trust = 1.0
+	darkline_a_revealed = false
+	darkline_b_revealed = false
+	darkline_c_unlocked = false
+	collected_clues.clear()
+	source_mark_log.clear()
+	items_used.clear()
+	awakened_colors = [false, false, false, false, false, false]
+	npc_visit_count = {"gravekeeper": 0}
+	npc_state_cache.clear()
+	melody_triggered = false
+	source_mark_revealed = false
+	fragment_completed = false
+	
+	# 重置所有碎片解密/完成状态
+	FragmentManager.reset_all_fragments()
+	
+	print("[GameManager] 状态已重置（新游戏）")
+
+func reset_fragment() -> void:
+	## 重新挑战关卡时重置关卡内进度（保留跨存档的对话历史与NPC信任/警觉状态）
+	## 对话历史 (ChatDatabase) 和 NPC 状态缓存 (npc_state_cache) 跟随存档持久化，
+	## 不会在重新进入关卡时清除——玩家可以通过加载存档找回之前的对话记录。
+	items_used.clear()
+	awakened_colors = [false, false, false, false, false, false]
+	npc_visit_count = {"gravekeeper": 0}
+	melody_triggered = false
+	source_mark_revealed = false
+	fragment_completed = false
+	print("[GameManager] 碎片关卡内进度已重置（对话历史与NPC信任状态已保留）")
+
 func set_phase(new_phase: int) -> void:
 	if current_phase != new_phase:
 		current_phase = new_phase

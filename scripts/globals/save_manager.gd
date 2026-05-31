@@ -1,12 +1,15 @@
 extends Node
 ## 存档管理器
 ## - 手动存档：按 F5 触发
-## - 自动存档：每 3 分钟自动保存
-## - 多槽位支持（默认槽位 0）
-## - 保存内容：GameManager 全局状态 + NPC 持久化 + ChatDatabase 聊天记录
+## - 自动存档：每 3 分钟自动保存到当前槽位
+## - 多槽位支持（0-4）
+## - 保存内容：GameManager 全局状态 + NPC 持久化 + ChatDatabase 聊天记录（按槽位独立）
+## - 启动时自动加载最后一次活动的槽位
 
 const SAVE_DIR: String = "user://saves/"
-const AUTO_SAVE_INTERVAL: float = 180.0  ## 自动存档间隔（秒）
+const AUTO_SAVE_INTERVAL: float = 30.0  ## 自动存档间隔（秒）
+const LAST_SLOT_PATH: String = "user://saves/last_slot.json"  ## 最后活动槽位记录
+const MAX_SLOTS: int = 3  ## 总槽位数
 
 var save_data: Dictionary = {}
 var _auto_timer: Timer = null
@@ -19,12 +22,17 @@ var _current_slot: int = 0  ## 当前槽位
 
 func _ready() -> void:
 	_ensure_save_dir()
-	_setup_auto_save()
 	
-	if load_game(0):
-		print("[SaveManager] 存档自动加载成功 (slot 0)")
+	var last_slot = _read_last_slot()
+	
+	if load_game(last_slot):
+		print("[SaveManager] 存档自动加载成功 (slot %d)" % last_slot)
+		# load_game 内部已设置 _current_slot，无需再调 set_current_slot
 	else:
-		print("[SaveManager] 未找到存档，使用默认状态")
+		print("[SaveManager] 未找到存档 (slot %d)，等待用户选择" % last_slot)
+		_current_slot = -1  # 无活跃槽位，自动保存将跳过
+	
+	_setup_auto_save()
 
 
 func _ensure_save_dir() -> void:
@@ -47,6 +55,8 @@ func _setup_auto_save() -> void:
 
 
 func _on_auto_save() -> void:
+	if _current_slot < 0:
+		return  # 没有活跃槽位（游戏尚未启动到具体存档）
 	save_game(_current_slot)
 	print("[SaveManager] 自动存档完成 (slot %d)" % _current_slot)
 
@@ -62,6 +72,8 @@ func _input(event: InputEvent) -> void:
 
 func manual_save() -> void:
 	## 手动存档（F5）—— 覆盖当前槽位
+	if _current_slot < 0:
+		return
 	save_game(_current_slot)
 	_show_save_notification()
 
@@ -76,6 +88,9 @@ func quick_save(slot: int = 0) -> void:
 
 func save_game(slot: int = 0) -> void:
 	var ts = Time.get_unix_time_from_system()
+	
+	# 确保聊天数据先落盘到独立文件（崩溃恢复用 + 保证 chat_{slot}.json 与 save_{slot}.json 一致）
+	ChatDatabase.flush_to_disk()
 	
 	save_data = {
 		"version": "0.2.0",
@@ -163,14 +178,24 @@ func load_game(slot: int = 0) -> bool:
 	if items is Dictionary:
 		GameManager.items_used = items
 	
-	# 恢复碎片
+	# 恢复碎片（先清空所有碎片状态，避免旧槽位数据残留）
+	FragmentManager.reset_all_fragments()
 	_deserialize_fragments(save_data.get("fragments", []))
 	_resume_decrypt_timers()
 	
 	# 恢复聊天记录
-	var chat = save_data.get("chat_history", {})
-	if chat is Dictionary:
-		ChatDatabase.restore_from(chat)
+	# 步骤 1: 尝试从该槽位的独立会话文件加载（崩溃恢复用，可能有比存档更新的数据）
+	ChatDatabase.set_slot(slot)
+	# 步骤 2: 如果独立文件无数据，从存档快照恢复（确保存档中的聊天记录一定被恢复）
+	if not ChatDatabase.has_any_data():
+		var chat_data = save_data.get("chat_history", {})
+		if chat_data is Dictionary and not chat_data.is_empty():
+			ChatDatabase.restore_from(chat_data)
+			print("[SaveManager] 从存档快照恢复聊天记录 | NPC数: %d" % chat_data.size())
+		else:
+			print("[SaveManager] 存档中无聊天记录快照")
+	else:
+		print("[SaveManager] 聊天记录已从独立文件恢复 (slot %d)" % slot)
 	
 	_current_slot = slot
 	print("[SaveManager] 存档加载成功 (slot %d)" % slot)
@@ -200,9 +225,9 @@ func _slot_path(slot: int) -> String:
 # ============================================================
 
 func list_slots() -> Array[Dictionary]:
-	## 返回所有存档槽信息 [{slot, timestamp, timestamp_readable, player_name, progress}, ...]
+	## 返回全部槽位信息（含空槽位），occupied 标记是否已占用
 	var slots: Array[Dictionary] = []
-	for i in range(5):  # 最多 5 个槽位
+	for i in range(MAX_SLOTS):
 		var path = _slot_path(i)
 		if FileAccess.file_exists(path):
 			var file = FileAccess.open(path, FileAccess.READ)
@@ -212,13 +237,25 @@ func list_slots() -> Array[Dictionary]:
 					var data = json.get_data()
 					slots.append({
 						"slot": i,
+						"occupied": true,
 						"timestamp": data.get("timestamp", 0),
 						"timestamp_readable": data.get("timestamp_readable", ""),
 						"player_name": data.get("player_name", ""),
 						"progress": data.get("repair_progress", 0.0),
 						"phase": data.get("current_phase", 0)
 					})
-				file.close()
+					file.close()
+					continue
+		# 空槽位
+		slots.append({
+			"slot": i,
+			"occupied": false,
+			"timestamp": 0,
+			"timestamp_readable": "",
+			"player_name": "",
+			"progress": 0.0,
+			"phase": 0
+		})
 	return slots
 
 
@@ -227,6 +264,64 @@ func delete_slot(slot: int) -> void:
 	if FileAccess.file_exists(path):
 		DirAccess.remove_absolute(path)
 		print("[SaveManager] 存档已删除 (slot %d)" % slot)
+	# 同时删除聊天记录文件
+	ChatDatabase.delete_slot_file(slot)
+
+
+func set_current_slot(slot: int) -> void:
+	_current_slot = slot
+	_write_last_slot(slot)
+	# 同步 ChatDatabase 到对应槽位的会话文件
+	ChatDatabase.set_slot(slot)
+	print("[SaveManager] 当前存档槽位设为 %d" % slot)
+
+
+func get_current_slot() -> int:
+	## 返回当前活跃的槽位编号（-1 表示无活跃槽位）
+	return _current_slot
+
+
+func _read_last_slot() -> int:
+	if not FileAccess.file_exists(LAST_SLOT_PATH):
+		return _current_slot
+	var file = FileAccess.open(LAST_SLOT_PATH, FileAccess.READ)
+	if file:
+		var json = JSON.new()
+		if json.parse(file.get_as_text()) == OK:
+			var data = json.get_data()
+			if data is Dictionary:
+				var slot = data.get("slot", 0)
+				file.close()
+				return slot
+		file.close()
+	return _current_slot
+
+
+func _write_last_slot(slot: int) -> void:
+	var file = FileAccess.open(LAST_SLOT_PATH, FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify({"slot": slot}))
+		file.close()
+
+
+func get_last_active_slot() -> int:
+	## 扫描所有存档槽位，返回时间戳最新的那个。无存档返回 -1
+	var best_slot = -1
+	var best_ts = 0
+	for i in range(MAX_SLOTS):
+		var path = _slot_path(i)
+		if FileAccess.file_exists(path):
+			var file = FileAccess.open(path, FileAccess.READ)
+			if file:
+				var json = JSON.new()
+				if json.parse(file.get_as_text()) == OK:
+					var data = json.get_data()
+					var ts = data.get("timestamp", 0)
+					if ts > best_ts:
+						best_ts = ts
+						best_slot = i
+				file.close()
+	return best_slot
 
 
 # ============================================================

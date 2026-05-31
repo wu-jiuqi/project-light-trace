@@ -1,12 +1,12 @@
 extends Node
-## 聊天记录混合存储
+## 聊天记录混合存储（按存档槽位隔离）
 ##   _cache: 每NPC最近N条（deque，LLM用）—— 纯内存，不落盘
-##   _data:  每NPC全部消息（持久化JSON文件）—— 翻历史用
+##   _data:  每NPC全部消息（持久化，按槽位独立文件）
 ##
-## 文件 user://chat_history.json：{ "blacksmith": [{role,content,timestamp,...},...], ... }
+## 文件 user://saves/chat_{slot}.json：{ "blacksmith": [{role,content,timestamp,...},...], ... }
 
-const DATA_PATH: String = "user://chat_history.json"
 const CACHE_SIZE: int = 20  ## LLM注入的最大历史条数
+const SAVE_DIR: String = "user://saves/"
 
 ## 内存缓存（LLM用）：{ "npc_id": Array[Dictionary] }，上限 CACHE_SIZE
 var _cache: Dictionary = {}
@@ -14,20 +14,50 @@ var _cache: Dictionary = {}
 ## 全量数据（磁盘）：{ "npc_id": Array[Dictionary] }
 var _data: Dictionary = {}
 
+## 当前绑定的存档槽位
+var _current_slot: int = 0
+
 
 # ============================================================
 # 生命周期
 # ============================================================
 
 func _ready() -> void:
+	# 不在 _ready 中自动加载，由 SaveManager 通过 set_slot() 控制加载时机
+	print("[ChatDatabase] 就绪 | 等待 SaveManager 指定槽位")
+
+
+# ============================================================
+# 槽位切换
+# ============================================================
+
+func set_slot(slot: int) -> void:
+	## 切换到指定槽位：保存当前槽位数据，清空内存，加载新槽位
+	if slot == _current_slot and not _data.is_empty():
+		return  # 同槽位且已有数据，无需重新加载
+	
+	# 保存当前槽位
+	_save()
+	
+	# 切换到新槽位
+	_current_slot = slot
+	_data.clear()
+	_cache.clear()
+	
+	# 尝试从该槽位的会话文件恢复（崩溃恢复）
 	_load()
-	print("[ChatDatabase] 就绪 | 文件: %s | NPC数: %d" % [ProjectSettings.globalize_path(DATA_PATH), _data.size()])
+	print("[ChatDatabase] 切换到槽位 %d | 文件: %s | NPC数: %d" % [slot, _data_path(), _data.size()])
+
+
+func _data_path() -> String:
+	return SAVE_DIR + "chat_%d.json" % _current_slot
 
 
 func _load() -> void:
-	if not FileAccess.file_exists(DATA_PATH):
+	var path = _data_path()
+	if not FileAccess.file_exists(path):
 		return
-	var file = FileAccess.open(DATA_PATH, FileAccess.READ)
+	var file = FileAccess.open(path, FileAccess.READ)
 	if not file:
 		return
 	var text = file.get_as_text()
@@ -55,9 +85,12 @@ func _rebuild_cache() -> void:
 
 
 func _save() -> void:
-	var file = FileAccess.open(DATA_PATH, FileAccess.WRITE)
+	if _data.is_empty():
+		return
+	var path = _data_path()
+	var file = FileAccess.open(path, FileAccess.WRITE)
 	if not file:
-		printerr("[ChatDatabase] 写入失败: %s" % DATA_PATH)
+		printerr("[ChatDatabase] 写入失败: %s" % path)
 		return
 	file.store_string(JSON.stringify(_data, "\t"))
 	file.close()
@@ -171,23 +204,54 @@ func clear_npc_history(npc_id: String) -> void:
 
 
 func clear_all_history() -> void:
+	## 清空当前槽位的全部聊天记录（同时删除文件）
 	_data.clear()
 	_cache.clear()
-	_save()
+	var path = _data_path()
+	if FileAccess.file_exists(path):
+		DirAccess.remove_absolute(path)
+	print("[ChatDatabase] 已清空槽位 %d 的全部聊天记录" % _current_slot)
 
 
 # ============================================================
 # 存档集成 —— 供 SaveManager 调用
 # ============================================================
 
+func flush_to_disk() -> void:
+	## 强制将当前内存中的聊天数据写入独立文件
+	## 供 SaveManager 在存档前调用，确保 chat_{slot}.json 与 save_{slot}.json 一致
+	_save()
+
+
 func get_raw_data() -> Dictionary:
 	return _data.duplicate(true)
 
 
+func has_any_data() -> bool:
+	## 返回当前槽位是否有任何聊天数据（供 load_game 判断是否需要从存档快照恢复）
+	return not _data.is_empty()
+
+
 func restore_from(raw: Dictionary) -> void:
+	## 从存档文件恢复聊天数据到内存（不影响该槽位独立文件的内容）
 	_data = raw.duplicate(true)
 	_rebuild_cache()
-	_save()
+	print("[ChatDatabase] 从存档恢复数据到内存 | NPC数: %d | 总消息: %d" % [_data.size(), _count_total_messages()])
+
+
+func delete_slot_file(slot: int) -> void:
+	## 删除指定槽位的聊天记录文件
+	var path = SAVE_DIR + "chat_%d.json" % slot
+	if FileAccess.file_exists(path):
+		DirAccess.remove_absolute(path)
+		print("[ChatDatabase] 已删除槽位 %d 的聊天记录文件" % slot)
+
+
+func _count_total_messages() -> int:
+	var total = 0
+	for npc_id in _data:
+		total += (_data[npc_id] as Array).size()
+	return total
 
 
 # ============================================================

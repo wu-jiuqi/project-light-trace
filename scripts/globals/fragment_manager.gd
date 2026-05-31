@@ -165,6 +165,7 @@ func _generate_partial_hint(full_hint: String) -> String:
 
 func enter_fragment(fragment: FragmentData) -> void:
 	current_fragment = fragment
+	GameManager.reset_fragment()  # 重新挑战：清NPC/物品/对话
 	fragment_entered.emit(fragment.id)
 	print("[FragmentManager] 进入碎片 %s: %s" % [fragment.id, fragment.name])
 
@@ -172,3 +173,13 @@ func complete_fragment(fragment: FragmentData) -> void:
 	fragment.decrypt_state = DecryptState.COMPLETED
 	fragment_completed.emit(fragment.id)
 	print("[FragmentManager] 碎片 %s 修复完成" % fragment.id)
+
+
+func reset_all_fragments() -> void:
+	## 将所有碎片重置为初始锁定状态（用于新游戏）
+	for f in fragments:
+		f.decrypt_state = DecryptState.LOCKED
+		f.decrypt_progress = 0.0
+		f.decrypt_start_time = 0
+		f.hint_visible = ""
+	print("[FragmentManager] 所有 %d 个碎片已重置为锁定状态" % fragments.size())
