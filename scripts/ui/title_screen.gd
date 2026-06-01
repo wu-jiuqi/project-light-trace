@@ -3,6 +3,8 @@ extends Control
 ## 四个选项框：继续游戏 / 开始新游戏 / 加载存档 / 退出游戏
 ## 键盘：↑↓导航  Enter确认
 
+const UITheme = preload("res://scripts/ui/ui_theme.gd")
+
 @export var menu_items: Array[String] = ["继续游戏", "开始新游戏", "加载存档", "退出游戏"]
 var _selected: int = 0
 var _has_saves: bool = false
@@ -21,11 +23,13 @@ var _slot_title: Label
 @onready var _title_label: Label = $TitleLabel
 @onready var _menu_vbox: VBoxContainer = $MenuVBox
 @onready var _menu_buttons: Array[Button] = []
-@onready var _bg: ColorRect = $BG
+@onready var _bg: TextureRect = $BG
+@onready var _menu_panel: Panel = $MenuPanel
 @onready var _version_label: Label = $VersionLabel
 
 
 func _ready() -> void:
+	_apply_skin()
 	_setup_menu()
 	
 	# 检测是否有可继续的存档（槽位中是否有已占用的）
@@ -37,6 +41,10 @@ func _ready() -> void:
 		_selected = 1  # 无存档时默认选中"开始新游戏"
 	
 	_update_selection()
+
+
+func _apply_skin() -> void:
+	_menu_panel.add_theme_stylebox_override("panel", UITheme.panel_style())
 
 
 func _setup_menu() -> void:
@@ -63,6 +71,7 @@ func _setup_menu() -> void:
 		hs.border_width_top = 2; hs.border_width_bottom = 2
 		hs.border_color = Color(0.5, 0.55, 0.65, 0.3)
 		btn.add_theme_stylebox_override("hover", hs)
+		UITheme.apply_button(btn)
 		
 		btn.pressed.connect(_on_menu_pressed.bind(i))
 		_menu_vbox.add_child(btn)
@@ -102,6 +111,7 @@ func _update_selection() -> void:
 			ss.border_width_top = 2; ss.border_width_bottom = 2
 			ss.border_color = Color(0.6, 0.5, 0.2, 0.5)
 			btn.add_theme_stylebox_override("normal", ss)
+			UITheme.apply_button(btn, true)
 			btn.grab_focus()
 		else:
 			btn.text = "     %s" % menu_items[i]
@@ -117,6 +127,7 @@ func _update_selection() -> void:
 			ds.border_width_top = 2; ds.border_width_bottom = 2
 			ds.border_color = Color(0.3, 0.3, 0.35, 0)
 			btn.add_theme_stylebox_override("normal", ds)
+			UITheme.apply_button(btn)
 
 
 func _on_menu_pressed(index: int) -> void:
@@ -263,6 +274,7 @@ func _build_save_slot_panel() -> void:
 	scs.bg_color = Color(0.08, 0.08, 0.1, 0.6)
 	scs.set_corner_radius_all(8)
 	_slot_scroll.add_theme_stylebox_override("panel", scs)
+	_slot_scroll.add_theme_stylebox_override("panel", UITheme.panel_style())
 	add_child(_slot_scroll)
 	
 	_slot_list = VBoxContainer.new()
@@ -299,6 +311,7 @@ func _make_slot_button(text: String, pos: Vector2) -> Button:
 	btn.position = pos
 	btn.size = Vector2(140, 44)
 	btn.add_theme_font_size_override("font_size", 15)
+	UITheme.apply_button(btn)
 	return btn
 
 
@@ -325,6 +338,7 @@ func _refresh_slot_list(slots: Array[Dictionary]) -> void:
 					_select_slot(final_slot)
 			)
 		container.add_theme_stylebox_override("panel", cs)
+		container.add_theme_stylebox_override("panel", UITheme.panel_style(true))
 		
 		if occupied:
 			# 已有存档

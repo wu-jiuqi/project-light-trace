@@ -5,6 +5,8 @@ extends Control
 ##   2. RAG动态对话（新版，start_rag_dialogue）
 ## 自动创建UI子节点，无需在场景中预置
 
+const UITheme = preload("res://scripts/ui/ui_theme.gd")
+
 signal dialogue_started(npc_name: String)
 signal dialogue_ended(npc_name: String)
 signal option_selected(option_index: int)
@@ -48,6 +50,7 @@ func _setup_ui() -> void:
 	panel_style.bg_color = Color(0, 0, 0, 0.85)
 	panel_style.set_corner_radius_all(8)
 	panel.add_theme_stylebox_override("panel", panel_style)
+	panel.add_theme_stylebox_override("panel", UITheme.panel_style())
 	add_child(panel)
 
 	# NPC名称标签
@@ -227,6 +230,7 @@ func _add_options(options: Array) -> void:
 		var btn = Button.new()
 		btn.text = options[i].get("text", "选项 %d" % i)
 		btn.custom_minimum_size = Vector2(400, 36)
+		UITheme.apply_button(btn)
 		var btn_index = i
 		var btn_data = options[i]
 		btn.pressed.connect(func(): _on_option_selected(btn_index, btn_data))

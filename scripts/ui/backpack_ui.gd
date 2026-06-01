@@ -2,6 +2,8 @@ extends Control
 ## 背包 UI — Autoload
 ## 按 B 打开/关闭，展示收集的物品，支持点击查看详情
 
+const UITheme = preload("res://scripts/ui/ui_theme.gd")
+
 var _canvas: CanvasLayer
 var _panel: Panel
 var _title_label: Label
@@ -55,6 +57,7 @@ func _build_ui() -> void:
 	ps.border_width_top = 2; ps.border_width_bottom = 2
 	ps.border_color = Color(0.4, 0.4, 0.5, 0.5)
 	_panel.add_theme_stylebox_override("panel", ps)
+	_panel.add_theme_stylebox_override("panel", UITheme.panel_style())
 	_panel.visible = false
 	_canvas.add_child(_panel)
 	
@@ -120,6 +123,7 @@ func _make_item_cell(item_id: int, meta: Dictionary, _empty: bool) -> Panel:
 	cs.border_width_top = 1; cs.border_width_bottom = 1
 	cs.border_color = meta.get("color", Color(0.4, 0.4, 0.5, 0.5))
 	cell.add_theme_stylebox_override("panel", cs)
+	cell.add_theme_stylebox_override("panel", UITheme.panel_style(true))
 	
 	# 图标
 	var icon = Label.new()
@@ -154,6 +158,7 @@ func _make_empty_cell() -> Panel:
 	cs.border_width_top = 1; cs.border_width_bottom = 1
 	cs.border_color = Color(0.2, 0.2, 0.25, 0.3)
 	cell.add_theme_stylebox_override("panel", cs)
+	cell.add_theme_stylebox_override("panel", UITheme.panel_style(true, Color(0.7, 0.78, 0.9, 0.55)))
 	return cell
 
 

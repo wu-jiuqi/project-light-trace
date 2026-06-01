@@ -3,6 +3,8 @@ extends Control
 ## 底部半透明面板 + 消息气泡 + 输入栏 + 流式输出
 ## 使用 CanvasLayer 确保渲染在最上层
 
+const UITheme = preload("res://scripts/ui/ui_theme.gd")
+
 signal dialogue_opened(npc_name: String)
 signal dialogue_closed()
 signal player_message_sent(message: String)
@@ -96,6 +98,7 @@ func _build_ui() -> void:
 	ps.border_width_top = 1
 	ps.border_color = Color(0.4, 0.4, 0.45, 0.3)
 	_panel.add_theme_stylebox_override("panel", ps)
+	_panel.add_theme_stylebox_override("panel", UITheme.panel_style())
 	_panel.visible = false
 	_canvas.add_child(_panel)
 	
@@ -127,6 +130,7 @@ func _build_ui() -> void:
 	cds.bg_color = Color(0.15, 0.15, 0.17, 0.3)
 	cds.set_corner_radius_all(6)
 	_chat_display.add_theme_stylebox_override("normal", cds)
+	_chat_display.add_theme_stylebox_override("normal", UITheme.panel_style(true))
 	_panel.add_child(_chat_display)
 	
 	# --- 底部输入栏 ---
@@ -139,6 +143,7 @@ func _build_ui() -> void:
 	ibs.border_width_top = 1
 	ibs.border_color = Color(0.25, 0.25, 0.28, 0.4)
 	_input_bar.add_theme_stylebox_override("panel", ibs)
+	_input_bar.add_theme_stylebox_override("panel", UITheme.panel_style(true))
 	_panel.add_child(_input_bar)
 	
 	# 输入框
@@ -155,6 +160,7 @@ func _build_ui() -> void:
 	iis.border_color = Color(0.35, 0.35, 0.4, 0.3)
 	_input_box.add_theme_stylebox_override("normal", iis)
 	_input_box.add_theme_color_override("font_color", Color(1, 1, 1, 0.9))
+	UITheme.apply_line_edit(_input_box)
 	_input_box.text_submitted.connect(_do_send)
 	_input_bar.add_child(_input_box)
 	
@@ -164,6 +170,7 @@ func _build_ui() -> void:
 	_send_btn.size = Vector2(80, 52)
 	_send_btn.text = "发送"
 	_send_btn.add_theme_font_size_override("font_size", 13)
+	UITheme.apply_button(_send_btn)
 	_send_btn.pressed.connect(_do_send.bind(""))
 	_input_bar.add_child(_send_btn)
 	
@@ -174,6 +181,7 @@ func _build_ui() -> void:
 	_give_btn.text = "给予"
 	_give_btn.add_theme_font_size_override("font_size", 13)
 	_give_btn.add_theme_color_override("font_color", Color(0.9, 0.85, 0.4, 1))
+	UITheme.apply_button(_give_btn, true)
 	_give_btn.pressed.connect(_do_give)
 	_give_btn.visible = false
 	_input_bar.add_child(_give_btn)
@@ -185,6 +193,7 @@ func _build_ui() -> void:
 	_history_btn.text = "历史"
 	_history_btn.add_theme_font_size_override("font_size", 13)
 	_history_btn.add_theme_color_override("font_color", Color(0.6, 0.8, 1, 1))
+	UITheme.apply_button(_history_btn)
 	_history_btn.pressed.connect(_show_history)
 	_input_bar.add_child(_history_btn)
 	
@@ -200,6 +209,7 @@ func _build_history_panel(vs: Vector2) -> void:
 	hps.bg_color = Color(0.08, 0.08, 0.1, 0.95)
 	hps.set_corner_radius_all(0)
 	_history_panel.add_theme_stylebox_override("panel", hps)
+	_history_panel.add_theme_stylebox_override("panel", UITheme.panel_style())
 	_history_panel.visible = false
 	_canvas.add_child(_history_panel)
 	
@@ -224,6 +234,7 @@ func _build_history_panel(vs: Vector2) -> void:
 	_history_close.size = Vector2(100, 36)
 	_history_close.text = "关闭 (Esc)"
 	_history_close.add_theme_font_size_override("font_size", 12)
+	UITheme.apply_button(_history_close)
 	_history_close.pressed.connect(_close_history)
 	_history_panel.add_child(_history_close)
 	
@@ -241,6 +252,7 @@ func _build_history_panel(vs: Vector2) -> void:
 	hds.bg_color = Color(0.12, 0.12, 0.14, 0.5)
 	hds.set_corner_radius_all(8)
 	_history_display.add_theme_stylebox_override("normal", hds)
+	_history_display.add_theme_stylebox_override("normal", UITheme.panel_style(true))
 	_history_panel.add_child(_history_display)
 	
 	# 翻页按钮
@@ -251,6 +263,7 @@ func _build_history_panel(vs: Vector2) -> void:
 	_history_prev.size = Vector2(btn_w, 36)
 	_history_prev.text = "< 上一页"
 	_history_prev.add_theme_font_size_override("font_size", 13)
+	UITheme.apply_button(_history_prev)
 	_history_prev.pressed.connect(_prev_page)
 	_history_panel.add_child(_history_prev)
 	
@@ -259,6 +272,7 @@ func _build_history_panel(vs: Vector2) -> void:
 	_history_next.size = Vector2(btn_w, 36)
 	_history_next.text = "下一页 >"
 	_history_next.add_theme_font_size_override("font_size", 13)
+	UITheme.apply_button(_history_next)
 	_history_next.pressed.connect(_next_page)
 	_history_panel.add_child(_history_next)
 
@@ -677,6 +691,7 @@ func show_alert_phase_change(npc_name: String, old_phase: int, new_phase: int, r
 	style.border_width_top = 2; style.border_width_bottom = 2
 	style.border_color = Color(1, 1, 1, 0.4)
 	popup.add_theme_stylebox_override("panel", style)
+	popup.add_theme_stylebox_override("panel", UITheme.panel_style(true, phase_colors[min(new_phase, 5)]))
 	
 	var label = Label.new()
 	label.position = Vector2(16, 12)

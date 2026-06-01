@@ -82,6 +82,23 @@ function checkProjectConfiguration() {
         'Godot 全局默认字体已配置'
     );
 
+    const uiAssets = [
+        'title_background.png',
+        'star_map_background.png',
+        'panel_frame.svg',
+        'panel_frame_soft.svg',
+        'button_normal.svg',
+        'button_hover.svg',
+        'button_pressed.svg',
+        'button_disabled.svg',
+        'input_frame.svg',
+        'progress_frame.svg',
+        'progress_fill.svg',
+    ];
+    for (const asset of uiAssets) {
+        check(fs.existsSync(path.join(PROJECT_DIR, 'assets', 'ui', asset)), `UI 美术资源存在: ${asset}`);
+    }
+
     const webUiFiles = [
         'scenes/star_map.tscn',
         'scripts/star_map/star_map.gd',

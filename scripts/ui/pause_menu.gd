@@ -3,6 +3,8 @@ extends Control
 ## 三个选项框：返回星图(副本内可见) / 保存 / 返回菜单
 ## 三个存档位：0, 1, 2（显示为存档 1/2/3），与标题画面一致
 
+const UITheme = preload("res://scripts/ui/ui_theme.gd")
+
 signal menu_opened
 signal menu_closed
 
@@ -141,6 +143,7 @@ func _build_ui() -> void:
 	ps.border_width_top = 1; ps.border_width_bottom = 1
 	ps.border_color = Color(0.35, 0.35, 0.4, 0.4)
 	_panel.add_theme_stylebox_override("panel", ps)
+	_panel.add_theme_stylebox_override("panel", UITheme.panel_style())
 	_panel.visible = false
 	_canvas.add_child(_panel)
 	
@@ -202,6 +205,7 @@ func _rebuild_menu() -> void:
 		hs.border_width_top = 1; hs.border_width_bottom = 1
 		hs.border_color = Color(0.5, 0.5, 0.2, 0.5)
 		btn.add_theme_stylebox_override("hover", hs)
+		UITheme.apply_button(btn)
 		
 		_menu_vbox.add_child(btn)
 		_menu_buttons.append(btn)
@@ -225,6 +229,7 @@ func _build_save_slots_panel(vs: Vector2, pw: float, ph: float) -> void:
 	ss.border_width_top = 1; ss.border_width_bottom = 1
 	ss.border_color = Color(0.35, 0.35, 0.4, 0.4)
 	_slot_overlay.add_theme_stylebox_override("panel", ss)
+	_slot_overlay.add_theme_stylebox_override("panel", UITheme.panel_style())
 	_slot_overlay.visible = false
 	_canvas.add_child(_slot_overlay)
 	
@@ -258,6 +263,7 @@ func _build_save_slots_panel(vs: Vector2, pw: float, ph: float) -> void:
 		bns.border_width_top = 1; bns.border_width_bottom = 1
 		bns.border_color = Color(0.3, 0.3, 0.35, 0.3)
 		btn.add_theme_stylebox_override("normal", bns)
+		UITheme.apply_button(btn)
 		
 		_slot_overlay.add_child(btn)
 		_slot_buttons.append(btn)
@@ -267,6 +273,7 @@ func _build_save_slots_panel(vs: Vector2, pw: float, ph: float) -> void:
 	_back_btn.size = Vector2(140, 44)
 	_back_btn.text = "返回"
 	_back_btn.add_theme_font_size_override("font_size", 15)
+	UITheme.apply_button(_back_btn)
 	_back_btn.pressed.connect(_hide_save_slots)
 	_slot_overlay.add_child(_back_btn)
 
@@ -303,6 +310,7 @@ func _refresh_slot_buttons() -> void:
 			cs.border_width_top = 2; cs.border_width_bottom = 2
 			cs.border_color = Color(0.4, 0.8, 0.4, 0.6)
 			_slot_buttons[i].add_theme_stylebox_override("normal", cs)
+			UITheme.apply_button(_slot_buttons[i], true)
 		else:
 			_slot_buttons[i].add_theme_color_override("font_color", Color(0.75, 0.75, 0.8, 1))
 			var ns = StyleBoxFlat.new()
@@ -312,6 +320,7 @@ func _refresh_slot_buttons() -> void:
 			ns.border_width_top = 1; ns.border_width_bottom = 1
 			ns.border_color = Color(0.3, 0.3, 0.35, 0.3)
 			_slot_buttons[i].add_theme_stylebox_override("normal", ns)
+			UITheme.apply_button(_slot_buttons[i])
 
 
 # ============================================================

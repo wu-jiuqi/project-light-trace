@@ -2,7 +2,9 @@ extends CanvasLayer
 ## 星图主界面
 ## 玩家在此选择碎片、查看解密状态、观察修复进度
 
-@onready var bg_panel: ColorRect = $BG
+const UITheme = preload("res://scripts/ui/ui_theme.gd")
+
+@onready var bg_panel: TextureRect = $BG
 @onready var fragment_container: Control = $FragmentContainer
 @onready var progress_bar: ProgressBar = $UI/ProgressBar
 @onready var progress_label: Label = $UI/ProgressLabel
@@ -26,9 +28,20 @@ func _connect_signals() -> void:
 	GameManager.progress_updated.connect(_on_progress_updated)
 
 func setup_star_map() -> void:
+	_apply_skin()
 	# 在星图上散布碎片节点
 	# MVP：简化为列表形式，后续版本改为3D星图
 	update_fragment_list()
+
+
+func _apply_skin() -> void:
+	$TitleBar.add_theme_stylebox_override("panel", UITheme.panel_style(true))
+	$UI/DetailPanel.add_theme_stylebox_override("panel", UITheme.panel_style())
+	$UI/BottomBar.add_theme_stylebox_override("panel", UITheme.panel_style(true))
+	UITheme.apply_item_list(fragment_list)
+	UITheme.apply_button(decrypt_btn, true)
+	UITheme.apply_button(enter_btn)
+	UITheme.apply_progress(progress_bar)
 
 func update_fragment_list() -> void:
 	fragment_list.clear()
