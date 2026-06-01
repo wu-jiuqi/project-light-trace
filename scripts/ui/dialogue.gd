@@ -91,7 +91,7 @@ func _setup_ui() -> void:
 	continue_indicator = Label.new()
 	continue_indicator.name = "ContinueIndicator"
 	continue_indicator.position = Vector2(56, -25)
-	continue_indicator.text = "▼ 按E继续"
+	continue_indicator.text = "按 E 继续"
 	continue_indicator.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6, 1))
 	continue_indicator.add_theme_font_size_override("font_size", 12)
 	continue_indicator.hide()

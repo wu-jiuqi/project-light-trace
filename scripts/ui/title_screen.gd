@@ -93,7 +93,7 @@ func _update_selection() -> void:
 	for i in _menu_buttons.size():
 		var btn = _menu_buttons[i]
 		if i == _selected:
-			btn.text = "▶  %s" % menu_items[i]
+			btn.text = ">  %s" % menu_items[i]
 			btn.add_theme_color_override("font_color", Color(1, 0.9, 0.5, 1))
 			var ss = StyleBoxFlat.new()
 			ss.bg_color = Color(0.15, 0.18, 0.25, 0.5)
@@ -349,7 +349,7 @@ func _refresh_slot_list(slots: Array[Dictionary]) -> void:
 			if _slot_mode == "new_game":
 				var warn = Label.new()
 				warn.position = Vector2(360, 40)
-				warn.text = "⚠ 将被覆盖"
+				warn.text = "[注意] 将被覆盖"
 				warn.add_theme_color_override("font_color", Color(0.9, 0.6, 0.2, 1))
 				warn.add_theme_font_size_override("font_size", 10)
 				container.add_child(warn)

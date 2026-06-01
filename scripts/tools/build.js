@@ -1,76 +1,78 @@
 /**
- * 溯光计划 - 构建脚本
- * 
- * 调用 Godot 引擎执行 Web (HTML5) 导出
- * 用法：node scripts/build.js [debug|release]
+ * 溯光计划 - Godot Web 构建脚本
+ *
+ * 可选环境变量：
+ *   GODOT_EXE             Godot 控制台程序路径
+ *   GODOT_TEMPLATE_VERSION 导出模板版本，默认 4.6.2.stable
  */
 
-const { execSync } = require('child_process');
-const path = require('path');
+const { execFileSync } = require('child_process');
 const fs = require('fs');
+const path = require('path');
 
-const GODOT_EXE = 'D:/Godot/Godot_v4.6.2-stable_win64_console.exe';
-const PROJECT_DIR = 'D:/WorkBuddy WorkSpace/shuoguang_project';
-const EXPORT_PRESET = process.argv[2] === 'debug' ? 'Web (HTML5)' : 'Web (HTML5)';
+const PROJECT_DIR = path.resolve(__dirname, '..', '..');
 const BUILD_DIR = path.join(PROJECT_DIR, 'build', 'web');
+const EXPORT_PRESET = 'Web (HTML5)';
+const TEMPLATE_VERSION = process.env.GODOT_TEMPLATE_VERSION || '4.6.2.stable';
+const GODOT_CANDIDATES = [
+    process.env.GODOT_EXE,
+    'D:/Godot/Godot_v4.6.2-stable_win64_console.exe',
+    'godot4',
+    'godot',
+].filter(Boolean);
 
-console.log('='.repeat(50));
-console.log('  溯光计划 - 构建脚本');
-console.log('  目标平台: Web (HTML5)');
-console.log('='.repeat(50));
+function findGodot() {
+    for (const candidate of GODOT_CANDIDATES) {
+        if (candidate.includes('/') || candidate.includes('\\')) {
+            if (fs.existsSync(candidate)) return candidate;
+            continue;
+        }
+        try {
+            execFileSync(candidate, ['--version'], { stdio: 'ignore' });
+            return candidate;
+        } catch {
+            // Try the next candidate.
+        }
+    }
+    return '';
+}
 
-// Check Godot executable
-if (!fs.existsSync(GODOT_EXE)) {
-    console.error('[ERROR] Godot executable not found:', GODOT_EXE);
-    console.log('[INFO] 请确保 Godot 4.6.2 已安装到: D:/Godot/');
+const godotExe = findGodot();
+if (!godotExe) {
+    console.error('[ERROR] 找不到 Godot。请设置 GODOT_EXE 环境变量。');
     process.exit(1);
 }
 
-// Check export templates
 const templatesDir = path.join(
     process.env.APPDATA || path.join(process.env.HOME, 'AppData', 'Roaming'),
-    'Godot', 'export_templates', '4.6.2.stable'
+    'Godot', 'export_templates', TEMPLATE_VERSION
 );
-const webDebug = path.join(templatesDir, 'web_debug.zip');
-const webRelease = path.join(templatesDir, 'web_release.zip');
-
-if (!fs.existsSync(webDebug) && !fs.existsSync(webRelease)) {
-    console.error('[ERROR] Web export templates not found!');
-    console.log('[INFO] 请在 Godot 编辑器中通过 编辑器 > 管理导出模板 下载');
-    console.log('[INFO] 或手动放置 web_debug.zip 和 web_release.zip 到:');
-    console.log('       ' + templatesDir);
-    console.log('[INFO] 下载地址: https://godotengine.org/download/archive/4.6.2-stable/');
+if (!fs.existsSync(path.join(templatesDir, 'web_debug.zip')) &&
+    !fs.existsSync(path.join(templatesDir, 'web_release.zip'))) {
+    console.error('[ERROR] Web 导出模板不存在:', templatesDir);
     process.exit(1);
 }
 
-// Ensure build directory
-if (!fs.existsSync(BUILD_DIR)) {
-    fs.mkdirSync(BUILD_DIR, { recursive: true });
-}
+fs.rmSync(BUILD_DIR, { recursive: true, force: true });
+fs.mkdirSync(BUILD_DIR, { recursive: true });
+
+console.log('[INFO] Godot:', godotExe);
+console.log('[INFO] 项目:', PROJECT_DIR);
+console.log('[INFO] 输出:', BUILD_DIR);
 
 try {
-    console.log('[INFO] 开始构建...');
-    console.log('[INFO] Godot:', GODOT_EXE);
-    console.log('[INFO] 项目:', PROJECT_DIR);
-    console.log('[INFO] 输出:', BUILD_DIR);
-
-    const cmd = `"${GODOT_EXE}" --headless --path "${PROJECT_DIR}" --export-release "${EXPORT_PRESET}" "${BUILD_DIR}/index.html"`;
-    console.log('[CMD]', cmd);
-    
-    execSync(cmd, { 
-        stdio: 'inherit',
+    execFileSync(godotExe, [
+        '--headless',
+        '--path', PROJECT_DIR,
+        '--export-release', EXPORT_PRESET,
+        path.join(BUILD_DIR, 'index.html'),
+    ], {
         cwd: PROJECT_DIR,
-        timeout: 300000 // 5 minutes
+        stdio: 'inherit',
+        timeout: 300000,
     });
-
-    console.log('[SUCCESS] 构建完成!');
-    console.log('[INFO] 输出目录:', BUILD_DIR);
-    
-    // List output files
-    const files = fs.readdirSync(BUILD_DIR);
-    console.log('[INFO] 输出文件:', files.join(', '));
-
-} catch (err) {
-    console.error('[ERROR] 构建失败:', err.message);
+    console.log('[SUCCESS] Web 构建完成:', fs.readdirSync(BUILD_DIR).join(', '));
+} catch (error) {
+    console.error('[ERROR] Web 构建失败:', error.message);
     process.exit(1);
 }

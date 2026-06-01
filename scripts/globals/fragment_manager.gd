@@ -26,10 +26,12 @@ class FragmentData:
 	var difficulty: int             # 1-5 难度
 	var is_story_critical: bool     # 是否承载关键剧情
 	var scene_path: String
+	var implemented: bool           # 当前版本是否可进入
 	
 	func _init(p_id: String, p_name: String, p_world: String, 
 			   p_hint: String, p_duration: int, p_source: String,
-			   p_difficulty: int, p_critical: bool, p_scene: String):
+			   p_difficulty: int, p_critical: bool, p_scene: String,
+			   p_implemented: bool = false):
 		id = p_id
 		name = p_name
 		world_name = p_world
@@ -43,6 +45,7 @@ class FragmentData:
 		difficulty = p_difficulty
 		is_story_critical = p_critical
 		scene_path = p_scene
+		implemented = p_implemented
 
 # === 所有碎片数据 ===
 var fragments: Array[FragmentData] = []
@@ -82,7 +85,7 @@ func _initialize_fragments() -> void:
 			"res://scenes/fragments/fragment_0047.tscn"),
 		FragmentData.new("0762", "颜色的葬礼", "灰白小镇",
 			"「蓝是_，红是_」", 180, "情感之印", 3, true,
-			"res://scenes/fragments/fragment_0762.tscn"),
+			"res://scenes/fragments/fragment_0762.tscn", true),
 		FragmentData.new("0915", "遗忘庭院", "记忆庭院",
 			"「_忘_」", 150, "记忆之印", 2, false,
 			"res://scenes/fragments/fragment_0915.tscn"),
@@ -114,13 +117,13 @@ func get_fragment_by_id(id: String) -> FragmentData:
 func get_available_fragments() -> Array[FragmentData]:
 	var available: Array[FragmentData] = []
 	for f in fragments:
-		if f.decrypt_state == DecryptState.PARTIAL or f.decrypt_state == DecryptState.FULL:
+		if f.implemented and (f.decrypt_state == DecryptState.PARTIAL or f.decrypt_state == DecryptState.FULL):
 			if f.decrypt_state != DecryptState.COMPLETED:
 				available.append(f)
 	return available
 
 func start_decrypt(fragment: FragmentData) -> void:
-	if fragment.decrypt_state != DecryptState.LOCKED:
+	if not fragment.implemented or fragment.decrypt_state != DecryptState.LOCKED:
 		return
 	
 	fragment.decrypt_state = DecryptState.DECRYPTING
@@ -129,7 +132,7 @@ func start_decrypt(fragment: FragmentData) -> void:
 		  [fragment.id, fragment.name, fragment.decrypt_duration])
 
 func check_decrypt_progress(fragment: FragmentData) -> void:
-	if fragment.decrypt_state != DecryptState.DECRYPTING:
+	if fragment.decrypt_state not in [DecryptState.DECRYPTING, DecryptState.PARTIAL]:
 		return
 	
 	var elapsed = Time.get_unix_time_from_system() - fragment.decrypt_start_time
@@ -156,18 +159,26 @@ func _generate_partial_hint(full_hint: String) -> String:
 	if "_" in full_hint:
 		return result  # 已经是半解密格式
 	else:
-		# 随机遮挡50%字符
-		var chars = result.to_utf8_buffer()
-		for i in range(0, chars.size(), 2):
-			if randf() > 0.5:
-				chars[i] = 95  # '_' 的UTF-8编码
-		return chars.get_string_from_utf8()
+		# 按 Unicode 字符遮挡，避免破坏中文 UTF-8 字节序列。
+		result = ""
+		for i in range(full_hint.length()):
+			var ch = full_hint.substr(i, 1)
+			if ch in ["「", "」", "_", " ", "，"]:
+				result += ch
+			elif randf() > 0.5:
+				result += "_"
+			else:
+				result += ch
+		return result
 
-func enter_fragment(fragment: FragmentData) -> void:
+func enter_fragment(fragment: FragmentData) -> bool:
+	if not fragment.implemented:
+		return false
 	current_fragment = fragment
 	GameManager.reset_fragment()  # 重新挑战：清NPC/物品/对话
 	fragment_entered.emit(fragment.id)
 	print("[FragmentManager] 进入碎片 %s: %s" % [fragment.id, fragment.name])
+	return true
 
 func complete_fragment(fragment: FragmentData) -> void:
 	fragment.decrypt_state = DecryptState.COMPLETED

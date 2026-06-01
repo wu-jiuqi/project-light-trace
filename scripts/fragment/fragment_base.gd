@@ -32,6 +32,9 @@ signal fragment_exited()
 func _ready() -> void:
 	_init_systems()
 	_load_fragment_data()
+	if current_fragment == null:
+		printerr("[FragmentWorld] 未指定碎片数据，模板场景不会启动玩法逻辑")
+		return
 	print("[FragmentWorld] 碎片世界加载完成: %s" % current_fragment.world_name)
 	fragment_loaded.emit(current_fragment.id)
 

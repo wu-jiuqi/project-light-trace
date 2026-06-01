@@ -13,7 +13,7 @@ const MAX_SLOTS: int = 3  ## 总槽位数
 
 var save_data: Dictionary = {}
 var _auto_timer: Timer = null
-var _current_slot: int = 0  ## 当前槽位
+var _current_slot: int = 0  ## 当前槽位；-1 表示尚未选择槽位
 
 
 # ============================================================
@@ -78,7 +78,7 @@ func manual_save() -> void:
 	_show_save_notification()
 
 
-func quick_save(slot: int = 0) -> void:
+func quick_save(slot: int = -1) -> void:
 	save_game(slot)
 
 
@@ -86,7 +86,15 @@ func quick_save(slot: int = 0) -> void:
 # 存档 / 读档
 # ============================================================
 
-func save_game(slot: int = 0) -> void:
+func save_game(slot: int = -1) -> bool:
+	if slot < 0:
+		slot = _current_slot
+	if slot < 0 or slot >= MAX_SLOTS:
+		printerr("[SaveManager] 存档失败: 没有有效的活动槽位")
+		return false
+	if slot != _current_slot:
+		printerr("[SaveManager] 存档失败: 目标槽位 %d 不是当前活动槽位 %d" % [slot, _current_slot])
+		return false
 	var ts = Time.get_unix_time_from_system()
 	
 	# 确保聊天数据先落盘到独立文件（崩溃恢复用 + 保证 chat_{slot}.json 与 save_{slot}.json 一致）
@@ -119,6 +127,9 @@ func save_game(slot: int = 0) -> void:
 		"melody_triggered": GameManager.melody_triggered,
 		"source_mark_revealed": GameManager.source_mark_revealed,
 		"fragment_completed": GameManager.fragment_completed,
+		"white_ready": GameManager.white_ready,
+		"gray_cloth_uncovered": GameManager.gray_cloth_uncovered,
+		"oldpainter_trust": GameManager.oldpainter_trust,
 		
 		# 物品使用记录
 		"items_used": GameManager.items_used,
@@ -136,6 +147,9 @@ func save_game(slot: int = 0) -> void:
 		file.store_string(JSON.stringify(save_data, "\t"))
 		file.close()
 		print("[SaveManager] 存档保存成功 (slot %d | %s)" % [slot, path])
+		return true
+	printerr("[SaveManager] 存档写入失败: %s" % path)
+	return false
 
 
 func load_game(slot: int = 0) -> bool:
@@ -172,6 +186,9 @@ func load_game(slot: int = 0) -> bool:
 	GameManager.melody_triggered = save_data.get("melody_triggered", false)
 	GameManager.source_mark_revealed = save_data.get("source_mark_revealed", false)
 	GameManager.fragment_completed = save_data.get("fragment_completed", false)
+	GameManager.white_ready = save_data.get("white_ready", false)
+	GameManager.gray_cloth_uncovered = save_data.get("gray_cloth_uncovered", false)
+	GameManager.oldpainter_trust = save_data.get("oldpainter_trust", 0.0)
 	
 	# 恢复物品
 	var items = save_data.get("items_used", {})
@@ -203,9 +220,9 @@ func load_game(slot: int = 0) -> bool:
 
 
 func _load_save_file(slot: int) -> void:
+	save_data = {}
 	var path = _slot_path(slot)
 	if not FileAccess.file_exists(path):
-		save_data = {}
 		return
 	
 	var file = FileAccess.open(path, FileAccess.READ)
@@ -260,15 +277,26 @@ func list_slots() -> Array[Dictionary]:
 
 
 func delete_slot(slot: int) -> void:
+	if slot < 0 or slot >= MAX_SLOTS:
+		return
 	var path = _slot_path(slot)
 	if FileAccess.file_exists(path):
 		DirAccess.remove_absolute(path)
 		print("[SaveManager] 存档已删除 (slot %d)" % slot)
 	# 同时删除聊天记录文件
+	if slot == _current_slot:
+		ChatDatabase.clear_all_history()
+		_current_slot = -1
+		save_data = {}
+		if FileAccess.file_exists(LAST_SLOT_PATH):
+			DirAccess.remove_absolute(LAST_SLOT_PATH)
 	ChatDatabase.delete_slot_file(slot)
 
 
 func set_current_slot(slot: int) -> void:
+	if slot < 0 or slot >= MAX_SLOTS:
+		printerr("[SaveManager] 无效存档槽位: %d" % slot)
+		return
 	_current_slot = slot
 	_write_last_slot(slot)
 	# 同步 ChatDatabase 到对应槽位的会话文件
@@ -353,7 +381,7 @@ func _deserialize_fragments(saved: Array) -> void:
 
 func _resume_decrypt_timers() -> void:
 	for f in FragmentManager.fragments:
-		if f.decrypt_state == FragmentManager.DecryptState.DECRYPTING:
+		if f.decrypt_state in [FragmentManager.DecryptState.DECRYPTING, FragmentManager.DecryptState.PARTIAL]:
 			FragmentManager.check_decrypt_progress(f)
 
 

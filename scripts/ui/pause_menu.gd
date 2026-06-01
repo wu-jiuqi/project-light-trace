@@ -287,10 +287,10 @@ func _refresh_slot_buttons() -> void:
 		var is_current = (i == current)
 		
 		if info != "":
-			var suffix = " ★ 当前" if is_current else ""
+			var suffix = " [当前]" if is_current else ""
 			_slot_buttons[i].text = "存档 %d — %s%s" % [i + 1, info, suffix]
 		else:
-			var suffix = " ★ 当前" if is_current else ""
+			var suffix = " [当前]" if is_current else ""
 			_slot_buttons[i].text = "存档 %d — [ 空 ]%s" % [i + 1, suffix]
 		
 		# 当前槽位使用高亮颜色

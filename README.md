@@ -108,16 +108,19 @@ npm run build    # 构建 Web (HTML5) 版本到 build/web/
 ### 步骤四：本地预览
 
 ```bash
-npm run serve    # 启动本地服务器 http://localhost:3000
+DEEPSEEK_API_KEY=替换为已轮换的新密钥 npm run serve
+# 启动本地服务器 http://localhost:3000，并提供同源 LLM 代理
 ```
+
+`DEEPSEEK_API_KEY` 只允许配置在服务端环境变量或部署平台密钥管理中，不要写入 Godot 客户端源码。
 
 ### 步骤五：在线部署
 
 ```bash
-# Cloud Studio 部署
-npm run deploy cloudstudio
+# Cloud Studio 部署包
+npm run deploy -- cloudstudio
 
-# 登录 Cloud Studio → 导入 deploy/ 目录 → 点击运行
+# 登录 Cloud Studio → 导入 deploy/ 目录 → 配置 DEEPSEEK_API_KEY → 点击运行
 # 自动获得可访问的在线链接
 ```
 

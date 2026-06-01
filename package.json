@@ -3,10 +3,11 @@
   "version": "0.1.0",
   "description": "溯光计划 - 归源计划 (Project Origin) - AI虚拟宇宙修复游戏",
   "scripts": {
-    "build": "node scripts/build.js",
-    "serve": "node scripts/serve.js",
-    "deploy": "node scripts/deploy.js",
-    "dev": "npm run build && npm run serve"
+    "build": "node scripts/tools/build.js",
+    "serve": "node scripts/tools/serve.js",
+    "deploy": "node scripts/tools/deploy.js",
+    "dev": "npm run build && npm run serve",
+    "test": "node scripts/tools/test.js"
   },
   "dependencies": {},
   "devDependencies": {},

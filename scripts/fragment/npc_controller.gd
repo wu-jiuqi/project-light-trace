@@ -321,6 +321,13 @@ func start_dialogue() -> void:
 	# 老画家：检查旋律触发
 	if npc_kb_id == "oldpainter" and _fragment_state and _fragment_state.has_method("_trigger_oldpainter_melody"):
 		_fragment_state._trigger_oldpainter_melody()
+	# 老画家：五色集齐后解锁白色
+	if npc_kb_id == "oldpainter" and _fragment_state and _fragment_state.has_method("try_unlock_white_from_painter"):
+		var unlocked = _fragment_state.try_unlock_white_from_painter()
+		if unlocked:
+			print("[NPC:oldpainter] 白色解锁触发！")
+			# 白色觉醒后更新情绪
+			_npc_mood = "六种颜色全部回来了。你看着画室里那幅被灰布盖着的自画像——是时候让她看看了。"
 	print("[NPC] %s 进入对话 (kb=%s rag=%s)" % [npc_name, npc_kb_id, use_rag])
 
 func end_dialogue() -> void:
@@ -736,7 +743,11 @@ func get_greeting() -> String:
 	if own_awake:
 		greeting = _get_post_awakening_greeting(count)
 	elif count >= 5:
-		greeting = _get_world_changed_greeting()
+		# 老画家：五色集齐但白色未解锁时，引导去画室
+		if npc_kb_id == "oldpainter" and not GameManager.is_color_awakened(GameManager.ColorType.WHITE):
+			greeting = "五种颜色都回来了。（他看向画室角落）那里——那幅画。灰布下面。这么些年，该有人去揭开它了。"
+		else:
+			greeting = _get_world_changed_greeting()
 	elif count >= 1:
 		greeting = _get_partial_awake_greeting(count)
 	else:
@@ -892,6 +903,8 @@ func _collect_game_state() -> Dictionary:
 	## 从碎片状态管理器收集当前游戏状态
 	if _fragment_state and _fragment_state.has_method("get_game_state"):
 		var state = _fragment_state.get_game_state(npc_kb_id)
+		# 使用 NPC 实际警觉值；该值已由 GameManager.npc_state_cache 跨房间持久化。
+		state["alert_level"] = int(npc_suspicion)
 		# 注入 NPC 情绪状态
 		if _npc_mood != "":
 			state["npc_mood"] = _npc_mood

@@ -20,7 +20,7 @@ offset_left = 120.0
 offset_top = 80.0
 offset_right = 200.0
 offset_bottom = 100.0
-text = "✦ ✦ ✦  万象星图  ✦ ✦ ✦"
+text = "-- 万象星图 --"
 
 [node name="TitleBar" type="Panel" parent="."]
 offset_left = 340.0
@@ -82,7 +82,7 @@ offset_left = 740.0
 offset_top = 420.0
 offset_right = 920.0
 offset_bottom = 460.0
-text = "🔓 提交解密"
+text = "提交解密"
 disabled = true
 
 [node name="EnterBtn" type="Button" parent="UI"]
@@ -90,7 +90,7 @@ offset_left = 940.0
 offset_top = 420.0
 offset_right = 1120.0
 offset_bottom = 460.0
-text = "🚀 进入碎片"
+text = "进入碎片"
 disabled = true
 
 [node name="BottomBar" type="Panel" parent="UI"]

@@ -61,7 +61,7 @@ func _build_ui() -> void:
 	# 标题
 	_title_label = Label.new()
 	_title_label.position = Vector2(20, 16)
-	_title_label.text = "🎒 背包"
+	_title_label.text = "[背包]"
 	_title_label.add_theme_color_override("font_color", Color(0.8, 0.85, 1, 1))
 	_title_label.add_theme_font_size_override("font_size", 22)
 	_panel.add_child(_title_label)
@@ -125,7 +125,7 @@ func _make_item_cell(item_id: int, meta: Dictionary, _empty: bool) -> Panel:
 	var icon = Label.new()
 	icon.position = Vector2(10, 8)
 	icon.size = Vector2(70, 40)
-	icon.text = meta.get("icon", "❓")
+	icon.text = meta.get("icon", "?")
 	icon.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	icon.add_theme_font_size_override("font_size", 32)
 	cell.add_child(icon)

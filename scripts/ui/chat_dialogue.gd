@@ -249,7 +249,7 @@ func _build_history_panel(vs: Vector2) -> void:
 	_history_prev = Button.new()
 	_history_prev.position = Vector2(vs.x / 2 - btn_w - 20, btn_y)
 	_history_prev.size = Vector2(btn_w, 36)
-	_history_prev.text = "◀ 上一页"
+	_history_prev.text = "< 上一页"
 	_history_prev.add_theme_font_size_override("font_size", 13)
 	_history_prev.pressed.connect(_prev_page)
 	_history_panel.add_child(_history_prev)
@@ -257,7 +257,7 @@ func _build_history_panel(vs: Vector2) -> void:
 	_history_next = Button.new()
 	_history_next.position = Vector2(vs.x / 2 + 20, btn_y)
 	_history_next.size = Vector2(btn_w, 36)
-	_history_next.text = "下一页 ▶"
+	_history_next.text = "下一页 >"
 	_history_next.add_theme_font_size_override("font_size", 13)
 	_history_next.pressed.connect(_next_page)
 	_history_panel.add_child(_history_next)
@@ -616,16 +616,16 @@ func _build_alert_popup(amount: float, reason: String, npc_name: String, alert_p
 	container.add_child(fill)
 	
 	# 主文本
-	var phase_names = ["信任", "谨慎", "怀疑⚠", "警觉⚠⚠", "敌对⚠⚠⚠", "封闭🚫"]
+	var phase_names = ["信任", "谨慎", "怀疑", "警觉", "敌对", "封闭"]
 	var phase_name = phase_names[min(alert_phase, 5)]
 	
 	var text = Label.new()
 	text.position = Vector2(12, 6)
 	text.size = Vector2(296, 26)
 	if amount > 0:
-		text.text = "⚠️ [%s] 警觉 %+.0f  →  %s  (%.0f/100)" % [npc_name, amount, phase_name, suspicion]
+		text.text = "[警觉] [%s] %+.0f  ->  %s  (%.0f/100)" % [npc_name, amount, phase_name, suspicion]
 	else:
-		text.text = "✓ [%s] 警觉 %+.0f  →  %s  (%.0f/100)" % [npc_name, amount, phase_name, suspicion]
+		text.text = "[缓和] [%s] %+.0f  ->  %s  (%.0f/100)" % [npc_name, amount, phase_name, suspicion]
 	text.add_theme_color_override("font_color", Color(1, 1, 1, 0.95))
 	text.add_theme_font_size_override("font_size", 12)
 	container.add_child(text)
@@ -651,7 +651,7 @@ func show_alert_phase_change(npc_name: String, old_phase: int, new_phase: int, r
 	var vs = get_viewport_rect().size
 	if vs.x <= 0: vs = Vector2(1280, 720)
 	
-	var phase_names = ["信任", "谨慎", "怀疑⚠", "警觉⚠⚠", "敌对⚠⚠⚠", "封闭🚫"]
+	var phase_names = ["信任", "谨慎", "怀疑", "警觉", "敌对", "封闭"]
 	var phase_colors = [
 		Color(0.2, 0.7, 0.3),
 		Color(0.7, 0.7, 0.1),

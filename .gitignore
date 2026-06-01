@@ -7,6 +7,7 @@
 
 # --- 构建/导出产物 ---
 build/
+deploy/
 
 # --- Node.js 依赖 (package.json 存在) ---
 node_modules/
