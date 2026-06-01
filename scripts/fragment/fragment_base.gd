@@ -104,7 +104,7 @@ func _on_source_mark_decoded(mark_name: String) -> void:
 	_on_fragment_completed()
 
 func _on_fragment_completed() -> void:
-	var was_completed = current_fragment.decrypt_state == FragmentManager.DecryptState.COMPLETED
+	var was_completed = current_fragment.completed
 
 	if not was_completed:
 		# 首次修复：记录源印 + 增加修复进度
@@ -127,14 +127,14 @@ func _get_random_other_clue() -> String:
 	# 随机获取一个其它碎片的线索
 	var other_fragments: Array[FragmentManager.FragmentData] = []
 	for f in FragmentManager.fragments:
-		if f.id != current_fragment.id and f.decrypt_state != FragmentManager.DecryptState.COMPLETED:
+		if f.id != current_fragment.id and not f.completed:
 			other_fragments.append(f)
 	
 	if other_fragments.is_empty():
 		return "「归源终章」"
 	
 	var random_f = other_fragments[randi() % other_fragments.size()]
-	return random_f.hint_full
+	return random_f.hint
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("interact"):

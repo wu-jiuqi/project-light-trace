@@ -95,7 +95,7 @@ var melody_triggered: bool = false      # 老画家旋律（紫色前提）
 var source_mark_revealed: bool = false   # 源印已显现
 var fragment_completed: bool = false     # 碎片已完成
 var white_ready: bool = false            # 五色集齐，白色可由老画家解锁
-var gray_cloth_uncovered: bool = false   # 自画像灰布已被揭开
+var gray_cloth_uncovered: bool = false   # 织女画像灰布已被揭开（旧存档键保持兼容）
 var oldpainter_trust: float = 0.0        # 老画家信任值，跨房间和存档保留
 
 # === 信号 ===
@@ -130,7 +130,7 @@ func new_game() -> void:
 	gray_cloth_uncovered = false
 	oldpainter_trust = 0.0
 	
-	# 重置所有碎片解密/完成状态
+	# 重置所有碎片完成状态
 	FragmentManager.reset_all_fragments()
 	
 	print("[GameManager] 状态已重置（新游戏）")

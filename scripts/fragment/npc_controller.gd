@@ -327,7 +327,7 @@ func start_dialogue() -> void:
 		if unlocked:
 			print("[NPC:oldpainter] 白色解锁触发！")
 			# 白色觉醒后更新情绪
-			_npc_mood = "六种颜色全部回来了。你看着画室里那幅被灰布盖着的自画像——是时候让她看看了。"
+			_npc_mood = "六种颜色全部回来了。你看着画室里那幅被灰布盖着的女人画像——是时候让她看看了。"
 	print("[NPC] %s 进入对话 (kb=%s rag=%s)" % [npc_name, npc_kb_id, use_rag])
 
 func end_dialogue() -> void:

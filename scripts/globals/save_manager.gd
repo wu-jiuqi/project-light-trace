@@ -101,7 +101,7 @@ func save_game(slot: int = -1) -> bool:
 	ChatDatabase.flush_to_disk()
 	
 	save_data = {
-		"version": "0.2.0",
+		"version": "0.3.0",
 		"slot": slot,
 		"timestamp": ts,
 		"timestamp_readable": Time.get_datetime_string_from_system(),
@@ -134,7 +134,7 @@ func save_game(slot: int = -1) -> bool:
 		# 物品使用记录
 		"items_used": GameManager.items_used,
 		
-		# 碎片解密状态
+		# 碎片修复状态
 		"fragments": _serialize_fragments(),
 		
 		# 聊天记录
@@ -198,7 +198,6 @@ func load_game(slot: int = 0) -> bool:
 	# 恢复碎片（先清空所有碎片状态，避免旧槽位数据残留）
 	FragmentManager.reset_all_fragments()
 	_deserialize_fragments(save_data.get("fragments", []))
-	_resume_decrypt_timers()
 	
 	# 恢复聊天记录
 	# 步骤 1: 尝试从该槽位的独立会话文件加载（崩溃恢复用，可能有比存档更新的数据）
@@ -361,28 +360,17 @@ func _serialize_fragments() -> Array:
 	for f in FragmentManager.fragments:
 		result.append({
 			"id": f.id,
-			"decrypt_state": f.decrypt_state,
-			"decrypt_progress": f.decrypt_progress,
-			"decrypt_start_time": f.decrypt_start_time,
-			"hint_visible": f.hint_visible,
+			"completed": f.completed,
 		})
 	return result
 
 
 func _deserialize_fragments(saved: Array) -> void:
 	for s in saved:
-		var f = FragmentManager.get_fragment_by_id(s["id"])
+		var f = FragmentManager.get_fragment_by_id(s.get("id", ""))
 		if f:
-			f.decrypt_state = s["decrypt_state"]
-			f.decrypt_progress = s["decrypt_progress"]
-			f.decrypt_start_time = s["decrypt_start_time"]
-			f.hint_visible = s["hint_visible"]
-
-
-func _resume_decrypt_timers() -> void:
-	for f in FragmentManager.fragments:
-		if f.decrypt_state in [FragmentManager.DecryptState.DECRYPTING, FragmentManager.DecryptState.PARTIAL]:
-			FragmentManager.check_decrypt_progress(f)
+			# 兼容 0.2.x：旧枚举中 COMPLETED 的值为 4。
+			f.completed = s.get("completed", s.get("decrypt_state", -1) == 4)
 
 
 # ============================================================

@@ -163,7 +163,7 @@ func _init_room_pickup() -> void:
 
 	if rn == "Square":
 		# 广场不再自动出现源印
-		# 源印改在画室自画像处，由玩家揭灰布后显现
+		# 源印改在画室织女画像处，由玩家揭灰布后显现
 		pass
 
 	elif rn == "Studio":
@@ -205,7 +205,7 @@ func get_oldpainter_hint() -> String:
 	if not GameManager.is_color_awakened(GameManager.ColorType.WHITE):
 		# 五色集齐但白色未解锁 → 引导玩家来画室
 		return "五种颜色……还差最后一种。来我的画室——角落里有一幅画。它被灰布盖着很多年了。也许该是你揭开的时候了。"
-	return "六色全齐了。去画室角落——那幅自画像的灰布下面。它一直在等你。"
+	return "六色全齐了。去画室角落——那幅女人画像的灰布下面。它一直在等你。"
 
 func _trigger_oldpainter_melody() -> void:
 	## 4色觉醒后，老画家哼出旋律，为紫色触发做准备
@@ -215,26 +215,16 @@ func _trigger_oldpainter_melody() -> void:
 
 
 func _create_gray_cloth() -> void:
-	## 在Studio场景创建被灰布覆盖的自画像
+	## 在 Studio 场景创建被灰布覆盖的织女画像。
 	var root = get_parent()
 	if root == null or root.name != "Studio": return
 
 	# 检查是否已存在
 	if root.get_node_or_null("GrayCloth"): return
 
-	# 先创建一个"自画像"背景（画框）
-	var portrait_frame = ColorRect.new()
-	portrait_frame.name = "PortraitFrame"
-	portrait_frame.offset_left = -40; portrait_frame.offset_top = -55
-	portrait_frame.offset_right = 40; portrait_frame.offset_bottom = 55
-	portrait_frame.color = Color(0.25, 0.2, 0.15, 0.9)  # 深棕色画框
-	var frame_node = Node2D.new()
-	frame_node.name = "PortraitNode"
-	frame_node.position = Vector2(340, 180)
-	frame_node.add_child(portrait_frame)
-	root.add_child(frame_node)
+	_create_zhinu_portrait()
 
-	# 创建灰布 Area2D（覆盖在自画像上）
+	# 创建灰布 Area2D（覆盖在织女画像上）
 	var cloth = Area2D.new()
 	cloth.name = "GrayCloth"
 	cloth.position = Vector2(340, 180)
@@ -270,11 +260,39 @@ func _create_gray_cloth() -> void:
 	cloth.collision_mask = 1
 
 	root.add_child(cloth)
-	print("[GrayCloth] 灰布已覆盖自画像 (340,180)")
+	print("[GrayCloth] 灰布已覆盖织女画像 (340,180)")
 
 	# 如果白色已觉醒，更新标签提示
 	if GameManager.is_color_awakened(GameManager.ColorType.WHITE):
 		label.text = "[E] 揭开灰布"
+
+
+func _create_zhinu_portrait() -> void:
+	var root = get_parent()
+	if root == null or root.name != "Studio": return
+	if root.get_node_or_null("PortraitNode"): return
+
+	var portrait_frame = ColorRect.new()
+	portrait_frame.name = "PortraitFrame"
+	portrait_frame.offset_left = -48; portrait_frame.offset_top = -67
+	portrait_frame.offset_right = 48; portrait_frame.offset_bottom = 67
+	portrait_frame.color = Color(0.25, 0.18, 0.1, 0.96)
+
+	var frame_node = Node2D.new()
+	frame_node.name = "PortraitNode"
+	frame_node.position = Vector2(340, 180)
+	frame_node.add_child(portrait_frame)
+
+	var portrait = TextureRect.new()
+	portrait.name = "ZhinuPortrait"
+	portrait.offset_left = -41; portrait.offset_top = -60
+	portrait.offset_right = 41; portrait.offset_bottom = 60
+	portrait.texture = load("res://assets/fragments/id0762/zhinu_portrait.png")
+	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	frame_node.add_child(portrait)
+	root.add_child(frame_node)
 
 
 func _on_gray_cloth_entered(body: Node) -> void:
@@ -326,9 +344,9 @@ func _display_uncover_message() -> void:
 	## 显示揭开灰布后的叙事文字
 	var msg = """灰布滑落。
 
-画框中的自画像显露出来——那是老画家的脸，但又不全是。
+画框中的女人画像显露出来。
 
-画中的眼睛不是灰色的。
+银色织线在她的发梢与衣纹间交错。画中的眼睛不是灰色的。
 
 六种颜色在瞳孔深处旋转，形成一个熟悉的符号。
 
@@ -337,14 +355,15 @@ func _display_uncover_message() -> void:
 
 
 func _create_studio_source_mark() -> void:
-	## 在Studio场景的画框位置创建可交互的源印
+	## 在 Studio 场景的织女画像位置创建可交互的源印。
 	var root = get_parent()
 	if root == null or root.name != "Studio": return
 
 	# 检查是否已存在
 	if root.get_node_or_null("SourceMark"): return
+	_create_zhinu_portrait()
 
-	# 创建源印 Area2D（在自画像位置）
+	# 创建源印 Area2D（在织女画像位置）
 	var mark = Area2D.new()
 	mark.name = "SourceMark"
 	mark.position = Vector2(340, 180)
@@ -355,13 +374,36 @@ func _create_studio_source_mark() -> void:
 	s.shape = circle
 	mark.add_child(s)
 
-	# 视觉：六色旋转发光效果（简化为白色发光圆）
-	var visual = ColorRect.new()
-	visual.name = "MarkVisual"
-	visual.offset_left = -28; visual.offset_top = -28
-	visual.offset_right = 28; visual.offset_bottom = 28
-	visual.color = Color(1, 1, 1, 0.9)
-	mark.add_child(visual)
+	# 视觉：画像上方的六色源印环。
+	var ring = Line2D.new()
+	ring.name = "MarkVisual"
+	ring.width = 4.0
+	ring.closed = true
+	ring.default_color = Color(0.96, 0.92, 1.0, 0.92)
+	for index in range(12):
+		var angle = TAU * float(index) / 12.0
+		ring.add_point(Vector2(cos(angle), sin(angle)) * 27.0)
+	mark.add_child(ring)
+	var colors = [
+		Color(0.95, 0.24, 0.2, 0.92),
+		Color(0.28, 0.58, 1.0, 0.92),
+		Color(1.0, 0.8, 0.25, 0.92),
+		Color(0.32, 0.86, 0.48, 0.92),
+		Color(0.74, 0.42, 1.0, 0.92),
+		Color(1.0, 1.0, 1.0, 0.96),
+	]
+	for index in range(colors.size()):
+		var glow = Polygon2D.new()
+		var angle = TAU * float(index) / float(colors.size())
+		var center = Vector2(cos(angle), sin(angle)) * 18.0
+		glow.polygon = PackedVector2Array([
+			center + Vector2(-4, -4),
+			center + Vector2(4, -4),
+			center + Vector2(4, 4),
+			center + Vector2(-4, 4),
+		])
+		glow.color = colors[index]
+		mark.add_child(glow)
 
 	# 标签
 	var label = Label.new()
@@ -381,7 +423,7 @@ func _create_studio_source_mark() -> void:
 
 	root.add_child(mark)
 	GameManager.source_mark_revealed = true
-	print("[SourceMark] 源印「情感之印」已在画室自画像中显现")
+	print("[SourceMark] 源印「情感之印」已在画室织女画像中显现")
 
 
 func _on_source_mark_entered(body: Node) -> void:
@@ -450,7 +492,7 @@ func _trigger_victory() -> void:
 
 	# === 修复进度防护：检查碎片是否已标记为完成 ===
 	var was_completed = GameManager.fragment_completed
-	if FragmentManager.current_fragment and FragmentManager.current_fragment.decrypt_state == FragmentManager.DecryptState.COMPLETED:
+	if FragmentManager.current_fragment and FragmentManager.current_fragment.completed:
 		was_completed = true
 
 	if was_completed:

@@ -10,6 +10,7 @@ func _init() -> void:
 func _run() -> void:
 	var manager = root.get_node("SaveManager")
 	var game_manager = root.get_node("GameManager")
+	var fragment_manager = root.get_node("FragmentManager")
 	for slot in range(manager.MAX_SLOTS):
 		manager.delete_slot(slot)
 
@@ -41,6 +42,11 @@ func _run() -> void:
 		is_equal_approx(game_manager.npc_state_cache["oldpainter"]["suspicion"], 12.0),
 		"NPC suspicion cache persists"
 	)
+
+	fragment_manager.reset_all_fragments()
+	manager._deserialize_fragments([{"id": "0762", "decrypt_state": 4}])
+	_check(fragment_manager.get_fragment_by_id("0762").completed, "legacy completed fragment state migrates")
+	fragment_manager.reset_all_fragments()
 
 	manager.delete_slot(2)
 	_check(manager.get_current_slot() == -1, "deleting the active slot clears active state")

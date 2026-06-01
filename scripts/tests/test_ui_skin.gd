@@ -35,15 +35,14 @@ func _run() -> void:
 	current_scene = star_map
 	await process_frame
 	_check(star_map.get_node("BG") is TextureRect, "star map uses generated background")
-	_check(_has_texture_panel(star_map.get_node("UI/DetailPanel")), "star map detail panel uses texture skin")
+	_check(_has_texture_panel(star_map.get_node("UI/DetailCard")), "star map detail card uses texture skin")
 	_check(
-		star_map.get_node("UI/DecryptBtn").get_theme_stylebox("normal") is StyleBoxTexture,
+		star_map.get_node("UI/DetailCard/EnterBtn").get_theme_stylebox("normal") is StyleBoxTexture,
 		"star map buttons use texture skin"
 	)
-	_check(
-		star_map.get_node("UI/ProgressBar").get_theme_stylebox("fill") is StyleBoxTexture,
-		"star map progress bar uses texture skin"
-	)
+	_check(not star_map.has_node("UI/FragmentList"), "star map no longer uses fragment list")
+	_check(not star_map.has_node("UI/ProgressBar"), "star map no longer shows progress bar")
+	_check(not star_map.has_node("UI/DecryptBtn"), "star map no longer exposes decrypt action")
 
 	if _failures == 0:
 		print("[SUMMARY] UI skin regression checks passed")
