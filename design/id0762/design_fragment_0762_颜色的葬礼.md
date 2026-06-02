@@ -239,9 +239,9 @@
 
 ### 5.1 Godot 实现要点
 
-- 使用 `TileMapLayer` + 16x16 tileset（灰色系调色板）
-- 颜色恢复通过 `modulate` 属性逐区域渐变（shader 或 tween 颜色插值）
-- NPC 用 `CharacterBody2D` + 简单 idle 动画（或者先用静态 Sprite 占位）
+- 使用 `TileMapLayer` + `16x16` 逻辑网格承载布局与碰撞；正式环境逐步替换为 `4x` 高分辨率纸片模块
+- 基础资产只维护彩色版本；颜色恢复通过 Shader 参数逐区域渐变
+- NPC 用 `CharacterBody2D` + 整片纸偶 Sprite2D；移动通过摇摆、弹跳和阴影错位表达，剧情动作替换独立姿态纸片
 - 场景不需要大——10-12个屏幕宽度的横向小镇就足够了
 - 每个区域用 `Area2D` 检测玩家进入，触发 NPC 对话提示
 
@@ -349,4 +349,4 @@ var has_studio_key: bool = false
 - [x] 老画家作为"规则揭示者"的角色清晰，三阶段对话递进
 - [x] 有至少一个"不依赖语言"的互动（薇拉的旋律触发）
 - [x] 碎片有自己的独特记忆点（白色雕像碎裂、老画家消失前的最后一句话）
-- [x] MVPGodot实现可行（TileMap + Sprite + 简单状态机）
+- [x] MVP Godot 实现可行（TileMap 逻辑网格 + 整片纸偶 Sprite + 简单状态机）

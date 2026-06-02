@@ -7,7 +7,8 @@
     "serve": "node scripts/tools/serve.js",
     "deploy": "node scripts/tools/deploy.js",
     "dev": "npm run build && npm run serve",
-    "test": "node scripts/tools/test.js"
+    "test": "node scripts/tools/test.js",
+    "validate:papercraft": "node scripts/tools/validate-papercraft-assets.js"
   },
   "dependencies": {},
   "devDependencies": {},

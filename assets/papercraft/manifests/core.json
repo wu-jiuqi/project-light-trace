@@ -1,0 +1,223 @@
+{
+  "schemaVersion": 1,
+  "scope": "core",
+  "assets": [
+    {
+      "id": "ref_material_board",
+      "path": "assets/papercraft/core/references/ref_material_board.png",
+      "category": "reference",
+      "role": "固定纸张纹理板",
+      "status": "planned",
+      "generation": "reference_board",
+      "requiredFor": "golden_reference"
+    },
+    {
+      "id": "ref_character_standard",
+      "path": "assets/papercraft/core/references/ref_character_standard.png",
+      "category": "reference",
+      "role": "标准整片纸偶",
+      "status": "planned",
+      "generation": "reference_edit",
+      "requiredFor": "golden_reference",
+      "notes": "优先以冯婶和现有旅店气氛板锁定角色纸纹、边缘和阴影"
+    },
+    {
+      "id": "ref_inn_facade",
+      "path": "assets/papercraft/core/references/ref_inn_facade.png",
+      "category": "reference",
+      "role": "旅店建筑立面",
+      "status": "planned",
+      "generation": "reference_edit",
+      "requiredFor": "golden_reference"
+    },
+    {
+      "id": "ref_street_modules",
+      "path": "assets/papercraft/core/references/ref_street_modules.png",
+      "category": "reference",
+      "role": "市集街模块组",
+      "status": "planned",
+      "generation": "reference_edit",
+      "requiredFor": "golden_reference"
+    },
+    {
+      "id": "ref_awakening_collage",
+      "path": "assets/papercraft/core/references/ref_awakening_collage.png",
+      "category": "reference",
+      "role": "觉醒拼贴演出",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "golden_reference"
+    },
+    {
+      "id": "ref_star_map",
+      "path": "assets/papercraft/core/references/ref_star_map.png",
+      "category": "reference",
+      "role": "纸工星图",
+      "status": "planned",
+      "generation": "ui_component",
+      "requiredFor": "golden_reference"
+    },
+    {
+      "id": "ref_ui_components",
+      "path": "assets/papercraft/core/references/ref_ui_components.png",
+      "category": "reference",
+      "role": "UI 组件样例",
+      "status": "planned",
+      "generation": "ui_component",
+      "requiredFor": "golden_reference"
+    },
+    {
+      "id": "material_kraft",
+      "path": "assets/papercraft/core/materials/kraft.png",
+      "category": "material",
+      "role": "牛皮纸纹理",
+      "status": "planned",
+      "generation": "reference_edit",
+      "requiredFor": "golden_reference"
+    },
+    {
+      "id": "material_gray_card",
+      "path": "assets/papercraft/core/materials/gray_card.png",
+      "category": "material",
+      "role": "灰白卡纸纹理",
+      "status": "planned",
+      "generation": "reference_edit",
+      "requiredFor": "golden_reference"
+    },
+    {
+      "id": "material_book_page",
+      "path": "assets/papercraft/core/materials/book_page.png",
+      "category": "material",
+      "role": "旧书页纹理",
+      "status": "planned",
+      "generation": "reference_edit",
+      "requiredFor": "golden_reference"
+    },
+    {
+      "id": "material_fiber_paper",
+      "path": "assets/papercraft/core/materials/fiber_paper.png",
+      "category": "material",
+      "role": "粗纤维纸纹理",
+      "status": "planned",
+      "generation": "reference_edit",
+      "requiredFor": "golden_reference"
+    },
+    {
+      "id": "material_tracing_paper",
+      "path": "assets/papercraft/core/materials/tracing_paper.png",
+      "category": "material",
+      "role": "描图纸纹理",
+      "status": "planned",
+      "generation": "reference_edit",
+      "requiredFor": "golden_reference"
+    },
+    {
+      "id": "material_foil",
+      "path": "assets/papercraft/core/materials/foil.png",
+      "category": "material",
+      "role": "银箔纸纹理",
+      "status": "planned",
+      "generation": "reference_edit",
+      "requiredFor": "golden_reference"
+    },
+    {
+      "id": "ui_title_background",
+      "path": "assets/papercraft/core/ui/title_background.png",
+      "category": "ui",
+      "role": "标题页多层纸板舞台",
+      "status": "planned",
+      "generation": "ui_component",
+      "requiredFor": "global_ui"
+    },
+    {
+      "id": "ui_star_map_background",
+      "path": "assets/papercraft/core/ui/star_map_background.png",
+      "category": "ui",
+      "role": "星图深色纸板底",
+      "status": "planned",
+      "generation": "ui_component",
+      "requiredFor": "global_ui"
+    },
+    {
+      "id": "ui_button_normal",
+      "path": "assets/papercraft/core/ui/button_normal.png",
+      "category": "ui",
+      "role": "普通按钮",
+      "status": "planned",
+      "generation": "ui_component",
+      "requiredFor": "global_ui"
+    },
+    {
+      "id": "ui_button_hover",
+      "path": "assets/papercraft/core/ui/button_hover.png",
+      "category": "ui",
+      "role": "悬停按钮",
+      "status": "planned",
+      "generation": "reference_edit",
+      "requiredFor": "global_ui"
+    },
+    {
+      "id": "ui_button_pressed",
+      "path": "assets/papercraft/core/ui/button_pressed.png",
+      "category": "ui",
+      "role": "按下按钮",
+      "status": "planned",
+      "generation": "reference_edit",
+      "requiredFor": "global_ui"
+    },
+    {
+      "id": "ui_button_disabled",
+      "path": "assets/papercraft/core/ui/button_disabled.png",
+      "category": "ui",
+      "role": "禁用按钮",
+      "status": "planned",
+      "generation": "reference_edit",
+      "requiredFor": "global_ui"
+    },
+    {
+      "id": "ui_dialogue_panel",
+      "path": "assets/papercraft/core/ui/dialogue_panel.png",
+      "category": "ui",
+      "role": "对话框",
+      "status": "planned",
+      "generation": "ui_component",
+      "requiredFor": "vertical_slice"
+    },
+    {
+      "id": "ui_detail_card",
+      "path": "assets/papercraft/core/ui/detail_card.png",
+      "category": "ui",
+      "role": "星图碎片详情卡",
+      "status": "planned",
+      "generation": "ui_component",
+      "requiredFor": "global_ui"
+    },
+    {
+      "id": "ui_pause_tabs",
+      "path": "assets/papercraft/core/ui/pause_tabs.png",
+      "category": "ui",
+      "role": "暂停菜单纸质标签页",
+      "status": "planned",
+      "generation": "ui_component",
+      "requiredFor": "global_ui"
+    },
+    {
+      "id": "ui_backpack_notebook",
+      "path": "assets/papercraft/core/ui/backpack_notebook.png",
+      "category": "ui",
+      "role": "背包剪贴簿",
+      "status": "planned",
+      "generation": "ui_component",
+      "requiredFor": "global_ui"
+    },
+    {
+      "id": "ui_star_shard_tracing_paper",
+      "path": "assets/papercraft/core/ui/star_shard_tracing_paper.png",
+      "category": "ui",
+      "role": "星图描图纸碎片",
+      "status": "planned",
+      "generation": "ui_component",
+      "requiredFor": "global_ui"
+    }
+  ]
+}
