@@ -7,7 +7,7 @@
       "path": "assets/papercraft/core/references/ref_material_board.png",
       "category": "reference",
       "role": "固定纸张纹理板",
-      "status": "planned",
+      "status": "ready",
       "generation": "reference_board",
       "requiredFor": "golden_reference"
     },
@@ -15,29 +15,31 @@
       "id": "ref_character_standard",
       "path": "assets/papercraft/core/references/ref_character_standard.png",
       "category": "reference",
-      "role": "标准整片纸偶",
-      "status": "planned",
+      "role": "标准异常整片纸偶",
+      "status": "ready",
       "generation": "reference_edit",
       "requiredFor": "golden_reference",
-      "notes": "优先以冯婶和现有旅店气氛板锁定角色纸纹、边缘和阴影"
+      "notes": "已冻结 Round 03 v04：铃铛花眼睛、深蓝紫披风式纸片、粗白立牌描边、围裙铅笔、钥匙和空白登记簿；用于锁定角色异常化上限与纸牌立牌轮廓"
     },
     {
       "id": "ref_inn_facade",
       "path": "assets/papercraft/core/references/ref_inn_facade.png",
       "category": "reference",
       "role": "旅店建筑立面",
-      "status": "planned",
+      "status": "ready",
       "generation": "reference_edit",
-      "requiredFor": "golden_reference"
+      "requiredFor": "golden_reference",
+      "notes": "已冻结 Round 01 v02：登记簿旅店，旧书页与书脊转化为两层建筑结构；保留灰瓦屋檐、二楼三窗、居中大门、门环、门垫和褪色空白招牌"
     },
     {
       "id": "ref_street_modules",
       "path": "assets/papercraft/core/references/ref_street_modules.png",
       "category": "reference",
       "role": "市集街模块组",
-      "status": "planned",
+      "status": "ready",
       "generation": "reference_edit",
-      "requiredFor": "golden_reference"
+      "requiredFor": "golden_reference",
+      "notes": "已冻结 Round 01 v02：灰白卡纸碎石道路，保留 5 tile 宽街道逻辑、左右 2 tile 抬高石板人行道、中心 1 tile 深色排水暗沟、直线段、边缘段、转角和 T 字接口；用于锁定道路与石板模块可拼装性"
     },
     {
       "id": "ref_awakening_collage",
@@ -53,18 +55,20 @@
       "path": "assets/papercraft/core/references/ref_star_map.png",
       "category": "reference",
       "role": "纸工星图",
-      "status": "planned",
+      "status": "ready",
       "generation": "ui_component",
-      "requiredFor": "golden_reference"
+      "requiredFor": "golden_reference",
+      "notes": "已冻结 Round 02 base v02：完整未切割的描图纸 / 烟灰银点四芒星母图。后续星图碎片必须从该母图本地切割生成，不能直接生成散落碎片"
     },
     {
       "id": "ref_ui_components",
       "path": "assets/papercraft/core/references/ref_ui_components.png",
       "category": "reference",
       "role": "UI 组件样例",
-      "status": "planned",
+      "status": "ready",
       "generation": "ui_component",
-      "requiredFor": "golden_reference"
+      "requiredFor": "golden_reference",
+      "notes": "已冻结 Round 01 上排 04：登记簿旅店 / 书脊装订方向。用于锁定按钮、对话框、背包剪贴簿和卡槽模块；星图界面另行探索，不由本参考冻结"
     },
     {
       "id": "material_kraft",

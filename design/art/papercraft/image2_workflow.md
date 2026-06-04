@@ -72,13 +72,15 @@ no smooth vector edges, no plastic miniature look
 ### 3.4 UI 组件模板
 
 ```text
-papercraft UI component for a 2D RPG,
-hand-cut layered cardstock, subtle torn-paper edge, readable empty center,
+papercraft UI component for a 2D RPG, based on the frozen registration-ledger UI direction,
+old guest-book pages, book spine hinges, folded page corners, brass rivets, paper tabs,
+hand-cut layered cardstock, readable low-texture empty center,
 single top-left light source, restrained right-bottom shadow,
-[button / dialogue frame / notebook slot / paper shard description],
+[button / dialogue frame / backpack notebook slot / ledger card slot description],
 isolated on transparent background,
 no words, no letters, no symbols, no watermark,
-clear silhouette and strong state readability at small size
+clear silhouette and strong state readability at small size,
+do not include star-map-specific motifs unless producing the later ref_star_map asset
 ```
 
 ### 3.5 异常拼贴模板
@@ -92,16 +94,36 @@ preserve a clear focal point and an empty subtitle-safe area,
 no readable generated text, no watermark, no photorealistic gore
 ```
 
+### 3.6 星图母图模板
+
+星图碎片不得直接通过文本生成散落状态。必须先生成完整母图，再本地切割。
+
+```text
+one complete unbroken four-point compass star silhouette for a 2D RPG star map,
+made from shimmering papercraft cardstock,
+dark cardboard backing, tracing-paper star haze, tiny silver pinpoints,
+visible paper fibers, irregular scissor-cut outer edge,
+single top-left light source, restrained lower-right paper shadow,
+[material direction],
+intact single four-point star only,
+no cracks, no fragments, no seam lines,
+no readable text, no letters, no numbers, no symbols, no watermark,
+no characters, no franchise elements, no smooth vector edges,
+no glossy plastic, no photorealistic 3D render
+```
+
+母图冻结后，后续星图碎片使用本地 mask 或编辑工具从母图切出 12 块。相邻碎片必须共享同一条切线，确保可以回拼成完整四芒星。
+
 ## 4. 黄金参考组生成
 
 按以下顺序生成：
 
 1. `ref_material_board`：先锁定材质，不包含角色或建筑。
-2. `ref_character_standard`：建议使用冯婶，已有气氛板可作参考。
-3. `ref_inn_facade`：验证建筑层叠、屋瓦、窗框和阴影。
-4. `ref_street_modules`：验证道路模块可拼装性。
-5. `ref_ui_components`：验证小尺寸可读性。
-6. `ref_star_map`：验证外层 UI 与世界场景属于同一视觉体系。
+2. `ref_character_standard`：已冻结为 Round 03 v04 的植物接待员式异常整片纸偶。后续角色优先从该图继承粗白立牌描边、深蓝紫大形、铃铛花眼睛、线绳钥匙和空白登记簿等语言；若制作普通居民，可降低非人体强度，但不要回到写实人体插画。
+3. `ref_inn_facade`：已冻结为 Round 01 v02 的登记簿旅店。后续建筑优先从该图继承“场所身份锚点转化为建筑结构”的语言：旧书页、书脊、折页、装订带、门窗屋檐和纸层阴影共同构成可玩的建筑立面。制作其他建筑时可以替换身份锚点，但必须保留入口、窗、屋檐、层级、拼装边界和缩小后的剪影可读性。
+4. `ref_street_modules`：已冻结为 Round 01 v02 的灰卡碎石道路模块。后续道路、石板和人行道资产优先继承该图的 5 tile 宽街道逻辑、左右 2 tile 抬高人行道、中心 1 tile 深色排水暗沟、直线/边缘/转角/T 字接口、灰白卡纸碎石密度和克制的固定件。
+5. `ref_ui_components`：已冻结为 Round 01 上排 04 的登记簿旅店 / 书脊装订方向。本参考只锁定按钮、对话框、背包剪贴簿和卡槽模块：旧住客登记簿展开页、书脊装订、折角纸页、铜钉、浅网格卡槽和空白票据。星图界面不由本参考冻结。
+6. `ref_star_map`：已冻结为 Round 02 base v02 的完整描图纸 / 烟灰银点四芒星母图。后续星图碎片必须从该母图本地切割为 12 块，确保碎片能合理拼回同一个四芒星；不得直接生成散落碎片作为正式拼合依据。
 7. `ref_awakening_collage`：最后增加超现实强度。
 
 黄金参考图一旦冻结：

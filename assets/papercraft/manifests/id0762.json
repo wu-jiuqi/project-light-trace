@@ -10,7 +10,8 @@
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "vertical_slice",
-      "variants": ["straight", "edge_left", "edge_right", "corner"]
+      "variants": ["straight", "edge_left", "edge_right", "corner", "t_junction"],
+      "notes": "基于 ref_street_modules：灰白卡纸碎石主路、左右 2 tile 抬高石板人行道、中心 1 tile 深色排水暗沟；所有变体必须保持暗沟连续和网格接口对齐"
     },
     {
       "id": "id0762_env_inn_facade",
