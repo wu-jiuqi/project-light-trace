@@ -51,21 +51,20 @@ No readable text, logos, watermark, gore, smooth vector edges, plastic toy look,
 |---|---|---|---|
 | v01 | assets/papercraft/core/references/candidates/awakening_collage_fresh_20260604/awakening_collage_fresh_v01.png | 保留 | 侵蚀逻辑清楚，边界雾化明显；舞台边框较弱 |
 | v02 | assets/papercraft/core/references/candidates/awakening_collage_fresh_20260604/awakening_collage_fresh_v02.png | 保留 | 彩色/灰白比例和中心雕像关系稳定；纸板舞台感更强 |
-| v03 | assets/papercraft/core/references/candidates/awakening_collage_fresh_20260604/awakening_collage_fresh_v03.png | 当前 draft | 立体书结构、底部留白、灰白占比和小镇可读性最接近本轮目标 |
+| v03 | assets/papercraft/core/references/candidates/awakening_collage_fresh_20260604/awakening_collage_fresh_v03.png | 选定 | 立体书结构、底部留白、灰白占比和小镇可读性最接近本轮目标 |
 
 ## 当前文件
 
 - 临时候选板：`assets/papercraft/core/references/candidates/awakening_collage_fresh_20260604/awakening_collage_fresh_contact_sheet_partial.png`
-- 当前 draft：`assets/papercraft/core/references/ref_awakening_collage.png`
+- 已冻结参考：`assets/papercraft/core/references/ref_awakening_collage.png`
 
-## 未完成项
+## 选定结论
 
-- 用户要求 10 张不同风格候选；本轮内置图像生成服务在第 4 张开始持续限流/服务端失败，目前只完成 3 张 fresh 候选。
-- 服务恢复后继续从 v04 补齐到 v10，并重新生成完整 contact sheet。
+用户选择 v03 作为本轮方向。原计划继续生成 10 张不同风格候选，但在 v03 已被选定后，不再将补齐候选数量作为阻塞项。后续应基于 v03 做局部编辑和演出模块扩展，而不是重新发散整体风格。
 
 ## QA
 
 - [x] 已按 `qa_checklist.md` 检查非空、焦点、字幕安全区和核心叙事。
-- [ ] 已完成 10 张候选。
-- [ ] 已更新清单状态。
-- [ ] 已运行 `npm run validate:papercraft`。
+- [x] 已根据用户选择冻结 v03。
+- [x] 已更新清单状态。
+- [x] 已运行 `npm run validate:papercraft`。

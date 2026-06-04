@@ -46,9 +46,10 @@
       "path": "assets/papercraft/core/references/ref_awakening_collage.png",
       "category": "reference",
       "role": "觉醒拼贴演出",
-      "status": "planned",
+      "status": "ready",
       "generation": "effect_composite",
-      "requiredFor": "golden_reference"
+      "requiredFor": "golden_reference",
+      "notes": "已冻结 fresh 20260604 v03：立体书/纸板舞台式 #0762 小镇过场，约 65% 灰白遗忘区域侵蚀约 35% 彩色生命区域；彩色必须落在红瓦、蓝天白云、绿色植物、黄色炉光、紫色音符纸片等具体物件上；底部保留字幕安全区"
     },
     {
       "id": "ref_star_map",
@@ -75,7 +76,7 @@
       "path": "assets/papercraft/core/materials/kraft.png",
       "category": "material",
       "role": "牛皮纸纹理",
-      "status": "planned",
+      "status": "ready",
       "generation": "reference_edit",
       "requiredFor": "golden_reference"
     },
@@ -84,7 +85,7 @@
       "path": "assets/papercraft/core/materials/gray_card.png",
       "category": "material",
       "role": "灰白卡纸纹理",
-      "status": "planned",
+      "status": "ready",
       "generation": "reference_edit",
       "requiredFor": "golden_reference"
     },
@@ -93,7 +94,7 @@
       "path": "assets/papercraft/core/materials/book_page.png",
       "category": "material",
       "role": "旧书页纹理",
-      "status": "planned",
+      "status": "ready",
       "generation": "reference_edit",
       "requiredFor": "golden_reference"
     },
@@ -102,7 +103,7 @@
       "path": "assets/papercraft/core/materials/fiber_paper.png",
       "category": "material",
       "role": "粗纤维纸纹理",
-      "status": "planned",
+      "status": "ready",
       "generation": "reference_edit",
       "requiredFor": "golden_reference"
     },
@@ -111,7 +112,7 @@
       "path": "assets/papercraft/core/materials/tracing_paper.png",
       "category": "material",
       "role": "描图纸纹理",
-      "status": "planned",
+      "status": "ready",
       "generation": "reference_edit",
       "requiredFor": "golden_reference"
     },
@@ -120,7 +121,7 @@
       "path": "assets/papercraft/core/materials/foil.png",
       "category": "material",
       "role": "银箔纸纹理",
-      "status": "planned",
+      "status": "ready",
       "generation": "reference_edit",
       "requiredFor": "golden_reference"
     },

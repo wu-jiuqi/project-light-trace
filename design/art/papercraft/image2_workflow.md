@@ -94,6 +94,20 @@ preserve a clear focal point and an empty subtitle-safe area,
 no readable generated text, no watermark, no photorealistic gore
 ```
 
+`ref_awakening_collage` 方向的进入世界 / 觉醒过场使用更具体的叙事模板：
+
+```text
+wide 16:9 surreal hand-cut papercraft cutscene for a 2D RPG,
+front-facing or slightly elevated paper theater / pop-up book view of the #0762 small town,
+about 65% gray lifeless desaturated town invading about 35% colorful living town,
+gray invasion edge made from jagged torn paper, ash ink, gray card fragments and soft tracing-paper fog,
+include readable town anchors: gray-eaves guest-ledger inn, stone street, central drainage channel, plaza white statue,
+color must live on concrete objects: red roof tiles, blue sky and white clouds, green plants, warm yellow bakery light, purple music-note scraps,
+preserve a bottom 18% low-contrast subtitle-safe paper band,
+strange and theatrical, but the meaning must remain clear: gray oblivion is swallowing a living colorful town,
+no readable generated text, no logos, no watermark, no franchise elements
+```
+
 ### 3.6 星图母图模板
 
 星图碎片不得直接通过文本生成散落状态。必须先生成完整母图，再本地切割。
@@ -124,7 +138,7 @@ no glossy plastic, no photorealistic 3D render
 4. `ref_street_modules`：已冻结为 Round 01 v02 的灰卡碎石道路模块。后续道路、石板和人行道资产优先继承该图的 5 tile 宽街道逻辑、左右 2 tile 抬高人行道、中心 1 tile 深色排水暗沟、直线/边缘/转角/T 字接口、灰白卡纸碎石密度和克制的固定件。
 5. `ref_ui_components`：已冻结为 Round 01 上排 04 的登记簿旅店 / 书脊装订方向。本参考只锁定按钮、对话框、背包剪贴簿和卡槽模块：旧住客登记簿展开页、书脊装订、折角纸页、铜钉、浅网格卡槽和空白票据。星图界面不由本参考冻结。
 6. `ref_star_map`：已冻结为 Round 02 base v02 的完整描图纸 / 烟灰银点四芒星母图。后续星图碎片必须从该母图本地切割为 12 块，确保碎片能合理拼回同一个四芒星；不得直接生成散落碎片作为正式拼合依据。
-7. `ref_awakening_collage`：最后增加超现实强度。
+7. `ref_awakening_collage`：已冻结为 fresh 20260604 v03。后续演出模块优先继承“完整小镇先可读，再被灰白遗忘侵蚀”的逻辑；彩色必须落在具体物件上，底部保留字幕安全区，异常拼贴服务叙事而不是单独炫技。
 
 黄金参考图一旦冻结：
 
@@ -143,7 +157,9 @@ no glossy plastic, no photorealistic 3D render
 | 建筑生成完整街景 | 不能复用 | 重申 modular、isolated asset、no full scene |
 | 出现伪文字 | UI 和线索不可控 | 要求 no words、no letters；文字由 Godot 渲染 |
 | 纹理过密 | 缩小后噪声过大 | 降低纤维和撕边强度，重新检查缩略图 |
-| 拼贴演出压住字幕 | 影响叙事 | 明确 subtitle-safe area 和 focal point |
+| 拼贴演出压住字幕 | 影响叙事 | 明确 bottom 18% subtitle-safe area、低对比纸纹和清晰 focal point |
+| 彩色变成抽象色块 | 无法传达“颜色回到世界物件” | 指定红瓦、蓝天白云、绿色植物、黄色炉光、紫色音符等具体承载物 |
+| 异常拼贴喧宾夺主 | 玩家读不出事件逻辑 | 先描述正常小镇，再描述灰白侵蚀的方向、比例和边界 |
 
 ## 6. Image2 能力边界
 
