@@ -95,15 +95,14 @@
       "requiredFor": "id0762_full"
     },
     {
-      "id": "id0762_character_player_idle_down",
-      "path": "assets/papercraft/fragments/id0762/characters/player_idle_down.png",
+      "id": "id0762_character_player",
+      "path": "assets/papercraft/player/player.png",
       "category": "character",
-      "role": "玩家向下基础纸偶",
-      "status": "planned",
+      "role": "玩家人物立绘：星形纸面具、深色披风、发光核心、链条和米白立牌描边。",
+      "status": "ready",
       "generation": "reference_edit",
       "requiredFor": "vertical_slice",
-      "variants": ["idle_up", "idle_left", "idle_right", "walk_down", "walk_up", "walk_left", "walk_right"],
-      "notes": "左肩信使包和信封角必须保留；左右方向不可镜像"
+      "notes": "当前阶段只生产人物立绘；128x192透明PNG，脚底锚点位于底边中心，保留厚白/米白立牌描边。外围独立轨道碎片已移除；纸片文字只作为缩小后不可读的材质纹理，不承担运行时阅读信息。"
     },
     {
       "id": "id0762_character_innkeeper_idle_down",
