@@ -52,7 +52,7 @@ func _ready() -> void:
 
 func _initialize_fragments() -> void:
 	fragments = [
-		FragmentData.new("0001", "启程之镇", "晨露镇", "「白日依山尽」", "晨曦之印", 1, false, "res://scenes/fragments/fragment_0001.tscn"),
+		FragmentData.new("0001", "启程之镇", "晨曦镇", "「白日依山尽」", "晨曦之印", 1, false, "res://scenes/fragments/fragment_0001.tscn", true),
 		FragmentData.new("0002", "黄昏驿站", "落霞驿站", "「黄河入海流」", "归途之印", 1, false, "res://scenes/fragments/fragment_0002.tscn"),
 		FragmentData.new("0003", "月下神社", "玉兔神社", "「举头望明月」", "月光之印", 1, false, "res://scenes/fragments/fragment_0003.tscn"),
 		FragmentData.new("0004", "工坊物语", "齿轮工坊", "「匠心」", "匠魂之印", 2, false, "res://scenes/fragments/fragment_0004.tscn"),

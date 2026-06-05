@@ -44,13 +44,13 @@ window/stretch/aspect="expand"
 
 enabled=PackedStringArray("res://addons/npc_library_tool/plugin.cfg")
 
-[html5]
-
-shell/head/include="<style>body{margin:0;padding:0;background:#0d0d1f;overflow:hidden}#canvas{display:block}</style>"
-
 [gui]
 
 theme/custom_font="res://assets/fonts/NotoSansSC-VF.ttf"
+
+[html5]
+
+shell/head/include="<style>body{margin:0;padding:0;background:#0d0d1f;overflow:hidden}#canvas{display:block}</style>"
 
 [input]
 
