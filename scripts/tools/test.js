@@ -5,7 +5,7 @@
 const fs = require('fs');
 const http = require('http');
 const path = require('path');
-const { createServer } = require('./serve.js');
+const { BUILD_DIR, createServer } = require('./serve.js');
 
 const PROJECT_DIR = path.resolve(__dirname, '..', '..');
 let failures = 0;
@@ -28,7 +28,7 @@ function walk(directory) {
 }
 
 function checkJsonFiles() {
-    const roots = ['resources', path.join('design', 'npcs', 'knowledge'), 'AI资源库'];
+    const roots = ['resources', path.join('design', 'id0762', 'npcs', 'knowledge'), 'AI资源库'];
     for (const root of roots) {
         for (const file of walk(path.join(PROJECT_DIR, root)).filter(name => name.endsWith('.json'))) {
             try {
@@ -47,7 +47,7 @@ function checkJsonFiles() {
     }
 
     const runtimeKnowledge = path.join(PROJECT_DIR, 'resources', 'npc_knowledge');
-    const designKnowledge = path.join(PROJECT_DIR, 'design', 'npcs', 'knowledge');
+    const designKnowledge = path.join(PROJECT_DIR, 'design', 'id0762', 'npcs', 'knowledge');
     for (const file of walk(runtimeKnowledge).filter(name => name.endsWith('.json'))) {
         const counterpart = path.join(designKnowledge, path.basename(file));
         check(fs.existsSync(counterpart), `知识库设计镜像存在: ${path.basename(file)}`);
@@ -176,7 +176,14 @@ function request(port, requestPath, options = {}) {
 
 async function checkServer() {
     const oldKey = process.env.DEEPSEEK_API_KEY;
+    const indexPath = path.join(BUILD_DIR, 'index.html');
+    const buildDirExisted = fs.existsSync(BUILD_DIR);
+    const createdIndex = !fs.existsSync(indexPath);
     delete process.env.DEEPSEEK_API_KEY;
+    if (createdIndex) {
+        fs.mkdirSync(BUILD_DIR, { recursive: true });
+        fs.writeFileSync(indexPath, '<!doctype html><title>test</title>', 'utf8');
+    }
     const server = createServer();
     await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
     const port = server.address().port;
@@ -197,6 +204,12 @@ async function checkServer() {
         check(proxy.status === 503, '未配置服务端 Key 时代理明确拒绝请求');
     } finally {
         await new Promise(resolve => server.close(resolve));
+        if (createdIndex) {
+            fs.rmSync(indexPath, { force: true });
+            if (!buildDirExisted) {
+                fs.rmSync(BUILD_DIR, { recursive: true, force: true });
+            }
+        }
         if (oldKey === undefined) delete process.env.DEEPSEEK_API_KEY;
         else process.env.DEEPSEEK_API_KEY = oldKey;
     }
