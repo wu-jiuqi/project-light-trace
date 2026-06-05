@@ -1,13 +1,32 @@
 {
-  "fragment_id": "0001",
-  "fragment_name": "启程之镇",
-  "total_items": 61,
-  "priority_count": {
-    "P0": 28,
-    "P1": 22,
-    "P2": 11
+  "schemaVersion": 1,
+  "scope": "0001",
+  "fragment": {
+    "id": "0001",
+    "name": "启程之镇"
   },
-  "items": [
+  "sourceDocument": "design/items/0001/0001_物品清单.md",
+  "lastSynced": "2026-06-05",
+  "summary": {
+    "totalAssets": 52,
+    "priorityCount": {
+      "P0": 30,
+      "P1": 20,
+      "P2": 2
+    },
+    "categoryCount": {
+      "environment": 14,
+      "fx": 7,
+      "prop": 29,
+      "ui": 2
+    },
+    "requiredForCount": {
+      "0001_full": 21,
+      "vertical_slice": 31
+    },
+    "note": "按清单正文唯一资产 ID 生成；与 Markdown 页首统计保持一致。"
+  },
+  "assets": [
     {
       "id": "0001_env_plaza_ground",
       "path": "assets/papercraft/fragments/0001/environment/0001_env_plaza_ground_straight.png",
@@ -16,8 +35,14 @@
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "vertical_slice",
-      "notes": "主色#C8C4BC，灰缝#A09B94。水泥勾缝形成网格纹理，32px下可通过网格辨识。玩家脚印贴花承接面。",
-      "variants": ["0001_env_plaza_ground_straight", "0001_env_plaza_ground_edge", "0001_env_plaza_ground_corner"]
+      "priority": "P0",
+      "sourceLine": 34,
+      "variants": [
+        "0001_env_plaza_ground_straight",
+        "0001_env_plaza_ground_edge",
+        "0001_env_plaza_ground_corner"
+      ],
+      "notes": "主色#C8C4BC，灰缝#A09B94。水泥勾缝形成网格纹理，32px下可通过网格辨识。玩家脚印贴花承接面。"
     },
     {
       "id": "0001_env_plaza_fountain",
@@ -27,6 +52,8 @@
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "sourceLine": 40,
       "notes": "主体#C0BCB4，水面#D8D4CC。tracing_paper叠加水面波动。32px下通过'带竖线的圆'辨识。"
     },
     {
@@ -37,26 +64,32 @@
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "0001_full",
+      "priority": "P1",
+      "sourceLine": 42,
       "notes": "主色#A89880牛皮纸木纹，靠背三条横木。32px下通过'三条横线'辨识。坐面中央磨损偏淡。"
     },
     {
       "id": "0001_prop_sundial_a",
-      "path": "assets/papercraft/fragments/0001/prop/0001_prop_sundial_a.png",
+      "path": "assets/papercraft/fragments/0001/props/0001_prop_sundial_a.png",
       "category": "prop",
       "role": "观测点A日晷——白色大理石，投下12°阴影。核心解密道具。",
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "sourceLine": 48,
       "notes": "白石#E8E0D4，晷针铜色#B8860B。石面有人为刮擦痕迹（3条浅划痕）。底座刻字'TP-2077-03-A'。32px下通过'半圆+放射线'辨识。"
     },
     {
       "id": "0001_prop_newspaper",
-      "path": "assets/papercraft/fragments/0001/prop/0001_prop_newspaper.png",
+      "path": "assets/papercraft/fragments/0001/props/0001_prop_newspaper.png",
       "category": "prop",
       "role": "广场长椅上的折叠报纸——日期2077年3月14日（零时前一天），暗线B时间锚点道具",
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "0001_full",
+      "priority": "P1",
+      "sourceLine": 49,
       "notes": "米黄#E8E0CC，book_page材质。禁止可读文字——标题为模糊墨块#908878。右下角烫痕。32px下通过'带黑条的米色方块'辨识。"
     },
     {
@@ -67,6 +100,8 @@
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "sourceLine": 62,
       "notes": "深灰石#8A8278，齿轮窗（纸艺切割圆形+齿边）。入口拱形门洞宽2tiles。屋顶缓坡暗灰#706860。32px下通过'高矩形+顶部圆形时钟'辨识。"
     },
     {
@@ -77,6 +112,8 @@
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "0001_full",
+      "priority": "P1",
+      "sourceLine": 71,
       "notes": "中灰石#908880，每级高4px深6px。第7级视觉上与其他完全一致——无碰撞由Godot层面实现。32px下通过'锯齿形轮廓'辨识。"
     },
     {
@@ -87,96 +124,116 @@
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "sourceLine": 73,
       "notes": "深灰地面#7A7268，石壁#807870。地面日晷图案#686058直径28px。4-5个天窗光斑#C0B8A8。碰撞：左右墙4px、上边界128px、入口底部留空。"
     },
     {
       "id": "0001_prop_clocktower_clock",
-      "path": "assets/papercraft/fragments/0001/prop/0001_prop_clocktower_clock.png",
+      "path": "assets/papercraft/fragments/0001/props/0001_prop_clocktower_clock.png",
       "category": "prop",
       "role": "钟楼顶端时钟——永远指向06:12，世界的视觉重心",
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "sourceLine": 79,
       "notes": "钟面#E0D8C8旧书页质感。时针指向6偏右0.5°。foil铜色边框#B8860B（<5%面积）。32px下通过'圆形+十字指针'辨识。"
     },
     {
       "id": "0001_prop_doorframe_inscription",
-      "path": "assets/papercraft/fragments/0001/prop/0001_prop_doorframe_inscription.png",
+      "path": "assets/papercraft/fragments/0001/props/0001_prop_doorframe_inscription.png",
       "category": "prop",
       "role": "钟楼入口门框刻字——解密核心线索",
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "sourceLine": 81,
       "notes": "手刻风格刻痕#706058。内容为模糊书写痕迹（本地化字段控制文案）。走近<100px触发放大。"
     },
     {
       "id": "0001_prop_sundial_b",
-      "path": "assets/papercraft/fragments/0001/prop/0001_prop_sundial_b.png",
+      "path": "assets/papercraft/fragments/0001/props/0001_prop_sundial_b.png",
       "category": "prop",
       "role": "观测点B日晷——青铜材质，钟楼底部东侧。指针可手动旋转（解密交互）。",
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "sourceLine": 83,
       "notes": "暗铜#A08060，氧化斑绿色#6B8B6B。手指擦痕#B89870（暗示最近有人碰过）。指针旋转交互——需支持Godot交互检测。"
     },
     {
       "id": "0001_prop_clocktower_secret_door",
-      "path": "assets/papercraft/fragments/0001/prop/0001_prop_clocktower_secret_door.png",
+      "path": "assets/papercraft/fragments/0001/props/0001_prop_clocktower_secret_door.png",
       "category": "prop",
       "role": "钟楼底层暗门——解密成功后开启，通往暗室",
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "sourceLine": 85,
       "notes": "与地板同色#8A8278，四边1px暗缝。双状态：关闭（与地板纹理一致）/开启（石板滑开，暗洞#3A3228）。开启动画由FX系统控制。"
     },
     {
       "id": "0001_prop_chamber_stone_platform",
-      "path": "assets/papercraft/fragments/0001/prop/0001_prop_chamber_stone_platform.png",
+      "path": "assets/papercraft/fragments/0001/props/0001_prop_chamber_stone_platform.png",
       "category": "prop",
       "role": "暗室中央石台——晨曦之印的放置基座",
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "sourceLine": 87,
       "notes": "深灰石#706860，顶面略光滑#807870。手刻序列'12-24-36-48-66'。中央圆形凹陷12px。32px下通过'方块+圆形亮点'辨识。"
     },
     {
       "id": "0001_prop_dawn_seal",
-      "path": "assets/papercraft/fragments/0001/prop/0001_prop_dawn_seal.png",
+      "path": "assets/papercraft/fragments/0001/props/0001_prop_dawn_seal.png",
       "category": "prop",
       "role": "晨曦之印——碎片0001的源印，铜色日晷徽章",
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "sourceLine": 89,
       "notes": "铜色#B8860B，浮雕日晷剪影+放射线刻度。foil边缘光#D4A020（≤10%面积）。纸艺折痕纹理。三状态：不存在/显现中/脉冲光晕。"
     },
     {
       "id": "0001_prop_handwritten_note",
-      "path": "assets/papercraft/fragments/0001/prop/0001_prop_handwritten_note.png",
+      "path": "assets/papercraft/fragments/0001/props/0001_prop_handwritten_note.png",
       "category": "prop",
       "role": "暗线A种子——暗室石台抽屉中的手写便笺。引入'建造者'和'她不是工具'概念。",
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "sourceLine": 91,
       "notes": "暖旧米黄#E8DCC0，蓝黑墨迹#203040（模糊不可读）。折叠态14×14px。透过背面可见'03''15'数字。禁止可读文字——用墨迹块暗示。"
     },
     {
       "id": "0001_prop_chamber_chalk_drawing",
-      "path": "assets/papercraft/fragments/0001/prop/0001_prop_chamber_chalk_drawing.png",
+      "path": "assets/papercraft/fragments/0001/props/0001_prop_chamber_chalk_drawing.png",
       "category": "prop",
       "role": "暗室北侧石壁粉笔涂鸦——人站在日晷前，极淡极难发现",
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "0001_full",
+      "priority": "P1",
+      "sourceLine": 93,
       "notes": "极淡白色粉笔线#C8C0B0（透明度~30%）。简笔画人形+半圆日晷。右下角手掌抹痕8×6px。纯视觉发现——无提示。"
     },
     {
       "id": "0001_prop_chamber_crack",
-      "path": "assets/papercraft/fragments/0001/prop/0001_prop_chamber_crack.png",
+      "path": "assets/papercraft/fragments/0001/props/0001_prop_chamber_crack.png",
       "category": "prop",
       "role": "暗室石台下方地面裂缝——透出微弱彩色光，预告#0762碎片",
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "0001_full",
+      "priority": "P1",
+      "sourceLine": 95,
       "notes": "Z形不规则裂缝1-2px宽（变化范围），长18px（最大范围）。透出暖色光#FFE0C0→#FFC080渐变（~15%不透明度）。tracing_paper叠加层。在0001中不可打开。"
     },
     {
@@ -187,6 +244,8 @@
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "sourceLine": 101,
       "notes": "石壁#5A5248，地面#4A4238，中央打磨区36×28px #504838。天花板48px（压迫感）。门缝光条#D4B880宽1-2px。碰撞：左右墙4px、上墙含门缝留空24-32px。"
     },
     {
@@ -197,8 +256,13 @@
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "0001_full",
-      "notes": "中灰#B0A898，碎石多边形拼贴。纵向双线车辙#C0B8A8。straight/corner两个变体。通过'不平整纹理'与广场石板区分。",
-      "variants": ["0001_env_market_ground_straight", "0001_env_market_ground_corner"]
+      "priority": "P1",
+      "sourceLine": 114,
+      "variants": [
+        "0001_env_market_ground_straight",
+        "0001_env_market_ground_corner"
+      ],
+      "notes": "中灰#B0A898，碎石多边形拼贴。纵向双线车辙#C0B8A8。straight/corner两个变体。通过'不平整纹理'与广场石板区分。"
     },
     {
       "id": "0001_env_bakery",
@@ -208,36 +272,44 @@
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "0001_full",
+      "priority": "P1",
+      "sourceLine": 120,
       "notes": "暖灰白#C8C0B0。场所锚点：食谱书页→屋脊折痕；烤炉砖拱→拱形门楣；麦穗→墙面装饰纹。拱形门楣+麦穗纹+橱窗。"
     },
     {
       "id": "0001_prop_bakery_window",
-      "path": "assets/papercraft/fragments/0001/prop/0001_prop_bakery_window.png",
+      "path": "assets/papercraft/fragments/0001/props/0001_prop_bakery_window.png",
       "category": "prop",
       "role": "面包店橱窗——永远7个面包，暗示'世界没有消耗概念'",
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "0001_full",
+      "priority": "P1",
+      "sourceLine": 129,
       "notes": "玻璃#D8D4C8半透明（40%），木框#A08870。内部7个面包#C8B898永远整齐排列。32px下通过'横条中的规则圆点'辨识。"
     },
     {
       "id": "0001_prop_sundial_c",
-      "path": "assets/papercraft/fragments/0001/prop/0001_prop_sundial_c.png",
+      "path": "assets/papercraft/fragments/0001/props/0001_prop_sundial_c.png",
       "category": "prop",
       "role": "观测点C日晷——黑石材质，市集面包店橱窗前。暗线B刻字隐藏于底座背面。",
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "sourceLine": 131,
       "notes": "深暗灰#585048（近黑色），银色刻度#A09890对比度高。底座刻字'TP-2077-03-C'。32px下通过'近黑的圆'辨识。"
     },
     {
       "id": "0001_prop_sundial_c_inscription",
-      "path": "assets/papercraft/fragments/0001/prop/0001_prop_sundial_c_inscription.png",
+      "path": "assets/papercraft/fragments/0001/props/0001_prop_sundial_c_inscription.png",
       "category": "prop",
       "role": "日晷C底座背面刻字——暗线B植入点：'第3批测试 心理压力测试'",
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "0001_full",
+      "priority": "P2",
+      "sourceLine": 133,
       "notes": "钥匙划痕风格#404040（比黑石略浅10%）。'心理压力测试'后8px乱划痕区域。纯视觉发现无提示——暗线B种子。P2——可后期添加。"
     },
     {
@@ -248,6 +320,8 @@
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "sourceLine": 146,
       "notes": "近白#D8D4CC，垂直等距细凹线（间隔12px模拟档案柜抽屉）。外窗可见复制粘贴的室内。32px下通过'打格子的白方块'辨识。"
     },
     {
@@ -258,56 +332,68 @@
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "vertical_slice",
+      "priority": "P1",
+      "sourceLine": 155,
       "notes": "纯白墙面#E0DCD4，冷白光#F0ECE0天花板灯。陈技术所在位置——对话场景背景。32px下通过'亮暗交替的矩形墙'辨识。"
     },
     {
       "id": "0001_prop_lab_displays",
-      "path": "assets/papercraft/fragments/0001/prop/0001_prop_lab_displays.png",
+      "path": "assets/papercraft/fragments/0001/props/0001_prop_lab_displays.png",
       "category": "prop",
       "role": "实验室6块显示屏——3亮（淡蓝白界面）3暗（灰色反光）",
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "0001_full",
+      "priority": "P1",
+      "sourceLine": 161,
       "notes": "边框#D0CCC4，亮屏#C8E0F0，暗屏#989490。亮屏上有模糊UI布局#A0C8E0+文字行#90B8D0。双状态：正常/警报红光。"
     },
     {
       "id": "0001_prop_lab_console",
-      "path": "assets/papercraft/fragments/0001/prop/0001_prop_lab_console.png",
+      "path": "assets/papercraft/fragments/0001/props/0001_prop_lab_console.png",
       "category": "prop",
       "role": "解密实验室中央操作台——陈技术的工作台，内置触控板",
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "sourceLine": 163,
       "notes": "桌面#D8D0C4，桌腿#807868。触控板24×8px蓝灰#B0B0C0带指纹。双状态触控板：脚本模式淡蓝光条/#非脚本模式全暗。"
     },
     {
       "id": "0001_prop_sundial_d",
-      "path": "assets/papercraft/fragments/0001/prop/0001_prop_sundial_d.png",
+      "path": "assets/papercraft/fragments/0001/props/0001_prop_sundial_d.png",
       "category": "prop",
       "role": "观测点D日晷——灰岗岩材质，研究所门口左侧。上方有摄像头。",
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "sourceLine": 165,
       "notes": "中灰颗粒纹理#908880，轻微风化麻点#989088。暗铁色晷针#706860。底座'TP-2077-03-D'。32px下通过'带小点的灰圆+上方方块'辨识。"
     },
     {
       "id": "0001_prop_lab_camera_sundial",
-      "path": "assets/papercraft/fragments/0001/prop/0001_prop_lab_camera_sundial.png",
+      "path": "assets/papercraft/fragments/0001/props/0001_prop_lab_camera_sundial.png",
       "category": "prop",
       "role": "日晷D上方监控摄像头——红色指示灯闪烁，暗示玩家被观察",
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "0001_full",
+      "priority": "P1",
+      "sourceLine": 167,
       "notes": "深灰圆柱#686058，黑色镜头#302820。红色指示灯#FF4040（foil微量）。脉冲闪烁周期3秒。玩家观察日晷时闪烁加快。"
     },
     {
       "id": "0001_prop_lab_camera_door",
-      "path": "assets/papercraft/fragments/0001/prop/0001_prop_lab_camera_door.png",
+      "path": "assets/papercraft/fragments/0001/props/0001_prop_lab_camera_door.png",
       "category": "prop",
       "role": "研究所入口门上方的常规监控摄像头——蓝色指示灯",
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "0001_full",
+      "priority": "P2",
+      "sourceLine": 169,
       "notes": "与日晷D摄像头同外观——但指示灯为蓝色#4080D0。P2——可后期添加或与日晷D摄像头共用模型换色。"
     },
     {
@@ -318,46 +404,56 @@
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "sourceLine": 182,
       "notes": "半透明蓝#6088D0（40%不透明度），纵向能量线#80A8E0间隔12px。呼吸脉动6秒周期（Shader控制）。32px下通过'蓝色条纹面'辨识。"
     },
     {
       "id": "0001_prop_light_wall_pillar",
-      "path": "assets/papercraft/fragments/0001/prop/0001_prop_light_wall_pillar.png",
+      "path": "assets/papercraft/fragments/0001/props/0001_prop_light_wall_pillar.png",
       "category": "prop",
       "role": "光墙两端控制柱——屏幕显示边界稳定性数据",
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "0001_full",
+      "priority": "P1",
+      "sourceLine": 188,
       "notes": "深灰圆柱#686058高48px。顶端屏幕#80B0F0蓝色模糊字块。闪烁时闪现'containment breach probability: 0.03%'。"
     },
     {
       "id": "0001_prop_sundial_e_ruins",
-      "path": "assets/papercraft/fragments/0001/prop/0001_prop_sundial_e_ruins.png",
+      "path": "assets/papercraft/fragments/0001/props/0001_prop_sundial_e_ruins.png",
       "category": "prop",
       "role": "观测点E日晷残骸——被砸碎的白大理石日晷，碎片被排列指向光墙",
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "sourceLine": 190,
       "notes": "白大理石#E8E0D4。7-8块不规则碎片，最大弧形14px。碎片排列成行指向光墙。晷针断裂为两段。32px下通过'散落浅色小块'辨识。"
     },
     {
       "id": "0001_prop_boundary_floor_inscription",
-      "path": "assets/papercraft/fragments/0001/prop/0001_prop_boundary_floor_inscription.png",
+      "path": "assets/papercraft/fragments/0001/props/0001_prop_boundary_floor_inscription.png",
       "category": "prop",
       "role": "暗线C种子——光墙前石板地面刻字：'上一个你走到这里的时候，光墙是红色的。'",
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "0001_full",
+      "priority": "P1",
+      "sourceLine": 192,
       "notes": "刻字深灰#585048，笔画深浅不一（多次刻制）。横向一行48×7px。文案由本地化字段控制——在游戏纹理中为模糊刻痕。"
     },
     {
       "id": "0001_prop_patrol_vehicle",
-      "path": "assets/papercraft/fragments/0001/prop/0001_prop_patrol_vehicle.png",
+      "path": "assets/papercraft/fragments/0001/props/0001_prop_patrol_vehicle.png",
       "category": "prop",
       "role": "赵安保的自动巡逻车——停放在光墙旁。屏幕显示边界接触事件日志。",
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "0001_full",
+      "priority": "P1",
+      "sourceLine": 194,
       "notes": "深灰四轮电动车#686058。4个黑轮#383028。蓝色常亮警灯#6090F0（foil）。屏幕8×6px。32px下通过'带蓝点的四轮车'辨识。"
     },
     {
@@ -368,6 +464,8 @@
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "sourceLine": 207,
       "notes": "官方灰白#D0CCC4，格子状立面（公告栏概念）。对称式结构。金色门框和logo。32px下通过'带金色方块的规则灰方块'辨识。碰撞矩形(0,0)-(128,128)px，入口底部中央留空40-64px。"
     },
     {
@@ -378,26 +476,32 @@
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "0001_full",
+      "priority": "P1",
+      "sourceLine": 216,
       "notes": "高天花#C0B8B0，石柱#A09890，抛光地面#C8C0B0。讲台#B09880。电子屏和logo挂于正面。碰撞矩形(0,0)-(128,96)px，入口底部留空40-64px。"
     },
     {
       "id": "0001_prop_admin_logo",
-      "path": "assets/papercraft/fragments/0001/prop/0001_prop_admin_logo.png",
+      "path": "assets/papercraft/fragments/0001/props/0001_prop_admin_logo.png",
       "category": "prop",
       "role": "天枢公司金色logo——圆形徽章，六条放射星芒",
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "sourceLine": 222,
       "notes": "暗金箔纸#C0A860，直径16px。六条放射线#D4C080。左上箔纸高光#D8CC90（不超过10%面积）。32px下通过'金色圆+光芒'辨识。"
     },
     {
       "id": "0001_prop_admin_screen",
-      "path": "assets/papercraft/fragments/0001/prop/0001_prop_admin_screen.png",
+      "path": "assets/papercraft/fragments/0001/props/0001_prop_admin_screen.png",
       "category": "prop",
       "role": "行政中心大厅电子屏——循环播放万象介绍画面。第47秒闪过王主管家庭照片。",
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "0001_full",
+      "priority": "P1",
+      "sourceLine": 224,
       "notes": "边框#D0CCC4，显示区36×24px。循环3帧：城市全景/用户互动/天枢logo。第47秒插入照片帧#E0D0B0暖色调。Shader控制帧切换。"
     },
     {
@@ -408,6 +512,8 @@
       "status": "planned",
       "generation": "effect_composite",
       "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "sourceLine": 234,
       "notes": "tracing_paper材质，蓝色渐变3-4圈。中心#80B0F0→#6090D0→#4068A0→透明。最大直径40px，约0.6秒完成。Additive叠加。"
     },
     {
@@ -418,6 +524,8 @@
       "status": "planned",
       "generation": "effect_composite",
       "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "sourceLine": 236,
       "notes": "外景独立纹理：草地#90A870、树木#788860、远山#889098、天空#D0D8E0。色彩饱和度40-50%——唯一出现'颜色'的区域。Overlay叠加。"
     },
     {
@@ -428,6 +536,8 @@
       "status": "planned",
       "generation": "effect_composite",
       "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "sourceLine": 238,
       "notes": "石板滑动0.8秒，暖金光#D4B880从暗室透出渐变1.5秒，3-5个纸屑粒子#C0B8A8上升2秒。Replace+Additive混合。"
     },
     {
@@ -438,6 +548,8 @@
       "status": "planned",
       "generation": "effect_composite",
       "requiredFor": "0001_full",
+      "priority": "P1",
+      "sourceLine": 240,
       "notes": "橙色微光#E8A040，脉冲2次各0.4秒。指针向右偏移2px回弹（Shader位移参数）。Additive叠加。"
     },
     {
@@ -448,6 +560,8 @@
       "status": "planned",
       "generation": "effect_composite",
       "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "sourceLine": 242,
       "notes": "淡金微光#D4C080→稳定20%。3圈金色波纹每圈0.3秒。foil用于指针尖端（<5%）。Additive叠加。触发1.5秒后联动暗门开启。"
     },
     {
@@ -458,6 +572,8 @@
       "status": "planned",
       "generation": "effect_composite",
       "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "sourceLine": 244,
       "notes": "光晕半径16px，渐变#D4B880→#C0A060→透明。脉冲周期4秒（30%→50%→30%）。Additive叠加+预烘焙光贴图影响墙面。"
     },
     {
@@ -468,46 +584,56 @@
       "status": "planned",
       "generation": "effect_composite",
       "requiredFor": "0001_full",
+      "priority": "P1",
+      "sourceLine": 246,
       "notes": "正常屏幕#C8E0F0，乱码时#60D0F0蓝+#F04040红交替。不规则矩形乱码块。持续约1秒。Shader参数切换纹理。"
     },
     {
       "id": "0001_prop_linguide_datapad",
-      "path": "assets/papercraft/fragments/0001/prop/0001_prop_linguide_datapad.png",
+      "path": "assets/papercraft/fragments/0001/props/0001_prop_linguide_datapad.png",
       "category": "prop",
       "role": "林指导数据板——NPC持有道具。'脚本模式vs非脚本模式'的视觉信号。",
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "sourceLine": 256,
       "notes": "外壳#D0CCC4，屏幕#C8E0F0。背面小天枢logo（foil）。脚本模式手持亮屏/非脚本模式放口袋里暗屏。32px下通过'带蓝光的矩形'辨识。"
     },
     {
       "id": "0001_prop_chentechnology_console",
-      "path": "assets/papercraft/fragments/0001/prop/0001_prop_chentechnology_console.png",
+      "path": "assets/papercraft/fragments/0001/props/0001_prop_chentechnology_console.png",
       "category": "prop",
       "role": "陈技术触控板——操作台核心交互面。手指滑动轨迹短暂留痕。",
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "sourceLine": 257,
       "notes": "蓝灰表面#B0B0C0，指纹#A8A8B8。脚本模式边缘淡蓝光条#B0D0F0（1px）。手指拖痕#C0C0D0约0.5秒消失。"
     },
     {
       "id": "0001_prop_zhaosecurity_device",
-      "path": "assets/papercraft/fragments/0001/prop/0001_prop_zhaosecurity_device.png",
+      "path": "assets/papercraft/fragments/0001/props/0001_prop_zhaosecurity_device.png",
       "category": "prop",
       "role": "赵安保腰间合规度记录装置——黑色矩形，多色指示灯",
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "0001_full",
+      "priority": "P1",
+      "sourceLine": 258,
       "notes": "外壳#403828（8×5px），指示灯多色：待机蓝#6080D0/警告红闪#F04040。银色按钮#B0A8A0。foil指示灯（<5%）。"
     },
     {
       "id": "0001_prop_npc_badge",
-      "path": "assets/papercraft/fragments/0001/prop/0001_prop_npc_badge.png",
+      "path": "assets/papercraft/fragments/0001/props/0001_prop_npc_badge.png",
       "category": "prop",
       "role": "NPC胸牌——四个NPC通用的公司ID胸牌。暗线B核心植入点：'冥府协议合规审查·已通过'。",
       "status": "planned",
       "generation": "isolated_asset",
       "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "sourceLine": 259,
       "notes": "奶油白底#E8E0D0（10×6px）。顶部'天枢TRAINING'#505048，中部'TP-2077-03-0[1-4]'#404038，底部极小字'冥府协议合规审查·已通过'#908880（1.2px高）。银灰边框#B8B0A8。"
     },
     {
@@ -518,6 +644,8 @@
       "status": "planned",
       "generation": "ui_component",
       "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "sourceLine": 269,
       "notes": "64×8px，背景暗灰#585048，填充蓝渐变#6080D0→#80A0E0。<25%时变红#D04040。book_page底+tracing_paper填充。屏幕左上角。"
     },
     {
@@ -528,6 +656,8 @@
       "status": "planned",
       "generation": "ui_component",
       "requiredFor": "0001_full",
+      "priority": "P1",
+      "sourceLine": 271,
       "notes": "80×24px卡片，淡蓝灰底#D8DCD0。2-3行模糊字块#687888。底部滑入0.3秒，持续5秒。book_page染蓝调底+tracing_paper叠加。"
     }
   ]
