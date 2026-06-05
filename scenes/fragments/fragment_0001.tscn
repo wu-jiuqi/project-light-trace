@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://fragment0001"]
+
+[ext_resource type="Script" path="res://scripts/fragment/fragment_0001_state.gd" id="1_state"]
+[ext_resource type="PackedScene" path="res://scenes/characters/id0762/player.tscn" id="2_player"]
+
+[node name="Fragment0001" type="Node2D"]
+script = ExtResource("1_state")
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+position = Vector2(245, 340)
