@@ -72,8 +72,9 @@
 
 ### 3.2 角色
 
-- 普通角色主画布建议 `128x192px`。
-- 运行时显示尺寸约为 `32x48` 世界单位。
+- 当前生产阶段只输出人物立绘：单张完整角色、透明背景 PNG、白色 / 米白立牌描边。
+- 普通角色立绘主画布建议 `128x192px`。
+- 缩略审查仍参考 `32x48`，但当前不要求交付运行时缩略图。
 - 脚底锚点统一放在画布底边中央。
 - 碰撞盒只覆盖脚下区域，不随纸偶外轮廓扩大。
 - 非对称元素必须保留：例如玩家左肩信使包、围裙污渍、裙摆刺绣。
@@ -89,6 +90,8 @@
 
 ## 4. 整片纸偶动画
 
+当前阶段暂缓动画资产生产。角色只交付人物立绘，不制作 `walk`、`talk`、方向变体、独立阴影或姿态替换图。以下规则保留为后续接入运行时纸偶动画时使用。
+
 角色不拆肢体，不制作复杂骨骼。基础表现来自完整纸片的轻量变换：
 
 | 状态 | 表现 |
@@ -101,24 +104,21 @@
 | `panic` | 替换恐慌姿态纸片，提高小幅抖动频率 |
 | `awakened` | 替换觉醒姿态纸片，配合颜色恢复 Shader 和局部 FX |
 
-玩家需要 `down`、`up`、`left`、`right` 四个方向。NPC 只制作实际会在场景中出现的方向和剧情姿态。左右方向不能直接镜像。
+后续若恢复运行时纸偶动画：玩家需要 `down`、`up`、`left`、`right` 四个方向；NPC 只制作实际会在场景中出现的方向和剧情姿态。左右方向不能直接镜像。
 
-命名格式：
+当前人物立绘命名格式：
 
 ```text
-<character>_<pose>_<direction>.png
-<character>_<pose>_<direction>_sp_mask.png
+<npc_id>_<name>.png
 ```
 
 示例：
 
 ```text
-player_idle_left.png
-player_walk_right.png
-blacksmith_idle_down.png
-blacksmith_awakened_down.png
-blacksmith_idle_down_sp_mask.png
+npc_01_linguide.png
 ```
+
+后续若恢复姿态和方向资产，再使用 `<character>_<pose>_<direction>.png` 与 `<character>_<pose>_<direction>_sp_mask.png`。
 
 ## 5. 灰阶、残留色与觉醒
 
@@ -203,7 +203,7 @@ blacksmith_idle_down_sp_mask.png
 1. 生成并冻结黄金参考组。
 2. 完成市集街垂直切片。
 3. 同步验证标题页、星图和对话框样例。
-4. 在 Godot 中接入纸偶摇摆、姿态替换、灰阶 Shader 和 UI 阴影。
+4. 在 Godot 中接入人物立绘、灰阶 Shader 和基础显示比例；纸偶摇摆、姿态替换和 UI 阴影后续再做。
 5. 制作一次觉醒拼贴演出。
 6. 验证后扩展到完整 #0762。
 7. 风格稳定后再建立 API 批处理。

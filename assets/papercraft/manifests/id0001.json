@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "scope": "id0001",
+  "assets": [
+    {
+      "id": "id0001_character_npc_01_linguide",
+      "path": "assets/papercraft/fragments/id0001/characters/npc_01_linguide.png",
+      "category": "character",
+      "role": "NPC #01 林指导人物立绘：纸工拼贴整身立绘，魔女帽、地图脸、深紫纸层服装和白色立牌描边。",
+      "status": "ready",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "notes": "当前阶段只生产人物立绘；128x192透明PNG，脚底锚点位于底边中心，保留厚白/米白立牌描边。暂不生产walk、talk、shadow、独立道具或FX。"
+    },
+    {
+      "id": "id0001_character_npc_02_chentechnology",
+      "path": "assets/papercraft/fragments/id0001/characters/npc_02_chentechnology.png",
+      "category": "character",
+      "role": "NPC #02 陈技术人物立绘：监视器拼贴头、黑色技术西装、键帽领带和米白立牌描边。",
+      "status": "ready",
+      "generation": "reference_edit",
+      "requiredFor": "vertical_slice",
+      "notes": "当前阶段只生产人物立绘；128x192透明PNG，脚底锚点位于底边中心，保留厚白/米白立牌描边。旧 chentechnology_* 姿态、阴影、道具和 FX 已移除。"
+    },
+    {
+      "id": "id0001_character_npc_03_wangdirector",
+      "path": "assets/papercraft/fragments/id0001/characters/npc_03_wangdirector.png",
+      "category": "character",
+      "role": "NPC #03 王主管人物立绘：公共信息部主管纸偶，深蓝西装、金色公司徽章、审查文件和米白立牌描边。",
+      "status": "ready",
+      "generation": "reference_edit",
+      "requiredFor": "vertical_slice",
+      "notes": "当前阶段只生产人物立绘；128x192透明PNG，脚底锚点位于底边中心，保留厚白/米白立牌描边。图中文字只作为缩小后不可读的纸纹和宣传/审查视觉锚点，不承担运行时阅读信息。"
+    },
+    {
+      "id": "id0001_character_npc_04_zhaosecurity",
+      "path": "assets/papercraft/fragments/id0001/characters/npc_04_zhaosecurity.png",
+      "category": "character",
+      "role": "NPC #04 赵安保人物立绘：边界巡逻员纸偶，蓝黑安保制服、锁形徽章、手册挂件和米白立牌描边。",
+      "status": "ready",
+      "generation": "reference_edit",
+      "requiredFor": "vertical_slice",
+      "notes": "当前阶段只生产人物立绘；128x192透明PNG，脚底锚点位于底边中心，保留厚白/米白立牌描边。臂章和手册文字只作为缩小后不可读的纸纹与安保身份锚点，不承担运行时阅读信息。"
+    }
+  ]
+}

@@ -4,8 +4,11 @@
 
 ```text
 assets/papercraft/manifests/core.json
+assets/papercraft/manifests/id0001.json
 assets/papercraft/manifests/id0762.json
 ```
+
+当前生产阶段只在清单中推进人物立绘条目。walk、talk、方向变体、独立阴影、道具、FX、UI、环境模块和星图碎片暂不列为新生产目标。
 
 ## 顶层字段
 
@@ -44,6 +47,8 @@ prop
 fx
 mask
 ```
+
+当前阶段新生产条目只使用 `character`。其他分类保留为后续阶段或既有参考资产使用。
 
 `generation`：
 

@@ -22,7 +22,12 @@
 ## 资产清单
 
 - `assets/papercraft/manifests/core.json`：全局材质、UI、标题页和星图。
+- `assets/papercraft/manifests/id0001.json`：碎片 #0001 角色立绘。
 - `assets/papercraft/manifests/id0762.json`：碎片 #0762「颜色的葬礼」。
+
+## 当前生产范围
+
+当前阶段只生产人物立绘资产：单张透明背景 PNG、完整角色、白色 / 米白立牌描边、脚底锚点居中。暂不生产 walk、talk、方向变体、独立阴影、道具、FX、UI、环境模块或星图碎片。
 
 运行以下命令检查目录和清单格式：
 
