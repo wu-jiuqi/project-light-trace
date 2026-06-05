@@ -1,0 +1,475 @@
+{
+  "schemaVersion": 1,
+  "scope": "0002",
+  "fragment": {
+    "id": "0002",
+    "name": "黄昏驿站"
+  },
+  "sourceDocument": "design/items/0002/0002_物品清单.md",
+  "lastSynced": "2026-06-05",
+  "summary": {
+    "totalAssets": 40,
+    "priorityCount": {
+      "P0": 24,
+      "P1": 14,
+      "P2": 2
+    },
+    "categoryCount": {
+      "environment": 13,
+      "fx": 6,
+      "prop": 20,
+      "ui": 2
+    },
+    "requiredForCount": {
+      "0002_full": 18,
+      "vertical_slice": 22
+    },
+    "note": "按清单正文唯一资产 ID 生成；地面模块含 straight/edge 两个变体（变体计入变体数组，不计入资产总数）。NFT关联物品部分可降级为NPC纸偶纹理（P0基线中）。"
+  },
+  "assets": [
+    {
+      "id": "0002_env_waiting_room",
+      "path": "assets/papercraft/fragments/0002/environment/0002_env_waiting_room.png",
+      "category": "environment",
+      "role": "候车室建筑——碎片入口建筑。旧信封概念立面，暖灰棕色#A89888。入口双扇木门朝南。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "场所锚点：候车室=旧信封。砖缝模拟信封书写行线，屋顶缓坡模拟封口折角。拱形窗透暖黄光#E8D898。碰撞矩形(0,0)-(160,128)px，入口底部留空56-104px。"
+    },
+    {
+      "id": "0002_env_waiting_room_floor",
+      "path": "assets/papercraft/fragments/0002/environment/0002_env_waiting_room_floor.png",
+      "category": "environment",
+      "role": "候车室室内木地板——暖灰棕色#A09080，纵向木板条宽8px。入口处磨损区域#B0A090。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "kraft材质。暖黄光反射来自白炽灯（tracing_paper叠加）。可通行区域。检票口附近有极浅纵向拖痕#B8A898。"
+    },
+    {
+      "id": "0002_env_waiting_room_bench",
+      "path": "assets/papercraft/fragments/0002/environment/0002_env_waiting_room_bench.png",
+      "category": "environment",
+      "role": "候车室中央木质长椅——两条并排放置。靠背三条横木，左侧长椅坐面特别光滑（#B8A890——反复循环的痕迹）。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0002_full",
+      "priority": "P1",
+      "notes": "主色#A89880 kraft材质。宽48px高32px。32px下通过'三条横线'辨识。空长椅暗示'没有人愿意在室内等'。"
+    },
+    {
+      "id": "0002_env_station_clock",
+      "path": "assets/papercraft/fragments/0002/environment/0002_env_station_clock.png",
+      "category": "environment",
+      "role": "候车室北墙圆形挂钟——永远17:47。秒针每隔约60秒颤抖一下（Shader控制——非独立动画资产）。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "钟面#E0D8C8旧书页质感，直径28px。木框#706050。时钟指向5偏右12°，分针指向9偏右24°，秒针停在3。foil铜色刻度（<3%）。"
+    },
+    {
+      "id": "0002_env_timetable",
+      "path": "assets/papercraft/fragments/0002/environment/0002_env_timetable.png",
+      "category": "environment",
+      "role": "候车室北墙列车时刻表——所有班次显示'延误'。'特快47'被反复修改——最深层笔迹'3月14日'。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "公告板#C8C0B0，36×48px。8-10行文字块#706858+红色'延误'标签#806050。特快47修改区域含多层重叠笔迹。靠近<80px触发放大。"
+    },
+    {
+      "id": "0002_env_ticket_window",
+      "path": "assets/papercraft/fragments/0002/environment/0002_env_ticket_window.png",
+      "category": "environment",
+      "role": "候车室东侧已关闭的售票窗口——玻璃上粉笔通知'等待时长：未知'（被擦掉又重写）。右下角'对不起。'灰尘划痕。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0002_full",
+      "priority": "P1",
+      "notes": "窗框#B0A898，玻璃#D0C8B8半透明（35%）。粉笔字#E0D8C8。窗台中央干净矩形8×4px（曾有人放下一本书）。靠近<80px触发放大。"
+    },
+    {
+      "id": "0002_env_ticket_gate",
+      "path": "assets/papercraft/fragments/0002/environment/0002_env_ticket_gate.png",
+      "category": "environment",
+      "role": "候车室北侧检票口铁栏杆——分隔候车室与站台。挂'列车延误·深表歉意'旧牌子（右下角被反复擦拭）。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "深灰铁质#686058，两根立柱高48px+三道横杆间隔12px。半高门宽16px。牌子#908878，右下角擦拭区#B8A898。把手握亮处#807868。"
+    },
+    {
+      "id": "0002_prop_conductor_list",
+      "path": "assets/papercraft/fragments/0002/props/0002_prop_conductor_list.png",
+      "category": "prop",
+      "role": "检票员手中泛黄旅客名单——六行名字五个日期标记，第六行打孔偏左（暗示票无效）。背面透见'第47批·黄昏驿站·循环测试'。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0002_full",
+      "priority": "P1",
+      "notes": "折叠态14×20px，#E8DCC0暖旧米黄。六行模糊字块#605040+圆形打孔2px。背面透见小字需逆光。book_page材质。"
+    },
+    {
+      "id": "0002_env_platform_ground",
+      "path": "assets/papercraft/fragments/0002/environment/0002_env_platform_ground_straight.png",
+      "category": "environment",
+      "role": "站台水泥地面铺装——比候车室地板更粗糙。纵向扫刷纹理+靠近铁轨侧水痕（泪滴形）。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "variants": [
+        "0002_env_platform_ground_straight",
+        "0002_env_platform_ground_edge"
+      ],
+      "notes": "主色#B0A898中灰水泥，扫刷纹理#B8B0A0。近铁轨侧略暗#A09888（黄昏光被遮挡）。水痕#C8C0B0不规则斑块。64×64px模块无缝平铺。"
+    },
+    {
+      "id": "0002_env_platform_bench",
+      "path": "assets/papercraft/fragments/0002/environment/0002_env_platform_bench.png",
+      "category": "environment",
+      "role": "站台标准长椅——三条（A/B/C）。三条磨损痕迹不同：A中央偏左光滑（老教师），B右侧更深（商人），C前部几乎无磨损（士兵只坐前沿）。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0002_full",
+      "priority": "P1",
+      "notes": "主色#A89880 kraft材质。宽48px高32px。三条长椅通过磨损差异区分NPC归属。统一朝向铁轨方向（面北）。"
+    },
+    {
+      "id": "0002_env_vending_machine",
+      "path": "assets/papercraft/fragments/0002/environment/0002_env_vending_machine.png",
+      "category": "environment",
+      "role": "站台中央空自动贩卖机——投币口被口香糖堵住。玻璃反光中闪现花园轮廓（暗示另一个碎片）。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0002_full",
+      "priority": "P1",
+      "notes": "浅灰蓝#A8B0B8，宽24×高48px。玻璃#C8D0D0半透明（45%）。货架空无一物#989898。投币口粉色口香糖#D0B0B0。反光花园纹理通过Shader控制。"
+    },
+    {
+      "id": "0002_env_water_tap",
+      "path": "assets/papercraft/fragments/0002/environment/0002_env_water_tap.png",
+      "category": "environment",
+      "role": "站台墙边旧式铜水龙头——卖花女喷花水源。流出冷水但喷花时产生蒸汽。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0002_full",
+      "priority": "P1",
+      "notes": "暗铜色#A08060，十字把手8×4px。管道#908878直径4px。铜绿氧化环#6B8B6B。下方极小水洼#C0C0C0约6×4px（静止）。不可交互。"
+    },
+    {
+      "id": "0002_env_seat_map_board",
+      "path": "assets/papercraft/fragments/0002/environment/0002_env_seat_map_board.png",
+      "category": "environment",
+      "role": "站台中央列车座位图展示牌——解密核心道具。左蓝右灰渐变（窗→走廊），3B覆盖黄色纸条'备用·待确认'。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "展示板#D0C8B8，40×24px。5个座位从左蓝#C8D8E0渐变到右灰#C0BCB4。3B黄色纸条#E8D898（可揭开）。每个座位下有NPC图标。Area2D交互。"
+    },
+    {
+      "id": "0002_env_yellow_line",
+      "path": "assets/papercraft/fragments/0002/environment/0002_env_yellow_line.png",
+      "category": "environment",
+      "role": "站台最北端黄黑警示胶带——物理边界。边缘略微卷起，暗示有人曾试图跨过但退回来了。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0002_full",
+      "priority": "P1",
+      "notes": "黄色#D8C060+黑色#403830交替条纹宽4px，总长96px。卷边1-2px纸艺撕边效果。下方粉笔箭头#C8C0B0。不可通行碰撞体。"
+    },
+    {
+      "id": "0002_prop_railway_tracks",
+      "path": "assets/papercraft/fragments/0002/props/0002_prop_railway_tracks.png",
+      "category": "prop",
+      "role": "站台北侧铁轨——东西延伸至薄雾。枕木表面光滑（AI没见过真正的枕木）。铁轨不生锈（时间停滞）。极远处有轻微弯曲（渲染边界）。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "钢轨#706860轨距12px，枕木#807060间隔6px。远端进入薄雾#B0A8A0渐变覆盖。tracing_paper薄雾叠加。不可通行。"
+    },
+    {
+      "id": "0002_prop_sleeper_inscription",
+      "path": "assets/papercraft/fragments/0002/props/0002_prop_sleeper_inscription.png",
+      "category": "prop",
+      "role": "黄线正下方枕木刻字——暗线B Deep植入点。'3月15日·零时·第44号枕木·未通过'。'未通过'被重复刻了两次。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0002_full",
+      "priority": "P2",
+      "notes": "枕木#807060，刻痕#504030。32×10px。纯视觉发现——需紧贴黄线+视角朝下。两次刻痕深度不同：第一次#605040，第二次#504030。"
+    },
+    {
+      "id": "0002_prop_track_burn_marks",
+      "path": "assets/papercraft/fragments/0002/props/0002_prop_track_burn_marks.png",
+      "category": "prop",
+      "role": "铁轨中段焦痕——7-8个人脚印状烧焦痕迹。最深脚印在铁轨正上方（有人停在铁轨中央）。最后两个转向站台方向。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0002_full",
+      "priority": "P1",
+      "notes": "焦痕#302820近黑，每个8×4px。散布范围40×16px。碳化裂纹#404040极细网状。需静止观察约5秒自动触发镜头推近。暗线A视觉证据。"
+    },
+    {
+      "id": "0002_prop_ticket_oldteacher",
+      "path": "assets/papercraft/fragments/0002/props/0002_prop_ticket_oldteacher.png",
+      "category": "prop",
+      "role": "老教师车票——17:50/3A·靠窗。泛黄#E8DCB8，左上角折痕。背面铅笔字'儿子。'",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "16×8px标准尺寸。book_page材质。折痕#D8CCA8三角形3×3px。背面铅笔字#A09080极淡。对话节点2获得。"
+    },
+    {
+      "id": "0002_prop_ticket_soldier",
+      "path": "assets/papercraft/fragments/0002/props/0002_prop_ticket_soldier.png",
+      "category": "prop",
+      "role": "士兵车票——17:52/3D·靠走廊。纵折+横折草率折叠痕迹。背面油污#A09070（机油痕迹）。底角被反复摩挲发亮。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "16×8px。纵折痕#D8C8A0。油污直径4px不规则斑。底角磨损#E0D0B0。对话节点2获得（行军袋中掉出）。"
+    },
+    {
+      "id": "0002_prop_ticket_flowergirl",
+      "path": "assets/papercraft/fragments/0002/props/0002_prop_ticket_flowergirl.png",
+      "category": "prop",
+      "role": "卖花女车票——17:54/3C·中间。花粉沾染淡黄绿斑点。边缘水润湿痕（喷水时溅到）。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "16×8px。花粉斑点#E0D0B0直径1-1.5px（5-7个）。水润湿痕#E8DCC0约4×2px。对话节点2获得（从花束中滑出）。"
+    },
+    {
+      "id": "0002_prop_ticket_merchant",
+      "path": "assets/papercraft/fragments/0002/props/0002_prop_ticket_merchant.png",
+      "category": "prop",
+      "role": "商人车票（备用票）——解密核心矛盾。17:54/3B·靠窗（异常！）。红色'备用'大字。涂掉的'11月——'（暗线B时间悖论）。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "16×8px。票面更新#F0E8D8无泛黄。'备用'#A04030暗红色字foil材质（<3%）。说明字1.2px高。背面涂改区10×3px——透见'11月——'。"
+    },
+    {
+      "id": "0002_prop_ticket_littlegirl",
+      "path": "assets/papercraft/fragments/0002/props/0002_prop_ticket_littlegirl.png",
+      "category": "prop",
+      "role": "小女孩车票——17:56/3E·靠走廊。边缘不规则撕边。背面彩色蜡笔涂鸦（太阳+小人+小心形）。折叠成纸鹤形。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "折叠态（纸鹤形）10×6px，展开16×8px。蜡笔色彩：橙黄#E8B840、蓝#6090D0、红#D06060。foil蜡笔（<8%）。双状态：折叠/展开。"
+    },
+    {
+      "id": "0002_fx_morse_light",
+      "path": "assets/papercraft/fragments/0002/fx/0002_fx_morse_light.png",
+      "category": "fx",
+      "role": "铁轨尽头光点闪烁——暗线C核心。三种模式：随机闪烁/WHO ARE YOU莫尔斯码/I SEE YOU莫尔斯码。",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "暖金光点#FFD080直径3px，光晕8px。tracing_paper+foil（<5%）。莫尔斯码节奏需精确计时。三种模式切换由停留时间+小女孩对话+隐藏交互触发。Additive叠加。"
+    },
+    {
+      "id": "0002_fx_clock_tick",
+      "path": "assets/papercraft/fragments/0002/fx/0002_fx_clock_tick.png",
+      "category": "fx",
+      "role": "时钟秒针颤抖——Shader驱动（无独立PNG资产）。每约60秒秒针偏移0.5-1px持续0.1秒。P2优先级。",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "0002_full",
+      "priority": "P2",
+      "notes": "纯Shader实现——秒针坐标微调（Replace模式）。需靠近时钟<40px+静止观察约60秒才能捕捉。间隔±15秒随机偏差。"
+    },
+    {
+      "id": "0002_fx_train_arrival",
+      "path": "assets/papercraft/fragments/0002/fx/0002_fx_train_arrival.png",
+      "category": "fx",
+      "role": "列车驶入站台演出——情感选择后的核心演出。车灯渐亮→列车轮廓清晰→金色铭牌'特快47'→站台震动。",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "车厢#686058宽96×高40px。车灯光晕#FFE0C0半径16px。铭牌#C0A860箔纸。驶入约2秒+停稳3秒+驶出3秒。Additive+Replace+Shader震动。"
+    },
+    {
+      "id": "0002_fx_homeward_seal",
+      "path": "assets/papercraft/fragments/0002/fx/0002_fx_homeward_seal.png",
+      "category": "fx",
+      "role": "归途之印浮现——检票员递出车票后，票背面浮现暗金色站台徽章。列车向远处驶去（不是驶来）。",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "暗金#C0A860直径14px。列车剪影+弧形轨迹#D4C080。浮现1.5秒（0→100%透明度）。金色粒子3-5个飘散2秒。脉冲光晕周期3秒。foil+ tracing_paper。"
+    },
+    {
+      "id": "0002_fx_flower_mist",
+      "path": "assets/papercraft/fragments/0002/fx/0002_fx_flower_mist.png",
+      "category": "fx",
+      "role": "矢车菊花瓣透光+喷水蒸汽——卖花女喷水时花瓣背面从灰蓝变纯蓝+蒸汽丝上升。",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "0002_full",
+      "priority": "P1",
+      "notes": "花瓣透光：灰蓝#8090A0→纯蓝#6090E0渐变0.3秒。蒸汽丝#E0E0E8半透明（20%），3-5条8×1px上升2秒消散。tracing_paper叠加。"
+    },
+    {
+      "id": "0002_fx_conductor_give_ticket",
+      "path": "assets/papercraft/fragments/0002/fx/0002_fx_conductor_give_ticket.png",
+      "category": "fx",
+      "role": "检票员递票演出——第一次离开检票口走向玩家。金色弧线从票徽章延伸到玩家胸口（源印能量传递）。",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "0002_full",
+      "priority": "P1",
+      "notes": "走出约0.8秒（24px路径）。递票手臂0.5秒。金色弧线#D4C080约48×1px持续0.5秒。foil极微量。Additive叠加。"
+    },
+    {
+      "id": "0002_prop_oldteacher_book",
+      "path": "assets/papercraft/fragments/0002/props/0002_prop_oldteacher_book.png",
+      "category": "prop",
+      "role": "老教师膝上空白书——布面封面。内页半透明，对着光看隐约有古诗词字迹'字在另一边'。书签是矢车菊干花瓣。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "封面#706860 fiber_paper布面。书脊烫金#B0A080。内页#E8E0D0 tracing_paper（18×12px）。隐见字迹#D0C8B8（5%不透明度）。干花瓣书签#8090B0。P0可降级为纸偶纹理。"
+    },
+    {
+      "id": "0002_prop_merchant_contract",
+      "path": "assets/papercraft/fragments/0002/props/0002_prop_merchant_contract.png",
+      "category": "prop",
+      "role": "商人空白合同——暗线B植入点。多层叠合+特定角度（~30°）可见水印：'冥府协议紧急更换通知'+时间[17:47]-[██:██]-[██:██]。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "8-10张叠放，每张24×32px book_page。水印#D8D0C0（3%不透明度）。多层叠合+特定角度可见完整水印（Shader控制visibility）。P0可降级为纸偶纹理。"
+    },
+    {
+      "id": "0002_prop_merchant_briefcase",
+      "path": "assets/papercraft/fragments/0002/props/0002_prop_merchant_briefcase.png",
+      "category": "prop",
+      "role": "商人深棕色公文包——PVC压纹仿真皮（AI没见过真皮）。底部有细裂缝（被反复装进拿出的次数太多）。金属扣黄铜色。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0002_full",
+      "priority": "P1",
+      "notes": "深棕#6B5040 kraft染色。22×16×6px。网格压纹#584030。底部裂缝#483020约4px。金属扣#A89880直径3px foil。P0可简化。"
+    },
+    {
+      "id": "0002_prop_soldier_duffel",
+      "path": "assets/papercraft/fragments/0002/props/0002_prop_soldier_duffel.png",
+      "category": "prop",
+      "role": "士兵行军袋——米黄帆布色。底部过于圆润（AI没见过真正的行军袋）。马克笔序列号'TP-2077-03-02'。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0002_full",
+      "priority": "P1",
+      "notes": "米黄#C8B898 fiber_paper。24×12px横向放置。抽绳#A09078 kraft。序列号#484030约3px高。拉链开合声暗示空弹夹（音效设计）。P0可简化。"
+    },
+    {
+      "id": "0002_prop_soldier_armband",
+      "path": "assets/papercraft/fragments/0002/props/0002_prop_soldier_armband.png",
+      "category": "prop",
+      "role": "士兵臂章——暗线B核心。'天枢安保·零时快速反应组·第07分队'。被反复刮擦（3-5条平行细线）——他试图抹掉自己的身份。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "深绿#607050 fiber_paper，10×8px。鹰形线#809070。三行字模糊块。刮擦区#708060约6×4px（3-5条线）。P0可纳入纸偶纹理。"
+    },
+    {
+      "id": "0002_prop_flowergirl_basket",
+      "path": "assets/papercraft/fragments/0002/props/0002_prop_flowergirl_basket.png",
+      "category": "prop",
+      "role": "卖花女矢车菊篮子——碎片0002中唯一的颜色来源。纸编织篮子+~30朵灰蓝/纯蓝矢车菊。花瓣褪色区可透见阿莲花田画面。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "篮子14×18px kraft编织（6×6条）。花朵灰蓝#8090B0→背面纯蓝#6090E0。褪色区#A0B0C8+针孔#E0E0E0。透见花田画面（tracing_paper叠加）。P0可简化至15朵。**跨碎片色值基准**：此色值为全项目矢车菊唯一标准。"
+    },
+    {
+      "id": "0002_prop_flowergirl_kettle",
+      "path": "assets/papercraft/fragments/0002/props/0002_prop_flowergirl_kettle.png",
+      "category": "prop",
+      "role": "卖花女铜制喷水壶——角色身份延伸工具。梨形壶身#A08060，细长弯曲壶嘴。壶口有水垢环（时间累积证据）。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0002_full",
+      "priority": "P1",
+      "notes": "壶身10×6px kraft。壶嘴长5px。壶把直径6px。水垢环#D8D0C0 0.5px。凹痕#908060。P1阶段制作——P0基线可纳入NPC纸偶姿态。"
+    },
+    {
+      "id": "0002_prop_littlegirl_backpack",
+      "path": "assets/papercraft/fragments/0002/props/0002_prop_littlegirl_backpack.png",
+      "category": "prop",
+      "role": "小女孩砖红色背包——拉链上挂全彩糖果（碎片中除了矢车菊外唯一不褪色的颜色）。正面粉笔太阳涂鸦（与0001暗室涂鸦同一只手）。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "砖红#C07050 fiber_paper，12×14px。糖#F0D0E0粉色foil（<5%）。高光#F8E0F0。粉笔太阳#E8D8C8直径4px。底部磨损#B06040。P0可纳入纸偶纹理。"
+    },
+    {
+      "id": "0002_prop_conductor_punch",
+      "path": "assets/papercraft/fragments/0002/props/0002_prop_conductor_punch.png",
+      "category": "prop",
+      "role": "检票员腰间打孔器——银灰色金属纸质感。打孔口边缘生锈（暗示'很久没有打过一张真正的票了'）。腰带上磨出明显凹痕。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0002_full",
+      "priority": "P1",
+      "notes": "银灰#A09890 gray_card，10×6×3px。打孔口直径3px。手柄磨损纹#B0A8A0。锈迹#8B7060直径2px。腰带凹痕#807868。P0可纳入纸偶纹理。"
+    },
+    {
+      "id": "0002_prop_npc_badge_0002",
+      "path": "assets/papercraft/fragments/0002/props/0002_prop_npc_badge_0002.png",
+      "category": "prop",
+      "role": "NPC胸牌·0002版——六个NPC通用。序列号末位5（检票员）和6（小女孩）不同于0001的1-4。'冥府协议'字比0001更淡（AI投影场景非公司直营）。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "10×6px book_page奶油白。顶部'天枢TRAINING'#505048，中部序列号'TP-2077-03-0[5/6]'#404038，底部'冥府协议'#989080（比0001淡5-8%）。纳入纸偶纹理。"
+    },
+    {
+      "id": "0002_ui_alertness_bar",
+      "path": "assets/papercraft/fragments/0002/ui/0002_ui_alertness_bar.png",
+      "category": "ui",
+      "role": "STANDARD模式警觉指示条——绿色→黄色→橙色→红色渐变。L5时边缘红光脉冲（温和——NPC的警觉是悲伤的认知而非敌意）。",
+      "status": "planned",
+      "generation": "ui_component",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "64×8px。背景#585048。L0-1绿#80B080→L2-3黄#D0C870→L4橙#E0A060→L5红#D04040。book_page底+tracing_paper填充。屏幕左上角。"
+    },
+    {
+      "id": "0002_ui_emotion_choice",
+      "path": "assets/papercraft/fragments/0002/ui/0002_ui_emotion_choice.png",
+      "category": "ui",
+      "role": "情感选择面板——五选项（留下商人/老教师/士兵/卖花女/小女孩）+检票员推理总结+金色装饰条。背景有水印纹理暗示'面板也是AI生成的'。",
+      "status": "planned",
+      "generation": "ui_component",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "120×80px card。上半部推理总结框24px高+检票员头像16×16px。下半部5个选项按钮各100×10px。悬停高亮#D8C8A0。金色装饰条#C0A860 foil。book_page底。弹出时背景暗30%。"
+    }
+  ]
+}
