@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://wbeu05wrv640"]
+
+[ext_resource type="Texture2D" uid="uid://cmem78bo5gglm" path="res://assets/papercraft/fragments/id0001/characters/npc_02_chentechnology.png" id="1_texture"]
+
+[sub_resource type="RectangleShape2D" id="Rect_body"]
+size = Vector2(36, 48)
+
+[node name="NPC_ChenTechnology" type="CharacterBody2D" unique_id=409151335]
+z_as_relative = false
+y_sort_enabled = true
+collision_layer = 4
+
+[node name="BodyCollision" type="CollisionShape2D" parent="." unique_id=1779919288]
+position = Vector2(0, -24)
+shape = SubResource("Rect_body")
+
+[node name="Visual" type="Sprite2D" parent="." unique_id=1133109294]
+position = Vector2(0, -48)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("1_texture")

@@ -10,10 +10,11 @@ const SAVE_DIR: String = "user://saves/"
 const AUTO_SAVE_INTERVAL: float = 30.0  ## 自动存档间隔（秒）
 const LAST_SLOT_PATH: String = "user://saves/last_slot.json"  ## 最后活动槽位记录
 const MAX_SLOTS: int = 3  ## 总槽位数
+const TITLE_SCREEN_PATH: String = "res://scenes/ui/title_screen.tscn"
 
 var save_data: Dictionary = {}
 var _auto_timer: Timer = null
-var _current_slot: int = 0  ## 当前槽位；-1 表示尚未选择槽位
+var _current_slot: int = -1  ## 当前槽位；-1 表示尚未选择槽位
 
 
 # ============================================================
@@ -28,11 +29,11 @@ func _ready() -> void:
 	if load_game(last_slot):
 		print("[SaveManager] 存档自动加载成功 (slot %d)" % last_slot)
 		# load_game 内部已设置 _current_slot，无需再调 set_current_slot
+		_setup_auto_save()  # 仅有活跃槽位时启动自动存档定时器
 	else:
 		print("[SaveManager] 未找到存档 (slot %d)，等待用户选择" % last_slot)
 		_current_slot = -1  # 无活跃槽位，自动保存将跳过
-	
-	_setup_auto_save()
+		# 不启动自动存档定时器，等待用户选择"新游戏"或"继续游戏"后再启动
 
 
 func _ensure_save_dir() -> void:
@@ -45,6 +46,13 @@ func _ensure_save_dir() -> void:
 # ============================================================
 
 func _setup_auto_save() -> void:
+	## 启动自动存档定时器（仅当 _current_slot 合法且定时器未运行时）
+	if _current_slot < 0:
+		print("[SaveManager] 自动存档跳过: 无活跃槽位")
+		return
+	if _auto_timer and _auto_timer.is_inside_tree():
+		print("[SaveManager] 自动存档定时器已在运行")
+		return
 	_auto_timer = Timer.new()
 	_auto_timer.name = "AutoSaveTimer"
 	_auto_timer.wait_time = AUTO_SAVE_INTERVAL
@@ -54,11 +62,45 @@ func _setup_auto_save() -> void:
 	print("[SaveManager] 自动存档就绪，间隔 %.0f 秒" % AUTO_SAVE_INTERVAL)
 
 
+func _stop_auto_save() -> void:
+	## 停止自动存档定时器（槽位变为无效时调用）
+	if _auto_timer and _auto_timer.is_inside_tree():
+		_auto_timer.stop()
+		print("[SaveManager] 自动存档定时器已停止")
+
+
 func _on_auto_save() -> void:
 	if _current_slot < 0:
-		return  # 没有活跃槽位（游戏尚未启动到具体存档）
+		printerr("[SaveManager] 自动存档异常: _current_slot=%d 但定时器仍在运行！停止定时器。" % _current_slot)
+		_stop_auto_save()
+		return
+	if _is_title_screen_active():
+		print("[SaveManager] 自动存档跳过: 标题画面活跃")
+		return
+	# 场景切换期间的额外保护：current_scene 为 null 时视为不安全
+	if get_tree().current_scene == null:
+		print("[SaveManager] 自动存档跳过: 场景切换中（current_scene 为 null）")
+		return
+	# 防御性检查：如果槽位标记有活跃存档但磁盘文件已不存在（如被外部删除），
+	# 重置槽位为 -1 避免自动保存创建意外存档
+	if not FileAccess.file_exists(_slot_path(_current_slot)):
+		print("[SaveManager] 自动存档跳过: slot %d 的存档文件不存在，重置活跃槽位并停止自动存档" % _current_slot)
+		_current_slot = -1
+		_stop_auto_save()
+		return
 	save_game(_current_slot)
-	print("[SaveManager] 自动存档完成 (slot %d)" % _current_slot)
+	print("[SaveManager] 自动存档完成 (slot %d | scene=%s)" % [_current_slot, get_tree().current_scene.name if get_tree().current_scene else "null"])
+
+
+func _is_title_screen_active() -> bool:
+	return _is_title_screen_scene(get_tree().current_scene)
+
+
+func _is_title_screen_scene(scene: Node) -> bool:
+	## 场景切换期间 current_scene 可能为 null，此时视为不安全状态，阻止自动存档。
+	if scene == null:
+		return true
+	return scene.scene_file_path == TITLE_SCREEN_PATH or scene.name == "TitleScreen"
 
 
 # ============================================================
@@ -289,7 +331,27 @@ func delete_slot(slot: int) -> void:
 		save_data = {}
 		if FileAccess.file_exists(LAST_SLOT_PATH):
 			DirAccess.remove_absolute(LAST_SLOT_PATH)
+		_stop_auto_save()  # 删除当前槽位后停止自动存档
 	ChatDatabase.delete_slot_file(slot)
+	if not has_any_save_files():
+		print("[SaveManager] delete_slot(%d): 磁盘已无存档文件，清除活跃槽位" % slot)
+		clear_active_slot()
+
+
+func has_any_save_files() -> bool:
+	for i in range(MAX_SLOTS):
+		if FileAccess.file_exists(_slot_path(i)):
+			return true
+	return false
+
+
+func clear_active_slot() -> void:
+	## 清空内存中的活跃槽位，防止自动保存把已删除的存档重新写回磁盘。
+	_current_slot = -1
+	save_data = {}
+	if FileAccess.file_exists(LAST_SLOT_PATH):
+		DirAccess.remove_absolute(LAST_SLOT_PATH)
+	_stop_auto_save()  # 清空活跃槽位时停止自动存档
 
 
 func set_current_slot(slot: int) -> void:
@@ -301,6 +363,8 @@ func set_current_slot(slot: int) -> void:
 	# 同步 ChatDatabase 到对应槽位的会话文件
 	ChatDatabase.set_slot(slot)
 	print("[SaveManager] 当前存档槽位设为 %d" % slot)
+	# 槽位变为合法值时，确保自动存档定时器正在运行
+	_setup_auto_save()
 
 
 func get_current_slot() -> int:

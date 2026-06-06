@@ -4,7 +4,7 @@ extends Node2D
 
 const TSA = preload("res://scripts/globals/transition_area.gd")
 const FSS = preload("res://scripts/fragment/fragment_0762_state.gd")
-const PlayerScene = preload("res://scenes/characters/id0762/player.tscn")
+const PlayerScene = preload("res://scenes/characters/player/player.tscn")
 const EXIT_SIZE := Vector2(20, 20)
 
 ## 地图边缘中点坐标

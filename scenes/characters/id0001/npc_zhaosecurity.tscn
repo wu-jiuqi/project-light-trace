@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://c2j5leta63e2"]
+
+[ext_resource type="Texture2D" uid="uid://djws22vl1scs6" path="res://assets/papercraft/fragments/id0001/characters/npc_04_zhaosecurity.png" id="1_texture"]
+
+[sub_resource type="RectangleShape2D" id="Rect_body"]
+size = Vector2(36, 48)
+
+[node name="NPC_ZhaoSecurity" type="CharacterBody2D" unique_id=481594507]
+z_as_relative = false
+y_sort_enabled = true
+collision_layer = 4
+
+[node name="BodyCollision" type="CollisionShape2D" parent="." unique_id=1257671554]
+position = Vector2(0, -24)
+shape = SubResource("Rect_body")
+
+[node name="Visual" type="Sprite2D" parent="." unique_id=1969576912]
+position = Vector2(0, -48)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("1_texture")

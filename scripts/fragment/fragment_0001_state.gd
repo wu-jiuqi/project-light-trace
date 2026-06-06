@@ -3,6 +3,12 @@
 ## 仅实现日晷观测、合规度、钟楼校准、源印显现与通关状态流转。
 
 const ClueSystemScript = preload("res://scripts/systems/clue_system.gd")
+const NPC_SCENES := {
+	"linguide": preload("res://scenes/characters/id0001/npc_linguide.tscn"),
+	"chentech": preload("res://scenes/characters/id0001/npc_chentechnology.tscn"),
+	"wangdirector": preload("res://scenes/characters/id0001/npc_wangdirector.tscn"),
+	"zhaosecurity": preload("res://scenes/characters/id0001/npc_zhaosecurity.tscn"),
+}
 
 const OBSERVATION_ORDER := ["A", "B", "C", "D", "E"]
 const TARGET_CLOCK_ANGLE := 66
@@ -163,7 +169,7 @@ func _create_world() -> void:
 		var data = SUNDIALS[key]
 		_create_sundial(key, data)
 
-	# TODO: 正式美术接入时，将这些占位矩形替换为纸工建筑、道路、人物和日晷资源。
+	# TODO: 正式美术接入时，将建筑、道路和日晷占位替换为纸工资源。
 
 
 func _create_rect(node_name: String, pos: Vector2, size: Vector2, color: Color, label_text: String = "", z: int = 0, has_collision: bool = false) -> ColorRect:
@@ -215,10 +221,14 @@ func _create_collision_rect(node_name: String, pos: Vector2, size: Vector2) -> S
 
 
 func _create_interactable(id: String, kind: String, title: String, pos: Vector2, color: Color) -> Node2D:
-	var node = Node2D.new()
+	var node: Node2D
+	if kind == "npc" and NPC_SCENES.has(id):
+		node = NPC_SCENES[id].instantiate() as Node2D
+	else:
+		node = Node2D.new()
 	node.name = "Interact_%s" % id
 	node.position = pos
-	node.z_index = Z_PROP
+	node.z_index = Z_CHARACTER if kind == "npc" else Z_PROP
 	node.set_meta("id", id)
 	node.set_meta("kind", kind)
 	node.set_meta("title", title)
@@ -226,15 +236,16 @@ func _create_interactable(id: String, kind: String, title: String, pos: Vector2,
 	add_child(node)
 	interactables.append(node)
 
-	var body = ColorRect.new()
-	body.position = Vector2(-18, -24)
-	body.size = Vector2(36, 48)
-	body.color = color
-	node.add_child(body)
-	_create_collision_rect("%sBodyCollision" % node.name, pos + body.position, body.size)
+	if kind != "npc":
+		var body = ColorRect.new()
+		body.position = Vector2(-18, -24)
+		body.size = Vector2(36, 48)
+		body.color = color
+		node.add_child(body)
+		_create_collision_rect("%sBodyCollision" % node.name, pos + body.position, body.size)
 
 	var label = Label.new()
-	label.position = Vector2(-58, 28)
+	label.position = Vector2(-58, 6 if kind == "npc" else 28)
 	label.size = Vector2(116, 24)
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.text = title

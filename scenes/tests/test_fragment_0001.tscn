@@ -1,7 +1,9 @@
-[gd_scene load_steps=2 format=3 uid="uid://testfragment0001"]
+[gd_scene format=3 uid="uid://c14ndhcqe3leu"]
 
 [ext_resource type="PackedScene" path="res://scenes/fragments/fragment_0001.tscn" id="1_fragment"]
 
-[node name="TestFragment0001" type="Node2D"]
+[node name="TestFragment0001" type="Node2D" unique_id=490708848]
+z_as_relative = false
+y_sort_enabled = true
 
-[node name="Fragment0001" parent="." instance=ExtResource("1_fragment")]
+[node name="Fragment0001" parent="." unique_id=1935141180 instance=ExtResource("1_fragment")]

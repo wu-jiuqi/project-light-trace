@@ -43,6 +43,21 @@ func _run() -> void:
 		"NPC suspicion cache persists"
 	)
 
+	var previous_scene = current_scene
+	var title_scene := Control.new()
+	title_scene.name = "TitleScreen"
+	root.add_child(title_scene)
+	current_scene = title_scene
+	game_manager.repair_progress = 40.0
+	manager._on_auto_save()
+	manager._load_save_file(2)
+	_check(
+		is_equal_approx(float(manager.save_data.get("repair_progress", -1.0)), 30.0),
+		"auto save skips the title screen"
+	)
+	current_scene = previous_scene
+	title_scene.queue_free()
+
 	fragment_manager.reset_all_fragments()
 	manager._deserialize_fragments([{"id": "0762", "decrypt_state": 4}])
 	_check(fragment_manager.get_fragment_by_id("0762").completed, "legacy completed fragment state migrates")

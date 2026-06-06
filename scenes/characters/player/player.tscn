@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://ccb17gylpq2jq"]
+
+[ext_resource type="Script" uid="uid://0cwpn0xpd646" path="res://scripts/player/player_controller.gd" id="1_player_script"]
+[ext_resource type="Texture2D" uid="uid://dt87cquadlgu3" path="res://assets/papercraft/player/player.png" id="2_texture"]
+
+[sub_resource type="RectangleShape2D" id="Rect_body"]
+size = Vector2(24, 32)
+
+[node name="Player" type="CharacterBody2D" unique_id=1555909685]
+z_as_relative = false
+y_sort_enabled = true
+collision_mask = 15
+script = ExtResource("1_player_script")
+
+[node name="BodyCollision" type="CollisionShape2D" parent="." unique_id=808120668]
+position = Vector2(0, -16)
+shape = SubResource("Rect_body")
+
+[node name="Visual" type="Sprite2D" parent="." unique_id=332735183]
+position = Vector2(0, -48)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_texture")
