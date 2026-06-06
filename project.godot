@@ -46,7 +46,7 @@ enabled=PackedStringArray("res://addons/npc_library_tool/plugin.cfg")
 
 [gui]
 
-theme/custom_font="res://assets/fonts/NotoSansSC-VF.ttf"
+theme/custom_font="res://assets/fonts/SourceHanSerifSC-VF.ttf"
 
 [html5]
 

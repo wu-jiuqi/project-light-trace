@@ -19,6 +19,7 @@ var total_fragments: int = 12              # MVP：12个碎片
 var repaired_fragments: int = 0
 var player_name: String = "溯光者-07"
 var company_name: String = "天枢公司"
+var play_time_seconds: float = 0.0
 
 # === 暗线状态 ===
 var darkline_a_revealed: bool = false
@@ -108,11 +109,21 @@ signal clue_collected(clue: String)
 func _ready() -> void:
 	print("[GameManager] 溯光计划启动 - 归源计划 V0.1.0")
 
+
+func _process(delta: float) -> void:
+	var scene := get_tree().current_scene
+	if scene == null:
+		return
+	if scene.name == "TitleScreen" or scene.scene_file_path == "res://scenes/ui/title_screen.tscn":
+		return
+	play_time_seconds += delta
+
 func new_game() -> void:
 	## 重置所有状态到初始值（开始新游戏/重新挑战）
 	current_phase = GamePhase.INIT
 	repair_progress = 0.0
 	repaired_fragments = 0
+	play_time_seconds = 0.0
 	company_trust = 1.0
 	darkline_a_revealed = false
 	darkline_b_revealed = false

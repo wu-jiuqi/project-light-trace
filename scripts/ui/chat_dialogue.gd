@@ -106,14 +106,14 @@ func _build_ui() -> void:
 	_name_label = Label.new()
 	_name_label.position = Vector2(20, 12)
 	_name_label.add_theme_color_override("font_color", Color(0.3, 0.8, 1, 1))
-	_name_label.add_theme_font_size_override("font_size", 14)
+	_name_label.add_theme_font_size_override("font_size", 15)
 	_panel.add_child(_name_label)
 	
 	# --- 思考中 ---
 	_think_label = Label.new()
 	_think_label.position = Vector2(vs.x - 120, 12)
 	_think_label.add_theme_color_override("font_color", Color(0.5, 0.8, 1, 0.7))
-	_think_label.add_theme_font_size_override("font_size", 11)
+	_think_label.add_theme_font_size_override("font_size", 12)
 	_panel.add_child(_think_label)
 	
 	# --- 聊天区 ---
@@ -125,7 +125,7 @@ func _build_ui() -> void:
 	_chat_display.scroll_active = true
 	_chat_display.scroll_following = true
 	_chat_display.selection_enabled = true
-	_chat_display.add_theme_font_size_override("normal_font_size", 13)
+	_chat_display.add_theme_font_size_override("normal_font_size", 14)
 	var cds = StyleBoxFlat.new()
 	cds.bg_color = Color(0.15, 0.15, 0.17, 0.3)
 	cds.set_corner_radius_all(6)
@@ -151,7 +151,7 @@ func _build_ui() -> void:
 	_input_box.position = Vector2(16, 16)
 	_input_box.size = Vector2(vs.x - 32 - 88, 52)
 	_input_box.placeholder_text = "输入消息..."
-	_input_box.add_theme_font_size_override("font_size", 14)
+	_input_box.add_theme_font_size_override("font_size", 15)
 	var iis = StyleBoxFlat.new()
 	iis.bg_color = Color(0.18, 0.18, 0.2, 0.7)
 	iis.set_corner_radius_all(8)
@@ -169,7 +169,7 @@ func _build_ui() -> void:
 	_send_btn.position = Vector2(vs.x - 96, 16)
 	_send_btn.size = Vector2(80, 52)
 	_send_btn.text = "发送"
-	_send_btn.add_theme_font_size_override("font_size", 13)
+	_send_btn.add_theme_font_size_override("font_size", 14)
 	UITheme.apply_button(_send_btn)
 	_send_btn.pressed.connect(_do_send.bind(""))
 	_input_bar.add_child(_send_btn)
@@ -179,7 +179,7 @@ func _build_ui() -> void:
 	_give_btn.position = Vector2(vs.x - 184, 16)
 	_give_btn.size = Vector2(80, 52)
 	_give_btn.text = "给予"
-	_give_btn.add_theme_font_size_override("font_size", 13)
+	_give_btn.add_theme_font_size_override("font_size", 14)
 	_give_btn.add_theme_color_override("font_color", Color(0.9, 0.85, 0.4, 1))
 	UITheme.apply_button(_give_btn, true)
 	_give_btn.pressed.connect(_do_give)
@@ -191,7 +191,7 @@ func _build_ui() -> void:
 	_history_btn.position = Vector2(vs.x - 272, 16)
 	_history_btn.size = Vector2(80, 52)
 	_history_btn.text = "历史"
-	_history_btn.add_theme_font_size_override("font_size", 13)
+	_history_btn.add_theme_font_size_override("font_size", 14)
 	_history_btn.add_theme_color_override("font_color", Color(0.6, 0.8, 1, 1))
 	UITheme.apply_button(_history_btn)
 	_history_btn.pressed.connect(_show_history)
@@ -225,7 +225,7 @@ func _build_history_panel(vs: Vector2) -> void:
 	_history_page_info = Label.new()
 	_history_page_info.position = Vector2(160, 20)
 	_history_page_info.add_theme_color_override("font_color", Color(0.6, 0.65, 0.7, 1))
-	_history_page_info.add_theme_font_size_override("font_size", 12)
+	_history_page_info.add_theme_font_size_override("font_size", 13)
 	_history_panel.add_child(_history_page_info)
 	
 	# 关闭按钮
@@ -233,7 +233,7 @@ func _build_history_panel(vs: Vector2) -> void:
 	_history_close.position = Vector2(vs.x - 120, 14)
 	_history_close.size = Vector2(100, 36)
 	_history_close.text = "关闭 (Esc)"
-	_history_close.add_theme_font_size_override("font_size", 12)
+	_history_close.add_theme_font_size_override("font_size", 13)
 	UITheme.apply_button(_history_close)
 	_history_close.pressed.connect(_close_history)
 	_history_panel.add_child(_history_close)
@@ -247,7 +247,7 @@ func _build_history_panel(vs: Vector2) -> void:
 	_history_display.bbcode_enabled = true
 	_history_display.scroll_active = true
 	_history_display.selection_enabled = true
-	_history_display.add_theme_font_size_override("normal_font_size", 13)
+	_history_display.add_theme_font_size_override("normal_font_size", 14)
 	var hds = StyleBoxFlat.new()
 	hds.bg_color = Color(0.12, 0.12, 0.14, 0.5)
 	hds.set_corner_radius_all(8)
@@ -262,7 +262,7 @@ func _build_history_panel(vs: Vector2) -> void:
 	_history_prev.position = Vector2(vs.x / 2 - btn_w - 20, btn_y)
 	_history_prev.size = Vector2(btn_w, 36)
 	_history_prev.text = "< 上一页"
-	_history_prev.add_theme_font_size_override("font_size", 13)
+	_history_prev.add_theme_font_size_override("font_size", 14)
 	UITheme.apply_button(_history_prev)
 	_history_prev.pressed.connect(_prev_page)
 	_history_panel.add_child(_history_prev)
@@ -271,7 +271,7 @@ func _build_history_panel(vs: Vector2) -> void:
 	_history_next.position = Vector2(vs.x / 2 + 20, btn_y)
 	_history_next.size = Vector2(btn_w, 36)
 	_history_next.text = "下一页 >"
-	_history_next.add_theme_font_size_override("font_size", 13)
+	_history_next.add_theme_font_size_override("font_size", 14)
 	UITheme.apply_button(_history_next)
 	_history_next.pressed.connect(_next_page)
 	_history_panel.add_child(_history_next)
@@ -641,7 +641,7 @@ func _build_alert_popup(amount: float, reason: String, npc_name: String, alert_p
 	else:
 		text.text = "[缓和] [%s] %+.0f  ->  %s  (%.0f/100)" % [npc_name, amount, phase_name, suspicion]
 	text.add_theme_color_override("font_color", Color(1, 1, 1, 0.95))
-	text.add_theme_font_size_override("font_size", 12)
+	text.add_theme_font_size_override("font_size", 13)
 	container.add_child(text)
 	
 	# 原因小字
@@ -650,7 +650,7 @@ func _build_alert_popup(amount: float, reason: String, npc_name: String, alert_p
 	reason_label.size = Vector2(296, 16)
 	reason_label.text = reason
 	reason_label.add_theme_color_override("font_color", Color(1, 1, 1, 0.55))
-	reason_label.add_theme_font_size_override("font_size", 9)
+	reason_label.add_theme_font_size_override("font_size", 10)
 	container.add_child(reason_label)
 	
 	return container
@@ -699,7 +699,7 @@ func show_alert_phase_change(npc_name: String, old_phase: int, new_phase: int, r
 	label.text = "%s 对你的态度变为：%s" % [npc_name, phase_names[min(new_phase, 5)]]
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.add_theme_color_override("font_color", Color(1, 1, 1, 0.95))
-	label.add_theme_font_size_override("font_size", 14)
+	label.add_theme_font_size_override("font_size", 15)
 	popup.add_child(label)
 	
 	_canvas.add_child(popup)

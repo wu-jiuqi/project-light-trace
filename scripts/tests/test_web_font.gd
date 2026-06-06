@@ -1,6 +1,6 @@
 extends SceneTree
 
-const FONT_PATH := "res://assets/fonts/NotoSansSC-VF.ttf"
+const FONT_PATH := "res://assets/fonts/SourceHanSerifSC-VF.ttf"
 
 
 func _init() -> void:
@@ -26,5 +26,5 @@ func _run() -> void:
 			quit(1)
 			return
 
-	print("[SUMMARY] bundled Web font covers title screen Chinese characters")
+	print("[SUMMARY] bundled Source Han Serif font covers title screen Chinese characters")
 	quit(0)

@@ -154,7 +154,7 @@ func _build_ui() -> void:
 	_title_label.size = Vector2(pw, 36)
 	_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_title_label.add_theme_color_override("font_color", Color(0.5, 0.85, 1, 1))
-	_title_label.add_theme_font_size_override("font_size", 22)
+	_title_label.add_theme_font_size_override("font_size", 23)
 	_panel.add_child(_title_label)
 	
 	# 菜单项容器
@@ -186,7 +186,7 @@ func _rebuild_menu() -> void:
 	for i in items.size():
 		var btn = Button.new()
 		btn.text = items[i]["text"]
-		btn.add_theme_font_size_override("font_size", 18)
+		btn.add_theme_font_size_override("font_size", 19)
 		btn.custom_minimum_size = Vector2(250, 48)
 		btn.pressed.connect(_on_menu_pressed.bind(items[i]["id"]))
 		
@@ -239,7 +239,7 @@ func _build_save_slots_panel(vs: Vector2, pw: float, ph: float) -> void:
 	st.size = Vector2(pw, 36)
 	st.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	st.add_theme_color_override("font_color", Color(0.5, 0.85, 1, 1))
-	st.add_theme_font_size_override("font_size", 20)
+	st.add_theme_font_size_override("font_size", 21)
 	_slot_overlay.add_child(st)
 	
 	for i in range(3):  # 0-based 槽位：0, 1, 2
@@ -247,7 +247,7 @@ func _build_save_slots_panel(vs: Vector2, pw: float, ph: float) -> void:
 		var btn = Button.new()
 		btn.position = Vector2(50, 90 + i * 70)
 		btn.size = Vector2(pw - 100, 56)
-		btn.add_theme_font_size_override("font_size", 16)
+		btn.add_theme_font_size_override("font_size", 17)
 		btn.pressed.connect(_do_save.bind(slot))
 		
 		var info = _get_slot_info(slot)
@@ -272,7 +272,7 @@ func _build_save_slots_panel(vs: Vector2, pw: float, ph: float) -> void:
 	_back_btn.position = Vector2((pw - 140) / 2, 320)
 	_back_btn.size = Vector2(140, 44)
 	_back_btn.text = "返回"
-	_back_btn.add_theme_font_size_override("font_size", 15)
+	_back_btn.add_theme_font_size_override("font_size", 16)
 	UITheme.apply_button(_back_btn)
 	_back_btn.pressed.connect(_hide_save_slots)
 	_slot_overlay.add_child(_back_btn)
@@ -416,7 +416,7 @@ func _show_saved_notification(slot: int) -> void:
 	label.position = Vector2(get_viewport_rect().size.x / 2 - 100, 100)
 	label.size = Vector2(200, 40)
 	label.add_theme_color_override("font_color", Color(0.4, 1, 0.5, 1))
-	label.add_theme_font_size_override("font_size", 16)
+	label.add_theme_font_size_override("font_size", 17)
 	_canvas.add_child(label)
 	
 	var tw = create_tween()

@@ -89,10 +89,10 @@ function checkProjectConfiguration() {
     }
 
     const projectSettings = fs.readFileSync(path.join(PROJECT_DIR, 'project.godot'), 'utf8');
-    const webFontPath = path.join(PROJECT_DIR, 'assets', 'fonts', 'NotoSansSC-VF.ttf');
+    const webFontPath = path.join(PROJECT_DIR, 'assets', 'fonts', 'SourceHanSerifSC-VF.ttf');
     check(fs.existsSync(webFontPath), 'Web 中文字体文件存在');
     check(
-        projectSettings.includes('theme/custom_font="res://assets/fonts/NotoSansSC-VF.ttf"'),
+        projectSettings.includes('theme/custom_font="res://assets/fonts/SourceHanSerifSC-VF.ttf"'),
         'Godot 全局默认字体已配置'
     );
 

@@ -58,7 +58,7 @@ func _setup_ui() -> void:
 	name_label.name = "NameLabel"
 	name_label.position = Vector2(56, -190)
 	name_label.add_theme_color_override("font_color", Color(0.3, 0.8, 1, 1))
-	name_label.add_theme_font_size_override("font_size", 16)
+	name_label.add_theme_font_size_override("font_size", 17)
 	add_child(name_label)
 
 	# RAG 模式标签
@@ -67,7 +67,7 @@ func _setup_ui() -> void:
 	rag_mode_label.position = Vector2(700, -190)
 	rag_mode_label.text = "[RAG]"
 	rag_mode_label.add_theme_color_override("font_color", Color(0.4, 0.9, 0.4, 0.7))
-	rag_mode_label.add_theme_font_size_override("font_size", 11)
+	rag_mode_label.add_theme_font_size_override("font_size", 12)
 	rag_mode_label.hide()
 	add_child(rag_mode_label)
 
@@ -78,7 +78,7 @@ func _setup_ui() -> void:
 	text_label.size = Vector2(768, 90)
 	text_label.bbcode_enabled = true
 	text_label.fit_content = true
-	text_label.add_theme_font_size_override("normal_font_size", 14)
+	text_label.add_theme_font_size_override("normal_font_size", 15)
 	text_label.add_theme_color_override("default_color", Color(0.95, 0.95, 0.95, 1))
 	add_child(text_label)
 
@@ -96,7 +96,7 @@ func _setup_ui() -> void:
 	continue_indicator.position = Vector2(56, -25)
 	continue_indicator.text = "按 E 继续"
 	continue_indicator.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6, 1))
-	continue_indicator.add_theme_font_size_override("font_size", 12)
+	continue_indicator.add_theme_font_size_override("font_size", 13)
 	continue_indicator.hide()
 	add_child(continue_indicator)
 

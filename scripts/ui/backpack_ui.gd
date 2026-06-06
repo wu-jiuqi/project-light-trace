@@ -85,7 +85,7 @@ func _build_ui() -> void:
 	_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_hint_label.text = "按 B 关闭"
 	_hint_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.6, 0.8))
-	_hint_label.add_theme_font_size_override("font_size", 12)
+	_hint_label.add_theme_font_size_override("font_size", 13)
 	_panel.add_child(_hint_label)
 
 
@@ -142,7 +142,7 @@ func _make_item_cell(item_id: int, meta: Dictionary, _empty: bool) -> Panel:
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	name_label.add_theme_color_override("font_color", Color(1, 1, 1, 0.9))
-	name_label.add_theme_font_size_override("font_size", 11)
+	name_label.add_theme_font_size_override("font_size", 12)
 	cell.add_child(name_label)
 	
 	return cell

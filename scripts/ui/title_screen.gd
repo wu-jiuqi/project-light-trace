@@ -2,7 +2,7 @@ extends Control
 ## 溯光计划 — 标题画面（重构版）
 ## 五个交互热区垂直排列在画面右侧（背景图已包含按钮视觉）：
 ##   开始游戏 / 游戏存档 / 成就 / 剧情回顾 / 退出游戏
-## 键盘导航：↑↓选择  Enter确认  Esc返回（存档面板中）
+## 键盘导航：↑↓选择  Enter确认  Esc关闭（弹窗/存档界面中）
 ##
 ## ============================================================
 ## 弹窗尺寸参考（供美术资产制作）
@@ -19,7 +19,6 @@ extends Control
 # ============================================================
 const PAPER_TITLE_BG = preload("res://assets/ui/title_start_bg.jpg")
 const PAPER_PANEL = preload("res://assets/papercraft/core/ui/dialogue_panel.png")
-const PAPER_SLOT = preload("res://assets/papercraft/core/ui/detail_card.png")
 const PAPER_BUTTON_NORMAL = preload("res://assets/papercraft/core/ui/button_normal.png")
 const PAPER_BUTTON_HOVER = preload("res://assets/papercraft/core/ui/button_hover.png")
 const PAPER_BUTTON_PRESSED = preload("res://assets/papercraft/core/ui/button_pressed.png")
@@ -30,9 +29,7 @@ const PAPER_BUTTON_DISABLED = preload("res://assets/papercraft/core/ui/button_di
 # ============================================================
 const PAPER_INK := Color(0.18, 0.12, 0.075, 1.0)
 const PAPER_INK_MUTED := Color(0.33, 0.25, 0.17, 0.95)
-const PAPER_GOLD := Color(0.63, 0.42, 0.15, 1.0)
 const PAPER_DIM := Color(0.36, 0.34, 0.30, 0.62)
-const PAPER_WARNING := Color(0.66, 0.25, 0.16, 1.0)
 
 # ============================================================
 # 布局常量 — 热区坐标与背景图按钮精确对齐
@@ -44,43 +41,66 @@ const BTN_COUNT := 5
 ## 5 个热区的矩形区域（设计稿精确坐标，1280×720 基准下）
 const HIT_RECTS: Array = [
 	Rect2(735, 75, 405, 100),   # 按钮1：开始游戏
-	Rect2(735, 195, 405, 85),   # 按钮2：继续游戏
-	Rect2(735, 300, 405, 80),   # 按钮3：设置
-	Rect2(735, 400, 405, 80),   # 按钮4：提示
-	Rect2(735, 500, 405, 80),   # 按钮5：退出
+	Rect2(735, 195, 405, 85),   # 按钮2：游戏存档
+	Rect2(735, 300, 405, 80),   # 按钮3：成就
+	Rect2(735, 400, 405, 80),   # 按钮4：剧情回顾
+	Rect2(735, 500, 405, 80),   # 按钮5：退出游戏
 ]
 const DEFAULT_TITLE_BG_SIZE := Vector2(1672, 941)
+const START_DIALOG_SIZE := Vector2(1659, 948)
+const DIALOG_HIGHLIGHT_COLOR := Color(0.75, 0.50, 0.18, 0.24)
+const SAVE_SLOT_HOVER_COLOR := Color(0.70, 0.46, 0.16, 0.22)
+const SAVE_SLOT_SELECTED_COLOR := Color(0.95, 0.62, 0.16, 0.32)
 
 # ============================================================
 # 成员变量
 # ============================================================
 var _selected: int = 0
 var _has_saves: bool = false
-var _hit_areas: Array[Control] = []
-var _hit_container: Control  # 容纳所有热区的容器
-var _selection_highlight: ColorRect  # 选中高亮指示器
-
-# 版本标签
-var _version_label: Label
 
 # 存档面板相关
 var _save_slots_visible: bool = false
-var _slot_containers: Array[Control] = []
 var _slot_selected: int = -1
 var _slot_mode: String = ""  # "load" 或 "new_game"
-var _slot_title_label: Label
-var _slot_scroll: ScrollContainer
-var _slot_list: VBoxContainer
-var _load_btn: Button
-var _new_game_btn: Button
-var _delete_btn: Button
-var _back_btn: Button
+var _save_slot_labels: Array[Dictionary] = []
 
 # 活跃弹窗引用（防止同时弹出多个）
-var _active_dialog: Window = null
+var _active_dialog: Node = null
+var _start_dialog_selected: int = 0
+var _overwrite_dialog_selected: int = 0
+var _overwrite_target_slot: int = -1
 
 @onready var _bg: TextureRect = $BG
 @onready var _dark_wash: ColorRect = $DarkWash
+@onready var _start_save_dialog: Control = $StartSaveDialog
+@onready var _start_save_dialog_panel: Control = $StartSaveDialog/PanelRoot
+@onready var _start_no_save_dialog: Control = $StartNoSaveDialog
+@onready var _start_no_save_dialog_panel: Control = $StartNoSaveDialog/PanelRoot
+@onready var _save_not_found_dialog: Control = $SaveNotFoundDialog
+@onready var _save_not_found_dialog_panel: Control = $SaveNotFoundDialog/PanelRoot
+@onready var _save_overwrite_dialog: Control = $SaveOverwriteDialog
+@onready var _save_overwrite_dialog_panel: Control = $SaveOverwriteDialog/PanelRoot
+@onready var _save_slots_screen: Control = $SaveSlotsScreen
+@onready var _save_slots_panel: Control = $SaveSlotsScreen/PanelRoot
+@onready var _hit_container: Control = $HitContainer
+@onready var _selection_highlight: ColorRect = $HitContainer/SelectionHighlight
+@onready var _hit_areas: Array[Control] = [$HitContainer/HitArea1, $HitContainer/HitArea2, $HitContainer/HitArea3, $HitContainer/HitArea4, $HitContainer/HitArea5]
+@onready var _version_label: Label = $VersionLabel
+@onready var _start_dialog_highlight: ColorRect = $StartSaveDialog/PanelRoot/DialogHighlight
+@onready var _start_new_game_button: Button = $StartSaveDialog/PanelRoot/StartNewGameButton
+@onready var _continue_game_button: Button = $StartSaveDialog/PanelRoot/ContinueGameButton
+@onready var _no_save_dialog_highlight: ColorRect = $StartNoSaveDialog/PanelRoot/DialogHighlight
+@onready var _no_save_new_game_button: Button = $StartNoSaveDialog/PanelRoot/StartNewGameButton
+@onready var _save_not_found_dialog_highlight: ColorRect = $SaveNotFoundDialog/PanelRoot/DialogHighlight
+@onready var _save_not_found_ok_button: Button = $SaveNotFoundDialog/PanelRoot/OkButton
+@onready var _save_overwrite_dialog_highlight: ColorRect = $SaveOverwriteDialog/PanelRoot/DialogHighlight
+@onready var _save_overwrite_yes_button: Button = $SaveOverwriteDialog/PanelRoot/YesButton
+@onready var _save_overwrite_no_button: Button = $SaveOverwriteDialog/PanelRoot/NoButton
+@onready var _save_slot_highlight: ColorRect = $SaveSlotsScreen/PanelRoot/SlotHighlight
+@onready var _save_slot_selected_highlight: ColorRect = $SaveSlotsScreen/PanelRoot/SlotSelectedHighlight
+@onready var _save_slot_buttons: Array[Button] = [$SaveSlotsScreen/PanelRoot/Slot1Button, $SaveSlotsScreen/PanelRoot/Slot2Button, $SaveSlotsScreen/PanelRoot/Slot3Button]
+@onready var _save_slot_load_button: Button = $SaveSlotsScreen/PanelRoot/LoadButton
+@onready var _save_slot_delete_button: Button = $SaveSlotsScreen/PanelRoot/DeleteButton
 
 
 # ============================================================
@@ -89,8 +109,12 @@ var _active_dialog: Window = null
 
 func _ready() -> void:
 	_apply_skin()
-	_create_hit_areas()
-	_create_version_label()
+	_setup_hit_areas()
+	_setup_start_save_dialog()
+	_setup_no_save_dialog()
+	_setup_save_not_found_dialog()
+	_setup_save_overwrite_dialog()
+	_setup_save_slots_screen()
 	_layout_all()
 	get_viewport().size_changed.connect(_layout_all)
 
@@ -105,30 +129,11 @@ func _apply_skin() -> void:
 	_dark_wash.color = Color(0.09, 0.07, 0.045, 0.1)
 
 
-# ============================================================
-# 交互热区创建（替代原来的 Button 创建）
-# 背景图 title_start_bg.jpg 已包含按钮视觉，
-# 这里只放置透明的鼠标/键盘交互热区
-# ============================================================
-
-func _create_hit_areas() -> void:
-	_hit_container = Control.new()
-	_hit_container.name = "HitContainer"
-	_hit_container.mouse_filter = Control.MOUSE_FILTER_PASS
-	add_child(_hit_container)
-
-	for i in BTN_COUNT:
+func _setup_hit_areas() -> void:
+	## 连接场景中热区节点的信号（节点已在 tscn 中定义）
+	for i in _hit_areas.size():
 		var idx := i  # 捕获循环变量，避免 lambda 闭包引用同一变量
-		var rect: Rect2 = HIT_RECTS[i]
-		var area := ColorRect.new()
-		area.name = "HitArea%d" % (i + 1)
-		area.color = Color(1, 1, 1, 0)  # 完全透明
-		area.custom_minimum_size = rect.size
-		area.position = rect.position
-		area.size = rect.size
-		area.mouse_filter = Control.MOUSE_FILTER_STOP
-		area.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-		area.focus_mode = Control.FOCUS_ALL
+		var area := _hit_areas[i]
 		area.gui_input.connect(func(event: InputEvent):
 			if event is InputEventMouseButton \
 					and event.button_index == MOUSE_BUTTON_LEFT \
@@ -136,25 +141,115 @@ func _create_hit_areas() -> void:
 				_on_button_pressed(idx)
 		)
 		area.mouse_entered.connect(func(): _on_button_hovered(idx))
-		_hit_container.add_child(area)
-		_hit_areas.append(area)
-
-	# 选中高亮指示器 — 半透明金色块，跟随当前选中热区
-	# 尺寸在 _update_selection() / _layout_hit_areas() 中动态设置
-	_selection_highlight = ColorRect.new()
-	_selection_highlight.name = "SelectionHighlight"
-	_selection_highlight.color = Color(0.63, 0.42, 0.15, 0.18)
-	_selection_highlight.mouse_filter = Control.MOUSE_FILTER_IGNORE  # 不拦截鼠标事件
-	_hit_container.add_child(_selection_highlight)
-	_selection_highlight.move_to_front()
 
 
-func _create_version_label() -> void:
-	_version_label = Label.new()
-	_version_label.text = "溯光计划 v0.2.0"
-	_version_label.add_theme_font_size_override("font_size", 11)
-	_version_label.add_theme_color_override("font_color", Color(0.32, 0.25, 0.17, 0.72))
-	add_child(_version_label)
+func _setup_start_save_dialog() -> void:
+	_start_save_dialog.visible = false
+	_start_save_dialog.mouse_filter = Control.MOUSE_FILTER_STOP
+	_start_dialog_highlight.color = DIALOG_HIGHLIGHT_COLOR
+	_start_dialog_highlight.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_start_new_game_button.pressed.connect(_on_start_dialog_new_game)
+	_continue_game_button.pressed.connect(_on_start_dialog_continue_game)
+	_start_new_game_button.mouse_entered.connect(_select_start_dialog_button.bind(0))
+	_continue_game_button.mouse_entered.connect(_select_start_dialog_button.bind(1))
+	_start_new_game_button.focus_entered.connect(_select_start_dialog_button.bind(0))
+	_continue_game_button.focus_entered.connect(_select_start_dialog_button.bind(1))
+	_apply_transparent_button(_start_new_game_button)
+	_apply_transparent_button(_continue_game_button)
+
+
+func _setup_no_save_dialog() -> void:
+	_start_no_save_dialog.visible = false
+	_start_no_save_dialog.mouse_filter = Control.MOUSE_FILTER_STOP
+	_no_save_dialog_highlight.color = DIALOG_HIGHLIGHT_COLOR
+	_no_save_dialog_highlight.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_no_save_new_game_button.pressed.connect(_on_no_save_dialog_new_game)
+	_no_save_new_game_button.mouse_entered.connect(_update_no_save_dialog_highlight)
+	_no_save_new_game_button.focus_entered.connect(_update_no_save_dialog_highlight)
+	_apply_transparent_button(_no_save_new_game_button)
+
+
+func _setup_save_not_found_dialog() -> void:
+	_save_not_found_dialog.visible = false
+	_save_not_found_dialog.mouse_filter = Control.MOUSE_FILTER_STOP
+	_save_not_found_dialog_highlight.color = DIALOG_HIGHLIGHT_COLOR
+	_save_not_found_dialog_highlight.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_save_not_found_ok_button.pressed.connect(_hide_save_not_found_dialog)
+	_save_not_found_ok_button.mouse_entered.connect(_update_save_not_found_dialog_highlight)
+	_save_not_found_ok_button.focus_entered.connect(_update_save_not_found_dialog_highlight)
+	_apply_transparent_button(_save_not_found_ok_button)
+
+
+func _setup_save_overwrite_dialog() -> void:
+	_save_overwrite_dialog.visible = false
+	_save_overwrite_dialog.mouse_filter = Control.MOUSE_FILTER_STOP
+	_save_overwrite_dialog_highlight.color = DIALOG_HIGHLIGHT_COLOR
+	_save_overwrite_dialog_highlight.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_save_overwrite_yes_button.pressed.connect(_confirm_overwrite_save)
+	_save_overwrite_no_button.pressed.connect(_hide_save_overwrite_dialog)
+	_save_overwrite_yes_button.mouse_entered.connect(_select_overwrite_dialog_button.bind(0))
+	_save_overwrite_no_button.mouse_entered.connect(_select_overwrite_dialog_button.bind(1))
+	_save_overwrite_yes_button.focus_entered.connect(_select_overwrite_dialog_button.bind(0))
+	_save_overwrite_no_button.focus_entered.connect(_select_overwrite_dialog_button.bind(1))
+	_apply_transparent_button(_save_overwrite_yes_button)
+	_apply_transparent_button(_save_overwrite_no_button)
+
+
+func _setup_save_slots_screen() -> void:
+	_save_slots_screen.visible = false
+	_save_slots_screen.mouse_filter = Control.MOUSE_FILTER_STOP
+	_save_slot_highlight.color = SAVE_SLOT_HOVER_COLOR
+	_save_slot_highlight.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_save_slot_selected_highlight.color = SAVE_SLOT_SELECTED_COLOR
+	_save_slot_selected_highlight.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	_save_slot_labels = [
+		{
+			"name": $SaveSlotsScreen/PanelRoot/Slot1Name,
+			"time": $SaveSlotsScreen/PanelRoot/Slot1Time,
+			"date": $SaveSlotsScreen/PanelRoot/Slot1Date,
+			"progress": $SaveSlotsScreen/PanelRoot/Slot1Progress,
+		},
+		{
+			"name": $SaveSlotsScreen/PanelRoot/Slot2Name,
+			"time": $SaveSlotsScreen/PanelRoot/Slot2Time,
+			"date": $SaveSlotsScreen/PanelRoot/Slot2Date,
+			"progress": $SaveSlotsScreen/PanelRoot/Slot2Progress,
+		},
+		{
+			"name": $SaveSlotsScreen/PanelRoot/Slot3Name,
+			"time": $SaveSlotsScreen/PanelRoot/Slot3Time,
+			"date": $SaveSlotsScreen/PanelRoot/Slot3Date,
+			"progress": $SaveSlotsScreen/PanelRoot/Slot3Progress,
+		},
+	]
+
+	for i in _save_slot_buttons.size():
+		var idx := i
+		var button := _save_slot_buttons[i]
+		_apply_transparent_button(button)
+		button.mouse_entered.connect(_hover_save_slot.bind(idx))
+		button.focus_entered.connect(_select_slot.bind(idx))
+		button.pressed.connect(_select_slot.bind(idx))
+
+	_apply_transparent_button(_save_slot_load_button)
+	_apply_transparent_button(_save_slot_delete_button)
+	_save_slot_load_button.mouse_entered.connect(_highlight_save_control.bind(_save_slot_load_button))
+	_save_slot_delete_button.mouse_entered.connect(_highlight_save_control.bind(_save_slot_delete_button))
+	_save_slot_load_button.focus_entered.connect(_highlight_save_control.bind(_save_slot_load_button))
+	_save_slot_delete_button.focus_entered.connect(_highlight_save_control.bind(_save_slot_delete_button))
+	_save_slot_load_button.pressed.connect(_activate_selected_slot)
+	_save_slot_delete_button.pressed.connect(_delete_selected_slot)
+
+	for label_set in _save_slot_labels:
+		for key in label_set:
+			var label := label_set[key] as Label
+			label.add_theme_color_override("font_color", Color(0.14, 0.09, 0.055, 0.98))
+			label.add_theme_color_override("font_outline_color", Color(0.14, 0.09, 0.055, 0.45))
+			label.add_theme_color_override("font_shadow_color", Color(0.86, 0.75, 0.56, 0.42))
+			label.add_theme_constant_override("outline_size", 1)
+			label.add_theme_constant_override("shadow_offset_x", 1)
+			label.add_theme_constant_override("shadow_offset_y", 1)
 
 
 # ============================================================
@@ -164,6 +259,11 @@ func _create_version_label() -> void:
 func _layout_all() -> void:
 	_layout_hit_areas()
 	_layout_version_label()
+	_layout_start_save_dialog()
+	_layout_no_save_dialog()
+	_layout_save_not_found_dialog()
+	_layout_save_overwrite_dialog()
+	_layout_save_slots_screen()
 
 
 func _layout_hit_areas() -> void:
@@ -240,20 +340,210 @@ func _layout_version_label() -> void:
 	_version_label.size = Vector2(260, 22)
 
 
+func _layout_start_save_dialog() -> void:
+	_layout_start_dialog_panel(_start_save_dialog_panel)
+	if _start_save_dialog.visible:
+		call_deferred("_update_start_dialog_highlight")
+
+
+func _layout_no_save_dialog() -> void:
+	_layout_start_dialog_panel(_start_no_save_dialog_panel)
+	if _start_no_save_dialog.visible:
+		call_deferred("_update_no_save_dialog_highlight")
+
+
+func _layout_save_not_found_dialog() -> void:
+	_layout_start_dialog_panel(_save_not_found_dialog_panel)
+	if _save_not_found_dialog.visible:
+		call_deferred("_update_save_not_found_dialog_highlight")
+
+
+func _layout_save_overwrite_dialog() -> void:
+	_layout_start_dialog_panel(_save_overwrite_dialog_panel)
+	if _save_overwrite_dialog.visible:
+		call_deferred("_update_save_overwrite_dialog_highlight")
+
+
+func _layout_save_slots_screen() -> void:
+	_layout_start_dialog_panel(_save_slots_panel)
+	if _save_slots_visible:
+		call_deferred("_update_save_slot_highlight")
+
+
+func _layout_start_dialog_panel(panel: Control) -> void:
+	var vs := _get_layout_size()
+	var texture_size := START_DIALOG_SIZE
+
+	var max_size := Vector2(vs.x * 0.82, vs.y * 0.74)
+	var scale_factor: float = minf(
+		max_size.x / texture_size.x,
+		max_size.y / texture_size.y
+	)
+	scale_factor = minf(scale_factor, 0.62)
+
+	var panel_size := texture_size * scale_factor
+	panel.position = (vs - panel_size) * 0.5
+	panel.size = panel_size
+
+
+func _is_active_dialog_visible() -> bool:
+	return _active_dialog != null \
+			and is_instance_valid(_active_dialog) \
+			and bool(_active_dialog.get("visible"))
+
+
+func _select_start_dialog_button(index: int) -> void:
+	_start_dialog_selected = clampi(index, 0, 1)
+	_update_start_dialog_highlight()
+
+
+func _update_start_dialog_highlight() -> void:
+	var target := _start_new_game_button if _start_dialog_selected == 0 else _continue_game_button
+	_start_dialog_highlight.visible = true
+	_start_dialog_highlight.position = target.position
+	_start_dialog_highlight.size = target.size
+	_start_dialog_highlight.move_to_front()
+	target.grab_focus()
+
+
+func _update_no_save_dialog_highlight() -> void:
+	_no_save_dialog_highlight.visible = true
+	_no_save_dialog_highlight.position = _no_save_new_game_button.position
+	_no_save_dialog_highlight.size = _no_save_new_game_button.size
+	_no_save_dialog_highlight.move_to_front()
+	_no_save_new_game_button.grab_focus()
+
+
+func _update_save_not_found_dialog_highlight() -> void:
+	_save_not_found_dialog_highlight.visible = true
+	_save_not_found_dialog_highlight.position = _save_not_found_ok_button.position
+	_save_not_found_dialog_highlight.size = _save_not_found_ok_button.size
+	_save_not_found_dialog_highlight.move_to_front()
+	_save_not_found_ok_button.grab_focus()
+
+
+func _select_overwrite_dialog_button(index: int) -> void:
+	_overwrite_dialog_selected = clampi(index, 0, 1)
+	_update_save_overwrite_dialog_highlight()
+
+
+func _update_save_overwrite_dialog_highlight() -> void:
+	var target := _save_overwrite_yes_button if _overwrite_dialog_selected == 0 else _save_overwrite_no_button
+	_save_overwrite_dialog_highlight.visible = true
+	_save_overwrite_dialog_highlight.position = target.position
+	_save_overwrite_dialog_highlight.size = target.size
+	_save_overwrite_dialog_highlight.move_to_front()
+	target.grab_focus()
+
+
+func _highlight_save_control(control: Control, grab_focus := true) -> void:
+	_save_slot_highlight.visible = true
+	_save_slot_highlight.position = control.position
+	_save_slot_highlight.size = control.size
+	if grab_focus:
+		control.grab_focus()
+
+
+func _hover_save_slot(index: int) -> void:
+	if index < 0 or index >= _save_slot_buttons.size():
+		return
+	_highlight_save_control(_save_slot_buttons[index], false)
+
+
+func _update_selected_save_slot_highlight() -> void:
+	if _slot_selected < 0 or _slot_selected >= _save_slot_buttons.size():
+		_save_slot_selected_highlight.visible = false
+		return
+	var button := _save_slot_buttons[_slot_selected]
+	_save_slot_selected_highlight.visible = true
+	_save_slot_selected_highlight.position = button.position
+	_save_slot_selected_highlight.size = button.size
+
+
+func _update_save_slot_highlight() -> void:
+	_update_selected_save_slot_highlight()
+
+
 # ============================================================
 # 键盘导航
 # ============================================================
 
 func _input(event: InputEvent) -> void:
+	if _save_overwrite_dialog.visible:
+		if event.is_action_pressed("ui_cancel") or event.is_action_pressed("escape"):
+			_hide_save_overwrite_dialog()
+			get_viewport().set_input_as_handled()
+		elif event.is_action_pressed("ui_left") or event.is_action_pressed("ui_up"):
+			_select_overwrite_dialog_button(0)
+			get_viewport().set_input_as_handled()
+		elif event.is_action_pressed("ui_right") or event.is_action_pressed("ui_down"):
+			_select_overwrite_dialog_button(1)
+			get_viewport().set_input_as_handled()
+		elif event.is_action_pressed("ui_accept") or event.is_action_pressed("interact"):
+			if _overwrite_dialog_selected == 0:
+				_confirm_overwrite_save()
+			else:
+				_hide_save_overwrite_dialog()
+			get_viewport().set_input_as_handled()
+		return
+
+	if _save_not_found_dialog.visible:
+		if event.is_action_pressed("ui_cancel") \
+				or event.is_action_pressed("escape") \
+				or event.is_action_pressed("ui_accept") \
+				or event.is_action_pressed("interact"):
+			_hide_save_not_found_dialog()
+			get_viewport().set_input_as_handled()
+		return
+
 	# 存档面板打开时，Esc 关闭面板
 	if _save_slots_visible:
 		if event.is_action_pressed("ui_cancel") or event.is_action_pressed("escape"):
 			_hide_save_slots()
 			get_viewport().set_input_as_handled()
+		elif event.is_action_pressed("ui_up"):
+			_select_slot(wrapi(_slot_selected - 1, 0, SaveManager.MAX_SLOTS))
+			get_viewport().set_input_as_handled()
+		elif event.is_action_pressed("ui_down"):
+			_select_slot(wrapi(_slot_selected + 1, 0, SaveManager.MAX_SLOTS))
+			get_viewport().set_input_as_handled()
+		elif event.is_action_pressed("ui_accept") or event.is_action_pressed("interact"):
+			_activate_selected_slot()
+			get_viewport().set_input_as_handled()
+		elif event is InputEventKey and event.pressed and event.keycode == KEY_DELETE:
+			_delete_selected_slot()
+			get_viewport().set_input_as_handled()
+		return
+
+	if _start_save_dialog.visible:
+		if event.is_action_pressed("ui_cancel") or event.is_action_pressed("escape"):
+			_hide_start_game_dialog()
+			get_viewport().set_input_as_handled()
+		elif event.is_action_pressed("ui_left") or event.is_action_pressed("ui_up"):
+			_select_start_dialog_button(0)
+			get_viewport().set_input_as_handled()
+		elif event.is_action_pressed("ui_right") or event.is_action_pressed("ui_down"):
+			_select_start_dialog_button(1)
+			get_viewport().set_input_as_handled()
+		elif event.is_action_pressed("ui_accept") or event.is_action_pressed("interact"):
+			if _start_dialog_selected == 0:
+				_on_start_dialog_new_game()
+			else:
+				_on_start_dialog_continue_game()
+			get_viewport().set_input_as_handled()
+		return
+
+	if _start_no_save_dialog.visible:
+		if event.is_action_pressed("ui_cancel") or event.is_action_pressed("escape"):
+			_hide_no_save_dialog()
+			get_viewport().set_input_as_handled()
+		elif event.is_action_pressed("ui_accept") or event.is_action_pressed("interact"):
+			_on_no_save_dialog_new_game()
+			get_viewport().set_input_as_handled()
 		return
 
 	# 有弹窗打开时不响应键盘
-	if _active_dialog and is_instance_valid(_active_dialog) and _active_dialog.visible:
+	if _is_active_dialog_visible():
 		return
 
 	if event.is_action_pressed("ui_up"):
@@ -277,6 +567,7 @@ func _update_selection() -> void:
 	# 移动选中高亮到当前选中热区的位置，并匹配其尺寸
 	if _selected >= 0 and _selected < _hit_areas.size():
 		var target := _hit_areas[_selected]
+		_selection_highlight.visible = true
 		_selection_highlight.position = target.position
 		_selection_highlight.size = target.size
 		target.grab_focus()
@@ -288,7 +579,7 @@ func _on_button_hovered(index: int) -> void:
 
 
 func _on_button_pressed(index: int) -> void:
-	if _active_dialog and is_instance_valid(_active_dialog) and _active_dialog.visible:
+	if _is_active_dialog_visible():
 		return
 	_selected = index
 	_update_selection()
@@ -322,69 +613,112 @@ func _has_occupied_save_slots() -> bool:
 		if slot.get("occupied", false):
 			return true
 	SaveManager.clear_active_slot()
-	print("[TitleScreen] _has_occupied_save_slots: 磁盘无存档，已清除活跃槽位")
 	return false
 
 
 func _show_start_game_dialog() -> void:
-	## 弹窗: 560×320 px，内边距 30px，两个按钮各 200×48 px 水平并排
-	var dialog := ConfirmationDialog.new()
-	dialog.title = "开始游戏"
-	dialog.dialog_text = "检测到已有游戏进度，请选择："
-	dialog.ok_button_text = "开始新游戏"
-	dialog.cancel_button_text = "继续当前游戏"
-	dialog.get_ok_button().custom_minimum_size = Vector2(200, 48)
-	dialog.get_cancel_button().custom_minimum_size = Vector2(200, 48)
+	_layout_start_save_dialog()
+	_start_save_dialog.visible = true
+	_start_save_dialog.move_to_front()
+	_active_dialog = _start_save_dialog
+	_select_start_dialog_button(0)
 
-	# 纸雕样式
-	_apply_dialog_panel_style(dialog)
-	_apply_title_button(dialog.get_ok_button())
-	_apply_title_button(dialog.get_cancel_button())
-	dialog.get_ok_button().add_theme_color_override("font_color", PAPER_GOLD)
-	dialog.get_cancel_button().add_theme_color_override("font_color", Color(0.32, 0.45, 0.22, 1.0))
 
-	dialog.confirmed.connect(_show_save_slots.bind("new_game"))
-	# 直接连接 Cancel 按钮的 pressed 信号，而非 dialog.canceled。
-	# Godot 4 的 ConfirmationDialog.canceled 会在 Cancel 按钮点击 AND/X 关闭/Escape 时都触发，
-	# 如果连到 _continue_game() 会导致关闭弹窗时意外进入游戏。
-	dialog.get_cancel_button().pressed.connect(_continue_game)
-	var dlg := dialog
-	dlg.close_requested.connect(func(): if _active_dialog == dlg: _active_dialog = null)
-	dlg.tree_exiting.connect(func(): if _active_dialog == dlg: _active_dialog = null)
+func _hide_start_game_dialog() -> void:
+	_start_save_dialog.visible = false
+	_start_dialog_highlight.visible = false
+	if _active_dialog == _start_save_dialog:
+		_active_dialog = null
 
-	add_child(dialog)
-	_active_dialog = dialog
-	dialog.popup_centered(Vector2i(560, 320))
+
+func _on_start_dialog_new_game() -> void:
+	_hide_start_game_dialog()
+	_show_save_slots("new_game")
+
+
+func _on_start_dialog_continue_game() -> void:
+	_hide_start_game_dialog()
+	_continue_game()
 
 
 func _show_no_save_dialog() -> void:
-	## 无存档时弹出提示，引导用户开始新游戏
-	var dialog := ConfirmationDialog.new()
-	dialog.title = "提示"
-	dialog.dialog_text = "未检测到存档"
-	dialog.ok_button_text = "开始新游戏"
-	# 隐藏取消按钮 — 无存档时只有"开始新游戏"一个选项
-	dialog.get_cancel_button().visible = false
-	dialog.get_ok_button().custom_minimum_size = Vector2(200, 48)
+	_layout_no_save_dialog()
+	_start_no_save_dialog.visible = true
+	_start_no_save_dialog.move_to_front()
+	_active_dialog = _start_no_save_dialog
+	_update_no_save_dialog_highlight()
 
-	_apply_dialog_panel_style(dialog)
-	_apply_title_button(dialog.get_ok_button())
-	dialog.get_ok_button().add_theme_color_override("font_color", PAPER_GOLD)
 
-	dialog.confirmed.connect(_show_save_slots.bind("new_game"))
-	var dlg := dialog
-	dlg.close_requested.connect(func(): if _active_dialog == dlg: _active_dialog = null)
-	dlg.tree_exiting.connect(func(): if _active_dialog == dlg: _active_dialog = null)
+func _hide_no_save_dialog() -> void:
+	_start_no_save_dialog.visible = false
+	_no_save_dialog_highlight.visible = false
+	if _active_dialog == _start_no_save_dialog:
+		_active_dialog = null
 
-	add_child(dialog)
-	_active_dialog = dialog
-	dialog.popup_centered(Vector2i(420, 200))
+
+func _on_no_save_dialog_new_game() -> void:
+	_hide_no_save_dialog()
+	_show_save_slots("new_game")
+
+
+func _show_save_not_found_dialog() -> void:
+	_layout_save_not_found_dialog()
+	_save_not_found_dialog.visible = true
+	_save_not_found_dialog.move_to_front()
+	_active_dialog = _save_not_found_dialog
+	_update_save_not_found_dialog_highlight()
+
+
+func _hide_save_not_found_dialog() -> void:
+	_save_not_found_dialog.visible = false
+	_save_not_found_dialog_highlight.visible = false
+	if _save_slots_visible:
+		_active_dialog = _save_slots_screen
+	elif _active_dialog == _save_not_found_dialog:
+		_active_dialog = null
+
+
+func _show_save_overwrite_dialog(slot: int) -> void:
+	_overwrite_target_slot = slot
+	_overwrite_dialog_selected = 1
+	_layout_save_overwrite_dialog()
+	_save_overwrite_dialog.visible = true
+	_save_overwrite_dialog.move_to_front()
+	_active_dialog = _save_overwrite_dialog
+	_update_save_overwrite_dialog_highlight()
+
+
+func _hide_save_overwrite_dialog() -> void:
+	_save_overwrite_dialog.visible = false
+	_save_overwrite_dialog_highlight.visible = false
+	_overwrite_target_slot = -1
+	if _save_slots_visible:
+		_active_dialog = _save_slots_screen
+	elif _active_dialog == _save_overwrite_dialog:
+		_active_dialog = null
+
+
+func _confirm_overwrite_save() -> void:
+	var slot := _overwrite_target_slot
+	if slot < 0:
+		_hide_save_overwrite_dialog()
+		return
+	_hide_save_overwrite_dialog()
+	_start_new_game_in_slot_unchecked(slot)
 
 
 func _start_new_game_in_slot() -> void:
 	if _slot_selected < 0:
 		return
 	var slot := _slot_selected
+	var slots := SaveManager.list_slots()
+	if slot < slots.size() and bool(slots[slot].get("occupied", false)):
+		_show_save_overwrite_dialog(slot)
+		return
+	_start_new_game_in_slot_unchecked(slot)
+
+
+func _start_new_game_in_slot_unchecked(slot: int) -> void:
 	print("[TitleScreen] 在槽位 %d 开始新游戏" % slot)
 
 	GameManager.new_game()
@@ -399,7 +733,7 @@ func _start_new_game_in_slot() -> void:
 func _continue_game() -> void:
 	var slot := SaveManager.get_last_active_slot()
 	if slot < 0:
-		_show_hint_dialog("提示", "没有找到存档文件。")
+		_show_save_not_found_dialog()
 		return
 	print("[TitleScreen] 继续游戏 (slot %d)" % slot)
 	SaveManager.load_game(slot)
@@ -451,8 +785,8 @@ func _show_hint_dialog(title_text: String, body_text: String) -> void:
 	_apply_dialog_panel_style(dialog)
 	_apply_title_button(dialog.get_ok_button())
 	var dlg := dialog
-	dlg.close_requested.connect(func(): if _active_dialog == dlg: _active_dialog = null)
-	dlg.tree_exiting.connect(func(): if _active_dialog == dlg: _active_dialog = null)
+	dlg.close_requested.connect(func(): if _active_dialog == dlg: _active_dialog = null; dlg.queue_free())
+	dlg.tree_exiting.connect(func(): if _active_dialog == dlg: _active_dialog = null; dlg.queue_free())
 
 	add_child(dialog)
 	_active_dialog = dialog
@@ -465,227 +799,106 @@ func _apply_dialog_panel_style(dialog: Window) -> void:
 
 
 # ============================================================
-# 存档加载面板
-# 弹窗尺寸参考: 620×400 px（实际为全屏覆盖模式）
-# 保留原有三槽位存档列表 + 加载/删除/返回按钮逻辑
+# 存档加载界面
+# 背景图内置存档视觉，只叠加三槽位/加载/删除透明交互热区
 # ============================================================
 
 func _show_save_slots(mode: String = "load") -> void:
 	_slot_mode = mode
 	var slots := SaveManager.list_slots()
 
-	# 加载模式：检查是否有已占用槽位
-	if mode == "load":
-		var has_any := false
-		for s in slots:
-			if s["occupied"]:
-				has_any = true
-				break
-		if not has_any:
-			_show_hint_dialog("提示", "没有找到存档文件。")
-			return
-
 	_save_slots_visible = true
-	_slot_selected = -1
+	_slot_selected = 0
 
 	# 隐藏主菜单热区和版本标签
 	_hit_container.visible = false
 	_version_label.visible = false
 
-	# 创建或显示存档面板
-	if not _slot_scroll:
-		_build_save_slot_panel()
-	else:
-		_slot_scroll.visible = true
-		_load_btn.visible = true
-		_delete_btn.visible = true
-		_back_btn.visible = true
-
-	# 根据模式显示不同按钮和标题
-	if mode == "load":
-		_slot_title_label.text = "加载存档"
-		_load_btn.visible = true
-		_delete_btn.visible = true
-		if _new_game_btn:
-			_new_game_btn.visible = false
-	else:  # "new_game"
-		_slot_title_label.text = "新游戏 — 选择槽位"
-		_load_btn.visible = false
-		_delete_btn.visible = false
-		if _new_game_btn:
-			_new_game_btn.visible = true
-
-	_slot_title_label.visible = true
+	_layout_save_slots_screen()
+	_save_slots_screen.visible = true
+	_save_slots_screen.move_to_front()
+	_active_dialog = _save_slots_screen
 	_refresh_slot_list(slots)
+	_select_slot(0)
 
 
 func _hide_save_slots() -> void:
 	_save_slots_visible = false
 	_slot_selected = -1
 	_slot_mode = ""
-
-	if _slot_scroll:
-		_slot_scroll.visible = false
-		_load_btn.visible = false
-		_delete_btn.visible = false
-		if _new_game_btn:
-			_new_game_btn.visible = false
-		_back_btn.visible = false
-	if _slot_title_label:
-		_slot_title_label.visible = false
+	_save_slots_screen.visible = false
+	_save_slot_highlight.visible = false
+	_save_slot_selected_highlight.visible = false
+	if _active_dialog == _save_slots_screen:
+		_active_dialog = null
 
 	_hit_container.visible = true
 	_version_label.visible = true
 	_update_selection()
 
 
-func _build_save_slot_panel() -> void:
-	var vs := get_viewport_rect().size
-
-	# 标题
-	_slot_title_label = Label.new()
-	_slot_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_slot_title_label.position = Vector2(0, 60)
-	_slot_title_label.size = Vector2(vs.x, 40)
-	_slot_title_label.add_theme_color_override("font_color", PAPER_INK)
-	_slot_title_label.add_theme_color_override(
-		"font_shadow_color", Color(0.95, 0.84, 0.62, 0.7)
-	)
-	_slot_title_label.add_theme_constant_override("shadow_offset_x", 1)
-	_slot_title_label.add_theme_constant_override("shadow_offset_y", 2)
-	_slot_title_label.add_theme_font_size_override("font_size", 22)
-	add_child(_slot_title_label)
-
-	# 滚动区域
-	_slot_scroll = ScrollContainer.new()
-	_slot_scroll.position = Vector2(vs.x / 2 - 260, 122)
-	_slot_scroll.size = Vector2(520, vs.y - 244)
-	_slot_scroll.add_theme_stylebox_override(
-		"panel", _paper_panel_style(Color(1, 1, 1, 0.98))
-	)
-	add_child(_slot_scroll)
-
-	_slot_list = VBoxContainer.new()
-	_slot_list.add_theme_constant_override("separation", 10)
-	_slot_scroll.add_child(_slot_list)
-
-	# 底部按钮栏
-	var btn_y := vs.y - 90
-
-	_back_btn = _make_slot_button("返回", Vector2(vs.x / 2 - 260, btn_y))
-	_back_btn.pressed.connect(_hide_save_slots)
-	add_child(_back_btn)
-
-	_delete_btn = _make_slot_button("删除", Vector2(vs.x / 2 - 74, btn_y))
-	_delete_btn.add_theme_color_override("font_color", PAPER_WARNING)
-	_delete_btn.pressed.connect(_delete_selected_slot)
-	add_child(_delete_btn)
-
-	_load_btn = _make_slot_button("加载", Vector2(vs.x / 2 + 112, btn_y))
-	_load_btn.add_theme_color_override("font_color", Color(0.32, 0.45, 0.22, 1))
-	_load_btn.pressed.connect(_load_selected_slot)
-	add_child(_load_btn)
-
-	# 新游戏专用按钮（初始隐藏）
-	_new_game_btn = _make_slot_button("新游戏", Vector2(vs.x / 2 + 112, btn_y))
-	_new_game_btn.add_theme_color_override("font_color", Color(0.32, 0.45, 0.22, 1))
-	_new_game_btn.pressed.connect(_start_new_game_in_slot)
-	_new_game_btn.visible = false
-	add_child(_new_game_btn)
-
-
-func _make_slot_button(text: String, pos: Vector2) -> Button:
-	var btn := Button.new()
-	btn.text = text
-	btn.position = pos
-	btn.size = Vector2(148, 48)
-	btn.add_theme_font_size_override("font_size", 15)
-	_apply_title_button(btn)
-	return btn
-
-
 func _refresh_slot_list(slots: Array) -> void:
-	## 统一刷新槽位列表（支持"加载"和"新游戏"两种模式）
-	for c in _slot_list.get_children():
-		c.queue_free()
-	_slot_containers.clear()
-
-	for i in slots.size():
-		var s: Dictionary = slots[i]
-		var slot_num: int = s["slot"]  # 0-based 内部索引
-		var occupied: bool = s["occupied"]
-		var container := Panel.new()
-		container.custom_minimum_size = Vector2(480, 72)
-
-		var final_slot := slot_num
-		if occupied or _slot_mode == "new_game":
-			container.gui_input.connect(
-				func(event: InputEvent):
-					if event is InputEventMouseButton and event.pressed:
-						_select_slot(final_slot)
-			)
-		container.add_theme_stylebox_override(
-			"panel",
-			_paper_slot_style(false, not occupied and _slot_mode == "load")
-		)
+	## 刷新场景内存档界面字段（支持"加载"和"新游戏"两种模式）
+	for i in range(mini(SaveManager.MAX_SLOTS, _save_slot_labels.size())):
+		var s: Dictionary = slots[i] if i < slots.size() else {
+			"slot": i,
+			"occupied": false,
+		}
+		var labels: Dictionary = _save_slot_labels[i]
+		var occupied: bool = s.get("occupied", false)
+		var muted := Color(0.30, 0.24, 0.17, 0.66)
+		var ink := Color(0.14, 0.09, 0.055, 0.98)
 
 		if occupied:
-			# 已有存档
-			var label := Label.new()
-			label.position = Vector2(28, 10)
-			label.text = "存档 %d  —  %s" % [slot_num + 1, s.get("timestamp_readable", "")]
-			label.add_theme_color_override("font_color", PAPER_INK)
-			label.add_theme_font_size_override("font_size", 14)
-			container.add_child(label)
-
-			var info := Label.new()
-			info.position = Vector2(28, 38)
-			var phase_names: Array[String] = ["初始", "探索", "危机A", "危机B", "论坛", "终局"]
-			var phase: int = s.get("phase", 0)
-			var phase_name: String = phase_names[min(phase, phase_names.size() - 1)]
-			info.text = "角色: %s  |  进度: %.0f%%  |  阶段: %s" % [
-				s.get("player_name", "?"),
-				s.get("progress", 0) * 100,
-				phase_name,
-			]
-			info.add_theme_color_override("font_color", PAPER_INK_MUTED)
-			info.add_theme_font_size_override("font_size", 11)
-			container.add_child(info)
-
-			# 新游戏模式：被占用的槽位显示覆盖警告
-			if _slot_mode == "new_game":
-				var warn := Label.new()
-				warn.position = Vector2(350, 47)
-				warn.text = "[注意] 将被覆盖"
-				warn.add_theme_color_override("font_color", PAPER_WARNING)
-				warn.add_theme_font_size_override("font_size", 10)
-				container.add_child(warn)
+			(labels["name"] as Label).text = s.get("save_name", _default_save_name(i))
+			(labels["time"] as Label).text = _format_play_time(float(s.get("play_time_seconds", 0.0)))
+			(labels["date"] as Label).text = _format_save_date(s)
+			(labels["progress"] as Label).text = "%.0f%%" % (float(s.get("progress", 0.0)) * 100.0)
+			for key in labels:
+				(labels[key] as Label).add_theme_color_override("font_color", ink)
 		else:
-			# 空槽位
-			var label := Label.new()
-			label.position = Vector2(28, 24)
-			if _slot_mode == "load":
-				label.text = "存档 %d  —  [ 空 ]" % (slot_num + 1)
-				label.add_theme_color_override("font_color", PAPER_DIM)
-			else:
-				label.text = "存档 %d  —  [ 空槽位 ]" % (slot_num + 1)
-				label.add_theme_color_override("font_color", PAPER_INK_MUTED)
-			label.add_theme_font_size_override("font_size", 14)
-			container.add_child(label)
-
-		_slot_list.add_child(container)
-		_slot_containers.append(container)
-
-	_slot_selected = -1
+			(labels["name"] as Label).text = "空槽位"
+			(labels["time"] as Label).text = "--:--:--"
+			(labels["date"] as Label).text = "----.--.--"
+			(labels["progress"] as Label).text = "--%"
+			for key in labels:
+				(labels[key] as Label).add_theme_color_override("font_color", muted)
 
 
 func _select_slot(index: int) -> void:
-	_slot_selected = index
-	for i in _slot_containers.size():
-		var container := _slot_containers[i]
-		container.add_theme_stylebox_override(
-			"panel", _paper_slot_style(i == _slot_selected)
-		)
+	_slot_selected = clampi(index, 0, SaveManager.MAX_SLOTS - 1)
+	_update_save_slot_highlight()
+
+
+func _activate_selected_slot() -> void:
+	if _slot_mode == "new_game":
+		_start_new_game_in_slot()
+	else:
+		_load_selected_slot()
+
+
+func _default_save_name(slot: int) -> String:
+	return "溯光档案 %02d" % (slot + 1)
+
+
+func _format_play_time(seconds: float) -> String:
+	var total := maxi(0, int(seconds))
+	var hours := total / 3600
+	var minutes := (total % 3600) / 60
+	var secs := total % 60
+	return "%02d:%02d:%02d" % [hours, minutes, secs]
+
+
+func _format_save_date(slot_info: Dictionary) -> String:
+	var readable: String = str(slot_info.get("timestamp_readable", ""))
+	if readable.length() >= 10:
+		return readable.substr(0, 10).replace("-", ".")
+
+	var timestamp := int(slot_info.get("timestamp", 0))
+	if timestamp <= 0:
+		return "----.--.--"
+	var date := Time.get_datetime_dict_from_unix_time(timestamp)
+	return "%04d.%02d.%02d" % [date["year"], date["month"], date["day"]]
 
 
 func _load_selected_slot() -> void:
@@ -693,7 +906,7 @@ func _load_selected_slot() -> void:
 		return
 	var slots := SaveManager.list_slots()
 	if _slot_selected >= slots.size() or not slots[_slot_selected]["occupied"]:
-		_show_hint_dialog("提示", "没有找到存档文件。")
+		_show_save_not_found_dialog()
 		return
 	var slot := _slot_selected
 	print("[TitleScreen] 加载存档 slot %d" % slot)
@@ -709,6 +922,7 @@ func _delete_selected_slot() -> void:
 	SaveManager.delete_slot(slot)
 	_has_saves = _has_occupied_save_slots()
 	_refresh_slot_list(SaveManager.list_slots())
+	_select_slot(slot)
 
 
 # ============================================================
@@ -734,15 +948,6 @@ func _paper_panel_style(tint := Color.WHITE) -> StyleBoxTexture:
 	return _paper_style(PAPER_PANEL, 72.0, tint)
 
 
-func _paper_slot_style(selected := false, unavailable := false) -> StyleBoxTexture:
-	var tint := Color(1, 1, 1, 1)
-	if selected:
-		tint = Color(1.12, 1.03, 0.82, 1)
-	elif unavailable:
-		tint = Color(0.82, 0.80, 0.74, 0.82)
-	return _paper_style(PAPER_SLOT, 32.0, tint)
-
-
 func _apply_title_button(button: Button, selected := false, unavailable := false) -> void:
 	button.add_theme_stylebox_override(
 		"normal",
@@ -760,3 +965,16 @@ func _apply_title_button(button: Button, selected := false, unavailable := false
 	button.add_theme_color_override("font_focus_color", PAPER_INK)
 	button.add_theme_color_override("font_pressed_color", Color(0.92, 0.84, 0.62, 1.0))
 	button.add_theme_color_override("font_disabled_color", PAPER_DIM)
+
+
+func _apply_transparent_button(button: Button) -> void:
+	var empty := StyleBoxEmpty.new()
+	button.text = ""
+	button.flat = true
+	button.focus_mode = Control.FOCUS_ALL
+	button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	button.add_theme_stylebox_override("normal", empty)
+	button.add_theme_stylebox_override("hover", empty)
+	button.add_theme_stylebox_override("pressed", empty)
+	button.add_theme_stylebox_override("focus", empty)
+	button.add_theme_stylebox_override("disabled", empty)

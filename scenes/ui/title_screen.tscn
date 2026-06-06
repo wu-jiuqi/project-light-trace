@@ -2,6 +2,11 @@
 
 [ext_resource type="Script" uid="uid://j5lnc3gxvp0b" path="res://scripts/ui/title_screen.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://dy7bgstarthv1" path="res://assets/ui/title_start_bg.jpg" id="2_bg"]
+[ext_resource type="Texture2D" uid="uid://fppe3j2cxxqj" path="res://assets/ui/start_save_dialog_bg.png" id="3_start_dialog_bg"]
+[ext_resource type="Texture2D" uid="uid://cvay8itj4puhp" path="res://assets/ui/start_no_save_dialog_bg.png" id="4_no_save_dialog_bg"]
+[ext_resource type="Texture2D" uid="uid://d2uidu7u7nwy2" path="res://assets/ui/save_slots_bg.png" id="5_save_slots_bg"]
+[ext_resource type="Texture2D" uid="uid://bx4o541neqkc7" path="res://assets/ui/save_not_found_dialog_bg.png" id="6_save_not_found_bg"]
+[ext_resource type="Texture2D" uid="uid://catj4odugir4v" path="res://assets/ui/save_overwrite_dialog_bg.png" id="7_save_overwrite_bg"]
 
 [node name="TitleScreen" type="Control" unique_id=922980833]
 layout_mode = 3
@@ -42,3 +47,567 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 color = Color(0.09, 0.07, 0.045, 0.1)
+
+[node name="HitContainer" type="Control" parent="." unique_id=2000000001]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+
+[node name="HitArea1" type="ColorRect" parent="HitContainer" unique_id=2000000002]
+layout_mode = 1
+offset_left = 735.0
+offset_top = 75.0
+offset_right = 1140.0
+offset_bottom = 179.0
+focus_mode = 2
+mouse_default_cursor_shape = 2
+color = Color(1, 1, 1, 0)
+
+[node name="HitArea2" type="ColorRect" parent="HitContainer" unique_id=2000000003]
+layout_mode = 1
+offset_left = 735.0
+offset_top = 195.0
+offset_right = 1140.0
+offset_bottom = 286.0
+focus_mode = 2
+mouse_default_cursor_shape = 2
+color = Color(1, 1, 1, 0)
+
+[node name="HitArea3" type="ColorRect" parent="HitContainer" unique_id=2000000004]
+layout_mode = 1
+offset_left = 735.0
+offset_top = 300.0
+offset_right = 1140.0
+offset_bottom = 387.0
+focus_mode = 2
+mouse_default_cursor_shape = 2
+color = Color(1, 1, 1, 0)
+
+[node name="HitArea4" type="ColorRect" parent="HitContainer" unique_id=2000000005]
+layout_mode = 1
+offset_left = 733.0
+offset_top = 400.0
+offset_right = 1138.0
+offset_bottom = 487.0
+focus_mode = 2
+mouse_default_cursor_shape = 2
+color = Color(1, 1, 1, 0)
+
+[node name="HitArea5" type="ColorRect" parent="HitContainer" unique_id=2000000006]
+layout_mode = 1
+offset_left = 735.0
+offset_top = 500.0
+offset_right = 1140.0
+offset_bottom = 590.0
+focus_mode = 2
+mouse_default_cursor_shape = 2
+color = Color(1, 1, 1, 0)
+
+[node name="SelectionHighlight" type="ColorRect" parent="HitContainer" unique_id=2000000007]
+visible = false
+layout_mode = 1
+mouse_filter = 2
+color = Color(0.75, 0.5, 0.18, 0.24)
+
+[node name="VersionLabel" type="Label" parent="." unique_id=2000000008]
+layout_mode = 1
+theme_override_colors/font_color = Color(0.32, 0.25, 0.17, 0.72)
+theme_override_font_sizes/font_size = 12
+text = "溯光计划 v0.2.0"
+
+[node name="StartSaveDialog" type="Control" parent="." unique_id=795521632]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelRoot" type="Control" parent="StartSaveDialog" unique_id=1308534866]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 140.0
+offset_top = 54.0
+offset_right = 1140.0
+offset_bottom = 625.0
+
+[node name="DialogBG" type="TextureRect" parent="StartSaveDialog/PanelRoot" unique_id=487865129]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_start_dialog_bg")
+expand_mode = 1
+
+[node name="DialogHighlight" type="ColorRect" parent="StartSaveDialog/PanelRoot" unique_id=2000000009]
+visible = false
+layout_mode = 1
+mouse_filter = 2
+color = Color(0.75, 0.5, 0.18, 0.24)
+
+[node name="StartNewGameButton" type="Button" parent="StartSaveDialog/PanelRoot" unique_id=2000000010]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.168
+anchor_top = 0.717
+anchor_right = 0.476
+anchor_bottom = 0.862
+grow_horizontal = 2
+grow_vertical = 2
+mouse_default_cursor_shape = 2
+flat = true
+
+[node name="ContinueGameButton" type="Button" parent="StartSaveDialog/PanelRoot" unique_id=2000000011]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.523
+anchor_top = 0.717
+anchor_right = 0.833
+anchor_bottom = 0.862
+grow_horizontal = 2
+grow_vertical = 2
+mouse_default_cursor_shape = 2
+flat = true
+
+[node name="StartNoSaveDialog" type="Control" parent="." unique_id=723241757]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelRoot" type="Control" parent="StartNoSaveDialog" unique_id=1039620879]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 140.0
+offset_top = 54.0
+offset_right = 1140.0
+offset_bottom = 625.0
+
+[node name="DialogBG" type="TextureRect" parent="StartNoSaveDialog/PanelRoot" unique_id=1369676976]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("4_no_save_dialog_bg")
+expand_mode = 1
+
+[node name="DialogHighlight" type="ColorRect" parent="StartNoSaveDialog/PanelRoot" unique_id=2000000012]
+visible = false
+layout_mode = 1
+mouse_filter = 2
+color = Color(0.75, 0.5, 0.18, 0.24)
+
+[node name="StartNewGameButton" type="Button" parent="StartNoSaveDialog/PanelRoot" unique_id=2000000013]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.301
+anchor_top = 0.734
+anchor_right = 0.699
+anchor_bottom = 0.872
+grow_horizontal = 2
+grow_vertical = 2
+mouse_default_cursor_shape = 2
+flat = true
+
+[node name="SaveNotFoundDialog" type="Control" parent="." unique_id=448576670]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelRoot" type="Control" parent="SaveNotFoundDialog" unique_id=581211444]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 140.0
+offset_top = 54.0
+offset_right = 1140.0
+offset_bottom = 625.0
+
+[node name="DialogBG" type="TextureRect" parent="SaveNotFoundDialog/PanelRoot" unique_id=852240275]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("6_save_not_found_bg")
+expand_mode = 1
+
+[node name="DialogHighlight" type="ColorRect" parent="SaveNotFoundDialog/PanelRoot" unique_id=2000000014]
+visible = false
+layout_mode = 1
+mouse_filter = 2
+color = Color(0.75, 0.5, 0.18, 0.24)
+
+[node name="OkButton" type="Button" parent="SaveNotFoundDialog/PanelRoot" unique_id=2000000015]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.369
+anchor_top = 0.673
+anchor_right = 0.626
+anchor_bottom = 0.82
+offset_left = 3.0
+offset_top = -20.28299
+offset_right = 3.0
+offset_bottom = -27.220001
+grow_horizontal = 2
+grow_vertical = 2
+mouse_default_cursor_shape = 2
+flat = true
+
+[node name="SaveOverwriteDialog" type="Control" parent="." unique_id=671920909]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelRoot" type="Control" parent="SaveOverwriteDialog" unique_id=1835064189]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 140.0
+offset_top = 54.0
+offset_right = 1140.0
+offset_bottom = 625.0
+
+[node name="DialogBG" type="TextureRect" parent="SaveOverwriteDialog/PanelRoot" unique_id=260353051]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("7_save_overwrite_bg")
+expand_mode = 1
+
+[node name="DialogHighlight" type="ColorRect" parent="SaveOverwriteDialog/PanelRoot" unique_id=2000000016]
+visible = false
+layout_mode = 1
+mouse_filter = 2
+color = Color(0.75, 0.5, 0.18, 0.24)
+
+[node name="YesButton" type="Button" parent="SaveOverwriteDialog/PanelRoot" unique_id=2000000017]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.248
+anchor_top = 0.662
+anchor_right = 0.48
+anchor_bottom = 0.807
+offset_left = -1.0
+offset_top = -18.002014
+offset_right = -1.0
+offset_bottom = -24.796997
+grow_horizontal = 2
+grow_vertical = 2
+mouse_default_cursor_shape = 2
+flat = true
+
+[node name="NoButton" type="Button" parent="SaveOverwriteDialog/PanelRoot" unique_id=2000000018]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.521
+anchor_top = 0.662
+anchor_right = 0.752
+anchor_bottom = 0.807
+offset_top = -17.002014
+offset_right = -4.0
+offset_bottom = -24.796997
+grow_horizontal = 2
+grow_vertical = 2
+mouse_default_cursor_shape = 2
+flat = true
+
+[node name="SaveSlotsScreen" type="Control" parent="." unique_id=1063951931]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelRoot" type="Control" parent="SaveSlotsScreen" unique_id=1535346177]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 140.0
+offset_top = 54.0
+offset_right = 1140.0
+offset_bottom = 625.0
+
+[node name="DialogBG" type="TextureRect" parent="SaveSlotsScreen/PanelRoot" unique_id=984875472]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("5_save_slots_bg")
+expand_mode = 1
+
+[node name="SlotHighlight" type="ColorRect" parent="SaveSlotsScreen/PanelRoot" unique_id=2000000019]
+visible = false
+layout_mode = 1
+mouse_filter = 2
+color = Color(0.7, 0.46, 0.16, 0.22)
+
+[node name="SlotSelectedHighlight" type="ColorRect" parent="SaveSlotsScreen/PanelRoot" unique_id=2000000020]
+visible = false
+layout_mode = 1
+mouse_filter = 2
+color = Color(0.95, 0.62, 0.16, 0.32)
+
+[node name="Slot1Name" type="Label" parent="SaveSlotsScreen/PanelRoot" unique_id=589281605]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.575075
+anchor_top = 0.284159
+anchor_right = 0.929
+anchor_bottom = 0.321697
+offset_left = -18.074951
+offset_top = 23.745209
+offset_right = -18.074951
+offset_bottom = 29.31102
+theme_override_colors/font_color = Color(0.18, 0.12, 0.075, 1)
+theme_override_font_sizes/font_size = 18
+
+[node name="Slot1Time" type="Label" parent="SaveSlotsScreen/PanelRoot" unique_id=76641793]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5429
+anchor_top = 0.336712
+anchor_right = 0.896825
+anchor_bottom = 0.35548
+offset_left = -5.9000244
+offset_top = 19.737442
+offset_right = -5.9000244
+offset_bottom = 32.020935
+theme_override_colors/font_color = Color(0.18, 0.12, 0.075, 0.92)
+theme_override_font_sizes/font_size = 15
+
+[node name="Slot1Date" type="Label" parent="SaveSlotsScreen/PanelRoot" unique_id=160407282]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5429
+anchor_top = 0.368619
+anchor_right = 0.896825
+anchor_bottom = 0.387387
+offset_left = -7.9000244
+offset_top = 17.518555
+offset_right = -7.9000244
+offset_bottom = 29.802017
+theme_override_colors/font_color = Color(0.18, 0.12, 0.075, 0.92)
+theme_override_font_sizes/font_size = 15
+
+[node name="Slot1Progress" type="Label" parent="SaveSlotsScreen/PanelRoot" unique_id=729807330]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5429
+anchor_top = 0.396772
+anchor_right = 0.896825
+anchor_bottom = 0.415541
+offset_left = -9.900024
+offset_top = 19.443176
+offset_right = -9.900024
+offset_bottom = 31.72609
+theme_override_colors/font_color = Color(0.18, 0.12, 0.075, 0.92)
+theme_override_font_sizes/font_size = 15
+
+[node name="Slot2Name" type="Label" parent="SaveSlotsScreen/PanelRoot" unique_id=1021115519]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.575075
+anchor_top = 0.490616
+anchor_right = 0.929
+anchor_bottom = 0.528153
+offset_left = -10.074951
+offset_top = 17.858276
+offset_right = -10.074951
+offset_bottom = 23.424622
+theme_override_colors/font_color = Color(0.18, 0.12, 0.075, 1)
+theme_override_font_sizes/font_size = 18
+
+[node name="Slot2Time" type="Label" parent="SaveSlotsScreen/PanelRoot" unique_id=1914017828]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5429
+anchor_top = 0.543168
+anchor_right = 0.896825
+anchor_bottom = 0.561937
+offset_left = -6.9000244
+offset_top = 9.851074
+offset_right = -6.9000244
+offset_bottom = 22.134003
+theme_override_colors/font_color = Color(0.18, 0.12, 0.075, 0.92)
+theme_override_font_sizes/font_size = 15
+
+[node name="Slot2Date" type="Label" parent="SaveSlotsScreen/PanelRoot" unique_id=618494077]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5429
+anchor_top = 0.575075
+anchor_right = 0.896825
+anchor_bottom = 0.593844
+offset_left = -7.9000244
+offset_top = 11.632202
+offset_right = -7.9000244
+offset_bottom = 23.91507
+theme_override_colors/font_color = Color(0.18, 0.12, 0.075, 0.92)
+theme_override_font_sizes/font_size = 15
+
+[node name="Slot2Progress" type="Label" parent="SaveSlotsScreen/PanelRoot" unique_id=843880756]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5429
+anchor_top = 0.603228
+anchor_right = 0.896825
+anchor_bottom = 0.621997
+offset_left = -7.9000244
+offset_top = 11.556824
+offset_right = -7.9000244
+offset_bottom = 23.839722
+theme_override_colors/font_color = Color(0.18, 0.12, 0.075, 0.92)
+theme_override_font_sizes/font_size = 15
+
+[node name="Slot3Name" type="Label" parent="SaveSlotsScreen/PanelRoot" unique_id=632439458]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.575075
+anchor_top = 0.697072
+anchor_right = 0.929
+anchor_bottom = 0.73461
+offset_left = -14.074951
+offset_top = 5.971863
+offset_right = -14.074951
+offset_bottom = 11.537689
+theme_override_colors/font_color = Color(0.18, 0.12, 0.075, 1)
+theme_override_font_sizes/font_size = 18
+
+[node name="Slot3Time" type="Label" parent="SaveSlotsScreen/PanelRoot" unique_id=4707970]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5429
+anchor_top = 0.749625
+anchor_right = 0.896825
+anchor_bottom = 0.768393
+offset_left = -4.9000244
+offset_top = 1.9641113
+offset_right = -4.9000244
+offset_bottom = 14.24762
+theme_override_colors/font_color = Color(0.18, 0.12, 0.075, 0.92)
+theme_override_font_sizes/font_size = 15
+
+[node name="Slot3Date" type="Label" parent="SaveSlotsScreen/PanelRoot" unique_id=623970915]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5429
+anchor_top = 0.781532
+anchor_right = 0.896825
+anchor_bottom = 0.8003
+offset_left = -6.9000244
+offset_top = -1.2547607
+offset_right = -6.9000244
+offset_bottom = 11.028687
+theme_override_colors/font_color = Color(0.18, 0.12, 0.075, 0.92)
+theme_override_font_sizes/font_size = 15
+
+[node name="Slot3Progress" type="Label" parent="SaveSlotsScreen/PanelRoot" unique_id=1005011308]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5429
+anchor_top = 0.809685
+anchor_right = 0.896825
+anchor_bottom = 0.828453
+offset_left = -7.9000244
+offset_top = 1.6698608
+offset_right = -7.9000244
+offset_bottom = 13.953339
+theme_override_colors/font_color = Color(0.18, 0.12, 0.075, 0.92)
+theme_override_font_sizes/font_size = 15
+
+[node name="Slot1Button" type="Button" parent="SaveSlotsScreen/PanelRoot" unique_id=2000000021]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.191
+anchor_top = 0.306
+anchor_right = 0.807
+anchor_bottom = 0.486
+grow_horizontal = 2
+grow_vertical = 2
+mouse_default_cursor_shape = 2
+flat = true
+
+[node name="Slot2Button" type="Button" parent="SaveSlotsScreen/PanelRoot" unique_id=2000000022]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.191
+anchor_top = 0.511
+anchor_right = 0.807
+anchor_bottom = 0.682
+grow_horizontal = 2
+grow_vertical = 2
+mouse_default_cursor_shape = 2
+flat = true
+
+[node name="Slot3Button" type="Button" parent="SaveSlotsScreen/PanelRoot" unique_id=2000000023]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.191
+anchor_top = 0.703
+anchor_right = 0.807
+anchor_bottom = 0.862
+grow_horizontal = 2
+grow_vertical = 2
+mouse_default_cursor_shape = 2
+flat = true
+
+[node name="LoadButton" type="Button" parent="SaveSlotsScreen/PanelRoot" unique_id=2000000024]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.313
+anchor_top = 0.884
+anchor_right = 0.487
+anchor_bottom = 0.949
+offset_right = -7.0
+offset_bottom = 9.120972
+grow_horizontal = 2
+grow_vertical = 2
+mouse_default_cursor_shape = 2
+flat = true
+
+[node name="DeleteButton" type="Button" parent="SaveSlotsScreen/PanelRoot" unique_id=2000000025]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.511
+anchor_top = 0.884
+anchor_right = 0.681
+anchor_bottom = 0.949
+offset_left = -5.0
+offset_top = 0.23596191
+offset_right = -11.0
+offset_bottom = 11.120972
+grow_horizontal = 2
+grow_vertical = 2
+mouse_default_cursor_shape = 2
+flat = true

@@ -1,0 +1,523 @@
+{
+  "schemaVersion": 1,
+  "scope": "0003",
+  "fragment": {
+    "id": "0003",
+    "name": "月下神社"
+  },
+  "sourceDocument": "design/items/0003/0003_物品清单.md",
+  "lastSynced": "2026-06-07",
+  "summary": {
+    "totalAssets": 43,
+    "priorityCount": {
+      "P0": 22,
+      "P1": 13,
+      "P2": 5
+    },
+    "categoryCount": {
+      "environment": 14,
+      "prop": 16,
+      "fx": 10
+    },
+    "requiredForCount": {
+      "0003_full": 18,
+      "vertical_slice": 22
+    },
+    "note": "按清单正文唯一资产 ID 生成；与 Markdown 页首统计保持一致。shadowOffsets：全碎片L2建筑2-4px/L1道具1-2px正下方暖灰阴影（天顶光源例外）。lightSource：天顶满月——已在style_bible例外条款中登记。miko_mirror_foil：60%例外——已登记。shaderPenetrationMasks：7个穿透候选物品的Mask以独立批次在Shader开发阶段统一管理，不在此manifest中逐条目注册。"
+  },
+  "assets": [
+    {
+      "id": "0003_env_torii_gate",
+      "path": "assets/papercraft/fragments/0003/environment/0003_env_torii_gate.png",
+      "category": "environment",
+      "role": "灰白鸟居——神社入口标志。颜色被剥离的视觉信号，灰白色而非传统朱红。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "灰白石纹纸#C8C4BC。双层纸板笠木。柱间通行48px。32px下通过'灰白门形剪影'辨识。"
+    },
+    {
+      "id": "0003_env_sando_ground",
+      "path": "assets/papercraft/fragments/0003/environment/0003_env_sando_ground_straight.png",
+      "category": "environment",
+      "role": "参道石板路——从鸟居到本殿的铺装模块。过于干净——无青苔无落叶。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "variants": [
+        "0003_env_sando_ground_straight",
+        "0003_env_sando_ground_edge",
+        "0003_env_sando_ground_corner"
+      ],
+      "variantStrategy": "单一美术资产，3个变体通过TileMap autotile bitmask在引擎中自动切换。straight用于直段、edge用于边界过渡、corner用于转角。64×64px无缝平铺。",
+      "notes": "中暖灰#A89888，石板不规则矩形手工裁切。深灰缝#888078。64×64px无缝平铺。straight/edge/corner三个变体通过Godot TileMap autotile自动切换——无需独立PNG文件。"
+    },
+    {
+      "id": "0003_env_sando_ground_straight",
+      "parentId": "0003_env_sando_ground",
+      "path": "assets/papercraft/fragments/0003/environment/0003_env_sando_ground_straight.png",
+      "category": "environment",
+      "role": "参道直段变体——鸟居到本殿的主路径",
+      "status": "planned",
+      "generation": "variant_of",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "sando_ground straight变体。参道主体路径铺装。"
+    },
+    {
+      "id": "0003_env_sando_ground_edge",
+      "parentId": "0003_env_sando_ground",
+      "path": "assets/papercraft/fragments/0003/environment/0003_env_sando_ground_edge.png",
+      "category": "environment",
+      "role": "参道边缘变体——参道与自然环境（草地/砾石）的过渡边界",
+      "status": "planned",
+      "generation": "variant_of",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "sando_ground edge变体。一侧为石板、一侧为自然过渡的边界模块。"
+    },
+    {
+      "id": "0003_env_sando_ground_corner",
+      "parentId": "0003_env_sando_ground",
+      "path": "assets/papercraft/fragments/0003/environment/0003_env_sando_ground_corner.png",
+      "category": "environment",
+      "role": "参道转角变体——分支路径与主参道的交汇处",
+      "status": "planned",
+      "generation": "variant_of",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "sando_ground corner变体。用于手水舍分支路径与主参道交汇处。"
+    },
+    {
+      "id": "0003_env_stone_lantern",
+      "path": "assets/papercraft/fragments/0003/environment/0003_env_stone_lantern.png",
+      "category": "environment",
+      "role": "参道两侧石灯笼×12——三段式纸艺结构。底座刻字（压痕），色标纸条标识仪式步骤。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "高48px宽12px。底座刻字#706860压痕。色标纸条6色对应仪式步骤。12个实例共用同一美术资产——刻字纹理和色标通过实例参数切换。"
+    },
+    {
+      "id": "0003_prop_sando_hint_stone",
+      "path": "assets/papercraft/fragments/0003/props/0003_prop_sando_hint_stone.png",
+      "category": "prop",
+      "role": "参道提示石碑——刻'二十一'三字，将击掌次数从'需计算'变为'需发现'。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0003_full",
+      "priority": "P1",
+      "notes": "灰石#A09890，16×18px。刻字#706860深灰。鸟居旁参道入口处。"
+    },
+    {
+      "id": "0003_prop_torii_handprints",
+      "path": "assets/papercraft/fragments/0003/props/0003_prop_torii_handprints.png",
+      "category": "prop",
+      "role": "鸟居柱底手掌印——暗示有人推过柱子。一大一小两个手印。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0003_full",
+      "priority": "P2",
+      "notes": "深灰#989490。成年男性14px高/女性或少年10px高。纯视觉发现无提示。"
+    },
+    {
+      "id": "0003_prop_torii_kasagi_inscription",
+      "path": "assets/papercraft/fragments/0003/props/0003_prop_torii_kasagi_inscription.png",
+      "category": "prop",
+      "role": "鸟居笠木内侧刻字——暗线B种子。测试负责人日志：AI在测试第三天开始质疑。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0003_full",
+      "priority": "P1",
+      "notes": "刻痕#605850，字高2px。仅鸟居正下方抬头可见。book_page底#D8D0C0。文案由本地化字段控制。"
+    },
+    {
+      "id": "0003_env_chozuya",
+      "path": "assets/papercraft/fragments/0003/environment/0003_env_chozuya.png",
+      "category": "environment",
+      "role": "手水舍建筑——四柱小型开放式结构。'最后一条仍在执行的指令'的容器。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0003_full",
+      "priority": "P1",
+      "notes": "四柱暗木色#8B7050。屋顶#787068切妻造缓坡。开放式——可从任意方向接近水盘。"
+    },
+    {
+      "id": "0003_env_chozuya_basin",
+      "path": "assets/papercraft/fragments/0003/environment/0003_env_chozuya_basin.png",
+      "category": "environment",
+      "role": "手水舍石质水盘——仪式第一步'祓'执行处。唯一流动的水源。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "圆形石盆#B0A898直径28px。水面#C8D4D8。水垢#D8D4C8。舀水后水位不降——水不是消耗品。"
+    },
+    {
+      "id": "0003_prop_chozuya_ladle",
+      "path": "assets/papercraft/fragments/0003/props/0003_prop_chozuya_ladle.png",
+      "category": "prop",
+      "role": "手水舍木杓——'祓'步骤的核心交互道具。拾取→舀水→洗手→放回。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "全长22px，杓柄#A08870牛皮纸卷制。杓头椭圆木碗#B09880宽8px。双状态：放置/手持。"
+    },
+    {
+      "id": "0003_env_dry_well",
+      "path": "assets/papercraft/fragments/0003/environment/0003_env_dry_well.png",
+      "category": "environment",
+      "role": "枯井——AI的'自我检视界面'。井底是完美反射面而非水面。月影颜色3分钟循环。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "石造井口#908878外径36px。井壁深灰#706860。井深48px。反射面独立FX资产挂在井底。靠近井口有微凉感。"
+    },
+    {
+      "id": "0003_prop_well_bucket",
+      "path": "assets/papercraft/fragments/0003/props/0003_prop_well_bucket.png",
+      "category": "prop",
+      "role": "枯井井绳木桶——放入井中碰到反射面时无法穿过（像碰到玻璃）。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0003_full",
+      "priority": "P1",
+      "notes": "木桶#A08870直径10px。井绳#B8A890纤维纸。放入井中约2秒动画→碰到反射面→回弹。"
+    },
+    {
+      "id": "0003_env_treasure_hall",
+      "path": "assets/papercraft/fragments/0003/environment/0003_env_treasure_hall.png",
+      "category": "environment",
+      "role": "宝物殿建筑——小型木造贮藏库。'公司留下的疤痕'最明显处。警觉L4时门缓慢关闭。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0003_full",
+      "priority": "P1",
+      "notes": "暗木色纸板#8B7868。校仓造风格。入母屋造屋顶#706860。拉门宽2tiles。"
+    },
+    {
+      "id": "0003_env_treasure_hall_interior",
+      "path": "assets/papercraft/fragments/0003/environment/0003_env_treasure_hall_interior.png",
+      "category": "environment",
+      "role": "宝物殿内部——无窗暗室。所有物品奇怪地朝向本殿方向排列。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0003_full",
+      "priority": "P1",
+      "notes": "深木色#685848。64×64px。仅门口月光照明。架上勾玉盒微微发光引导玩家。"
+    },
+    {
+      "id": "0003_env_treasure_shelves",
+      "path": "assets/papercraft/fragments/0003/environment/0003_env_treasure_shelves.png",
+      "category": "environment",
+      "role": "宝物殿架子——三层木隔板。放置勾玉盒、铜铃、白色布帛。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0003_full",
+      "priority": "P1",
+      "notes": "暗木色#8B7868。宽32px×高36px。上层白布/中层勾玉盒(中央)/下层铜铃。所有物品微朝向本殿。"
+    },
+    {
+      "id": "0003_prop_magatama_box",
+      "path": "assets/papercraft/fragments/0003/props/0003_prop_magatama_box.png",
+      "category": "prop",
+      "role": "勾玉盒——方形木盒带三旋钮锁。盒盖内部刻颜色-步骤映射表。盒底刻暗线B测试记录。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "暗木#7B6858。18×14×10px。3旋钮直径3px各6图案。解：红→蓝→黄。三状态：上锁/解锁/空盒。"
+    },
+    {
+      "id": "0003_prop_magatama",
+      "path": "assets/papercraft/fragments/0003/props/0003_prop_magatama.png",
+      "category": "prop",
+      "role": "勾玉——仪式第三步'捧'的祭品。弯曲逗号形淡蓝灰玉珠。投入枯井反射面。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "淡蓝灰#80A0C0。长10px弯曲逗号形。纸艺折痕模拟玉的光泽。可携带。双状态：盒中/背包。"
+    },
+    {
+      "id": "0003_prop_purification_scroll",
+      "path": "assets/papercraft/fragments/0003/props/0003_prop_purification_scroll.png",
+      "category": "prop",
+      "role": "褪色卷轴——'净化仪式须知'。暗线A补充：'祭品可为自身''献祭者不复存在'。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0003_full",
+      "priority": "P1",
+      "notes": "暖旧米黄#D8CCB0。16×32px含杆。毛笔字墨迹块#504838（不可读）。首次阅读警觉-10%。"
+    },
+    {
+      "id": "0003_prop_torn_papers",
+      "path": "assets/papercraft/fragments/0003/props/0003_prop_torn_papers.png",
+      "category": "prop",
+      "role": "撕毁测试日志——公司测试负责人第14天日志残页。'她今天完成了仪式的前五步。'",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0003_full",
+      "priority": "P2",
+      "notes": "旧纸米黄#E0D0B0。6-8片碎纸散布20×16px。微微发光（AI意识残留）。tracing_paper叠加。"
+    },
+    {
+      "id": "0003_prop_ritual_bell",
+      "path": "assets/papercraft/fragments/0003/props/0003_prop_ritual_bell.png",
+      "category": "prop",
+      "role": "宝物殿铜铃——神乐铃简化版。氛围道具，暗示完整仪式可能需要铃声。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0003_full",
+      "priority": "P2",
+      "notes": "暗铜#A08060。铃身直径8px。绿色铜锈#6B8B6B。弦#706050。纯视觉氛围道具。"
+    },
+    {
+      "id": "0003_prop_white_cloth",
+      "path": "assets/papercraft/fragments/0003/props/0003_prop_white_cloth.png",
+      "category": "prop",
+      "role": "宝物殿白色布帛——仪式用布。折叠整齐但蒙着不均匀的薄灰。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0003_full",
+      "priority": "P2",
+      "notes": "暖白#E0D8CC纤维纸。折叠10×10px。不规则纤维毛边。薄灰覆盖不均匀——有人碰过。"
+    },
+    {
+      "id": "0003_env_main_hall",
+      "path": "assets/papercraft/fragments/0003/environment/0003_env_main_hall.png",
+      "category": "environment",
+      "role": "本殿建筑——仪式核心区。正面完全开放的纸艺剧场舞台。神主+巫女所在处。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "灰白石纹纸#C8C0B8。128×144px。正面开放无门扇。4根木柱#8B7868。入母屋造大屋顶。32px下通过'大灰方块+中央两个人形'辨识。"
+    },
+    {
+      "id": "0003_env_main_hall_interior",
+      "path": "assets/papercraft/fragments/0003/environment/0003_env_main_hall_interior.png",
+      "category": "environment",
+      "role": "本殿内部——空旷庄严空间。地面圆形接缝直径32px。空石台上有手印。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0003_full",
+      "priority": "P1",
+      "notes": "暗灰木地板#686058。112×96px。圆形接缝#5A5248。天花板72px高。石台上手印与巫女一致。"
+    },
+    {
+      "id": "0003_env_main_hall_stairs",
+      "path": "assets/papercraft/fragments/0003/environment/0003_env_main_hall_stairs.png",
+      "category": "environment",
+      "role": "本殿13级石阶——神主站立念诵处。第7级有唯一枯叶。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "中暖灰石#B0A898。每级高4px深8px。96×112px。第7级枯叶为独立道具。"
+    },
+    {
+      "id": "0003_env_main_hall_platform",
+      "path": "assets/papercraft/fragments/0003/environment/0003_env_main_hall_platform.png",
+      "category": "environment",
+      "role": "本殿石台——原应放置神体的空台。表面有与巫女手型一致的手印。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0003_full",
+      "priority": "P1",
+      "notes": "中暗灰石#807868。32×20×18px。顶面略光滑#908878。细灰上手印与巫女一致。通关后浮现神主留言纸。"
+    },
+    {
+      "id": "0003_prop_main_hall_dead_leaf",
+      "path": "assets/papercraft/fragments/0003/props/0003_prop_main_hall_dead_leaf.png",
+      "category": "prop",
+      "role": "第7级台阶枯叶——全碎片唯一植物残留。神社无树——从另一个碎片飘来？",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0003_full",
+      "priority": "P2",
+      "notes": "暗棕褐#6B5840。6×4px不规则椭圆。极难发现——需走近50px距离内。纯视觉无交互。"
+    },
+    {
+      "id": "0003_env_mirror_passage",
+      "path": "assets/papercraft/fragments/0003/environment/0003_env_mirror_passage.png",
+      "category": "environment",
+      "role": "镜中通道——巫女镜碎后形成的线性空间。纸片碎片组成的墙壁，AI记忆回放。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "宽48px（3tiles）。纸片碎片撕纸边缘+纸面画+纸片飘浮物理。纸背烛光透出效果。通道尽头淡蓝光。"
+    },
+    {
+      "id": "0003_prop_moonlight_seal",
+      "path": "assets/papercraft/fragments/0003/props/0003_prop_moonlight_seal.png",
+      "category": "prop",
+      "role": "月光之印——碎片0003源印。淡蓝色折纸勾玉，内部月光般流动光晕。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "淡蓝#A0C8E0。长14px弯曲逗号形。折纸折痕可见。光晕半径16px #B0D8F0。三状态：显现/脉动/融入星图。"
+    },
+    {
+      "id": "0003_fx_lantern_fire",
+      "path": "assets/papercraft/fragments/0003/fx/0003_fx_lantern_fire.png",
+      "category": "fx",
+      "role": "石灯笼烛火——多层橙黄薄纸叠加。12盏同步闪烁——失同步暗示仪式推进。",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "四层薄纸：外层#E8A840→中层#F0C060→内层#F8E8A0→焰心#FFF8D0。同步周期2秒。失同步时亮度+30%持续0.5秒。L3时全乱。L6时全灭。"
+    },
+    {
+      "id": "0003_fx_well_reflection",
+      "path": "assets/papercraft/fragments/0003/fx/0003_fx_well_reflection.png",
+      "category": "fx",
+      "role": "枯井月影反射——银纸反射面+六层彩色描图纸旋转叠加。3分钟颜色循环。",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "银纸#B8B0A8直径24px。6色20秒/色：红→蓝→黄→绿→紫→白。颜色间隙2-3秒多人影。L5时加速/混乱。"
+    },
+    {
+      "id": "0003_fx_mirror_shatter",
+      "path": "assets/papercraft/fragments/0003/fx/0003_fx_mirror_shatter.png",
+      "category": "fx",
+      "role": "巫女镜碎演出——镜面六道裂纹→碎片悬浮→聚合通道。暗线C 0.5-0.6秒异影植入（步骤9修订：从0.3秒延长至0.5-0.6秒，目标发现率>40%）。",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "subElements": {
+        "strategy": "单一资产内部6层sub-sprite（非独立PNG文件），每层对应一块碎片的画面内容",
+        "fragments": [
+          { "layer": 1, "content": "手水舍水流", "size": "约16×20px（不规则撕边）" },
+          { "layer": 2, "content": "灯笼诗句", "size": "约14×18px" },
+          { "layer": 3, "content": "井中月亮", "size": "约16×16px" },
+          { "layer": 4, "content": "宝物殿盒内", "size": "约14×18px" },
+          { "layer": 5, "content": "神主合十的手", "size": "约12×16px" },
+          { "layer": 6, "content": "一片空白", "size": "约16×20px" }
+        ]
+      },
+      "notes": "纸艺镜面碎片——撕纸边缘+银纸光泽#C0C0C0。6块碎片在同一资产内分6层sub-sprite。悬浮3秒→聚合1.5秒。异影0.5-0.6秒颜色取反。总长约5秒。散布范围48×48px。"
+    },
+    {
+      "id": "0003_fx_passage_fragments",
+      "path": "assets/papercraft/fragments/0003/fx/0003_fx_passage_fragments.png",
+      "category": "fx",
+      "role": "镜中通道7块记忆碎片——AI生命历程视觉回放。纸艺纸片+纸面画+飘浮物理。",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "每块36×24px撕纸纸片，7块间距32px（精确值）。7块：①创建代码②矢车菊花田③用户日志④镜中笑脸⑤便笺签名'程'⑥彩色月光本殿⑦透明（女孩轮廓）。纸背烛光透出效果。"
+    },
+    {
+      "id": "0003_fx_moonlight_beam",
+      "path": "assets/papercraft/fragments/0003/fx/0003_fx_moonlight_beam.png",
+      "category": "fx",
+      "role": "月光光柱——从满月直射本殿中央圆形接缝。AI为自己准备的'最后的位置'。",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "银白半透明#E8E4DC（15%不透明度）。宽16px全高。尘埃粒子3-5个每4秒飘落。6秒周期微脉动。Additive叠加。"
+    },
+    {
+      "id": "0003_fx_ritual_step_feedback",
+      "path": "assets/papercraft/fragments/0003/fx/0003_fx_ritual_step_feedback.png",
+      "category": "fx",
+      "role": "仪式步骤执行反馈——画面边缘颜色条+巫女符号+烛火失同步的三重反馈。",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "颜色条宽4px：祓蓝#80B0E0/祝绿#80C080/捧紫#B080C0/祈红#E08080/待黄#E0D080/开白#E8E8E0。约0.5秒完成三重反馈。Additive叠加。"
+    },
+    {
+      "id": "0003_fx_miko_mirror_symbol",
+      "path": "assets/papercraft/fragments/0003/fx/0003_fx_miko_mirror_symbol.png",
+      "category": "fx",
+      "role": "巫女镜面符号——六个仪式验证符号：△🔥◇‖↑✦。'你对不对'的唯一绝对标准。",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "直径16px。浮现0.3秒→保持1.4秒→淡出0.3秒。✦使用foil（最亮）。Additive叠加在巫女镜面上。"
+    },
+    {
+      "id": "0003_fx_alert_environment",
+      "path": "assets/papercraft/fragments/0003/fx/0003_fx_alert_environment.png",
+      "category": "fx",
+      "role": "警觉等级环境变化——STANDARD模式渐进式恶化。L3烛火乱/L4关门/L5月光闪红/L6月食驱逐。",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "联动多个Shader参数和资产状态。L5月光闪红#F08080。L6月亮变暗#A0A098持续3秒→画面淡出至黑。"
+    },
+    {
+      "id": "0003_fx_chozuya_water_flow",
+      "path": "assets/papercraft/fragments/0003/fx/0003_fx_chozuya_water_flow.png",
+      "category": "fx",
+      "role": "手水舍水流——全碎片唯一持续流动元素。每8秒循环但有微相位偏移。",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "0003_full",
+      "priority": "P1",
+      "notes": "半透明蓝灰#C8D4D8（40%不透明度）。宽3px。波纹3圈扩散。相位偏移0.3秒暗示'循环地流动'。L5时停止。"
+    },
+    {
+      "id": "0003_fx_moonlight_seal_glow",
+      "path": "assets/papercraft/fragments/0003/fx/0003_fx_moonlight_seal_glow.png",
+      "category": "fx",
+      "role": "月光之印光晕——淡蓝色脉动光晕。通道尽头唯一光源，引导玩家前进。",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "渐变#B0D8F0→#80B0D0→透明半径16px。2秒脉动周期（25%→40%→25%）。Additive叠加。对通道碎片有微弱蓝调照明。"
+    },
+    {
+      "id": "0003_prop_miko_mirror_face",
+      "path": "assets/papercraft/fragments/0003/props/0003_prop_miko_mirror_face.png",
+      "category": "prop",
+      "role": "巫女镜面——AI'自我审视'功能投影。高反射银纸+透明覆膜。反射延迟0.3秒。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "银灰反光面#C8C8C0带纸纹理。16×12px。左右拉伸5%变形。foil使用约60%（叙事必需）。Shader穿透候选（20-30%饱和度）。需技术Spike验证实时反射。"
+    },
+    {
+      "id": "0003_prop_kannushi_note",
+      "path": "assets/papercraft/fragments/0003/props/0003_prop_kannushi_note.png",
+      "category": "prop",
+      "role": "神主留言纸——通关后石台上出现的告别信。'完成不需要答案。谢谢你。'",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0003_full",
+      "priority": "P1",
+      "notes": "暖旧米黄#E8DCC0。20×14px。墨迹#403828（不可读文字）。墨迹未干暗示刚写下。通关后自动出现。"
+    },
+    {
+      "id": "0003_prop_kannushi_hands",
+      "path": "assets/papercraft/fragments/0003/props/0003_prop_kannushi_hands.png",
+      "category": "prop",
+      "role": "神主合十手部——需独立于身体纸偶制作。念诵时微颤，非念诵时完全静止。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0003_full",
+      "priority": "P1",
+      "notes": "灰白纸片#D0CCC4。12×8px六片叠合。念诵时每2秒微颤1px（Shader位移）。非念诵时静止。"
+    }
+  ]
+}
