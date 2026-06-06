@@ -2,20 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-<<<<<<< HEAD
-uid="uid://wsrbxqybtqdk"
-=======
-uid="uid://dt87cquadlgu3"
->>>>>>> f74edf73705757e9cea8ad9bdddc3c7b8c6b0819
-path="res://.godot/imported/player.png-362cd7c3de7afe56589104a8f8b4b250.ctex"
+uid="uid://bl6h7wjh17my8"
+path="res://.godot/imported/0001_fx_light_wall_ripple.png-c8ec2e0a92e90b43d5fceb1be0a7c8c1.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/papercraft/player/player.png"
-dest_files=["res://.godot/imported/player.png-362cd7c3de7afe56589104a8f8b4b250.ctex"]
+source_file="res://assets/papercraft/fragments/id0001/environment/0001_fx_light_wall_ripple.png"
+dest_files=["res://.godot/imported/0001_fx_light_wall_ripple.png-c8ec2e0a92e90b43d5fceb1be0a7c8c1.ctex"]
 
 [params]
 
