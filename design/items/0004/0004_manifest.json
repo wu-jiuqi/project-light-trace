@@ -1,0 +1,579 @@
+{
+  "schemaVersion": 1,
+  "scope": "0004",
+  "fragment": {
+    "id": "0004",
+    "name": "工坊物语"
+  },
+  "sourceDocument": "design/items/0004/0004_物品清单.md",
+  "lastSynced": "2026-06-07",
+  "summary": {
+    "totalAssets": 48,
+    "priorityCount": {
+      "P0": 29,
+      "P1": 16,
+      "P2": 3
+    },
+    "categoryCount": {
+      "environment": 18,
+      "fx": 11,
+      "prop": 18,
+      "ui": 1
+    },
+    "requiredForCount": {
+      "0004_full": 28,
+      "vertical_slice": 19
+    },
+    "note": "按清单正文唯一资产 ID 生成；与 Markdown 页首统计保持一致。"
+  },
+  "assets": [
+    {
+      "id": "0004_env_entrance_door",
+      "path": "assets/papercraft/fragments/0004/environment/0004_env_entrance_door.png",
+      "category": "environment",
+      "role": "工坊入口铸铁双扇门（含门把手木牌）——连接外界雾海与工坊内部。半开状态，门缝透出暖黄灯光。木牌留言由本地化控制。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0004_full",
+      "priority": "P1",
+      "notes": "双扇门#3A3028瓦楞纸板(kraft)，每扇12×36px，门框#2A2218(2px)。浇铸纹#4A4038。观察窗#C8D0D0(tracing_paper)。合页#8A7A58。木牌14×8px#A89880，留言'正在工作。请勿打扰。——但如果你进来了，帮我做完。'（本地化）。残胶#B0A898。半开态——门缝4px透暖光。32px下通过'深灰方块+浅棕小方块'辨识。"
+    },
+    {
+      "id": "0004_env_workshop_floor",
+      "path": "assets/papercraft/fragments/0004/environment/0004_env_workshop_floor_straight.png",
+      "category": "environment",
+      "role": "工坊深棕地板——全工坊室内地面铺装模块。深暖棕木板+瓦楞纹理+金属屑散布。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "variants": [
+        "0004_env_workshop_floor_straight",
+        "0004_env_workshop_floor_edge",
+        "0004_env_workshop_floor_corner"
+      ],
+      "notes": "主色#5A4A38，木板宽12px纵向排列，缝1px暗#4A3A28。瓦楞纹理+金属屑#8A7A58散布。32px下通过'带纵纹的深棕面'辨识。"
+    },
+    {
+      "id": "0004_env_main_workbench",
+      "path": "assets/papercraft/fragments/0004/environment/0004_env_main_workbench.png",
+      "category": "environment",
+      "role": "中央装配区主工作台——三层纸板层叠+纸制铆钉。玩家解密指挥中心。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "台面三层纸板#6B5840/#5A4A38/#4A3A28，铆钉#8A7A58。台面上摊开主图纸+黄铜砝码+陶杯。四腿粗纸管#4A3A28。暗格在右上角。80×24px台面+32px总高。"
+    },
+    {
+      "id": "0004_env_brass_lamps",
+      "path": "assets/papercraft/fragments/0004/environment/0004_env_brass_lamps.png",
+      "category": "environment",
+      "role": "工坊三盏悬挂黄铜灯——暖黄色光源，以钟摆节奏呼吸波动。一盏灯泡碎裂。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "锯齿锥形描图纸灯罩#D4C898，黄铜边框#B8860B。发光核心#F0E8C8直径6px。光晕#E8D8A0→#C8B878→透明。**技术交付**：三盏灯完好版为一张完整PNG；碎裂灯泡的纸片裂痕纹理为独立PNG mask（叠加到完好灯罩上），通过Shader控制裂痕透明度——非独立PNG变体。亮度波动±8%由Shader控制。"
+    },
+    {
+      "id": "0004_env_perfect_automaton_blank",
+      "path": "assets/papercraft/fragments/0004/environment/0004_env_perfect_automaton_blank.png",
+      "category": "environment",
+      "role": "主工作台上未完成人偶纸模——白色平躺纸片，有折叠引导虚线。等待组装。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "白色纸模#F0ECE0，折叠虚线#D0CCC0。面部空白椭圆轮廓#D8D4C8。掌心凹痕#E0DCD0直径6px。**技术交付**：平躺展开48×56px和折叠约16×40px两种状态——两帧独立PNG（可同sprite sheet或独立文件），通过AnimationPlayer控制切换——非Shader变形。32px下通过'白色十字形'辨识。"
+    },
+    {
+      "id": "0004_prop_main_blueprint",
+      "path": "assets/papercraft/fragments/0004/props/0004_prop_main_blueprint.png",
+      "category": "prop",
+      "role": "主工作台上的完美人偶外形设计图——旧蓝图纸，六个空白材料编号框等待填充。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "褪色蓝图纸#D8D8C8，白色轮廓线#E8E4D8。六个标注箭头+空白材料框#E0DCD0。咖啡渍#C8B898直径10px。56×40px。多状态：空白框0/6→6/6逐步填充。"
+    },
+    {
+      "id": "0004_prop_brass_weight",
+      "path": "assets/papercraft/fragments/0004/props/0004_prop_brass_weight.png",
+      "category": "prop",
+      "role": "压图纸的黄铜砝码——底部刻字'天平的另一端——是你吗？'",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0004_full",
+      "priority": "P1",
+      "notes": "圆柱形#B8860B直径8px高8px。底部刻字#8A6A08高1.5px——需<60px距离辨识。氧化斑#6B8B6B。手指触摸区#C8980C。"
+    },
+    {
+      "id": "0004_prop_ceramic_cup",
+      "path": "assets/papercraft/fragments/0004/props/0004_prop_ceramic_cup.png",
+      "category": "prop",
+      "role": "工作台上陶杯——AI离开前最后一杯饮品。热气不散——时间被悬停。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0004_full",
+      "priority": "P1",
+      "notes": "粗陶#8A7860高12px。杯中深棕液体#4A3828。白色热气#F0ECE0描图纸叠加上升10px（不消失——Shader飘动动画）。手指印#A09080。32px下通过'带白烟的棕色小杯'辨识。"
+    },
+    {
+      "id": "0004_prop_secret_compartment",
+      "path": "assets/papercraft/fragments/0004/props/0004_prop_secret_compartment.png",
+      "category": "prop",
+      "role": "主工作台抽屉暗格——齿轮形凹槽+倒置日晷符号。在0004中不可打开。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0004_full",
+      "priority": "P2",
+      "notes": "与抽屉底板同色#5A4A38，四边1px暗缝#4A3A28。齿轮凹槽直径10px（8齿）。倒置日晷浅刻痕。P2——碎片0004中不可打开，为碎片4096伏笔。"
+    },
+    {
+      "id": "0004_prop_reversed_sundial_brass",
+      "path": "assets/papercraft/fragments/0004/props/0004_prop_reversed_sundial_brass.png",
+      "category": "prop",
+      "role": "齿轮·左赠送的信物——刻有倒置日晷符号的黄铜片。暗线C植入点。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "不规则圆形#B8860B直径10px。倒置日晷刻痕#8A6A08。氧化斑#6B8B6B（<5%面积）。foil边缘微光（<5%）。齿轮·左在提交正确材料后赠送。"
+    },
+    {
+      "id": "0004_env_warehouse_floor",
+      "path": "assets/papercraft/fragments/0004/environment/0004_env_warehouse_floor_straight.png",
+      "category": "environment",
+      "role": "材料仓库室内地板——比中央区更暗，有货架拖拽刮痕和金属/木屑粉末。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0004_full",
+      "priority": "P1",
+      "variants": [
+        "0004_env_warehouse_floor_straight",
+        "0004_env_warehouse_floor_edge",
+        "0004_env_warehouse_floor_corner"
+      ],
+      "notes": "主色#504030（比中央区深）。横向货架拖痕#605040。金属粉#8A7A58+木屑#C8B898散布。straight/edge/corner三变体。"
+    },
+    {
+      "id": "0004_env_metal_shelf",
+      "path": "assets/papercraft/fragments/0004/environment/0004_env_metal_shelf.png",
+      "category": "environment",
+      "role": "金属材料陈列架——三层横板存放六种金属候选材料。同材料不同颜色的'情感标注'。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0004_full",
+      "priority": "P1",
+      "notes": "纸板折叠结构48×56px。横板#706860，侧柱#585048。材料块8×6×4px在纸托盘#C8C0B0上。同材料颜色差异（偏红#B87040/偏黄#C8A840）。手写标签#E8E0D0。"
+    },
+    {
+      "id": "0004_env_wood_shelf",
+      "path": "assets/papercraft/fragments/0004/environment/0004_env_wood_shelf.png",
+      "category": "environment",
+      "role": "木材切片陈列架——存放三种轻质候选材料。最薄切片旁有'太薄了——但好看'便签。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0004_full",
+      "priority": "P1",
+      "notes": "结构同金属架但浅棕#A89880。木材切片#C8B898/#B0A090/#A8B080厚度3/5/4px。便签#E8E0D0。32px下通过'带横条纹的浅棕方块'辨识。"
+    },
+    {
+      "id": "0004_env_liquid_cabinet",
+      "path": "assets/papercraft/fragments/0004/environment/0004_env_liquid_cabinet.png",
+      "category": "environment",
+      "role": "液体材料储存柜——蒸汽冷却+半透明柜门。柜内有深蓝色实验残留。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0004_full",
+      "priority": "P2",
+      "notes": "深灰铁色#686058。半透明描图纸柜门#C8D0D0（30%透明）。冷凝水珠#E0E8E8。深蓝残留#204060。'第七次尝试。失败。——颜色不错。——留着。'标签。P2——环境叙事深化项。"
+    },
+    {
+      "id": "0004_env_material_detector",
+      "path": "assets/papercraft/fragments/0004/environment/0004_env_material_detector.png",
+      "category": "environment",
+      "role": "材料检测仪——黄铜台式设备。检测18种材料属性。核心交互设备。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "黄铜外壳#B8860B（foil<5%）。底座20×14×6px+检测台16×10px+绿色显示屏10×6px#A0C0A0。'分析'按钮#A0A0A0直径4px。齿轮·左便利贴。检测时按钮边缘绿光#B0D0B0脉冲1秒。"
+    },
+    {
+      "id": "0004_env_steam_pipes",
+      "path": "assets/papercraft/fragments/0004/environment/0004_env_steam_pipes.png",
+      "category": "environment",
+      "role": "工坊蒸汽管道系统——纸管结构，法兰盘接头，间歇冒出白色蒸汽。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0004_full",
+      "priority": "P1",
+      "notes": "纸管#706860直径4px，法兰盘#807870直径8px。蒸汽#F0ECE8透明度15%描图纸叠加，上升20px消散。约每5-8秒随机冒出。Shader控制粒子效果。"
+    },
+    {
+      "id": "0004_env_gallery_floor",
+      "path": "assets/papercraft/fragments/0004/environment/0004_env_gallery_floor_straight.png",
+      "category": "environment",
+      "role": "图纸陈列廊地板——全工坊最暗地面。有石墨粉末散布。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0004_full",
+      "priority": "P1",
+      "variants": [
+        "0004_env_gallery_floor_straight",
+        "0004_env_gallery_floor_edge",
+        "0004_env_gallery_floor_corner"
+      ],
+      "notes": "主色#4A3A28（最暗棕）。窄木板8px拼接。石墨粉#808080散布。straight/edge/corner三变体。32px下通过'极暗棕+细灰点'辨识。"
+    },
+    {
+      "id": "0004_env_gallery_wall",
+      "path": "assets/papercraft/fragments/0004/environment/0004_env_gallery_wall.png",
+      "category": "environment",
+      "role": "图纸陈列廊六面展示墙——深暖灰墙面+麻绳悬挂线。六张子图纸的位置对应人偶身体方向。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "墙面#6B6058。悬挂麻绳#8A8078（fiber_paper）。六面墙各约40×64px。站中央时六张图纸形成人形轮廓。**技术交付**：简单水平排列无独立交互→合并为一个PNG(约240×64px)；需独立碰撞/交互判定→六个独立实例。"
+    },
+    {
+      "id": "0004_env_seven_clocks",
+      "path": "assets/papercraft/fragments/0004/environment/0004_env_seven_clocks.png",
+      "category": "environment",
+      "role": "七只时钟——分散挂在陈列廊墙上。时间各不相同，滴答拼成旋律。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "钟面#D8D0C0直径14px（book_page），刻度短线#706860。边框深棕#6B5840（kraft）。七只钟时间：3:14/11:58/00:01/17:43/06:12/22:37/13:33。滴答频率由音频驱动。不同的完成度和磨损程度。"
+    },
+    {
+      "id": "0004_prop_blueprint_heart",
+      "path": "assets/papercraft/fragments/0004/props/0004_prop_blueprint_heart.png",
+      "category": "prop",
+      "role": "子图纸一·心脏——中央偏下墙。三候选材料+淬火改良小字提示。背面AI独白第一段。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "旧蓝图米黄#E8E0CC，白色机械结构线。咖啡渍#C8B898。右侧小字淬火提示#585048。背面铅笔草稿——AI独白。28×20px。双状态：在墙/已拾取。"
+    },
+    {
+      "id": "0004_prop_blueprint_head",
+      "path": "assets/papercraft/fragments/0004/props/0004_prop_blueprint_head.png",
+      "category": "prop",
+      "role": "子图纸二·头部——上方墙。需抬头看。右上角有石墨手指印。淬火改良具体数值在此。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "同心脏图纸格式。石墨手指印#C0B8A0。左上角淬火温度860°C提示。背面AI独白第二段。双状态。"
+    },
+    {
+      "id": "0004_prop_blueprint_left_arm",
+      "path": "assets/papercraft/fragments/0004/props/0004_prop_blueprint_left_arm.png",
+      "category": "prop",
+      "role": "子图纸三·左臂——西侧墙。六张中批注最多——边缘密布手写计算。背面AI独白第三段。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "同心脏图纸格式。边缘密集手写公式#585048。背面独白第三段（关于'手会不会犹豫'）。双状态。"
+    },
+    {
+      "id": "0004_prop_blueprint_right_arm",
+      "path": "assets/papercraft/fragments/0004/props/0004_prop_blueprint_right_arm.png",
+      "category": "prop",
+      "role": "子图纸四·右臂——东侧墙。有被抚平的折痕——AI曾犹豫降低标准。背面独白第四段。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "右上角折痕线#D8D0C0长约20px，折线区略光滑#E0D8C8。背面独白第四段（关于'右手画左手'）。双状态。"
+    },
+    {
+      "id": "0004_prop_blueprint_left_leg",
+      "path": "assets/papercraft/fragments/0004/props/0004_prop_blueprint_left_leg.png",
+      "category": "prop",
+      "role": "子图纸五·左腿——西南墙。下方地面有金属屑——AI曾实物测试承重。底部有压痕。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "底部边缘凹痕#D8D0C0约6×4px。下方地面金属屑#8A7A58。背面独白第五段（关于'它需要站起来'）。双状态。"
+    },
+    {
+      "id": "0004_prop_blueprint_right_leg",
+      "path": "assets/papercraft/fragments/0004/props/0004_prop_blueprint_right_leg.png",
+      "category": "prop",
+      "role": "子图纸六·右腿——东南墙。最靠近公司备忘录。背面有唯一红色字迹'他们不会理解的'。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "背面右下角红色墨水#803030（唯一使用红色的图纸）。背面独白第六段（关于'铅笔会留下来'）。双状态。"
+    },
+    {
+      "id": "0004_prop_company_memo",
+      "path": "assets/papercraft/fragments/0004/props/0004_prop_company_memo.png",
+      "category": "prop",
+      "role": "暗线B推进种子——天枢公司内部备忘录。'第38次创造边界审查'+'冥府协议'被圈出。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "打印纸冷白#E8E0CC。米字折痕#D8D0C0。蓝黑墨水批注#203040（与碎片0001便笺同笔迹）。'冥府协议'被不规则椭圆圈出。折叠态16×12px/展开22×30px。book_page材质——禁止可读文字。"
+    },
+    {
+      "id": "0004_env_forge_floor",
+      "path": "assets/papercraft/fragments/0004/environment/0004_env_forge_floor_straight.png",
+      "category": "environment",
+      "role": "锻造区石砖地面——与木地板不同的耐热石材。中央有烧焦痕迹。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0004_full",
+      "priority": "P1",
+      "variants": [
+        "0004_env_forge_floor_straight",
+        "0004_env_forge_floor_edge",
+        "0004_env_forge_floor_corner"
+      ],
+      "notes": "深灰石#706860不规则矩形石砖拼贴。熔炉前烧焦区#3A3028直径24px。铁屑#8A7A68散布。straight/edge/corner三变体。"
+    },
+    {
+      "id": "0004_env_forge_furnace",
+      "path": "assets/papercraft/fragments/0004/environment/0004_env_forge_furnace.png",
+      "category": "environment",
+      "role": "锻造熔炉——瓦楞纸+黑色薄纸模拟铸铁。初始冷态，点燃后变暖红。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "瓦楞纸炉体#504438+黑薄纸#2A2218。炉膛16×12px，灰烬#484038+余烬红#603020。炉门半开#3A3028。烟囱8×32px#3A3028。点燃后火光#E88040→#D06020（tracing_paper叠加）。"
+    },
+    {
+      "id": "0004_env_cooling_trough",
+      "path": "assets/papercraft/fragments/0004/environment/0004_env_cooling_trough.png",
+      "category": "environment",
+      "role": "冷却水槽——石质水槽+永不蒸发的淡蓝色修复之水。淬火用。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "石槽#888078，外部24×16px，内部蓄水20×10px水深8px。淡蓝水#A0B8C8（tracing_paper透明度40%）。水垢环#C8C0B8。永不蒸发/永不污染（叙事特征）。淬火后短暂蓝光#C0D8E8脉冲1秒。"
+    },
+    {
+      "id": "0004_env_tool_wall",
+      "path": "assets/papercraft/fragments/0004/environment/0004_env_tool_wall.png",
+      "category": "environment",
+      "role": "锻造区工具墙——整齐排列的纸艺工具。有一把钳子的位置是空的。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0004_full",
+      "priority": "P1",
+      "notes": "木板背板#8A7860（40×32px）。纸绳悬挂#A09080。钳子×2/锤子×1/锉刀×1/扳手×1（#706860+#6B5840）。空位轮廓#A09080——钳子在主工作台上。整齐排列暗示AI离开前整理过。"
+    },
+    {
+      "id": "0004_prop_temp_dial",
+      "path": "assets/papercraft/fragments/0004/props/0004_prop_temp_dial.png",
+      "category": "prop",
+      "role": "熔炉温度调节盘——暗铜色圆盘，860°C刻度线略粗。玩家交互旋转。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "暗铜圆盘#A08060直径16px。弧形刻度200-1200°C共11条。860°C线略粗#706050。指针#604838。标签'860'。初始指向0°——设置到860°C后锁定+触发熔炉点燃FX。"
+    },
+    {
+      "id": "0004_prop_temp_inscription",
+      "path": "assets/papercraft/fragments/0004/props/0004_prop_temp_inscription.png",
+      "category": "prop",
+      "role": "墙上温度刻字——'八六零'+AI的关火提醒。下方有火烧痕迹。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0004_full",
+      "priority": "P1",
+      "notes": "石墙基底#706860。第一行'八六零'字高4px#908880。第二行小字'记住。关火。...'字高2px#989088。手工凿刻风格——笔画粗细不均。下方焦痕#4A4038直径8px。"
+    },
+    {
+      "id": "0004_fx_steam_pulse",
+      "path": "assets/papercraft/fragments/0004/fx/0004_fx_steam_pulse.png",
+      "category": "fx",
+      "role": "蒸汽脉冲升腾——工坊的'呼吸'。多层描图纸S形白色蒸汽，与钟摆摆动同步。",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "描图纸叠加#F0ECE8透明度12-18%。S形不规则上升24-36px。约每4-10秒随机冒出一缕。与钟摆幅度关联。Additive叠加。全场景级。"
+    },
+    {
+      "id": "0004_fx_light_breathing",
+      "path": "assets/papercraft/fragments/0004/fx/0004_fx_light_breathing.png",
+      "category": "fx",
+      "role": "灯光呼吸波动——三盏黄铜灯亮度以钟摆节奏正弦波动。碎裂灯泡波动更大。",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "运行时Shader亮度参数控制——无独立PNG产出。Manifest注册ID用于参数追踪；构建时不产出美术文件。正常灯±8%波动，碎裂灯±10%。2.2秒周期正弦曲线。暖金黄#D4C898↔#E0D8A8。"
+    },
+    {
+      "id": "0004_fx_suspended_droplet",
+      "path": "assets/papercraft/fragments/0004/fx/0004_fx_suspended_droplet.png",
+      "category": "fx",
+      "role": "水珠悬停上升——违反重力的水珠。暗示工坊物理规则不完整。",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "0004_full",
+      "priority": "P1",
+      "notes": "透明球体#D8E8F0透明度25%直径3-4px。滴落→离地30px处骤停0.3秒→缓升到80px消散。约每30-60秒随机触发一次。完整循环3-4秒。Additive叠加。"
+    },
+    {
+      "id": "0004_fx_gear_spark",
+      "path": "assets/papercraft/fragments/0004/fx/0004_fx_gear_spark.png",
+      "category": "fx",
+      "role": "齿轮摩擦火花——齿轮·左'——嘎——'时爆出金色微小火花。",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "0004_full",
+      "priority": "P1",
+      "notes": "金色亮点#F0D860→#E8C040→透明，2-3个同时弹出，每个直径2-3px，散射8-12px。持续0.3-0.5秒。foil用于最亮火花（<3%）。对话驱动触发。Additive叠加。"
+    },
+    {
+      "id": "0004_fx_forge_ignite",
+      "path": "assets/papercraft/fragments/0004/fx/0004_fx_forge_ignite.png",
+      "category": "fx",
+      "role": "熔炉点燃演出——温度盘设到860°C时触发。暗→红→橙渐变+烟囱冒烟。",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "炉膛火光#484038→#602020→#E88040渐变1.5秒。核心#F0A060直径0→8px。炉门溢出红#E88040（2px宽）。烟囱烟#C8C0B8透明度15%上升16px。指针闪过淡金光#D4C080 0.3秒。Additive叠加。"
+    },
+    {
+      "id": "0004_fx_trough_glow",
+      "path": "assets/papercraft/fragments/0004/fx/0004_fx_trough_glow.png",
+      "category": "fx",
+      "role": "冷却水槽修复光效——淬火时水槽发出冰蓝色脉冲微光。",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "0004_full",
+      "priority": "P1",
+      "notes": "冰蓝光#C0D8E8透明度0%→30%→0%，脉冲0.5秒+渐暗0.5秒。材料取出后残光#A0C8D8透明度15%持续2秒。Additive叠加。与暖黄工坊形成色温对比。"
+    },
+    {
+      "id": "0004_fx_automaton_awakening",
+      "path": "assets/papercraft/fragments/0004/fx/0004_fx_automaton_awakening.png",
+      "category": "fx",
+      "role": "完美人偶觉醒演出——齿轮全停→纸模折叠→面部生成→眼睛睁开→齿轮重启。碎片最高潮。",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "完整演出6-8秒。①齿轮全停3秒。②碎裂灯泡射出暖金光束#D4B880。③纸模折叠1.5秒（平面→立体）。④面部生成2秒（弧线眼#706858+嘴#806858）。⑤纸艺开眼。⑥齿轮重启节奏更稳。Additive光束+Replace人偶状态切换。"
+    },
+    {
+      "id": "0004_fx_forgeheart_seal_manifest",
+      "path": "assets/papercraft/fragments/0004/fx/0004_fx_forgeheart_seal_manifest.png",
+      "category": "fx",
+      "role": "匠魂之印显现——完美人偶掌心金色齿轮徽章自转。源印交付演出。",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "金色齿轮直径8px，8齿。光丝#D4C080编织成齿轮轮廓。自转4秒/圈。foil齿轮主体（≤10%面积，特许硬上限≤15%）。刻字'如果我造的东西能比我活得久...'（#C0A860，1px高）。脉冲光晕#D4B880→#C0A060→透明半径10px，4秒周期。Additive光晕+Replace掌心。"
+    },
+    {
+      "id": "0004_fx_window_mirror",
+      "path": "assets/papercraft/fragments/0004/fx/0004_fx_window_mirror.png",
+      "category": "fx",
+      "role": "窗外镜像——窗前静站3分钟后，雾中浮现与玩家姿势同步的人形轮廓。暗线C种子。",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "0004_full",
+      "priority": "P1",
+      "notes": "雾背景#B0A8A0。人形轮廓#888078透明度0%→30%（3秒）→淡出（2秒）。持续显示5秒。姿势与玩家同步。Overlay叠加。触发条件：窗前≥3分钟+已收集≥3张子图纸。"
+    },
+    {
+      "id": "0004_fx_pendulum_stop",
+      "path": "assets/papercraft/fragments/0004/fx/0004_fx_pendulum_stop.png",
+      "category": "fx",
+      "role": "钟摆停止——人偶觉醒后钟摆·心首次停止摆动。摆动幅度渐变→0。",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "Shader参数控制。摆动幅度±24px→±16px→±8px→±4px→0（3秒减速）。停止4秒后恢复新频率（0.35Hz vs原0.45Hz）。底座刻字发微光tracing_paper。全工坊齿轮同步停止/重启。**纯Shader物品——无独立PNG产出**。Manifest注册ID用于参数追踪；构建时不产出美术文件。"
+    },
+    {
+      "id": "0004_fx_detector_feedback",
+      "path": "assets/papercraft/fragments/0004/fx/0004_fx_detector_feedback.png",
+      "category": "fx",
+      "role": "材料检测仪反馈——分析完成时屏幕边缘脉冲光。正常=绿色，改良后=金色。",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "0004_full",
+      "priority": "P2",
+      "notes": "正常检测：绿光#B0D0B0脉冲0.5秒。改良材料检测：金光#D4C080脉冲0.5秒+便利贴字迹发光0.3秒。检测仪屏幕10×6px，脉冲光宽2px。Additive叠加。P2——细节优化项。"
+    },
+    {
+      "id": "0004_prop_gearleft_arms",
+      "path": "assets/papercraft/fragments/0004/props/0004_prop_gearleft_arms.png",
+      "category": "prop",
+      "role": "齿轮·左的三条手臂——黄铜齿轮层层堆叠。两条组装+一条拆卸。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "每条手臂4-5个齿轮#B8860B层叠（从肩到指尖渐小）。组装臂夹持器#A0760A（18px），拆卸臂钩爪#8A6A08（14px）。齿轮间隙透金光。foil咬合处微光（<3%）。AnimationPlayer控制可动。"
+    },
+    {
+      "id": "0004_prop_springright_eyes",
+      "path": "assets/papercraft/fragments/0004/props/0004_prop_springright_eyes.png",
+      "category": "prop",
+      "role": "弹簧·右的十二只眼睛——环形轨道上独立可旋转。不同虹膜色阶。警觉高时闭合。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "铜色眼轨#B8860B直径14px（kraft）。12个眼孔各2.5px，虹膜色阶#C8C0B8→#686058→#A08060。独立旋转（对焦动画）。L4时6只闭合（灰纸片#A09890），L5时12只全闭。32px下通过'圆环上的灰点阵列'辨识。"
+    },
+    {
+      "id": "0004_prop_pendulum_base_inscription",
+      "path": "assets/papercraft/fragments/0004/props/0004_prop_pendulum_base_inscription.png",
+      "category": "prop",
+      "role": "钟摆·心底座刻字——AI最后的请求。仅在钟摆停止时清晰可读。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0004_full",
+      "priority": "P1",
+      "notes": "黄铜圆台#B8860B直径24×高6px。环形刻字#8A6A08字高1.5px。内容由本地化字段控制。钟摆摆动时被动态模糊遮盖——停止时显现。侧面热痕#C8980C（6×4px——AI最后摸的地方）。foil热痕高光（<3%）。"
+    },
+    {
+      "id": "0004_prop_automaton_face",
+      "path": "assets/papercraft/fragments/0004/props/0004_prop_automaton_face.png",
+      "category": "prop",
+      "role": "完美人偶觉醒后面部——纸艺线条五官。不是画上去的——是'折出来的'。",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "纸模底#F0ECE0。眼睛两条弧线#706858各5px，嘴弧线#806858 4px（浅笑）。纸艺风格——线条粗细不均0.5-1.5px。觉醒时纸片折叠展开生成。AnimationPlayer控制微笑微动（1px上移）。"
+    },
+    {
+      "id": "0004_ui_alert_bar",
+      "path": "assets/papercraft/fragments/0004/ui/0004_ui_alert_bar.png",
+      "category": "ui",
+      "role": "警觉值指示条——STANDARD模式红色进度条+阶段标签。碎片0004专属UI。",
+      "status": "planned",
+      "generation": "ui_component",
+      "requiredFor": "vertical_slice",
+      "priority": "P0",
+      "notes": "64×8px，背景暗灰#585048。红色填充渐变#D04040→#E06060。'警觉值'标签+#百分比数字#C0B8B0。阶段标签：L2注意/L3警惕/L4敌意/L5对抗/L6驱逐（红色闪烁）。book_page底+tracing_paper填充。屏幕左上角。"
+    }
+  ]
+}

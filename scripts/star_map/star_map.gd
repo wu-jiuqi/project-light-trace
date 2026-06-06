@@ -1,25 +1,30 @@
 extends CanvasLayer
 ## 星图主界面：点击散落玻璃碎片查看详情，已修复碎片归位成四芒星。
 
-const UITheme = preload("res://scripts/ui/ui_theme.gd")
+const DETAIL_CARD_SIZE := Vector2(470, 628)
+const DETAIL_HIGHLIGHT_COLOR := Color(0.63, 0.42, 0.15, 0.18)
 
 @onready var shard_canvas: StarShardCanvas = $FragmentContainer/ShardCanvas
-@onready var detail_card: Panel = $UI/DetailCard
+@onready var detail_card: Control = $UI/DetailCard
 @onready var detail_title: Label = $UI/DetailCard/TitleLabel
 @onready var detail_body: Label = $UI/DetailCard/BodyLabel
-@onready var enter_btn: Button = $UI/DetailCard/EnterBtn
-@onready var close_btn: Button = $UI/DetailCard/CloseBtn
 
 var selected_fragment: FragmentManager.FragmentData = null
 var _card_open := false
+var _detail_selected: int = 0
+var _detail_highlight: ColorRect
+var enter_btn: Button
+var close_btn: Button
 
 
 func _ready() -> void:
+	_create_detail_interaction_nodes()
 	_apply_skin()
 	shard_canvas.fragment_selected.connect(_on_fragment_selected)
 	shard_canvas.empty_clicked.connect(_close_detail_card)
 	enter_btn.pressed.connect(_on_enter_btn_pressed)
 	close_btn.pressed.connect(_close_detail_card)
+	get_viewport().size_changed.connect(_layout_detail_card)
 	var animate_id = FragmentManager.consume_completion_animation_id()
 	shard_canvas.configure(FragmentManager.fragments, animate_id)
 	_close_detail_card(false)
@@ -27,10 +32,69 @@ func _ready() -> void:
 
 
 func _apply_skin() -> void:
-	$TitleBar.add_theme_stylebox_override("panel", UITheme.panel_style(true))
-	detail_card.add_theme_stylebox_override("panel", UITheme.panel_style())
-	UITheme.apply_button(enter_btn, true)
-	UITheme.apply_button(close_btn)
+	_apply_transparent_button(enter_btn)
+	_apply_transparent_button(close_btn)
+
+
+func _create_detail_interaction_nodes() -> void:
+	_detail_highlight = ColorRect.new()
+	_detail_highlight.name = "DialogHighlight"
+	_detail_highlight.visible = false
+	_detail_highlight.layout_mode = 1
+	_detail_highlight.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_detail_highlight.color = DETAIL_HIGHLIGHT_COLOR
+	detail_card.add_child(_detail_highlight)
+	_move_child_after(_detail_highlight, "DialogBG")
+
+	enter_btn = _create_detail_button("EnterBtn", 0.137, 0.805, 0.484, 0.879)
+	close_btn = _create_detail_button("CloseBtn", 0.527, 0.805, 0.858, 0.879)
+	enter_btn.mouse_entered.connect(_select_detail_button.bind(0))
+	close_btn.mouse_entered.connect(_select_detail_button.bind(1))
+	enter_btn.focus_entered.connect(_select_detail_button.bind(0))
+	close_btn.focus_entered.connect(_select_detail_button.bind(1))
+
+
+func _create_detail_button(
+		node_name: String,
+		left: float,
+		top: float,
+		right: float,
+		bottom: float
+) -> Button:
+	var button := Button.new()
+	button.name = node_name
+	button.layout_mode = 1
+	button.anchors_preset = -1
+	button.anchor_left = left
+	button.anchor_top = top
+	button.anchor_right = right
+	button.anchor_bottom = bottom
+	button.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	button.grow_vertical = Control.GROW_DIRECTION_BOTH
+	button.flat = true
+	button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	detail_card.add_child(button)
+	return button
+
+
+func _move_child_after(child: Node, sibling_name: String) -> void:
+	var sibling := detail_card.get_node_or_null(sibling_name)
+	if sibling == null:
+		return
+	detail_card.move_child(child, sibling.get_index() + 1)
+
+
+func _apply_transparent_button(button: Button) -> void:
+	var empty := StyleBoxEmpty.new()
+	button.text = ""
+	button.flat = true
+	button.focus_mode = Control.FOCUS_ALL
+	button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	button.add_theme_stylebox_override("normal", empty)
+	button.add_theme_stylebox_override("hover", empty)
+	button.add_theme_stylebox_override("pressed", empty)
+	button.add_theme_stylebox_override("focus", empty)
+	button.add_theme_stylebox_override("disabled", empty)
 
 
 func _on_fragment_selected(index: int) -> void:
@@ -45,9 +109,9 @@ func _update_detail_card() -> void:
 	var fragment = selected_fragment
 	if fragment == null:
 		return
-	detail_title.text = "碎片 #%s  %s" % [fragment.id, fragment.name]
-	var state_text = "已修复 · 已归位" if fragment.completed else "尚未修复 · 漂流中"
-	var importance = "关键剧情碎片" if fragment.is_story_critical else "普通碎片"
+	detail_title.text = "#%s  %s" % [fragment.id, fragment.name]
+	var state_text := "已修复 · 已归位" if fragment.completed else "尚未修复 · 漂流中"
+	var importance := "关键剧情碎片" if fragment.is_story_critical else "普通碎片"
 	detail_body.text = "世界：%s\n难度：%d / 5\n类型：%s\n状态：%s\n\n线索：%s" % [
 		fragment.world_name,
 		fragment.difficulty,
@@ -58,34 +122,96 @@ func _update_detail_card() -> void:
 	if fragment.completed:
 		detail_body.text += "\n\n源印：%s" % fragment.source_mark_name
 	if fragment.implemented:
-		enter_btn.text = "再次进入" if fragment.completed else "进入碎片"
 		enter_btn.visible = true
+		_detail_selected = 0
 	else:
 		detail_body.text += "\n\n该碎片尚未开放。"
 		enter_btn.visible = false
-
+		_detail_selected = 1
+	_update_detail_highlight()
 
 func _open_detail_card() -> void:
 	_card_open = true
 	detail_card.visible = true
+	_layout_detail_card()
 	var tween = create_tween()
 	tween.set_trans(Tween.TRANS_QUAD)
 	tween.set_ease(Tween.EASE_OUT)
-	tween.tween_property(detail_card, "position:x", 830.0, 0.24)
+	tween.tween_property(detail_card, "position:x", _get_detail_open_x(), 0.24)
+	tween.tween_callback(_update_detail_highlight)
 
 
 func _close_detail_card(animated: bool = true) -> void:
 	selected_fragment = null
 	_card_open = false
+	_detail_highlight.visible = false
 	if not animated:
-		detail_card.position.x = 1280.0
+		_layout_detail_card()
 		detail_card.visible = false
 		return
 	var tween = create_tween()
 	tween.set_trans(Tween.TRANS_QUAD)
 	tween.set_ease(Tween.EASE_IN)
-	tween.tween_property(detail_card, "position:x", 1280.0, 0.2)
+	tween.tween_property(detail_card, "position:x", _get_detail_closed_x(), 0.2)
 	tween.tween_callback(func() -> void: detail_card.visible = false)
+
+
+func _layout_detail_card() -> void:
+	var viewport_size := get_viewport().get_visible_rect().size
+	detail_card.size = DETAIL_CARD_SIZE
+	detail_card.position.y = maxf(24.0, (viewport_size.y - DETAIL_CARD_SIZE.y) * 0.5)
+	detail_card.position.x = _get_detail_open_x() if _card_open else _get_detail_closed_x()
+	if _card_open:
+		_update_detail_highlight()
+
+
+func _get_detail_open_x() -> float:
+	var viewport_size := get_viewport().get_visible_rect().size
+	return viewport_size.x - DETAIL_CARD_SIZE.x - 34.0
+
+
+func _get_detail_closed_x() -> float:
+	var viewport_size := get_viewport().get_visible_rect().size
+	return viewport_size.x + 24.0
+
+
+func _select_detail_button(index: int) -> void:
+	if index == 0 and not enter_btn.visible:
+		index = 1
+	_detail_selected = clampi(index, 0, 1)
+	_update_detail_highlight()
+
+
+func _update_detail_highlight() -> void:
+	if not _card_open or not detail_card.visible:
+		_detail_highlight.visible = false
+		return
+	var target := enter_btn if _detail_selected == 0 and enter_btn.visible else close_btn
+	_detail_highlight.visible = true
+	_detail_highlight.position = target.position
+	_detail_highlight.size = target.size
+	_detail_highlight.move_to_front()
+	target.grab_focus()
+
+
+func _input(event: InputEvent) -> void:
+	if not _card_open:
+		return
+	if event.is_action_pressed("ui_cancel") or event.is_action_pressed("escape"):
+		_close_detail_card()
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("ui_left") or event.is_action_pressed("ui_up"):
+		_select_detail_button(0)
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("ui_right") or event.is_action_pressed("ui_down"):
+		_select_detail_button(1)
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("ui_accept") or event.is_action_pressed("interact"):
+		if _detail_selected == 0 and enter_btn.visible:
+			_on_enter_btn_pressed()
+		else:
+			_close_detail_card()
+		get_viewport().set_input_as_handled()
 
 
 func _on_enter_btn_pressed() -> void:
