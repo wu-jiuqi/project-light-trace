@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "scope": "0004",
+  "fragment": { "id": "0004", "name": "工坊物语" },
+  "sourceDocument": "design/items/0004/0004_物品清单_优化版.md",
+  "optimizationBase": "design/items/0004/0004_物品清单.md (步骤9修订版, 48件)",
+  "lastSynced": "2026-06-07",
+  "summary": {
+    "totalAssets": 28, "originalTotal": 48, "reduction": "42%",
+    "priorityCount": { "P0": 20, "P1": 7, "P2": 1 },
+    "categoryCount": { "environment": 10, "fx": 5, "prop": 12, "ui": 1 }
+  },
+  "assets": [
+    {"id":"0004_env_entrance_door","category":"environment","role":"工坊入口铸铁门——半开+木牌留言","priority":"P1","notes":""},
+    {"id":"0004_env_workshop_floor","category":"environment","role":"工坊地板系统——四区变体统一","priority":"P0","notes":"吸收: warehouse_floor(P1) + gallery_floor(P1) + forge_floor(P1)。4variant, 64px平铺"},
+    {"id":"0004_env_main_workbench","category":"environment","role":"主工作台——含砝码+陶杯+暗格","priority":"P0","notes":"吸收: brass_weight(P1) + ceramic_cup(P1) + secret_compartment(P2)"},
+    {"id":"0004_env_brass_lamps","category":"environment","role":"悬挂黄铜灯×3——含灯光呼吸","priority":"P0","notes":"吸收: light_breathing(P1)。碎裂mask叠加"},
+    {"id":"0004_env_perfect_automaton_blank","category":"environment","role":"完美人偶空白纸模——含面部","priority":"P0","notes":"吸收: automaton_face(P1)。双状态(展开/折叠)"},
+    {"id":"0004_env_material_detector","category":"environment","role":"材料检测仪——含检测反馈","priority":"P0","notes":"吸收: detector_feedback(P1)"},
+    {"id":"0004_env_material_shelving","category":"environment","role":"仓库陈列系统——金属架+木材架+液体柜","priority":"P1","notes":"吸收: metal_shelf(P1) + wood_shelf(P1) + liquid_cabinet(P2)"},
+    {"id":"0004_env_steam_pipes","category":"environment","role":"蒸汽管道系统——含蒸汽脉冲","priority":"P1","notes":"吸收: steam_pulse(P1)"},
+    {"id":"0004_env_gallery_wall","category":"environment","role":"陈列廊墙面系统——七只钟+子图纸位","priority":"P1","notes":"吸收: seven_clocks(P1) + pendulum_stop(P1)"},
+    {"id":"0004_env_forge_system","category":"environment","role":"锻造区系统——熔炉+水槽+工具墙+点燃+修复+温度盘+刻字","priority":"P0","notes":"吸收: forge_furnace(P0) + cooling_trough(P0) + tool_wall(P1) + forge_ignite(P0) + trough_glow(P1) + temp_dial(P1) + temp_inscription(P2)"},
+    {"id":"0004_prop_main_blueprint","category":"prop","role":"主工作台图纸——解密仪表板","priority":"P0","notes":"6状态(0/6→6/6)"},
+    {"id":"0004_prop_reversed_sundial_brass","category":"prop","role":"倒置日晷黄铜片——齿轮·左信物","priority":"P0","notes":"暗线C植入点。可携带"},
+    {"id":"0004_prop_blueprint_heart","category":"prop","role":"心脏子图纸","priority":"P0","notes":""},
+    {"id":"0004_prop_blueprint_head","category":"prop","role":"头部子图纸","priority":"P0","notes":""},
+    {"id":"0004_prop_blueprint_left_arm","category":"prop","role":"左臂子图纸","priority":"P0","notes":""},
+    {"id":"0004_prop_blueprint_right_arm","category":"prop","role":"右臂子图纸","priority":"P0","notes":""},
+    {"id":"0004_prop_blueprint_left_leg","category":"prop","role":"左腿子图纸","priority":"P0","notes":""},
+    {"id":"0004_prop_blueprint_right_leg","category":"prop","role":"右腿子图纸","priority":"P0","notes":""},
+    {"id":"0004_prop_company_memo","category":"prop","role":"公司备忘录——暗线B核心证据","priority":"P1","notes":"签署人'陈██'"},
+    {"id":"0004_prop_gearleft_arms","category":"prop","role":"齿轮·左手臂——独立拆装动画","priority":"P0","notes":"暗线A"},
+    {"id":"0004_prop_springright_eyes","category":"prop","role":"弹簧·右眼睛——独立调焦动画","priority":"P0","notes":"暗线A"},
+    {"id":"0004_prop_pendulum_base_inscription","category":"prop","role":"钟摆底座刻字","priority":"P1","notes":""},
+    {"id":"0004_fx_suspended_droplet","category":"fx","role":"悬停水珠——违反重力","priority":"P1","notes":""},
+    {"id":"0004_fx_gear_spark","category":"fx","role":"齿轮火花","priority":"P1","notes":""},
+    {"id":"0004_fx_automaton_awakening","category":"fx","role":"人偶觉醒演出","priority":"P0","notes":"总长约4秒"},
+    {"id":"0004_fx_forgeheart_seal_manifest","category":"fx","role":"匠心之印浮现","priority":"P0","notes":"暗金色齿轮+锤子徽章"},
+    {"id":"0004_fx_window_mirror","category":"fx","role":"窗外镜像——下雨的工坊","priority":"P1","notes":"暗线C"},
+    {"id":"0004_ui_alert_bar","category":"ui","role":"STANDARD警觉指示条","priority":"P0","notes":"64×8px。绿→黄→橙→红"}
+  ]
+}
