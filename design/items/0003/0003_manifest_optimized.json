@@ -1,42 +1,237 @@
 {
   "schemaVersion": 1,
   "scope": "0003",
-  "fragment": { "id": "0003", "name": "月下神社" },
+  "fragment": {
+    "id": "0003",
+    "name": "月下道观"
+  },
   "sourceDocument": "design/items/0003/0003_物品清单_优化版.md",
   "optimizationBase": "design/items/0003/0003_物品清单.md (V1.2, 40件)",
   "lastSynced": "2026-06-07",
   "summary": {
-    "totalAssets": 27, "originalTotal": 40, "reduction": "33%",
-    "priorityCount": { "P0": 18, "P1": 7, "P2": 2 },
-    "categoryCount": { "environment": 7, "fx": 5, "prop": 12, "npc": 3 }
+    "totalAssets": 21,
+    "originalTotal": 40,
+    "reduction": "48%",
+    "priorityCount": {
+      "P0": 16,
+      "P1": 5
+    },
+    "categoryCount": {
+      "environment": 8,
+      "prop": 8,
+      "fx": 5
+    }
   },
   "assets": [
-    {"id":"0003_env_torii_gate","category":"environment","role":"灰白鸟居——含柱底手掌印+笠木内侧刻字","priority":"P0","notes":"吸收: torii_handprints(P2) + torii_kasagi_inscription(P1)"},
-    {"id":"0003_env_sando_ground","category":"environment","role":"参道石板路——含入口提示石碑","priority":"P0","notes":"吸收: sando_hint_stone(P1)。3变体64px平铺"},
-    {"id":"0003_env_stone_lantern","category":"environment","role":"石灯笼×12——参道两侧","priority":"P0","notes":"12实例同一资产。烛火见0003_fx_lantern_fire"},
-    {"id":"0003_env_chozuya","category":"environment","role":"手水舍建筑组——含水盘+水流","priority":"P1","notes":"吸收: chozuya_basin(P0) + chozuya_water_flow(P1)"},
-    {"id":"0003_env_dry_well","category":"environment","role":"枯井——含井绳木桶","priority":"P0","notes":"吸收: well_bucket(P1)。月影反射见0003_fx_well_reflection"},
-    {"id":"0003_env_treasure_hall","category":"environment","role":"宝物殿建筑——含内部+架子+铃+布+撕毁日志","priority":"P1","notes":"吸收: treasure_hall_interior(P1) + treasure_shelves(P1) + ritual_bell(P2) + white_cloth(P2) + torn_papers(P2)"},
-    {"id":"0003_env_main_hall","category":"environment","role":"本殿建筑——含内部+台阶+石台+枯叶","priority":"P0","notes":"吸收: main_hall_interior(P1) + main_hall_stairs(P0) + main_hall_platform(P1) + main_hall_dead_leaf(P2)"},
-    {"id":"0003_env_mirror_passage","category":"environment","role":"镜中通道空间","priority":"P0","notes":"巫女镜碎后聚合通道"},
-    {"id":"0003_prop_chozuya_ladle","category":"prop","role":"手水舍木杓——仪式第一步道具","priority":"P0","notes":"双状态(放置/手持)"},
-    {"id":"0003_prop_magatama_box","category":"prop","role":"勾玉盒——三旋钮锁","priority":"P0","notes":"三状态(上锁/解锁/空盒)。暗线B种子"},
-    {"id":"0003_prop_magatama","category":"prop","role":"勾玉——仪式祭品","priority":"P0","notes":"可携带。双状态"},
-    {"id":"0003_prop_purification_scroll","category":"prop","role":"褪色卷轴——暗线A核心文本","priority":"P1","notes":"首次阅读→警觉值-10%"},
-    {"id":"0003_prop_moonlight_seal","category":"prop","role":"月光之印——碎片0003源印","priority":"P0","notes":"三状态。Shader穿透(80-100%)"},
-    {"id":"0003_fx_lantern_fire","category":"fx","role":"石灯笼烛火——12盏同步闪烁","priority":"P0","notes":"含仪式步骤反馈中的烛火失同步子行为"},
-    {"id":"0003_fx_well_reflection","category":"fx","role":"枯井月影反射——6色循环","priority":"P0","notes":"Shader穿透候选(15-20%)"},
-    {"id":"0003_fx_mirror_shatter","category":"fx","role":"巫女镜碎演出——含镜面符号序列","priority":"P0","notes":"吸收: miko_mirror_symbol(P0)。暗线C首次视觉化"},
-    {"id":"0003_fx_passage_fragments","category":"fx","role":"镜中通道碎片序列——7块记忆","priority":"P0","notes":"AI生命历程视觉回放"},
-    {"id":"0003_fx_moonlight_beam","category":"fx","role":"月光光柱——含脉动光晕","priority":"P0","notes":"吸收: moonlight_seal_glow(P0)"},
-    {"id":"0003_prop_miko_mirror_face","category":"prop","role":"巫女镜面——银纸反射面","priority":"P0","notes":"约60% foil(叙事必需)。Shader穿透(20-30%)"},
-    {"id":"0003_prop_kannushi_note","category":"prop","role":"神主留言纸——暗线A★核心推进","priority":"P1","notes":"通关后石台上自动出现"},
-    {"id":"0003_prop_kannushi_hands","category":"prop","role":"神主合十手部——独立微颤动画","priority":"P1","notes":"可纳入纸偶但动画独立"},
-    {"id":"0003_fx_ritual_feedback","category":"fx","role":"仪式步骤执行反馈（系统级——无独立资产）","priority":"P0","notes":"解散至: 彩色边条(Shader)+烛火失同步(lantern_fire)+镜面符号(mirror_shatter)"},
-    {"id":"0003_fx_alert_system","category":"fx","role":"警觉等级环境变化（系统级——Shader参数联动）","priority":"P0","notes":"无独立资产。L3烛火乱/L4门关/L5水流停/L6日食+全熄"},
-    {"id":"0003_prop_torii_details","category":"prop","role":"鸟居柱底掌印+笠木刻字（子特征）","priority":"P2","notes":"已吸收至0003_env_torii_gate。独立记录以保留叙事追溯"},
-    {"id":"0003_prop_treasure_hall_details","category":"prop","role":"宝物殿氛围道具组（铜铃+白布+撕毁日志——子特征）","priority":"P2","notes":"已吸收至0003_env_treasure_hall。独立记录以保留叙事追溯"},
-    {"id":"0003_prop_main_hall_details","category":"prop","role":"本殿附属细节（石台手印+第7级枯叶——子特征）","priority":"P2","notes":"已吸收至0003_env_main_hall。独立记录以保留叙事追溯"},
-    {"id":"0003_env_chozuya_water","category":"fx","role":"手水舍水流（子特征）","priority":"P1","notes":"已吸收至0003_env_chozuya"}
+    {
+      "id": "0003_env_paifang_gate",
+      "category": "environment",
+      "role": "灰白牌坊——含柱底手掌印+笠木内侧刻字",
+      "priority": "P0",
+      "notes": "吸收: torii_handprints(P2) + torii_kasagi_inscription(P1)",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice"
+    },
+    {
+      "id": "0003_env_sando_ground",
+      "category": "environment",
+      "role": "参道石板路——含入口提示石碑",
+      "priority": "P0",
+      "notes": "吸收: sando_hint_stone(P1)。3变体64px平铺",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice"
+    },
+    {
+      "id": "0003_env_stone_lantern",
+      "category": "environment",
+      "role": "石灯×12——参道两侧",
+      "priority": "P0",
+      "notes": "12实例同一资产。烛火见0003_fx_lantern_fire",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice"
+    },
+    {
+      "id": "0003_env_purification_pool",
+      "category": "environment",
+      "role": "净手池建筑组——含水盘+水流",
+      "priority": "P1",
+      "notes": "吸收: chozuya_basin(P0) + chozuya_water_flow(P1)",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0003_full"
+    },
+    {
+      "id": "0003_env_ancient_well",
+      "category": "environment",
+      "role": "古井——含井绳木桶",
+      "priority": "P0",
+      "notes": "吸收: well_bucket(P1)。月影反射见0003_fx_well_reflection",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice"
+    },
+    {
+      "id": "0003_env_scripture_pavilion",
+      "category": "environment",
+      "role": "藏经阁建筑——含内部+架子+铃+布+撕毁日志",
+      "priority": "P1",
+      "notes": "吸收: treasure_hall_interior(P1) + treasure_shelves(P1) + ritual_bell(P2) + white_cloth(P2) + torn_papers(P2)",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0003_full"
+    },
+    {
+      "id": "0003_env_main_palace",
+      "category": "environment",
+      "role": "正殿建筑——含内部+台阶+石台+枯叶+风铃+膝盖凹痕",
+      "priority": "P0",
+      "notes": "吸收: main_hall_interior(P1) + main_hall_stairs(P0) + main_hall_platform(P1) + main_hall_dead_leaf(P2) + main_hall_knee_dents(P2) + main_hall_wind_chime(P2)。地面圆形接缝直径32px。风铃无风自鸣（异常物理规则提示）",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice"
+    },
+    {
+      "id": "0003_env_mirror_passage",
+      "category": "environment",
+      "role": "镜中通道空间",
+      "priority": "P0",
+      "notes": "镜灵镜碎后聚合通道",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice"
+    },
+    {
+      "id": "0003_prop_purification_pool_ladle",
+      "category": "prop",
+      "role": "净手池木杓——仪式第一步道具",
+      "priority": "P0",
+      "notes": "双状态(放置/手持)",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice"
+    },
+    {
+      "id": "0003_prop_magatama_box",
+      "category": "prop",
+      "role": "勾玉盒——三旋钮锁",
+      "priority": "P0",
+      "notes": "三状态(上锁/解锁/空盒)。暗线B种子",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice"
+    },
+    {
+      "id": "0003_prop_magatama",
+      "category": "prop",
+      "role": "勾玉——仪式祭品",
+      "priority": "P0",
+      "notes": "可携带。双状态",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice"
+    },
+    {
+      "id": "0003_prop_purification_scroll",
+      "category": "prop",
+      "role": "褪色卷轴——暗线A核心文本",
+      "priority": "P1",
+      "notes": "首次阅读→警觉值-10%",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0003_full"
+    },
+    {
+      "id": "0003_prop_moonlight_seal",
+      "category": "prop",
+      "role": "月光之印——碎片0003源印",
+      "priority": "P0",
+      "notes": "三状态。Shader穿透(80-100%)",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice"
+    },
+    {
+      "id": "0003_fx_lantern_fire",
+      "category": "fx",
+      "role": "石灯烛火——12盏同步闪烁",
+      "priority": "P0",
+      "notes": "含仪式步骤反馈中的烛火失同步子行为",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "vertical_slice"
+    },
+    {
+      "id": "0003_fx_well_reflection",
+      "category": "fx",
+      "role": "古井月影反射——6色循环",
+      "priority": "P0",
+      "notes": "Shader穿透候选(15-20%)",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "vertical_slice"
+    },
+    {
+      "id": "0003_fx_mirror_shatter",
+      "category": "fx",
+      "role": "镜灵镜碎演出——含镜面符号序列",
+      "priority": "P0",
+      "notes": "吸收: jingling_mirror_symbol(P0)。暗线C首次视觉化",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "vertical_slice"
+    },
+    {
+      "id": "0003_fx_passage_fragments",
+      "category": "fx",
+      "role": "镜中通道碎片序列——7块记忆",
+      "priority": "P0",
+      "notes": "AI生命历程视觉回放",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "vertical_slice"
+    },
+    {
+      "id": "0003_fx_moonlight_beam",
+      "category": "fx",
+      "role": "月光光柱——含脉动光晕",
+      "priority": "P0",
+      "notes": "吸收: moonlight_seal_glow(P0)",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "vertical_slice"
+    },
+    {
+      "id": "0003_prop_jingling_mirror_face",
+      "category": "prop",
+      "role": "镜灵镜面——银纸反射面",
+      "priority": "P0",
+      "notes": "约60% foil(叙事必需)。Shader穿透(20-30%)",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice"
+    },
+    {
+      "id": "0003_prop_daoshi_note",
+      "category": "prop",
+      "role": "道士留言纸——暗线A★核心推进",
+      "priority": "P1",
+      "notes": "通关后石台上自动出现",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0003_full"
+    },
+    {
+      "id": "0003_prop_daoshi_hands",
+      "category": "prop",
+      "role": "道士合十手部——独立微颤动画",
+      "priority": "P1",
+      "notes": "可纳入纸偶但动画独立",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "0003_full"
+    }
   ]
 }
