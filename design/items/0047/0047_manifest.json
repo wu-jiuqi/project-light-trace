@@ -1,0 +1,319 @@
+{
+  "fragment_id": "0047",
+  "fragment_name": "倒悬图书馆",
+  "total_items": 26,
+  "p0_count": 12,
+  "p1_count": 14,
+  "p2_count": 0,
+  "compression_note": "51件压缩至26件。移除P2(10件)、合并同类项(4灯→1、5书架→2、3纸条→1、5地面→3、2人文书→1)、FX内嵌至宿主物品",
+  "generated": "2026-06-07",
+  "items": [
+    {
+      "id": "0047_env_library_ground",
+      "path": "assets/papercraft/id0047/environment/library_ground.png",
+      "category": "environment",
+      "role": "图书馆木地板（圆厅/人文/历史三区通用）",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "notes": "三区变体：圆厅（#5A4A3A暗暖棕+检索烧焦磨损）| 人文（#6A5A4A暖中棕+纸屑）| 历史（#4A3A2A深暗棕+裂纹+霉渍）。64×64px无缝平铺，straight/edge/corner变体",
+      "priority": "P0",
+      "variants": [
+        "0047_env_library_ground_straight",
+        "0047_env_library_ground_edge",
+        "0047_env_library_ground_corner"
+      ]
+    },
+    {
+      "id": "0047_env_science_ground",
+      "path": "assets/papercraft/id0047/environment/science_ground.png",
+      "category": "environment",
+      "role": "科学区石板地",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "id0047_full",
+      "notes": "冷灰石板 #706860，规则灰缝 #605850，乙书桌下圆形发亮磨痕 #807870。64×64px无缝平铺，straight/edge变体",
+      "priority": "P1",
+      "variants": [
+        "0047_env_science_ground_straight",
+        "0047_env_science_ground_edge"
+      ]
+    },
+    {
+      "id": "0047_env_forbidden_ground",
+      "path": "assets/papercraft/id0047/environment/forbidden_ground.png",
+      "category": "environment",
+      "role": "禁书区暗地板",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "id0047_full",
+      "notes": "极暗棕 #3A2A1A，中央裂缝 #2A1A0A（与0001暗室呼应），沉默读者脚边磨痕 #4A3A2A，散落纸屑 #D0C0B0。64×64px无缝平铺，straight/edge变体",
+      "priority": "P1",
+      "variants": [
+        "0047_env_forbidden_ground_straight",
+        "0047_env_forbidden_ground_edge"
+      ]
+    },
+    {
+      "id": "0047_env_catalog_desk",
+      "path": "assets/papercraft/id0047/environment/catalog_desk.png",
+      "category": "environment",
+      "role": "目录桌（含检索烧焦FX）",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "notes": "圆形桌面直径40px #5A4230，四灯光焦痕 #6A5240，检索烧焦焦痕累积 #3A2A1A。内嵌FX：检索时火光 #E8A040（1秒）+纸烟 #C0B8B0（2秒）。桌腿铜色包脚 #B8860B（foil<3%）。桌腿高16px+桌面厚4px=总高20px",
+      "priority": "P0"
+    },
+    {
+      "id": "0047_env_lamp",
+      "path": "assets/papercraft/id0047/environment/lamp.png",
+      "category": "environment",
+      "role": "不灭灯（4色温变体+呼吸变化FX）",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "notes": "六边形纸灯笼 #D8C8A0，4变体：L1(#F0C870/2700K/r40px/烧焦痕) | L2(#F0D080/2600K/r36px/裂痕) | L3(#E8D898/2800K/r32px/干净) | L4(#D0B080/2500K/r28px/蓝边 #6088D0)。内嵌FX：呼吸变化8分钟周期正弦波，四灯相位错开。直径20px+细绳28-48px+纸穗",
+      "priority": "P0"
+    },
+    {
+      "id": "0047_env_bookshelf_standard",
+      "path": "assets/papercraft/id0047/environment/bookshelf_standard.png",
+      "category": "environment",
+      "role": "标准书架（圆厅/人文/科学三区通用）",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "id0047_full",
+      "notes": "5层隔板，三区变体：圆厅(#4A3828+倒置书) | 人文(#5A4230+彩色书脊) | 科学(#686058+灰白书脊)。straight/corner变体。尺寸按区域：96px×160px/64px×144px/48px×176px",
+      "priority": "P1",
+      "variants": [
+        "0047_env_bookshelf_standard_straight",
+        "0047_env_bookshelf_standard_corner"
+      ]
+    },
+    {
+      "id": "0047_env_bookshelf_archive",
+      "path": "assets/papercraft/id0047/environment/bookshelf_archive.png",
+      "category": "environment",
+      "role": "档案柜书架（历史区+禁书区）",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "id0047_full",
+      "notes": "两变体：历史(#585048深灰绿档案柜，6层×3列抽屉，铜拉手 #B0A080 foil<2%，半开抽屉+纸卷) | 禁书(#3A2A1A暗棕小书架，2层，真理之书金线 #D0C080)。历史straight/corner，禁书变体为独立模块(48px×64px)——非拼接，单独PNG文件(0047_env_bookshelf_archive_forbidden.png)，不列入variants数组",
+      "priority": "P1",
+      "variants": [
+        "0047_env_bookshelf_archive_straight",
+        "0047_env_bookshelf_archive_corner"
+      ]
+    },
+    {
+      "id": "0047_env_desk_scribe_a",
+      "path": "assets/papercraft/id0047/environment/desk_scribe_a.png",
+      "category": "environment",
+      "role": "抄写员甲书桌（含原版+改写版书）",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "id0047_full",
+      "notes": "倾斜桌面8° #4A3828，两书并排（左原版 #E8DCC0/右改写版 #F0E8D8），原版书脊烫金 #C0A860 foil<3%，改写版蓝色审查标签 #6088D0。台灯 #C0B0A0。48px×24px桌面+20px桌腿=总高28px",
+      "priority": "P1"
+    },
+    {
+      "id": "0047_env_desk_scribe_b",
+      "path": "assets/papercraft/id0047/environment/desk_scribe_b.png",
+      "category": "environment",
+      "role": "抄写员乙书桌",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "id0047_full",
+      "notes": "纯白桌面 #E8E4DC，极度整洁——仅一本书+笔+字条，无墨水渍铅笔屑。白色细桌腿 #E0DCD4（4条，直径3px）。40px×20px桌面+18px桌腿=总高22px",
+      "priority": "P1"
+    },
+    {
+      "id": "0047_env_desk_scribe_c",
+      "path": "assets/papercraft/id0047/environment/desk_scribe_c.png",
+      "category": "environment",
+      "role": "抄写员丙书桌（含档案盒堆）",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "id0047_full",
+      "notes": "深绿灰金属桌面 #484038，纸堆8px高，左边泛黄纸条 #E0D8C8，右边瓦楞档案盒 #786858（3盒叠放，一半开露纸卷 #E8DCC0）。台灯 #B0A8A0，数字纸片排列。44px×22px桌面+16px桌腿+8px纸堆=总高24px",
+      "priority": "P1"
+    },
+    {
+      "id": "0047_env_forbidden_chain",
+      "path": "assets/papercraft/id0047/environment/forbidden_chain.png",
+      "category": "environment",
+      "role": "禁书区锁链栏杆",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "id0047_full",
+      "notes": "3根竖杆 #585048（48px×3px），粗铁链 #504840（链环4px）松松绕在栏杆上——无锁扣。空锁扣 #706860，栏杆手印 #605848。可推开（推开时金属摩擦音效）",
+      "priority": "P1"
+    },
+    {
+      "id": "0047_prop_catalog_slip",
+      "path": "assets/papercraft/id0047/prop/catalog_slip.png",
+      "category": "prop",
+      "role": "分类号纸条（含消失FX）",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "notes": "泛黄便签 #E8DCC0，手工撕边，深灰墨水 #484038。内嵌FX：末位数字视线移开后3秒右→左擦除淡出（红色删除描边 #804040），回头0.5秒恢复，5秒冷却。24px×10px",
+      "priority": "P0"
+    },
+    {
+      "id": "0047_prop_scribe_notes",
+      "path": "assets/papercraft/id0047/prop/scribe_notes.png",
+      "category": "prop",
+      "role": "抄写员纸条（甲/乙/丙三变体）",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "notes": "三变体：甲(20px×8px/#E8DCC0/墨迹 #484038/正反面) | 乙(12px×8px/#F0ECE0/蓝黑墨迹 #304050/三状态纹理切换) | 丙(22px×9px/#E0D0B8/暗绿墨迹 #404838/虫蛀小孔/反写字迹)。关键解密道具——第二/四/三位数字",
+      "priority": "P0"
+    },
+    {
+      "id": "0047_prop_dried_flower",
+      "path": "assets/papercraft/id0047/prop/dried_flower.png",
+      "category": "prop",
+      "role": "未被改写的春天",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "id0047_full",
+      "notes": "浅粉矢车菊花瓣 #E8C8C0（6px×3px），卷曲边缘+纤维纹理 #D8B8B0。夹于书页间鼓起7px×4px。可拾取收藏品——暗线A跨碎片锚点（0004/0762）",
+      "priority": "P1"
+    },
+    {
+      "id": "0047_prop_truth_book",
+      "path": "assets/papercraft/id0047/prop/truth_book.png",
+      "category": "prop",
+      "role": "真理之书",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "notes": "深棕布面装帧 #6A4A3A，书脊烫金 #C0A860 foil<5%，刻痕分类号 B-1-0-1-7，陈技术便利贴。四状态（书架/乱码/清晰/末页源印）。32px×20px封+6px书脊，摊开64px×20px，约14页。核心道具——暗线B核心证据+暗线A扉页",
+      "priority": "P0"
+    },
+    {
+      "id": "0047_prop_blank_book",
+      "path": "assets/papercraft/id0047/prop/blank_book.png",
+      "category": "prop",
+      "role": "沉默读者的空白书（含闪光FX）",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "id0047_full",
+      "notes": "素白亚麻封面 #E8E0D8，纯白内页 #F0ECE0。内嵌FX：手指触碰→0.2秒金色文字闪光 #D4C080（4px扩散）。封面内侧铅笔字 #908880+半日晷符号。最后一页被撕下。24px×16px封+摊开48px×16px",
+      "priority": "P1"
+    },
+    {
+      "id": "0047_prop_chen_note_forbidden",
+      "path": "assets/papercraft/id0047/prop/chen_note_forbidden.png",
+      "category": "prop",
+      "role": "陈技术便利贴（全域）",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "vertical_slice",
+      "notes": "淡黄色 #F0E0B0。灰蓝墨水 #485868模糊审查字块。右下日期「2077.3」 #605848。禁书区12px×7px（P0—真理之书书脊，双状态模糊/可读）+人文/科学/历史区10px×6px（P1—可选交互）。跨碎片0001→0047叙事回响",
+      "priority": "P0"
+    },
+    {
+      "id": "0047_prop_truth_sigil",
+      "path": "assets/papercraft/id0047/prop/truth_sigil.png",
+      "category": "prop",
+      "role": "真理之印",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "vertical_slice",
+      "notes": "金色「真」字16px×16px，10画纸艺切割纸条（宽1.5px），光晕 #D4C080→#C0A060→透明，4秒脉冲周期。浮现动画3秒（渗→扩散→收束）。foil<8%。源印——通关获取",
+      "priority": "P0"
+    },
+    {
+      "id": "0047_prop_forbidden_book",
+      "path": "assets/papercraft/id0047/prop/forbidden_book.png",
+      "category": "prop",
+      "role": "禁书区其他审查书",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "id0047_full",
+      "notes": "暗灰素面封面 #585048，白色编号标签 #D0C8C0（4px×2px），内页涂黑 #202020，第38页漏「协议」笔画 #706860。完整度<60%变为均一灰 #808080不可交互。封面20px×14px×2本",
+      "priority": "P1"
+    },
+    {
+      "id": "0047_fx_gravity_flip",
+      "path": "assets/papercraft/id0047/fx/gravity_flip.png",
+      "category": "fx",
+      "role": "重力翻转效果",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "vertical_slice",
+      "notes": "180°旋转0.5秒EaseOutCubic，多层纸遮罩（外深灰缩小+内淡金扩展）。衣摆头发Shader顶点位移2px/3秒循环。Camera2D.rotation=180°+AnimationPlayer",
+      "priority": "P0"
+    },
+    {
+      "id": "0047_fx_text_reveal",
+      "path": "assets/papercraft/id0047/fx/text_reveal.png",
+      "category": "fx",
+      "role": "真理之书文字显形",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "vertical_slice",
+      "notes": "逐行180°→0°旋转重组EaseOutQuart，行间0.05秒延迟「波浪式」，颜色 #807870→#484038，不透明度40%→100%，总1.8秒。金色书页描边 #D4C080持续3秒。Shader参数+GDScript逐行触发",
+      "priority": "P0"
+    },
+    {
+      "id": "0047_fx_sigil_emerge",
+      "path": "assets/papercraft/id0047/fx/sigil_emerge.png",
+      "category": "fx",
+      "role": "源印浮现",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "vertical_slice",
+      "notes": "三阶段4秒：渗透(0-1.5s不透明度0→80%+Shader noise mask)→光晕(1.5-3s半径0→40px+环境光+15%)→收束(3-4s残留脉冲)。多层tracing_paper+foil+noise mask",
+      "priority": "P0"
+    },
+    {
+      "id": "0047_fx_shelf_gray_out",
+      "path": "assets/papercraft/id0047/fx/shelf_gray_out.png",
+      "category": "fx",
+      "role": "书架变灰",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "id0047_full",
+      "notes": "信息完整度<60%触发，逐架「波浪」变灰 #808080（5秒），每架褪色0.3s→模糊0.3s→均一灰。变灰后碰撞体禁用。Shader饱和度+LOD参数，GDScript逐架触发",
+      "priority": "P1"
+    },
+    {
+      "id": "0047_fx_guide_glow",
+      "path": "assets/papercraft/id0047/fx/guide_glow.png",
+      "category": "fx",
+      "role": "金色引导光圈",
+      "status": "planned",
+      "generation": "effect_composite",
+      "requiredFor": "id0047_full",
+      "notes": "Ring外径20px×内径16px×线宽2px #FFD700，脉动2秒周期15%→40%→15% Additive。距离响应：10m不可见→0.5m内30%→70%线性增强。预烘焙光斑降级方案",
+      "priority": "P1"
+    },
+    {
+      "id": "0047_prop_elder_robe",
+      "path": "assets/papercraft/id0047/prop/elder_robe.png",
+      "category": "prop",
+      "role": "目录老者灰袍",
+      "status": "planned",
+      "generation": "isolated_asset",
+      "requiredFor": "id0047_full",
+      "notes": "多层灰纸袍 #908880（3-4层可见纸边），下摆撕裂 #807870，袖口烧焦 #3A2A1A。纸层间暖光透出 #B0A090。悬浮离地16px——下摆Shader波动1px/5秒。NPC纸偶服装——需独立制作",
+      "priority": "P1"
+    },
+    {
+      "id": "0047_ui_info_integrity_bar",
+      "path": "assets/papercraft/id0047/ui/info_integrity_bar.png",
+      "category": "ui",
+      "role": "信息完整度指示条",
+      "status": "planned",
+      "generation": "ui_component",
+      "requiredFor": "vertical_slice",
+      "notes": "64px×8px左上角。首次显示延迟至第一次扣分（翻开真理之书时）。暗灰底 #585048+蓝渐变填充 #6088D0→#80A0E0（<40%变红 #D04040）。标签+百分比数字（模糊字块不可读）。首次滑入动画0.3s EaseOutCubic",
+      "priority": "P0"
+    }
+  ]
+}
