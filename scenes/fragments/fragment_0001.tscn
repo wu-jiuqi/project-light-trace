@@ -1,10 +1,209 @@
-[gd_scene format=3 uid="uid://fragment0001"]
+[gd_scene format=3 uid="uid://vwste8w6ibmr"]
 
-[ext_resource type="Script" path="res://scripts/fragment/fragment_0001_state.gd" id="1_state"]
-[ext_resource type="PackedScene" path="res://scenes/characters/player/player.tscn" id="2_player"]
+[ext_resource type="Texture2D" uid="uid://fk0pkr55xuhi" path="res://assets/papercraft/fragments/id0001/environment2/fantasy_shop_11.png" id="1_q23m0"]
+[ext_resource type="Texture2D" uid="uid://cud0akhbd3n6x" path="res://assets/papercraft/fragments/id0001/environment2/road_crossing_25.png" id="1_sk1d4"]
+[ext_resource type="Texture2D" uid="uid://c246ct1w5miuy" path="res://assets/papercraft/fragments/id0001/environment2/0001_env_clocktower.png" id="2_52m1y"]
+[ext_resource type="Texture2D" uid="uid://u731skvjowp3" path="res://assets/papercraft/fragments/id0001/environment2/fantasy_shop_03.png" id="3_pyfi5"]
+[ext_resource type="Texture2D" uid="uid://dotbmabd4mjx2" path="res://assets/papercraft/fragments/id0001/environment2/fishshop_13.png" id="4_vurmb"]
+[ext_resource type="Texture2D" uid="uid://rns664t3l77j" path="res://assets/papercraft/fragments/id0001/environment2/breadshop_06.png" id="5_jgijl"]
+[ext_resource type="Texture2D" uid="uid://ddngw1k5pxqq6" path="res://assets/papercraft/fragments/id0001/environment2/flowerpot_23.png" id="6_3mr5v"]
+[ext_resource type="Texture2D" uid="uid://iqul8pxdo67j" path="res://assets/papercraft/fragments/id0001/environment2/sundial_21.png" id="7_cmphu"]
+[ext_resource type="Texture2D" uid="uid://3ovls67ar2up" path="res://assets/papercraft/fragments/id0001/environment2/lantern_22.png" id="7_jgijl"]
+[ext_resource type="Texture2D" uid="uid://ck2otjlivkd8l" path="res://assets/papercraft/fragments/id0001/environment2/fantasy_shop_14.png" id="8_3mr5v"]
+[ext_resource type="Texture2D" uid="uid://dsiidfmhm7htr" path="res://assets/papercraft/fragments/id0001/environment2/road_18.png" id="9_4nsis"]
+[ext_resource type="Texture2D" uid="uid://8lptfu3px70t" path="res://assets/papercraft/fragments/id0001/environment2/sundial_20.png" id="9_cmphu"]
+[ext_resource type="Texture2D" uid="uid://lxs56palto81" path="res://assets/papercraft/fragments/id0001/environment2/building_27.png" id="13_bhmjt"]
+[ext_resource type="Texture2D" uid="uid://chm4fqnsp6itt" path="res://assets/papercraft/fragments/id0001/environment2/building_17.png" id="14_j6apd"]
+[ext_resource type="Texture2D" uid="uid://205wpk1064tu" path="res://assets/papercraft/fragments/id0001/environment2/church_no_bg.png" id="15_nucfm"]
+[ext_resource type="Texture2D" uid="uid://bxbtg3m8k6gj7" path="res://assets/papercraft/fragments/id0001/environment2/foliage_24.png" id="16_dbv8g"]
+[ext_resource type="Texture2D" uid="uid://dtjkcjrqck0xg" path="res://assets/papercraft/fragments/id0001/environment2/sundial_19.png" id="17_yssys"]
+[ext_resource type="Texture2D" uid="uid://b8k2jmtribsmf" path="res://assets/papercraft/fragments/id0001/environment2/0001_env_admin_center.png" id="18_8bhro"]
+[ext_resource type="Texture2D" uid="uid://cy1mqfs44c3ea" path="res://assets/papercraft/fragments/id0001/environment2/fruitshop.png" id="19_3i7db"]
+[ext_resource type="Texture2D" uid="uid://pydh4xqeum3v" path="res://assets/papercraft/fragments/id0001/environment2/castle_forest_28_denoised_sharp.png" id="19_j6apd"]
+[ext_resource type="Texture2D" uid="uid://b0a7a2ys1dpfx" path="res://assets/papercraft/fragments/id0001/environment2/fantasy_shop_12.png" id="20_h2wgi"]
+[ext_resource type="Texture2D" uid="uid://but3tqwombydj" path="res://assets/papercraft/fragments/id0001/environment2/fantasy_ground_16.png" id="21_oco2y"]
 
-[node name="Fragment0001" type="Node2D"]
-script = ExtResource("1_state")
+[node name="Fragment0001" type="Node2D" unique_id=1371060065]
 
-[node name="Player" parent="." instance=ExtResource("2_player")]
-position = Vector2(245, 340)
+[node name="front" type="Node2D" parent="." unique_id=1368252398]
+
+[node name="teashop" type="Sprite2D" parent="front" unique_id=782370539]
+z_index = 10
+position = Vector2(910.4375, 458.3125)
+scale = Vector2(0.23094921, 0.20871966)
+texture = ExtResource("1_q23m0")
+
+[node name="yao" type="Sprite2D" parent="front" unique_id=2093266592]
+z_index = 3
+position = Vector2(360, 463.99997)
+scale = Vector2(0.23668672, 0.22853513)
+texture = ExtResource("3_pyfi5")
+
+[node name="Sprite2D2" type="Sprite2D" parent="front" unique_id=1354169896]
+z_index = 2
+position = Vector2(128, 456.00003)
+scale = Vector2(0.25559828, 0.23762934)
+texture = ExtResource("4_vurmb")
+
+[node name="bread" type="Sprite2D" parent="front" unique_id=370762242]
+z_index = 10
+position = Vector2(1104.0001, 464)
+scale = Vector2(0.25233963, 0.22013198)
+texture = ExtResource("5_jgijl")
+
+[node name="flower" type="Sprite2D" parent="front" unique_id=1326291933]
+z_index = 10
+position = Vector2(1272, 536.00006)
+scale = Vector2(0.05745357, 0.06515408)
+texture = ExtResource("6_3mr5v")
+
+[node name="rigui black" type="Sprite2D" parent="front" unique_id=1893473559]
+z_index = 10
+position = Vector2(1224, 544.00006)
+scale = Vector2(0.10566642, 0.099452086)
+texture = ExtResource("7_cmphu")
+
+[node name="lantern" type="Sprite2D" parent="front" unique_id=635144508]
+z_index = 10
+position = Vector2(792, 256)
+scale = Vector2(0.109259546, 0.10958998)
+texture = ExtResource("7_jgijl")
+
+[node name="lantern2" type="Sprite2D" parent="front" unique_id=65272862]
+z_index = 10
+position = Vector2(951.99994, 256)
+scale = Vector2(0.109259546, 0.10958998)
+texture = ExtResource("7_jgijl")
+
+[node name="fountain" type="Sprite2D" parent="front" unique_id=741153789]
+z_index = 10
+position = Vector2(640, 432)
+scale = Vector2(0.23056336, 0.23060462)
+texture = ExtResource("8_3mr5v")
+
+[node name="rigui white" type="Sprite2D" parent="front" unique_id=169072370]
+z_index = 10
+position = Vector2(560, 544.00006)
+scale = Vector2(0.098718226, 0.11023872)
+texture = ExtResource("9_cmphu")
+
+[node name="root" type="Node2D" parent="." unique_id=1018017967]
+
+[node name="Sprite2D" type="Sprite2D" parent="root" unique_id=703569109]
+z_index = 1
+position = Vector2(640, 328.81247)
+scale = Vector2(0.7643541, 0.8348831)
+texture = ExtResource("1_sk1d4")
+metadata/_edit_lock_ = true
+
+[node name="mid" type="Node2D" parent="." unique_id=1433990149]
+
+[node name="roadblackleft" type="Sprite2D" parent="mid" unique_id=996140455]
+position = Vector2(-31.999992, 432.00003)
+scale = Vector2(0.7168078, 0.65492934)
+skew = 0.4223697
+texture = ExtResource("9_4nsis")
+metadata/_edit_lock_ = true
+
+[node name="roadblackright" type="Sprite2D" parent="mid" unique_id=1828135246]
+position = Vector2(1312, 432.00003)
+scale = Vector2(0.7168078, 0.65492934)
+skew = -0.4223697
+texture = ExtResource("9_4nsis")
+metadata/_edit_lock_ = true
+
+[node name="zhonglou" type="Sprite2D" parent="mid" unique_id=872877875]
+z_index = 5
+position = Vector2(872.00006, 168)
+scale = Vector2(0.23955552, 0.24761501)
+texture = ExtResource("2_52m1y")
+
+[node name="gaota" type="Sprite2D" parent="mid" unique_id=1201750450]
+z_index = 5
+position = Vector2(104, 160)
+scale = Vector2(0.2871391, 0.31661227)
+texture = ExtResource("13_bhmjt")
+
+[node name="shiyanshi" type="Sprite2D" parent="mid" unique_id=1681486193]
+z_index = 3
+position = Vector2(328.00003, 224.00002)
+scale = Vector2(0.25966856, 0.22656284)
+texture = ExtResource("14_j6apd")
+
+[node name="church" type="Sprite2D" parent="mid" unique_id=1555653755]
+z_index = 3
+position = Vector2(1104, 186.87796)
+scale = Vector2(0.32763815, 0.28522643)
+texture = ExtResource("15_nucfm")
+
+[node name="cao" type="Sprite2D" parent="mid" unique_id=309613093]
+z_index = 10
+position = Vector2(480, 296.00003)
+scale = Vector2(0.07890602, 0.091355555)
+texture = ExtResource("16_dbv8g")
+
+[node name="cao2" type="Sprite2D" parent="mid" unique_id=780781930]
+z_index = 10
+position = Vector2(15.9999695, 289.00003)
+scale = Vector2(0.07890602, 0.091355555)
+texture = ExtResource("16_dbv8g")
+
+[node name="rigui hui" type="Sprite2D" parent="mid" unique_id=745680769]
+z_index = 10
+position = Vector2(248, 344)
+scale = Vector2(0.07776954, 0.076555036)
+texture = ExtResource("17_yssys")
+
+[node name="rigui qingtong" type="Sprite2D" parent="mid" unique_id=470055846]
+z_index = 9
+position = Vector2(968.00006, 328)
+scale = Vector2(0.08354186, 0.082934655)
+texture = ExtResource("7_cmphu")
+
+[node name="back" type="Node2D" parent="." unique_id=1391632538]
+
+[node name="yanjiusuo" type="Sprite2D" parent="back" unique_id=966437994]
+z_index = 2
+position = Vector2(415.99997, 64)
+scale = Vector2(0.17054084, 0.15608278)
+texture = ExtResource("18_8bhro")
+
+[node name="forest" type="Sprite2D" parent="back" unique_id=903466131]
+z_index = 2
+position = Vector2(976.0001, 56.000004)
+scale = Vector2(0.19053365, 0.15608278)
+texture = ExtResource("19_j6apd")
+
+[node name="shop1" type="Sprite2D" parent="back" unique_id=210033967]
+z_index = 2
+position = Vector2(912, 72.00001)
+scale = Vector2(0.1308705, 0.12461271)
+texture = ExtResource("19_3i7db")
+
+[node name="shop2" type="Sprite2D" parent="back" unique_id=876787085]
+z_index = 2
+position = Vector2(786.1454, 67.83837)
+scale = Vector2(0.110257745, 0.113892116)
+texture = ExtResource("20_h2wgi")
+
+[node name="roadblackright2" type="Sprite2D" parent="back" unique_id=1408445505]
+z_index = -2
+position = Vector2(1223.9999, 248)
+scale = Vector2(0.7168078, 0.65492934)
+skew = -0.42236972
+texture = ExtResource("21_oco2y")
+metadata/_edit_lock_ = true
+
+[node name="roadblackleft2" type="Sprite2D" parent="back" unique_id=647597189]
+z_index = -4
+position = Vector2(40.000004, 224)
+scale = Vector2(0.7256464, 0.57782745)
+skew = 0.42236972
+texture = ExtResource("21_oco2y")
+metadata/_edit_lock_ = true
+
+[node name="flower2" type="Sprite2D" parent="back" unique_id=1683729759]
+z_index = 10
+position = Vector2(840, 120)
+scale = Vector2(0.027122548, 0.027452836)
+texture = ExtResource("6_3mr5v")
