@@ -20,8 +20,15 @@
 [ext_resource type="Texture2D" uid="uid://b8k2jmtribsmf" path="res://assets/papercraft/fragments/id0001/environment2/0001_env_admin_center.png" id="18_8bhro"]
 [ext_resource type="Texture2D" uid="uid://cy1mqfs44c3ea" path="res://assets/papercraft/fragments/id0001/environment2/fruitshop.png" id="19_3i7db"]
 [ext_resource type="Texture2D" uid="uid://pydh4xqeum3v" path="res://assets/papercraft/fragments/id0001/environment2/castle_forest_28_denoised_sharp.png" id="19_j6apd"]
+[ext_resource type="Texture2D" uid="uid://clgp706t1cpvg" path="res://assets/papercraft/fragments/id0001/environment2/buildings_31.png" id="19_yssys"]
 [ext_resource type="Texture2D" uid="uid://b0a7a2ys1dpfx" path="res://assets/papercraft/fragments/id0001/environment2/fantasy_shop_12.png" id="20_h2wgi"]
 [ext_resource type="Texture2D" uid="uid://but3tqwombydj" path="res://assets/papercraft/fragments/id0001/environment2/fantasy_ground_16.png" id="21_oco2y"]
+[ext_resource type="Texture2D" uid="uid://ccbptudeicbq2" path="res://assets/papercraft/fragments/id0001/environment2/fantasy_shop_01.png" id="22_cnh1t"]
+[ext_resource type="Texture2D" uid="uid://dtcudjptetwrb" path="res://assets/papercraft/fragments/id0001/environment2/clockmakers_36.png" id="23_cnh1t"]
+[ext_resource type="Texture2D" uid="uid://25dx44mp0fs1" path="res://assets/papercraft/fragments/id0001/environment2/0001_env_light_wall.png" id="24_yssys"]
+[ext_resource type="Texture2D" uid="uid://b7fd6m0ptb6o" path="res://assets/papercraft/fragments/id0001/environment2/lantern_33.png" id="26_ff6ei"]
+[ext_resource type="Texture2D" uid="uid://d4gw2tv5x4gq5" path="res://assets/papercraft/fragments/id0001/environment2/lantern_35.png" id="27_1c074"]
+[ext_resource type="Texture2D" uid="uid://d368digipfe3a" path="res://assets/papercraft/fragments/id0001/environment2/beijng.png" id="30_yj7sy"]
 
 [node name="Fragment0001" type="Node2D" unique_id=1371060065]
 
@@ -164,13 +171,25 @@ texture = ExtResource("7_cmphu")
 
 [node name="yanjiusuo" type="Sprite2D" parent="back" unique_id=966437994]
 z_index = 2
-position = Vector2(415.99997, 64)
-scale = Vector2(0.17054084, 0.15608278)
+position = Vector2(424.00003, 64)
+scale = Vector2(0.16339545, 0.14835389)
 texture = ExtResource("18_8bhro")
+
+[node name="fangqun" type="Sprite2D" parent="back" unique_id=1020604881]
+z_index = 2
+position = Vector2(160, 58)
+scale = Vector2(0.20994475, 0.18931319)
+texture = ExtResource("19_yssys")
 
 [node name="forest" type="Sprite2D" parent="back" unique_id=903466131]
 z_index = 2
-position = Vector2(976.0001, 56.000004)
+position = Vector2(968.00006, 40.000004)
+scale = Vector2(0.19053365, 0.15608278)
+texture = ExtResource("19_j6apd")
+
+[node name="forest2" type="Sprite2D" parent="back" unique_id=574083128]
+z_index = 2
+position = Vector2(1168, 40)
 scale = Vector2(0.19053365, 0.15608278)
 texture = ExtResource("19_j6apd")
 
@@ -180,6 +199,18 @@ position = Vector2(912, 72.00001)
 scale = Vector2(0.1308705, 0.12461271)
 texture = ExtResource("19_3i7db")
 
+[node name="shop3" type="Sprite2D" parent="back" unique_id=348372857]
+z_index = 3
+position = Vector2(1168.0001, 64)
+scale = Vector2(0.12247621, 0.11794117)
+texture = ExtResource("22_cnh1t")
+
+[node name="shop4" type="Sprite2D" parent="back" unique_id=523029063]
+z_index = 2
+position = Vector2(1048, 64.00001)
+scale = Vector2(0.13877836, 0.111752324)
+texture = ExtResource("23_cnh1t")
+
 [node name="shop2" type="Sprite2D" parent="back" unique_id=876787085]
 z_index = 2
 position = Vector2(786.1454, 67.83837)
@@ -188,7 +219,7 @@ texture = ExtResource("20_h2wgi")
 
 [node name="roadblackright2" type="Sprite2D" parent="back" unique_id=1408445505]
 z_index = -2
-position = Vector2(1223.9999, 248)
+position = Vector2(1216, 232)
 scale = Vector2(0.7168078, 0.65492934)
 skew = -0.42236972
 texture = ExtResource("21_oco2y")
@@ -207,3 +238,100 @@ z_index = 10
 position = Vector2(840, 120)
 scale = Vector2(0.027122548, 0.027452836)
 texture = ExtResource("6_3mr5v")
+
+[node name="lantern3" type="Sprite2D" parent="back" unique_id=1516786552]
+z_index = 10
+position = Vector2(231.99998, 96)
+scale = Vector2(0.06738895, 0.06117458)
+texture = ExtResource("7_jgijl")
+
+[node name="lantern4" type="Sprite2D" parent="back" unique_id=925568367]
+z_index = 10
+position = Vector2(144, 88)
+scale = Vector2(0.056442082, 0.058111325)
+texture = ExtResource("26_ff6ei")
+
+[node name="lantern5" type="Sprite2D" parent="back" unique_id=1844845169]
+z_index = 10
+position = Vector2(80, 88.00001)
+scale = Vector2(0.054003734, 0.058751788)
+texture = ExtResource("27_1c074")
+
+[node name="cao3" type="Sprite2D" parent="back" unique_id=487216396]
+z_index = 10
+position = Vector2(1248, 101)
+scale = Vector2(0.064971425, 0.07757572)
+texture = ExtResource("16_dbv8g")
+
+[node name="back2" type="Node2D" parent="." unique_id=1206885330]
+
+[node name="guangqiang6" type="Sprite2D" parent="back2" unique_id=709463369]
+z_index = 1
+position = Vector2(1191, 58)
+scale = Vector2(0.12241438, 0.11463904)
+texture = ExtResource("24_yssys")
+
+[node name="guangqiang11" type="Sprite2D" parent="back2" unique_id=680845711]
+z_index = 1
+position = Vector2(1191, 58)
+scale = Vector2(0.12241438, 0.11463904)
+texture = ExtResource("24_yssys")
+
+[node name="guangqiang7" type="Sprite2D" parent="back2" unique_id=727266252]
+z_index = 1
+position = Vector2(1025, 58)
+scale = Vector2(0.12241438, 0.11463904)
+texture = ExtResource("24_yssys")
+
+[node name="guangqiang5" type="Sprite2D" parent="back2" unique_id=314291554]
+z_index = -1
+position = Vector2(416, 58)
+scale = Vector2(0.12241438, 0.11463904)
+texture = ExtResource("24_yssys")
+
+[node name="guangqiang9" type="Sprite2D" parent="back2" unique_id=464945006]
+z_index = -1
+position = Vector2(489, 57.999996)
+scale = Vector2(0.12241438, 0.11463904)
+texture = ExtResource("30_yj7sy")
+
+[node name="guangqiang10" type="Sprite2D" parent="back2" unique_id=220085314]
+z_index = -1
+position = Vector2(704, 58)
+scale = Vector2(0.12241438, 0.11463904)
+texture = ExtResource("30_yj7sy")
+
+[node name="guangqiang8" type="Sprite2D" parent="back2" unique_id=1213382975]
+z_index = 1
+position = Vector2(859, 58)
+scale = Vector2(0.12241438, 0.11463904)
+texture = ExtResource("24_yssys")
+
+[node name="guangqiang4" type="Sprite2D" parent="back2" unique_id=1073045627]
+z_index = 1
+position = Vector2(248, 58)
+scale = Vector2(0.12241438, 0.11463904)
+texture = ExtResource("24_yssys")
+
+[node name="guangqiang3" type="Sprite2D" parent="back2" unique_id=264474856]
+z_index = 1
+position = Vector2(248, 58)
+scale = Vector2(0.12241438, 0.11463904)
+texture = ExtResource("24_yssys")
+
+[node name="guangqiang" type="Sprite2D" parent="back2" unique_id=1289736197]
+position = Vector2(82.18751, 58.312492)
+scale = Vector2(0.12241438, 0.11463904)
+texture = ExtResource("24_yssys")
+
+[node name="forest3" type="Sprite2D" parent="back2" unique_id=1896820049]
+z_index = 1
+position = Vector2(162.00002, 48.000004)
+scale = Vector2(0.19053365, 0.15608278)
+texture = ExtResource("19_j6apd")
+
+[node name="forest4" type="Sprite2D" parent="back2" unique_id=456239378]
+z_index = 1
+position = Vector2(352.00003, 48.000004)
+scale = Vector2(0.19053365, 0.15608278)
+texture = ExtResource("19_j6apd")
