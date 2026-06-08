@@ -92,3 +92,17 @@ func get_item_count() -> int:
 
 func get_item_meta(item_id: int) -> Dictionary:
 	return ITEM_META.get(item_id, {})
+
+
+# ============================================================
+# 序列化接口 — 供 SaveManager 调用
+# ============================================================
+
+func to_dict() -> Dictionary:
+	## 将背包物品序列化为字典
+	return {"inventory": _items.duplicate()}
+
+
+func from_dict(data: Dictionary) -> void:
+	## 从字典恢复背包物品
+	_items = (data.get("inventory", []) as Array).duplicate()

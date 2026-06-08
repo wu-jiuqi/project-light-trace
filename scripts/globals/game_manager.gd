@@ -1,6 +1,10 @@
 extends Node
 ## 游戏全局状态管理器
 ## 管理游戏核心状态：当前阶段、修复进度、暗线揭示状态等
+##
+## 碎片 #0762 专属状态（awakened_colors, melody_triggered 等）
+## 已迁移至 FragmentManager._fragment_states["0762"]
+## GameManager 保留操作方法，内部委托给 FragmentManager
 
 # === 游戏阶段 ===
 enum GamePhase {
@@ -32,18 +36,18 @@ var collected_clues: Array[String] = []
 var source_mark_log: Array[Dictionary] = []  # 已解码的源印记录
 var items_used: Dictionary = {}             # 已被消耗的物品（交给NPC后标记）
 
-# === 碎片 #0762 六色觉醒系统（全局共享，跨场景） ===
+# === 碎片 #0762 六色觉醒系统常量 ===
+## 实际数据存储在 FragmentManager._fragment_states["0762"] 中
+## GameManager 保留以下常量和操作方法，内部委托 FragmentManager
 enum ColorType { RED, BLUE, YELLOW, GREEN, PURPLE, WHITE }
 const COLOR_NAME: Array = ["红", "蓝", "黄", "绿", "紫", "白"]
 const COLOR_NPC: Array = ["blacksmith", "florist", "baker", "gravekeeper", "violinist", "statue"]
-
-var awakened_colors: Array[bool] = [false, false, false, false, false, false]
-var npc_visit_count: Dictionary = { "gravekeeper": 0 }
 signal color_awakened(color_type: int, npc_id: String)
 
 # === NPC 状态持久化（跨场景/重进房间不重置） ===
 ## 格式: { "scene_name:npc_kb_id": { "position_x":float, "position_y":float, "suspicion":float, "alert_phase":int, "doubts":bool } }
 var npc_state_cache: Dictionary = {}
+var npc_visit_count: Dictionary = { "gravekeeper": 0 }
 
 func save_npc_state(scene_name: String, npc_kb_id: String, pos: Vector2, suspicion: float, alert_phase: int, doubts: bool) -> void:
 	var key = "%s:%s" % [scene_name, npc_kb_id]
@@ -65,19 +69,45 @@ func clear_npc_state(scene_name: String) -> void:
 	for key in to_remove:
 		npc_state_cache.erase(key)
 
+
+# ============================================================
+# 六色觉醒操作（委托 FragmentManager 存储）
+# ============================================================
+
+func get_awakened_colors() -> Array:
+	## 返回 awakened_colors 数组的副本
+	var colors = FragmentManager.get_fragment_state("0762", "awakened_colors")
+	if colors is Array and colors.size() == 6:
+		return colors.duplicate()
+	return [false, false, false, false, false, false]
+
 func awaken_color(color_type: int) -> void:
-	if color_type < 0 or color_type >= awakened_colors.size(): return
-	if awakened_colors[color_type]: return
-	awakened_colors[color_type] = true
+	if color_type < 0 or color_type >= 6: return
+	var colors: Array = FragmentManager.get_fragment_state("0762", "awakened_colors")
+	if colors.size() != 6:
+		colors = [false, false, false, false, false, false]
+	if colors[color_type]: return
+	colors[color_type] = true
+	FragmentManager.set_fragment_state("0762", "awakened_colors", colors)
 	print("[GameManager] 颜色觉醒: %s → %s (%d/6)" % [COLOR_NAME[color_type], COLOR_NPC[color_type], _count_awakened()])
 	color_awakened.emit(color_type, COLOR_NPC[color_type])
 
-func is_color_awakened(color_type: int) -> bool: return awakened_colors[color_type]
+func is_color_awakened(color_type: int) -> bool:
+	var colors: Array = FragmentManager.get_fragment_state("0762", "awakened_colors")
+	if colors.size() != 6:
+		return false
+	return colors[color_type] if color_type >= 0 and color_type < colors.size() else false
 
 func _count_awakened() -> int:
+	var colors: Array = FragmentManager.get_fragment_state("0762", "awakened_colors")
 	var c = 0
-	for a in awakened_colors: if a: c += 1
+	for a in colors: if a: c += 1
 	return c
+
+
+# ============================================================
+# 物品使用标记
+# ============================================================
 
 func mark_item_used(key: String) -> void:
 	items_used[key] = true
@@ -85,21 +115,22 @@ func mark_item_used(key: String) -> void:
 func is_item_used(key: String) -> bool:
 	return items_used.get(key, false)
 
+
+# ============================================================
+# NPC 拜访计数
+# ============================================================
+
 func record_npc_visit(npc_kb_id: String) -> void:
 	if not npc_visit_count.has(npc_kb_id): return
 	npc_visit_count[npc_kb_id] += 1
 
 func get_visit_count(npc_kb_id: String) -> int: return npc_visit_count.get(npc_kb_id, 0)
 
-# === 碎片 #0762 进度标记（全局） ===
-var melody_triggered: bool = false      # 老画家旋律（紫色前提）
-var source_mark_revealed: bool = false   # 源印已显现
-var fragment_completed: bool = false     # 碎片已完成
-var white_ready: bool = false            # 五色集齐，白色可由老画家解锁
-var gray_cloth_uncovered: bool = false   # 织女画像灰布已被揭开（旧存档键保持兼容）
-var oldpainter_trust: float = 0.0        # 老画家信任值，跨房间和存档保留
 
-# === 信号 ===
+# ============================================================
+# 信号
+# ============================================================
+
 signal phase_changed(new_phase: int)
 signal progress_updated(progress: float)
 signal fragment_repaired(fragment_id: String)
@@ -107,7 +138,7 @@ signal decryption_complete(fragment_id: String)
 signal clue_collected(clue: String)
 
 func _ready() -> void:
-	print("[GameManager] 溯光计划启动 - 归源计划 V0.1.0")
+	print("[GameManager] 溯光计划 V0.1.0")
 
 
 func _process(delta: float) -> void:
@@ -117,6 +148,11 @@ func _process(delta: float) -> void:
 	if scene.name == "TitleScreen" or scene.scene_file_path == "res://scenes/ui/title_screen.tscn":
 		return
 	play_time_seconds += delta
+
+
+# ============================================================
+# 游戏流程控制
+# ============================================================
 
 func new_game() -> void:
 	## 重置所有状态到初始值（开始新游戏/重新挑战）
@@ -131,35 +167,29 @@ func new_game() -> void:
 	collected_clues.clear()
 	source_mark_log.clear()
 	items_used.clear()
-	awakened_colors = [false, false, false, false, false, false]
 	npc_visit_count = {"gravekeeper": 0}
 	npc_state_cache.clear()
-	melody_triggered = false
-	source_mark_revealed = false
-	fragment_completed = false
-	white_ready = false
-	gray_cloth_uncovered = false
-	oldpainter_trust = 0.0
+	
+	# 重置碎片 #0762 专属状态（委托 FragmentManager）
+	FragmentManager.reset_fragment_states("0762")
 	
 	# 重置所有碎片完成状态
 	FragmentManager.reset_all_fragments()
 	
 	print("[GameManager] 状态已重置（新游戏）")
 
+
 func reset_fragment() -> void:
 	## 重新挑战关卡时重置关卡内进度（保留跨存档的对话历史与NPC信任/警觉状态）
 	## 对话历史 (ChatDatabase) 和 NPC 状态缓存 (npc_state_cache) 跟随存档持久化，
 	## 不会在重新进入关卡时清除——玩家可以通过加载存档找回之前的对话记录。
 	items_used.clear()
-	awakened_colors = [false, false, false, false, false, false]
-	npc_visit_count = {"gravekeeper": 0}
-	melody_triggered = false
-	source_mark_revealed = false
-	fragment_completed = false
-	white_ready = false
-	gray_cloth_uncovered = false
-	oldpainter_trust = 0.0
+	
+	# 重置碎片 #0762 专属状态（委托 FragmentManager）
+	FragmentManager.reset_fragment_states("0762")
+	
 	print("[GameManager] 碎片关卡内进度已重置（对话历史与NPC信任状态已保留）")
+
 
 func set_phase(new_phase: int) -> void:
 	if current_phase != new_phase:
@@ -194,3 +224,65 @@ func add_collected_clue(clue: String) -> void:
 		collected_clues.append(clue)
 		clue_collected.emit(clue)
 		print("[GameManager] 线索收集: %s" % clue)
+
+
+# ============================================================
+# 序列化接口 — 供 SaveManager 调用
+# ============================================================
+
+func to_dict() -> Dictionary:
+	## 将全局状态序列化为字典（不含碎片专属状态）
+	return {
+		"play_time_seconds": play_time_seconds,
+		"repair_progress": repair_progress,
+		"current_phase": current_phase,
+		"player_name": player_name,
+		"company_trust": company_trust,
+		"darkline_a_revealed": darkline_a_revealed,
+		"darkline_b_revealed": darkline_b_revealed,
+		"darkline_c_unlocked": darkline_c_unlocked,
+		"collected_clues": collected_clues.duplicate(),
+		"source_mark_log": source_mark_log.duplicate(true),
+		"items_used": items_used.duplicate(),
+		"npc_state_cache": npc_state_cache.duplicate(true),
+		"npc_visit_count": npc_visit_count.duplicate(),
+	}
+
+
+func from_dict(data: Dictionary) -> void:
+	## 从字典恢复所有全局状态，缺失字段使用默认值
+	play_time_seconds = float(data.get("play_time_seconds", 0.0))
+	repair_progress = float(data.get("repair_progress", 0.0))
+	current_phase = int(data.get("current_phase", GamePhase.INIT))
+	player_name = str(data.get("player_name", "溯光者-07"))
+	company_trust = float(data.get("company_trust", 1.0))
+	darkline_a_revealed = bool(data.get("darkline_a_revealed", false))
+	darkline_b_revealed = bool(data.get("darkline_b_revealed", false))
+	darkline_c_unlocked = bool(data.get("darkline_c_unlocked", false))
+	
+	collected_clues = (data.get("collected_clues", []) as Array).duplicate()
+	
+	var sml = data.get("source_mark_log", [])
+	source_mark_log.clear()
+	if sml is Array:
+		for entry in sml:
+			if entry is Dictionary:
+				source_mark_log.append(entry.duplicate(true))
+	
+	var iu = data.get("items_used", {})
+	if iu is Dictionary:
+		items_used = iu.duplicate()
+	else:
+		items_used.clear()
+	
+	var npc_cache = data.get("npc_state_cache", {})
+	if npc_cache is Dictionary:
+		npc_state_cache = npc_cache.duplicate(true)
+	else:
+		npc_state_cache.clear()
+	
+	var visits = data.get("npc_visit_count", {})
+	if visits is Dictionary:
+		npc_visit_count = visits.duplicate()
+	else:
+		npc_visit_count = {"gravekeeper": 0}

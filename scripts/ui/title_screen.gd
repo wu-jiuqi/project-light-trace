@@ -502,10 +502,10 @@ func _input(event: InputEvent) -> void:
 			_hide_save_slots()
 			get_viewport().set_input_as_handled()
 		elif event.is_action_pressed("ui_up"):
-			_select_slot(wrapi(_slot_selected - 1, 0, SaveManager.MAX_SLOTS))
+			_select_slot(wrapi(_slot_selected - 1, 0, _save_slot_buttons.size()))
 			get_viewport().set_input_as_handled()
 		elif event.is_action_pressed("ui_down"):
-			_select_slot(wrapi(_slot_selected + 1, 0, SaveManager.MAX_SLOTS))
+			_select_slot(wrapi(_slot_selected + 1, 0, _save_slot_buttons.size()))
 			get_viewport().set_input_as_handled()
 		elif event.is_action_pressed("ui_accept") or event.is_action_pressed("interact"):
 			_activate_selected_slot()
@@ -719,7 +719,7 @@ func _start_new_game_in_slot() -> void:
 
 
 func _start_new_game_in_slot_unchecked(slot: int) -> void:
-	print("[TitleScreen] 在槽位 %d 开始新游戏" % slot)
+	print("[TitleScreen] 在槽位 %d 开始新游戏，播放开场动画" % slot)
 
 	GameManager.new_game()
 	SaveManager.set_current_slot(slot)
@@ -727,7 +727,8 @@ func _start_new_game_in_slot_unchecked(slot: int) -> void:
 	SaveManager.save_game(slot)
 
 	SceneManager.pending_spawn_point = "from_cutscene"
-	get_tree().change_scene_to_file("res://scenes/star_map.tscn")
+	# 新游戏 → 开场动画 → 星图
+	get_tree().change_scene_to_file("res://scenes/cinematic/opening_cinematic.tscn")
 
 
 func _continue_game() -> void:
@@ -839,7 +840,7 @@ func _hide_save_slots() -> void:
 
 func _refresh_slot_list(slots: Array) -> void:
 	## 刷新场景内存档界面字段（支持"加载"和"新游戏"两种模式）
-	for i in range(mini(SaveManager.MAX_SLOTS, _save_slot_labels.size())):
+	for i in range(mini(SaveConstants.MAX_SLOTS, _save_slot_labels.size())):
 		var s: Dictionary = slots[i] if i < slots.size() else {
 			"slot": i,
 			"occupied": false,
@@ -866,7 +867,7 @@ func _refresh_slot_list(slots: Array) -> void:
 
 
 func _select_slot(index: int) -> void:
-	_slot_selected = clampi(index, 0, SaveManager.MAX_SLOTS - 1)
+	_slot_selected = clampi(index, 0, _save_slot_buttons.size() - 1)
 	_update_save_slot_highlight()
 
 

@@ -4,6 +4,9 @@ extends Node
 ##   _data:  每NPC全部消息（持久化，按槽位独立文件）
 ##
 ## 文件 user://saves/chat_{slot}.json：{ "blacksmith": [{role,content,timestamp,...},...], ... }
+##
+## 聊天数据仅存储于独立的 chat_{slot}.json 文件中
+## SaveManager 不再内嵌聊天数据到 save_{slot}.json
 
 const CACHE_SIZE: int = 20  ## LLM注入的最大历史条数
 const SAVE_DIR: String = "user://saves/"
@@ -223,20 +226,9 @@ func flush_to_disk() -> void:
 	_save()
 
 
-func get_raw_data() -> Dictionary:
-	return _data.duplicate(true)
-
-
 func has_any_data() -> bool:
-	## 返回当前槽位是否有任何聊天数据（供 load_game 判断是否需要从存档快照恢复）
+	## 返回当前槽位是否有任何聊天数据
 	return not _data.is_empty()
-
-
-func restore_from(raw: Dictionary) -> void:
-	## 从存档文件恢复聊天数据到内存（不影响该槽位独立文件的内容）
-	_data = raw.duplicate(true)
-	_rebuild_cache()
-	print("[ChatDatabase] 从存档恢复数据到内存 | NPC数: %d | 总消息: %d" % [_data.size(), _count_total_messages()])
 
 
 func delete_slot_file(slot: int) -> void:
@@ -245,13 +237,6 @@ func delete_slot_file(slot: int) -> void:
 	if FileAccess.file_exists(path):
 		DirAccess.remove_absolute(path)
 		print("[ChatDatabase] 已删除槽位 %d 的聊天记录文件" % slot)
-
-
-func _count_total_messages() -> int:
-	var total = 0
-	for npc_id in _data:
-		total += (_data[npc_id] as Array).size()
-	return total
 
 
 # ============================================================

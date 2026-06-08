@@ -1,9 +1,8 @@
 extends Node
 ## 碎片 #0762 游戏状态管理器
 ## 所有颜色状态委托给 GameManager（全局单例，跨场景共享）
+## 碎片专属标记字段（melody_triggered, white_ready 等）存储在 FragmentManager._fragment_states["0762"]
 
-# 别名：方便 NPC 通过 group 找到 fragment_state
-# 实际数据在 GameManager 中
 
 func awaken_color(color_type: int) -> void:
 	GameManager.awaken_color(color_type)
@@ -67,7 +66,7 @@ func _check_green() -> bool:
 func _check_purple() -> bool:
 	if is_color_awakened(GameManager.ColorType.PURPLE): return false
 	if _count_awakened() < 4: return false
-	if not GameManager.melody_triggered: return false  # 需要老画家的旋律（全局状态）
+	if not FragmentManager.get_fragment_state("0762", "melody_triggered"): return false  # 需要老画家的旋律
 	awaken_color(GameManager.ColorType.PURPLE)
 	return true
 
@@ -77,14 +76,15 @@ func _check_white() -> bool:
 	if is_color_awakened(GameManager.ColorType.WHITE): return false
 	if _count_awakened() < 5: return false
 	# 不自动觉醒，只标记 white_ready
-	GameManager.white_ready = true
+	FragmentManager.set_fragment_state("0762", "white_ready", true)
 	print("[FragmentState] 五色已集齐，白色等待老画家解锁")
 	return false
 
 func check_global() -> void:
 	## 五色集齐后标记 white_ready，不再自动解锁白色
-	if _count_awakened() >= 5 and not GameManager.white_ready:
-		GameManager.white_ready = true
+	var white_ready_val = FragmentManager.get_fragment_state("0762", "white_ready")
+	if _count_awakened() >= 5 and not white_ready_val:
+		FragmentManager.set_fragment_state("0762", "white_ready", true)
 		print("[FragmentState] 五色已集齐——白色可由老画家解锁")
 
 func try_unlock_white_from_painter() -> bool:
@@ -92,7 +92,7 @@ func try_unlock_white_from_painter() -> bool:
 	if is_color_awakened(GameManager.ColorType.WHITE): return false
 	if _count_awakened() < 5: return false
 	awaken_color(GameManager.ColorType.WHITE)
-	GameManager.white_ready = false  # 已消费
+	FragmentManager.set_fragment_state("0762", "white_ready", false)  # 已消费
 
 	# 如果画室灰布已存在，更新标签为可交互
 	var root = get_parent()
@@ -120,11 +120,11 @@ func get_memory_stage() -> String:
 func get_npc_memory_stage(npc_id: String) -> String:
 	var base = get_memory_stage()
 	var color_awake = false
-	if npc_id == "blacksmith": color_awake = GameManager.awakened_colors[GameManager.ColorType.RED]
-	elif npc_id == "florist": color_awake = GameManager.awakened_colors[GameManager.ColorType.BLUE]
-	elif npc_id == "baker": color_awake = GameManager.awakened_colors[GameManager.ColorType.YELLOW]
-	elif npc_id == "gravekeeper": color_awake = GameManager.awakened_colors[GameManager.ColorType.GREEN]
-	elif npc_id == "violinist": color_awake = GameManager.awakened_colors[GameManager.ColorType.PURPLE]
+	if npc_id == "blacksmith": color_awake = GameManager.is_color_awakened(GameManager.ColorType.RED)
+	elif npc_id == "florist": color_awake = GameManager.is_color_awakened(GameManager.ColorType.BLUE)
+	elif npc_id == "baker": color_awake = GameManager.is_color_awakened(GameManager.ColorType.YELLOW)
+	elif npc_id == "gravekeeper": color_awake = GameManager.is_color_awakened(GameManager.ColorType.GREEN)
+	elif npc_id == "violinist": color_awake = GameManager.is_color_awakened(GameManager.ColorType.PURPLE)
 	if color_awake and base in ["initial", "partial_awake"]:
 		if npc_id == "blacksmith": return "red_awakened"
 		elif npc_id == "florist": return "blue_awakened"
@@ -136,15 +136,17 @@ func get_npc_memory_stage(npc_id: String) -> String:
 signal trust_changed(npc_id: String, val: float, delta: float)
 
 func modify_trust(_id: String, delta: float) -> void:
-	GameManager.oldpainter_trust = clampf(GameManager.oldpainter_trust + delta, -100, 100)
-	trust_changed.emit("oldpainter", GameManager.oldpainter_trust, delta)
+	var current_trust: float = FragmentManager.get_fragment_state("0762", "oldpainter_trust")
+	var new_trust: float = clampf(current_trust + delta, -100, 100)
+	FragmentManager.set_fragment_state("0762", "oldpainter_trust", new_trust)
+	trust_changed.emit("oldpainter", new_trust, delta)
 
 func get_trust(_id: String) -> float:
-	return GameManager.oldpainter_trust
+	return FragmentManager.get_fragment_state("0762", "oldpainter_trust")
 
 func get_game_state(npc_id: String = "") -> Dictionary:
 	var stage = get_npc_memory_stage(npc_id) if npc_id != "" else get_memory_stage()
-	return { "memory_stage":stage, "alert_level":0, "trust_level":int(get_trust(npc_id)), "awakened_colors":GameManager.awakened_colors.duplicate(), "awakened_count":_count_awakened() }
+	return { "memory_stage":stage, "alert_level":0, "trust_level":int(get_trust(npc_id)), "awakened_colors":GameManager.get_awakened_colors(), "awakened_count":_count_awakened() }
 
 # ============================================================
 # 拾取物品初始化（场景加载时）
@@ -173,14 +175,15 @@ func _init_room_pickup() -> void:
 
 		# 画室场景初始化：根据进度创建灰布或源印
 		var white_awake = GameManager.is_color_awakened(GameManager.ColorType.WHITE)
+		var gray_uncovered: bool = FragmentManager.get_fragment_state("0762", "gray_cloth_uncovered")
 
-		if white_awake and not GameManager.gray_cloth_uncovered:
+		if white_awake and not gray_uncovered:
 			# 白色已觉醒但灰布未揭 → 创建灰布（等待玩家揭开）
 			_create_gray_cloth()
-		elif white_awake and GameManager.gray_cloth_uncovered:
+		elif white_awake and gray_uncovered:
 			# 灰布已揭 → 直接创建源印
 			_create_studio_source_mark()
-		elif GameManager.white_ready and not GameManager.gray_cloth_uncovered:
+		elif FragmentManager.get_fragment_state("0762", "white_ready") and not gray_uncovered:
 			# 五色集齐但白色未解锁 → 老画家会引导，但灰布要先准备好
 			_create_gray_cloth()
 
@@ -195,7 +198,7 @@ var _near_gray_cloth: bool = false
 func get_oldpainter_hint() -> String:
 	## 根据当前觉醒进度和信任度，返回老画家的提示
 	var c = _count_awakened()
-	var trust = int(GameManager.oldpainter_trust)
+	var trust = int(FragmentManager.get_fragment_state("0762", "oldpainter_trust"))
 	if c < 1: return "先去看那些颜色。不是我的颜色——是他们的。"
 	if c < 3: return "颜色们在互相寻找对方——只是他们还不会说话。帮他们说吧。"
 	if c < 4: return "还差一点。那个整天对着面包笑的——他需要火。"
@@ -209,8 +212,8 @@ func get_oldpainter_hint() -> String:
 
 func _trigger_oldpainter_melody() -> void:
 	## 4色觉醒后，老画家哼出旋律，为紫色触发做准备
-	if GameManager.melody_triggered: return
-	GameManager.melody_triggered = true
+	if FragmentManager.get_fragment_state("0762", "melody_triggered"): return
+	FragmentManager.set_fragment_state("0762", "melody_triggered", true)
 	print("[OldPainter] 老画家哼出了旋律——紫色触发条件已解锁")
 
 
@@ -311,7 +314,7 @@ func _on_gray_cloth_exited(body: Node) -> void:
 		if root:
 			var n = root.get_node_or_null("GrayCloth/ClothLabel")
 			if n:
-				if GameManager.gray_cloth_uncovered:
+				if FragmentManager.get_fragment_state("0762", "gray_cloth_uncovered"):
 					n.text = "情感之印"
 				else:
 					n.text = "一幅被灰布盖住的画"
@@ -323,7 +326,7 @@ func _uncover_gray_cloth() -> void:
 	if root == null: return
 
 	_near_gray_cloth = false
-	GameManager.gray_cloth_uncovered = true
+	FragmentManager.set_fragment_state("0762", "gray_cloth_uncovered", true)
 
 	# 移除灰布
 	var cloth = root.get_node_or_null("GrayCloth")
@@ -422,7 +425,7 @@ func _create_studio_source_mark() -> void:
 	mark.collision_mask = 1
 
 	root.add_child(mark)
-	GameManager.source_mark_revealed = true
+	FragmentManager.set_fragment_state("0762", "source_mark_revealed", true)
 	print("[SourceMark] 源印「情感之印」已在画室织女画像中显现")
 
 
@@ -491,7 +494,7 @@ func _trigger_victory() -> void:
 	await get_tree().create_timer(2.0).timeout
 
 	# === 修复进度防护：检查碎片是否已标记为完成 ===
-	var was_completed = GameManager.fragment_completed
+	var was_completed = FragmentManager.get_fragment_state("0762", "fragment_completed")
 	if FragmentManager.current_fragment and FragmentManager.current_fragment.completed:
 		was_completed = true
 
@@ -511,7 +514,7 @@ func _trigger_victory() -> void:
 		"情感之印",
 		"颜色是记忆的容器——她把自己的情感打碎藏进了六个不会互相说话的人里"
 	)
-	GameManager.fragment_completed = true
+	FragmentManager.set_fragment_state("0762", "fragment_completed", true)
 	SaveManager.save_game()
 
 	# 返回星图

@@ -131,7 +131,7 @@ func _build_ui() -> void:
 	_canvas.add_child(_overlay)
 	
 	# 菜单面板
-	var pw = 360; var ph = 380
+	var pw = 360; var ph = 460
 	_panel = Panel.new()
 	_panel.position = Vector2((vs.x - pw) / 2, (vs.y - ph) / 2)
 	_panel.size = Vector2(pw, ph)
@@ -242,11 +242,11 @@ func _build_save_slots_panel(vs: Vector2, pw: float, ph: float) -> void:
 	st.add_theme_font_size_override("font_size", 21)
 	_slot_overlay.add_child(st)
 	
-	for i in range(3):  # 0-based 槽位：0, 1, 2
+	for i in range(SaveConstants.MAX_SLOTS):  # 0-based 槽位：0~4
 		var slot = i  # 内部使用 0-based，和 title_screen / SaveManager 一致
 		var btn = Button.new()
-		btn.position = Vector2(50, 90 + i * 70)
-		btn.size = Vector2(pw - 100, 56)
+		btn.position = Vector2(50, 90 + i * 60)
+		btn.size = Vector2(pw - 100, 48)
 		btn.add_theme_font_size_override("font_size", 17)
 		btn.pressed.connect(_do_save.bind(slot))
 		
@@ -269,7 +269,7 @@ func _build_save_slots_panel(vs: Vector2, pw: float, ph: float) -> void:
 		_slot_buttons.append(btn)
 	
 	_back_btn = Button.new()
-	_back_btn.position = Vector2((pw - 140) / 2, 320)
+	_back_btn.position = Vector2((pw - 140) / 2, 400)
 	_back_btn.size = Vector2(140, 44)
 	_back_btn.text = "返回"
 	_back_btn.add_theme_font_size_override("font_size", 16)

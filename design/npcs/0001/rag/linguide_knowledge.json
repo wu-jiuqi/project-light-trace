@@ -1,4 +1,4 @@
-{
+﻿{
   "npc_id": "linguide",
   "npc_name": "林指导",
   "fragment": "0001",
@@ -9,7 +9,7 @@
     {
       "id": "lg_world_01",
       "category": "world_knowledge",
-      "keywords": ["启程之镇", "训练场", "天枢", "归源计划", "碎片", "溯光者训练", "日晷", "钟楼"],
+      "keywords": ["启程之镇", "训练场", "天枢", "溯光计划", "碎片", "溯光者训练", "日晷", "钟楼"],
       "relevance_gate": "low",
       "memory_stage": "any",
       "alert_required": 0,
@@ -58,7 +58,7 @@
       "relevance_gate": "low",
       "memory_stage": "initial",
       "alert_required": 0,
-      "content": "又一位溯光者来了。扫描编号——确认通过。我说出那句重复了无数次的开场白：'欢迎来到归源计划·第一阶段训练场。'数据板在手里发着恒定的蓝光——和17批之前一模一样。"
+      "content": "又一位溯光者来了。扫描编号——确认通过。我说出那句重复了无数次的开场白：'欢迎来到溯光计划·第一阶段训练场。'数据板在手里发着恒定的蓝光——和17批之前一模一样。"
     },
     {
       "id": "lg_memory_02",

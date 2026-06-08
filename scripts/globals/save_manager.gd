@@ -1,20 +1,29 @@
 extends Node
-## 存档管理器
-## - 手动存档：按 F5 触发
-## - 自动存档：每 30 秒自动保存到当前槽位（仅活跃槽位有效时运行）
-## - 多槽位支持（0-2）
-## - 保存内容：GameManager 全局状态 + NPC 持久化 + ChatDatabase 聊天记录（按槽位独立）
-## - 启动时自动加载最后一次活动的槽位
+## 存档管理器 — v1.0.0 重构版
+##
+## 核心变更（相对于 v0.3.0）:
+##   - 原子写入策略（.tmp → rename .json → .bak 兜底）
+##   - SHA-256 校验和（SaveChecksum）
+##   - 版本迁移框架（SaveMigration）
+##   - 通过 Manager.to_dict()/from_dict() 序列化，解除硬编码耦合
+##   - 槽位从 3 扩展至 5（SaveConstants.MAX_SLOTS）
+##   - 聊天数据仅存于 chat_{slot}.json，不再内嵌于 save_{slot}.json
 
-const SAVE_DIR: String = "user://saves/"
-const AUTO_SAVE_INTERVAL: float = 30.0  ## 自动存档间隔（秒）
-const LAST_SLOT_PATH: String = "user://saves/last_slot.json"  ## 最后活动槽位记录
-const MAX_SLOTS: int = 3  ## 总槽位数
 const TITLE_SCREEN_PATH: String = "res://scenes/ui/title_screen.tscn"
 
 var save_data: Dictionary = {}
 var _auto_timer: Timer = null
 var _current_slot: int = -1  ## 当前槽位；-1 表示尚未选择槽位
+
+
+# ============================================================
+# 信号
+# ============================================================
+
+signal save_completed(slot: int, success: bool)
+signal load_completed(slot: int, success: bool)
+signal save_corrupted(slot: int)
+signal save_recovered(slot: int)
 
 
 # ============================================================
@@ -26,7 +35,7 @@ func _ready() -> void:
 	
 	var last_slot = _read_last_slot()
 	
-	if last_slot >= 0 and last_slot < MAX_SLOTS and load_game(last_slot):
+	if last_slot >= 0 and last_slot < SaveConstants.MAX_SLOTS and load_game(last_slot):
 		print("[SaveManager] 存档自动加载成功 (slot %d)" % last_slot)
 		_setup_auto_save()
 	else:
@@ -35,8 +44,8 @@ func _ready() -> void:
 
 
 func _ensure_save_dir() -> void:
-	if not DirAccess.dir_exists_absolute(SAVE_DIR):
-		DirAccess.make_dir_recursive_absolute(SAVE_DIR)
+	if not DirAccess.dir_exists_absolute(SaveConstants.SAVE_DIR):
+		DirAccess.make_dir_recursive_absolute(SaveConstants.SAVE_DIR)
 
 
 # ============================================================
@@ -51,11 +60,11 @@ func _setup_auto_save() -> void:
 		return
 	_auto_timer = Timer.new()
 	_auto_timer.name = "AutoSaveTimer"
-	_auto_timer.wait_time = AUTO_SAVE_INTERVAL
+	_auto_timer.wait_time = SaveConstants.AUTO_SAVE_INTERVAL
 	_auto_timer.autostart = true
 	_auto_timer.timeout.connect(_on_auto_save)
 	add_child(_auto_timer)
-	print("[SaveManager] 自动存档就绪，间隔 %.0f 秒" % AUTO_SAVE_INTERVAL)
+	print("[SaveManager] 自动存档就绪，间隔 %.0f 秒" % SaveConstants.AUTO_SAVE_INTERVAL)
 
 
 func _stop_auto_save() -> void:
@@ -66,6 +75,7 @@ func _stop_auto_save() -> void:
 		_auto_timer.queue_free()
 	_auto_timer = null
 
+
 func _on_auto_save() -> void:
 	if _current_slot < 0:
 		_stop_auto_save()
@@ -74,7 +84,7 @@ func _on_auto_save() -> void:
 		return
 	if get_tree().current_scene == null:
 		return
-	if not FileAccess.file_exists(_slot_path(_current_slot)):
+	if not FileAccess.file_exists(SaveConstants.slot_path(_current_slot)):
 		_current_slot = -1
 		_stop_auto_save()
 		return
@@ -113,173 +123,342 @@ func quick_save(slot: int = -1) -> void:
 
 
 # ============================================================
-# 存档 / 读档
+# 存档核心 — save_game
 # ============================================================
 
 func save_game(slot: int = -1) -> bool:
 	if slot < 0:
 		slot = _current_slot
-	if slot < 0 or slot >= MAX_SLOTS:
-		printerr("[SaveManager] 存档失败: 没有有效的活动槽位")
+	if slot < 0 or slot >= SaveConstants.MAX_SLOTS:
+		printerr("[SaveManager] 存档失败: 无效槽位 %d" % slot)
+		save_completed.emit(slot, false)
 		return false
-	if slot != _current_slot:
-		printerr("[SaveManager] 存档失败: 目标槽位 %d 不是当前活动槽位 %d" % [slot, _current_slot])
-		return false
-	var ts = Time.get_unix_time_from_system()
-	
+
+	# 1. 刷新聊天数据到磁盘
 	ChatDatabase.flush_to_disk()
-	
-	save_data = {
-		"version": "0.3.0",
+
+	# 2. 组装存档字典
+	var save_dict: Dictionary = _assemble_save_dict(slot)
+	if save_dict.is_empty():
+		printerr("[SaveManager] 存档失败: 无法组装存档字典")
+		save_completed.emit(slot, false)
+		return false
+
+	# 3. 计算校验和
+	var checksum: String = SaveChecksum.compute(save_dict, ["checksum"])
+	if checksum.is_empty():
+		printerr("[SaveManager] 存档失败: 无法计算校验和")
+		save_completed.emit(slot, false)
+		return false
+	save_dict["checksum"] = checksum
+
+	# 4. 序列化为 JSON
+	var json_str: String = JSON.stringify(save_dict, "\t")
+	if json_str.is_empty():
+		printerr("[SaveManager] 存档失败: JSON 序列化返回空")
+		save_completed.emit(slot, false)
+		return false
+
+	# 5. 原子写入
+	var write_ok: bool = _atomic_write(slot, json_str)
+	if write_ok:
+		save_data = save_dict
+		print("[SaveManager] 存档保存成功 (slot %d)" % slot)
+
+	save_completed.emit(slot, write_ok)
+	return write_ok
+
+
+# ============================================================
+# 存档字典组装 / 拆解
+# ============================================================
+
+func _assemble_save_dict(slot: int) -> Dictionary:
+	## 组装完整存档字典（version + checksum + global + fragments + fragment_states）
+	var ts: float = Time.get_unix_time_from_system()
+	var save_name: String = _resolve_save_name(slot)
+
+	# 合并 GameManager 和 InventoryManager 的序列化数据
+	var global_dict: Dictionary = GameManager.to_dict()
+	var inv_dict: Dictionary = InventoryManager.to_dict()
+	# inventory 合入 global（保持向后兼容）
+	for key in inv_dict:
+		global_dict[key] = inv_dict[key]
+
+	var fragments: Array = FragmentManager.get_fragments_list()
+	var fragment_states: Dictionary = FragmentManager.get_fragment_states_dict()
+
+	return {
+		"version": SaveConstants.SAVE_VERSION,
 		"slot": slot,
 		"timestamp": ts,
 		"timestamp_readable": Time.get_datetime_string_from_system(),
-		"save_name": _resolve_save_name(slot),
-		"play_time_seconds": GameManager.play_time_seconds,
-		
-		"repair_progress": GameManager.repair_progress,
-		"repaired_count": GameManager.repaired_fragments,
-		"current_phase": GameManager.current_phase,
-		"collected_clues": GameManager.collected_clues,
-		"source_mark_log": GameManager.source_mark_log,
-		"company_trust": GameManager.company_trust,
-		"darkline_a": GameManager.darkline_a_revealed,
-		"darkline_b": GameManager.darkline_b_revealed,
-		"darkline_c": GameManager.darkline_c_unlocked,
-		"player_name": GameManager.player_name,
-		
-		"npc_state_cache": GameManager.npc_state_cache,
-		
-		"awakened_colors": GameManager.awakened_colors,
-		"npc_visit_count": GameManager.npc_visit_count,
-		"melody_triggered": GameManager.melody_triggered,
-		"source_mark_revealed": GameManager.source_mark_revealed,
-		"fragment_completed": GameManager.fragment_completed,
-		"white_ready": GameManager.white_ready,
-		"gray_cloth_uncovered": GameManager.gray_cloth_uncovered,
-		"oldpainter_trust": GameManager.oldpainter_trust,
-		
-		"items_used": GameManager.items_used,
-		
-		"fragments": _serialize_fragments(),
-		
-		"chat_history": ChatDatabase.get_raw_data(),
+		"save_name": save_name,
+		"checksum": "",  # 稍后由 save_game() 填充
+		"global": global_dict,
+		"fragments": fragments,
+		"fragment_states": fragment_states,
 	}
-	
-	var path = _slot_path(slot)
-	var file = FileAccess.open(path, FileAccess.WRITE)
-	if file:
-		file.store_string(JSON.stringify(save_data, "\t"))
-		file.close()
-		print("[SaveManager] 存档保存成功 (slot %d)" % slot)
-		return true
-	printerr("[SaveManager] 存档写入失败: %s" % path)
-	return false
 
+
+func _disassemble_save_dict(data: Dictionary) -> void:
+	## 从存档字典恢复所有游戏状态
+	# 恢复全局状态
+	var global_data: Dictionary = data.get("global", {})
+	GameManager.from_dict(global_data)
+	InventoryManager.from_dict(global_data)
+
+	# 恢复碎片完成状态和专属状态
+	FragmentManager.reset_all_fragments()
+	_apply_fragments_list(data.get("fragments", []))
+	FragmentManager.apply_fragment_states(data.get("fragment_states", {}))
+
+	print("[SaveManager] 存档状态恢复完成")
+
+
+func _apply_fragments_list(saved: Array) -> void:
+	## 将 fragments 数组中的 completed 状态应用到对应 FragmentData
+	for s in saved:
+		if not s is Dictionary:
+			continue
+		var fragment_id: String = str(s.get("id", ""))
+		if fragment_id.is_empty():
+			continue
+		var f = FragmentManager.get_fragment_by_id(fragment_id)
+		if f:
+			f.completed = bool(s.get("completed", false))
+
+
+# ============================================================
+# 原子写入
+# ============================================================
+
+func _atomic_write(slot: int, json_str: String) -> bool:
+	## 原子写入策略：
+	##   1. 写入 save_{slot}.tmp
+	##   2. rename save_{slot}.json → save_{slot}.bak（如果存在）
+	##   3. rename save_{slot}.tmp → save_{slot}.json
+	##   4. 验证新文件可解析且 checksum 正确
+	##   5. 验证通过 → 删除 .bak；验证失败 → 恢复 .bak → .json
+
+	var json_path: String = SaveConstants.slot_path(slot)
+	var tmp_path: String = SaveConstants.tmp_path(slot)
+	var bak_path: String = SaveConstants.bak_path(slot)
+
+	# 步骤 1: 写入临时文件
+	var tmp_file: FileAccess = FileAccess.open(tmp_path, FileAccess.WRITE)
+	if not tmp_file:
+		printerr("[SaveManager] 原子写入失败: 无法创建临时文件 %s" % tmp_path)
+		return false
+	tmp_file.store_string(json_str)
+	tmp_file.close()
+
+	# 步骤 2: 原文件 → .bak
+	var had_original: bool = FileAccess.file_exists(json_path)
+	if had_original:
+		var rename_err: int = DirAccess.rename_absolute(json_path, bak_path)
+		if rename_err != OK:
+			printerr("[SaveManager] 原子写入: 无法将 %s 重命名为 %s (err=%d)" % [json_path, bak_path, rename_err])
+			# .tmp 已写入，尝试直接覆盖（降级策略）
+			DirAccess.remove_absolute(json_path)
+
+	# 步骤 3: .tmp → .json
+	var final_rename_err: int = DirAccess.rename_absolute(tmp_path, json_path)
+	if final_rename_err != OK:
+		printerr("[SaveManager] 原子写入: 无法将 %s 重命名为 %s (err=%d)" % [tmp_path, json_path, final_rename_err])
+		# 恢复 .bak
+		if had_original and FileAccess.file_exists(bak_path):
+			DirAccess.rename_absolute(bak_path, json_path)
+		# 清理 .tmp
+		if FileAccess.file_exists(tmp_path):
+			DirAccess.remove_absolute(tmp_path)
+		return false
+
+	# 步骤 4: 验证新文件
+	var verification_ok: bool = _verify_save_file(slot)
+	if verification_ok:
+		# 验证通过 → 删除 .bak
+		if FileAccess.file_exists(bak_path):
+			DirAccess.remove_absolute(bak_path)
+		return true
+	else:
+		# 验证失败 → 恢复 .bak
+		printerr("[SaveManager] 原子写入验证失败，回滚到备份")
+		DirAccess.remove_absolute(json_path)
+		if had_original and FileAccess.file_exists(bak_path):
+			DirAccess.rename_absolute(bak_path, json_path)
+			print("[SaveManager] 已从备份恢复 slot %d" % slot)
+		else:
+			printerr("[SaveManager] 无备份可恢复，slot %d 存档丢失" % slot)
+		# 清理 .tmp
+		if FileAccess.file_exists(tmp_path):
+			DirAccess.remove_absolute(tmp_path)
+		return false
+
+
+func _verify_save_file(slot: int) -> bool:
+	## 验证指定槽位的存档文件可解析且校验和正确
+	var data: Dictionary = _atomic_read(slot)
+	if data.is_empty():
+		return false
+	return SaveChecksum.verify(data, ["checksum"])
+
+
+# ============================================================
+# 读档核心 — load_game
+# ============================================================
 
 func load_game(slot: int = 0) -> bool:
-	if slot < 0 or slot >= MAX_SLOTS:
+	if slot < 0 or slot >= SaveConstants.MAX_SLOTS:
 		save_data = {}
-		printerr("[SaveManager] Invalid save slot: %d" % slot)
+		printerr("[SaveManager] 无效存档槽位: %d" % slot)
+		load_completed.emit(slot, false)
 		return false
-	_load_save_file(slot)
-	if save_data.is_empty():
-		return false
-	
-	GameManager.repair_progress = save_data.get("repair_progress", 0.0)
-	GameManager.repaired_fragments = save_data.get("repaired_count", 0)
-	GameManager.current_phase = save_data.get("current_phase", 0)
-	GameManager.play_time_seconds = float(save_data.get("play_time_seconds", 0.0))
-	GameManager.collected_clues.assign(save_data.get("collected_clues", []))
-	GameManager.source_mark_log.assign(save_data.get("source_mark_log", []))
-	GameManager.company_trust = save_data.get("company_trust", 1.0)
-	GameManager.darkline_a_revealed = save_data.get("darkline_a", false)
-	GameManager.darkline_b_revealed = save_data.get("darkline_b", false)
-	GameManager.darkline_c_unlocked = save_data.get("darkline_c", false)
-	GameManager.player_name = save_data.get("player_name", "溯光者-07")
-	
-	var npc_cache = save_data.get("npc_state_cache", {})
-	if npc_cache is Dictionary:
-		GameManager.npc_state_cache = npc_cache
-	
-	var colors = save_data.get("awakened_colors", [])
-	if colors is Array and colors.size() == 6:
-		GameManager.awakened_colors.assign(colors)
-	
-	var visits = save_data.get("npc_visit_count", {})
-	if visits is Dictionary:
-		GameManager.npc_visit_count = visits
-	
-	GameManager.melody_triggered = save_data.get("melody_triggered", false)
-	GameManager.source_mark_revealed = save_data.get("source_mark_revealed", false)
-	GameManager.fragment_completed = save_data.get("fragment_completed", false)
-	GameManager.white_ready = save_data.get("white_ready", false)
-	GameManager.gray_cloth_uncovered = save_data.get("gray_cloth_uncovered", false)
-	GameManager.oldpainter_trust = save_data.get("oldpainter_trust", 0.0)
-	
-	var items = save_data.get("items_used", {})
-	if items is Dictionary:
-		GameManager.items_used = items
-	
-	FragmentManager.reset_all_fragments()
-	_deserialize_fragments(save_data.get("fragments", []))
-	
+
+	# 1. 读取文件
+	var data: Dictionary = _atomic_read(slot)
+	if data.is_empty():
+		# 尝试从备份恢复
+		print("[SaveManager] slot %d 存档不存在或无法读取，尝试备份恢复" % slot)
+		if _restore_from_backup(slot):
+			data = _atomic_read(slot)
+			if data.is_empty():
+				load_completed.emit(slot, false)
+				return false
+		else:
+			load_completed.emit(slot, false)
+			return false
+
+	# 2. 验证校验和
+	if not SaveChecksum.verify(data, ["checksum"]):
+		printerr("[SaveManager] slot %d 校验和不匹配，尝试备份恢复" % slot)
+		if _restore_from_backup(slot):
+			data = _atomic_read(slot)
+			if data.is_empty() or not SaveChecksum.verify(data, ["checksum"]):
+				save_corrupted.emit(slot)
+				load_completed.emit(slot, false)
+				return false
+		else:
+			save_corrupted.emit(slot)
+			load_completed.emit(slot, false)
+			return false
+
+	# 3. 版本迁移
+	if SaveMigration.needs_migration(data):
+		print("[SaveManager] slot %d 需要版本迁移" % slot)
+		data = SaveMigration.migrate(data)
+		if data.is_empty():
+			printerr("[SaveManager] slot %d 版本迁移失败" % slot)
+			load_completed.emit(slot, false)
+			return false
+
+	# 4. 恢复状态
+	_disassemble_save_dict(data)
+
+	# 5. 加载聊天数据
 	ChatDatabase.set_slot(slot)
-	if not ChatDatabase.has_any_data():
-		var chat_data = save_data.get("chat_history", {})
-		if chat_data is Dictionary and not chat_data.is_empty():
-			ChatDatabase.restore_from(chat_data)
-	
+
+	# 6. 更新当前槽位
 	_current_slot = slot
+	save_data = data
+	_write_last_slot(slot)
+	_setup_auto_save()
+
 	print("[SaveManager] 存档加载成功 (slot %d)" % slot)
+	load_completed.emit(slot, true)
 	return true
 
 
-func _load_save_file(slot: int) -> void:
-	save_data = {}
-	if slot < 0 or slot >= MAX_SLOTS:
-		return
-	var path = _slot_path(slot)
+func _atomic_read(slot: int) -> Dictionary:
+	## 安全读取指定槽位的存档文件
+	var path: String = SaveConstants.slot_path(slot)
 	if not FileAccess.file_exists(path):
-		return
-	
-	var file = FileAccess.open(path, FileAccess.READ)
-	if file:
-		var json = JSON.new()
-		if json.parse(file.get_as_text()) == OK:
-			var data = json.get_data()
-			if data is Dictionary and not data.is_empty():
-				save_data = data
-		file.close()
+		return {}
+
+	var file: FileAccess = FileAccess.open(path, FileAccess.READ)
+	if not file:
+		return {}
+
+	var text: String = file.get_as_text()
+	file.close()
+
+	if text.is_empty():
+		return {}
+
+	var json: JSON = JSON.new()
+	var parse_err: int = json.parse(text)
+	if parse_err != OK:
+		printerr("[SaveManager] JSON 解析失败 (slot %d): 第 %d 行" % [slot, json.get_error_line()])
+		return {}
+
+	var data = json.get_data()
+	if not data is Dictionary:
+		return {}
+
+	return data
 
 
-func _slot_path(slot: int) -> String:
-	return SAVE_DIR + "save_%d.json" % slot
+# ============================================================
+# 备份恢复
+# ============================================================
+
+func _restore_from_backup(slot: int) -> bool:
+	## 尝试从 .bak 备份恢复存档
+	var bak_path: String = SaveConstants.bak_path(slot)
+	var json_path: String = SaveConstants.slot_path(slot)
+
+	if not FileAccess.file_exists(bak_path):
+		print("[SaveManager] slot %d 无备份文件可用" % slot)
+		return false
+
+	# 验证备份文件的完整性
+	var bak_data: Dictionary = _read_file_dict(bak_path)
+	if bak_data.is_empty():
+		printerr("[SaveManager] slot %d 备份文件无效" % slot)
+		return false
+
+	if not SaveChecksum.verify(bak_data, ["checksum"]):
+		printerr("[SaveManager] slot %d 备份文件校验和失败 — 仍尝试恢复" % slot)
+
+	# 移除当前的损坏文件
+	if FileAccess.file_exists(json_path):
+		DirAccess.remove_absolute(json_path)
+
+	# 将备份重命名为正式文件
+	var rename_err: int = DirAccess.rename_absolute(bak_path, json_path)
+	if rename_err != OK:
+		printerr("[SaveManager] 备份恢复失败: 重命名错误 %d" % rename_err)
+		return false
+
+	save_recovered.emit(slot)
+	print("[SaveManager] 已从备份恢复 slot %d" % slot)
+	return true
 
 
-func _default_save_name(slot: int) -> String:
-	return "溯光档案 %02d" % (slot + 1)
+func _read_file_dict(path: String) -> Dictionary:
+	## 读取 JSON 文件并解析为字典
+	if not FileAccess.file_exists(path):
+		return {}
 
+	var file: FileAccess = FileAccess.open(path, FileAccess.READ)
+	if not file:
+		return {}
 
-func _resolve_save_name(slot: int) -> String:
-	if int(save_data.get("slot", -1)) == slot \
-			and save_data.has("save_name") \
-			and str(save_data.get("save_name", "")).strip_edges() != "":
-		return str(save_data["save_name"]).strip_edges()
-	var path = _slot_path(slot)
-	if FileAccess.file_exists(path):
-		var file = FileAccess.open(path, FileAccess.READ)
-		if file:
-			var json = JSON.new()
-			if json.parse(file.get_as_text()) == OK:
-				var data = json.get_data()
-				if data is Dictionary:
-					var existing_name := str(data.get("save_name", "")).strip_edges()
-					if existing_name != "":
-						file.close()
-						return existing_name
-			file.close()
-	return _default_save_name(slot)
+	var text: String = file.get_as_text()
+	file.close()
+
+	if text.is_empty():
+		return {}
+
+	var json: JSON = JSON.new()
+	if json.parse(text) != OK:
+		return {}
+
+	var data = json.get_data()
+	if not data is Dictionary:
+		return {}
+
+	return data
 
 
 # ============================================================
@@ -288,30 +467,26 @@ func _resolve_save_name(slot: int) -> String:
 
 func list_slots() -> Array[Dictionary]:
 	## 返回全部槽位信息（含空槽位），occupied 标记是否已占用
+	## 适配新 JSON 结构路径: data["global"]["play_time_seconds"]
 	var slots: Array[Dictionary] = []
-	for i in range(MAX_SLOTS):
-		var path = _slot_path(i)
+	for i in range(SaveConstants.MAX_SLOTS):
+		var path: String = SaveConstants.slot_path(i)
 		if FileAccess.file_exists(path):
-			var file = FileAccess.open(path, FileAccess.READ)
-			if file:
-				var json = JSON.new()
-				var parse_ok = json.parse(file.get_as_text()) == OK
-				file.close()
-				if parse_ok:
-					var data = json.get_data()
-					if data is Dictionary and not data.is_empty():
-						slots.append({
-							"slot": i,
-							"occupied": true,
-							"timestamp": data.get("timestamp", 0),
-							"timestamp_readable": data.get("timestamp_readable", ""),
-							"save_name": data.get("save_name", _default_save_name(i)),
-							"play_time_seconds": data.get("play_time_seconds", 0.0),
-							"player_name": data.get("player_name", ""),
-							"progress": data.get("repair_progress", 0.0),
-							"phase": data.get("current_phase", 0)
-						})
-						continue
+			var data: Dictionary = _read_file_dict(path)
+			if not data.is_empty():
+				var global: Dictionary = data.get("global", {})
+				slots.append({
+					"slot": i,
+					"occupied": true,
+					"timestamp": data.get("timestamp", 0),
+					"timestamp_readable": data.get("timestamp_readable", ""),
+					"save_name": data.get("save_name", _default_save_name(i)),
+					"play_time_seconds": float(global.get("play_time_seconds", 0.0)),
+					"player_name": str(global.get("player_name", "")),
+					"progress": float(global.get("repair_progress", 0.0)),
+					"phase": int(global.get("current_phase", 0))
+				})
+				continue
 		slots.append({
 			"slot": i,
 			"occupied": false,
@@ -327,25 +502,39 @@ func list_slots() -> Array[Dictionary]:
 
 
 func delete_slot(slot: int) -> void:
-	if slot < 0 or slot >= MAX_SLOTS:
+	if slot < 0 or slot >= SaveConstants.MAX_SLOTS:
 		return
-	var path = _slot_path(slot)
-	if FileAccess.file_exists(path):
-		# 先覆写为空JSON再删除
-		var wipe := FileAccess.open(path, FileAccess.WRITE)
+
+	var json_path: String = SaveConstants.slot_path(slot)
+	var bak_path: String = SaveConstants.bak_path(slot)
+	var tmp_path: String = SaveConstants.tmp_path(slot)
+
+	# 删除主存档文件
+	if FileAccess.file_exists(json_path):
+		var wipe := FileAccess.open(json_path, FileAccess.WRITE)
 		if wipe:
 			wipe.store_string("{}")
 			wipe.close()
-		DirAccess.remove_absolute(path)
-		print("[SaveManager] 存档已删除 (slot %d)" % slot)
-	
+		DirAccess.remove_absolute(json_path)
+
+	# 删除备份文件
+	if FileAccess.file_exists(bak_path):
+		DirAccess.remove_absolute(bak_path)
+
+	# 删除临时文件
+	if FileAccess.file_exists(tmp_path):
+		DirAccess.remove_absolute(tmp_path)
+
+	print("[SaveManager] 存档已删除 (slot %d)" % slot)
+
 	if slot == _current_slot:
 		_stop_auto_save()
 		ChatDatabase.clear_all_history()
 		_current_slot = -1
 		save_data = {}
-		if FileAccess.file_exists(LAST_SLOT_PATH):
-			DirAccess.remove_absolute(LAST_SLOT_PATH)
+		if FileAccess.file_exists(SaveConstants.LAST_SLOT_PATH):
+			DirAccess.remove_absolute(SaveConstants.LAST_SLOT_PATH)
+
 	ChatDatabase.delete_slot_file(slot)
 	if not has_any_save_files():
 		clear_active_slot()
@@ -363,13 +552,13 @@ func clear_active_slot() -> void:
 	_stop_auto_save()
 	_current_slot = -1
 	save_data = {}
-	if FileAccess.file_exists(LAST_SLOT_PATH):
-		DirAccess.remove_absolute(LAST_SLOT_PATH)
+	if FileAccess.file_exists(SaveConstants.LAST_SLOT_PATH):
+		DirAccess.remove_absolute(SaveConstants.LAST_SLOT_PATH)
 	FragmentManager.reset_all_fragments()
 
 
 func set_current_slot(slot: int) -> void:
-	if slot < 0 or slot >= MAX_SLOTS:
+	if slot < 0 or slot >= SaveConstants.MAX_SLOTS:
 		printerr("[SaveManager] 无效存档槽位: %d" % slot)
 		return
 	_current_slot = slot
@@ -385,9 +574,9 @@ func get_current_slot() -> int:
 
 
 func _read_last_slot() -> int:
-	if not FileAccess.file_exists(LAST_SLOT_PATH):
+	if not FileAccess.file_exists(SaveConstants.LAST_SLOT_PATH):
 		return _current_slot
-	var file = FileAccess.open(LAST_SLOT_PATH, FileAccess.READ)
+	var file = FileAccess.open(SaveConstants.LAST_SLOT_PATH, FileAccess.READ)
 	if file:
 		var json = JSON.new()
 		if json.parse(file.get_as_text()) == OK:
@@ -395,7 +584,7 @@ func _read_last_slot() -> int:
 			if data is Dictionary:
 				var slot := int(data.get("slot", -1))
 				file.close()
-				if slot >= 0 and slot < MAX_SLOTS and FileAccess.file_exists(_slot_path(slot)):
+				if slot >= 0 and slot < SaveConstants.MAX_SLOTS and FileAccess.file_exists(SaveConstants.slot_path(slot)):
 					return slot
 				return _current_slot
 		file.close()
@@ -403,7 +592,7 @@ func _read_last_slot() -> int:
 
 
 func _write_last_slot(slot: int) -> void:
-	var file = FileAccess.open(LAST_SLOT_PATH, FileAccess.WRITE)
+	var file = FileAccess.open(SaveConstants.LAST_SLOT_PATH, FileAccess.WRITE)
 	if file:
 		file.store_string(JSON.stringify({"slot": slot}))
 		file.close()
@@ -412,43 +601,43 @@ func _write_last_slot(slot: int) -> void:
 func get_last_active_slot() -> int:
 	## 扫描所有存档槽位，返回时间戳最新的那个。无存档返回 -1
 	var best_slot = -1
-	var best_ts = 0
-	for i in range(MAX_SLOTS):
-		var path = _slot_path(i)
+	var best_ts: float = 0.0
+	for i in range(SaveConstants.MAX_SLOTS):
+		var path: String = SaveConstants.slot_path(i)
 		if FileAccess.file_exists(path):
-			var file = FileAccess.open(path, FileAccess.READ)
-			if file:
-				var json = JSON.new()
-				if json.parse(file.get_as_text()) == OK:
-					var data = json.get_data()
-					if data is Dictionary and not data.is_empty():
-						var ts := int(data.get("timestamp", 0))
-						if ts > best_ts:
-							best_ts = ts
-							best_slot = i
-				file.close()
+			var data: Dictionary = _read_file_dict(path)
+			if not data.is_empty():
+				var ts: float = float(data.get("timestamp", 0))
+				if ts > best_ts:
+					best_ts = ts
+					best_slot = i
 	return best_slot
 
 
 # ============================================================
-# 序列化
+# 存档名称
 # ============================================================
 
-func _serialize_fragments() -> Array:
-	var result: Array = []
-	for f in FragmentManager.fragments:
-		result.append({
-			"id": f.id,
-			"completed": f.completed,
-		})
-	return result
+func _default_save_name(slot: int) -> String:
+	return "溯光档案 %02d" % (slot + 1)
 
 
-func _deserialize_fragments(saved: Array) -> void:
-	for s in saved:
-		var f = FragmentManager.get_fragment_by_id(s.get("id", ""))
-		if f:
-			f.completed = s.get("completed", s.get("decrypt_state", -1) == 4)
+func _resolve_save_name(slot: int) -> String:
+	## 解析存档名称：优先使用内存中的名称，其次读取磁盘上的现有名称
+	if int(save_data.get("slot", -1)) == slot \
+			and save_data.has("save_name") \
+			and str(save_data.get("save_name", "")).strip_edges() != "":
+		return str(save_data["save_name"]).strip_edges()
+
+	var path: String = SaveConstants.slot_path(slot)
+	if FileAccess.file_exists(path):
+		var data: Dictionary = _read_file_dict(path)
+		if not data.is_empty():
+			var existing_name := str(data.get("save_name", "")).strip_edges()
+			if existing_name != "":
+				return existing_name
+
+	return _default_save_name(slot)
 
 
 # ============================================================

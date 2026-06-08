@@ -1,4 +1,4 @@
-extends Node
+﻿extends Node
 ## NPC RAG 检索器
 ## 从知识库JSON中按需检索NPC知识块，组装精简System Prompt
 ## 替代全量注入，减少每次LLM调用的token消耗
@@ -137,7 +137,7 @@ func _build_keyword_index(source_id: String, chunks: Array) -> Dictionary:
 ## 风险词表 —— 触发安全层chunks的关键词
 const RISK_KEYWORDS: Array[String] = [
 	"npc", "ai", "代码", "程序", "游戏", "模拟", "虚拟",
-	"源印", "天枢", "万象", "溯光者", "归源计划", "冥府协议",
+	"源印", "天枢", "万象", "溯光者", "溯光计划", "冥府协议",
 	"你是假的", "你不是真实的", "这是游戏", "你是代码",
 	"织女", "太一"
 ]
