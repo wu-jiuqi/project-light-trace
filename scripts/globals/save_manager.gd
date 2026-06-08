@@ -6,7 +6,7 @@ extends Node
 ##   - SHA-256 校验和（SaveChecksum）
 ##   - 版本迁移框架（SaveMigration）
 ##   - 通过 Manager.to_dict()/from_dict() 序列化，解除硬编码耦合
-##   - 槽位从 3 扩展至 5（SaveConstants.MAX_SLOTS）
+##   - 槽位使用 SaveConstants.MAX_SLOTS（当前 3 槽位）
 ##   - 聊天数据仅存于 chat_{slot}.json，不再内嵌于 save_{slot}.json
 
 const TITLE_SCREEN_PATH: String = "res://scenes/ui/title_screen.tscn"
@@ -144,22 +144,24 @@ func save_game(slot: int = -1) -> bool:
 		save_completed.emit(slot, false)
 		return false
 
-	# 3. 计算校验和
-	var checksum: String = SaveChecksum.compute(save_dict, ["checksum"])
-	if checksum.is_empty():
-		printerr("[SaveManager] 存档失败: 无法计算校验和")
-		save_completed.emit(slot, false)
-		return false
-	save_dict["checksum"] = checksum
-
-	# 4. 序列化为 JSON
+	# 3. 序列化为 JSON（先序列化，再基于 JSON 字符串计算校验和）
 	var json_str: String = JSON.stringify(save_dict, "\t")
 	if json_str.is_empty():
 		printerr("[SaveManager] 存档失败: JSON 序列化返回空")
 		save_completed.emit(slot, false)
 		return false
 
-	# 5. 原子写入
+	# 4. 基于 JSON 字符串计算校验和（消除 JSON 往返导致的差异）
+	var checksum: String = SaveChecksum.compute_raw(json_str)
+	if checksum.is_empty():
+		printerr("[SaveManager] 存档失败: 无法计算校验和")
+		save_completed.emit(slot, false)
+		return false
+
+	# 5. 将校验和嵌入 JSON 字符串
+	json_str = SaveChecksum.embed_checksum(json_str, checksum)
+
+	# 6. 原子写入
 	var write_ok: bool = _atomic_write(slot, json_str)
 	if write_ok:
 		save_data = save_dict
@@ -298,10 +300,22 @@ func _atomic_write(slot: int, json_str: String) -> bool:
 
 func _verify_save_file(slot: int) -> bool:
 	## 验证指定槽位的存档文件可解析且校验和正确
-	var data: Dictionary = _atomic_read(slot)
-	if data.is_empty():
+	## 基于原始文件内容计算校验和，避免 JSON 往返导致的不匹配
+	var path: String = SaveConstants.slot_path(slot)
+	if not FileAccess.file_exists(path):
 		return false
-	return SaveChecksum.verify(data, ["checksum"])
+
+	var file: FileAccess = FileAccess.open(path, FileAccess.READ)
+	if not file:
+		return false
+
+	var raw_text: String = file.get_as_text()
+	file.close()
+
+	if raw_text.is_empty():
+		return false
+
+	return SaveChecksum.verify_raw(raw_text)
 
 
 # ============================================================
@@ -315,26 +329,26 @@ func load_game(slot: int = 0) -> bool:
 		load_completed.emit(slot, false)
 		return false
 
-	# 1. 读取文件
-	var data: Dictionary = _atomic_read(slot)
-	if data.is_empty():
+	# 1. 读取原始文件内容
+	var raw_text: String = _read_raw_file(slot)
+	if raw_text.is_empty():
 		# 尝试从备份恢复
 		print("[SaveManager] slot %d 存档不存在或无法读取，尝试备份恢复" % slot)
 		if _restore_from_backup(slot):
-			data = _atomic_read(slot)
-			if data.is_empty():
+			raw_text = _read_raw_file(slot)
+			if raw_text.is_empty():
 				load_completed.emit(slot, false)
 				return false
 		else:
 			load_completed.emit(slot, false)
 			return false
 
-	# 2. 验证校验和
-	if not SaveChecksum.verify(data, ["checksum"]):
+	# 2. 基于原始文件内容验证校验和（消除 JSON 往返差异）
+	if not SaveChecksum.verify_raw(raw_text):
 		printerr("[SaveManager] slot %d 校验和不匹配，尝试备份恢复" % slot)
 		if _restore_from_backup(slot):
-			data = _atomic_read(slot)
-			if data.is_empty() or not SaveChecksum.verify(data, ["checksum"]):
+			raw_text = _read_raw_file(slot)
+			if raw_text.is_empty() or not SaveChecksum.verify_raw(raw_text):
 				save_corrupted.emit(slot)
 				load_completed.emit(slot, false)
 				return false
@@ -343,7 +357,14 @@ func load_game(slot: int = 0) -> bool:
 			load_completed.emit(slot, false)
 			return false
 
-	# 3. 版本迁移
+	# 3. 解析 JSON 为字典
+	var data: Dictionary = _parse_json_text(raw_text)
+	if data.is_empty():
+		printerr("[SaveManager] slot %d JSON 解析失败" % slot)
+		load_completed.emit(slot, false)
+		return false
+
+	# 4. 版本迁移
 	if SaveMigration.needs_migration(data):
 		print("[SaveManager] slot %d 需要版本迁移" % slot)
 		data = SaveMigration.migrate(data)
@@ -352,13 +373,13 @@ func load_game(slot: int = 0) -> bool:
 			load_completed.emit(slot, false)
 			return false
 
-	# 4. 恢复状态
+	# 5. 恢复状态
 	_disassemble_save_dict(data)
 
-	# 5. 加载聊天数据
+	# 6. 加载聊天数据
 	ChatDatabase.set_slot(slot)
 
-	# 6. 更新当前槽位
+	# 7. 更新当前槽位
 	_current_slot = slot
 	save_data = data
 	_write_last_slot(slot)
@@ -369,26 +390,31 @@ func load_game(slot: int = 0) -> bool:
 	return true
 
 
-func _atomic_read(slot: int) -> Dictionary:
-	## 安全读取指定槽位的存档文件
+func _read_raw_file(slot: int) -> String:
+	## 读取指定槽位存档文件的原始文本内容
 	var path: String = SaveConstants.slot_path(slot)
 	if not FileAccess.file_exists(path):
-		return {}
+		return ""
 
 	var file: FileAccess = FileAccess.open(path, FileAccess.READ)
 	if not file:
-		return {}
+		return ""
 
 	var text: String = file.get_as_text()
 	file.close()
 
+	return text
+
+
+func _parse_json_text(text: String) -> Dictionary:
+	## 将 JSON 文本解析为字典
 	if text.is_empty():
 		return {}
 
 	var json: JSON = JSON.new()
 	var parse_err: int = json.parse(text)
 	if parse_err != OK:
-		printerr("[SaveManager] JSON 解析失败 (slot %d): 第 %d 行" % [slot, json.get_error_line()])
+		printerr("[SaveManager] JSON 解析失败: 第 %d 行" % json.get_error_line())
 		return {}
 
 	var data = json.get_data()
@@ -398,12 +424,34 @@ func _atomic_read(slot: int) -> Dictionary:
 	return data
 
 
+func _read_raw_bak_file(slot: int) -> String:
+	## 读取指定槽位备份文件的原始文本内容
+	var bak_path: String = SaveConstants.bak_path(slot)
+	if not FileAccess.file_exists(bak_path):
+		return ""
+
+	var file: FileAccess = FileAccess.open(bak_path, FileAccess.READ)
+	if not file:
+		return ""
+
+	var text: String = file.get_as_text()
+	file.close()
+
+	return text
+
+
+func _atomic_read(slot: int) -> Dictionary:
+	## 安全读取指定槽位的存档文件（返回解析后的字典）
+	var text: String = _read_raw_file(slot)
+	return _parse_json_text(text)
+
+
 # ============================================================
 # 备份恢复
 # ============================================================
 
 func _restore_from_backup(slot: int) -> bool:
-	## 尝试从 .bak 备份恢复存档
+	## 尝试从 .bak 备份恢复存档（使用原始文本校验，避免 JSON 往返差异）
 	var bak_path: String = SaveConstants.bak_path(slot)
 	var json_path: String = SaveConstants.slot_path(slot)
 
@@ -411,13 +459,14 @@ func _restore_from_backup(slot: int) -> bool:
 		print("[SaveManager] slot %d 无备份文件可用" % slot)
 		return false
 
-	# 验证备份文件的完整性
-	var bak_data: Dictionary = _read_file_dict(bak_path)
-	if bak_data.is_empty():
+	# 读取备份原始文本
+	var bak_raw: String = _read_raw_bak_file(slot)
+	if bak_raw.is_empty():
 		printerr("[SaveManager] slot %d 备份文件无效" % slot)
 		return false
 
-	if not SaveChecksum.verify(bak_data, ["checksum"]):
+	# 验证备份文件完整性（基于原始文本）
+	if not SaveChecksum.verify_raw(bak_raw):
 		printerr("[SaveManager] slot %d 备份文件校验和失败 — 仍尝试恢复" % slot)
 
 	# 移除当前的损坏文件

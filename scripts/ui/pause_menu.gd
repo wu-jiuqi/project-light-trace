@@ -242,7 +242,7 @@ func _build_save_slots_panel(vs: Vector2, pw: float, ph: float) -> void:
 	st.add_theme_font_size_override("font_size", 21)
 	_slot_overlay.add_child(st)
 	
-	for i in range(SaveConstants.MAX_SLOTS):  # 0-based 槽位：0~4
+	for i in range(SaveConstants.MAX_SLOTS):  # 0-based 槽位：0~2
 		var slot = i  # 内部使用 0-based，和 title_screen / SaveManager 一致
 		var btn = Button.new()
 		btn.position = Vector2(50, 90 + i * 60)

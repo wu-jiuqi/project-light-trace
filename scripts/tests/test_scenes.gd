@@ -8,7 +8,7 @@ func _init() -> void:
 
 
 func _run() -> void:
-	var scene_paths: Array[String] = []
+	var scene_paths: Array[String] = [] as Array[String]
 	_collect_scenes("res://scenes", scene_paths)
 	scene_paths.sort()
 	_check(scene_paths.size() == 22, "expected 22 project scenes")
