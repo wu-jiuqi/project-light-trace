@@ -18,6 +18,9 @@ class_name OpeningCinematic
 # ============================================
 
 var panels: Array[TextureRect] = []
+var pages: Array[Control] = []
+## panel_page_idx[i] — 第 i 个面板属于哪个页面（page 索引，0-5）
+var panel_page_idx: Array[int] = []
 ## 当前已显示的最新面板索引（-1 表示尚未显示任何面板）
 var current_panel: int = -1
 var is_transitioning: bool = false
@@ -63,23 +66,26 @@ func _ready() -> void:
 
 
 func _gather_panels() -> void:
-	## 按页面顺序收集所有 TextureRect 面板，初始全部隐藏
-	# 先收集页面容器并按名称排序
-	var pages_temp: Array[Control] = []
+	## 按页面顺序收集所有 TextureRect 面板，记录面板→页面映射，初始全部隐藏
+	pages.clear()
+	panels.clear()
+	panel_page_idx.clear()
+
 	for child in page_container.get_children():
 		if child is Control and child.name.begins_with("Page"):
-			pages_temp.append(child)
-	pages_temp.sort_custom(func(a: Node, b: Node): return a.name.naturalnocasecmp_to(b.name) < 0)
+			pages.append(child)
+	pages.sort_custom(func(a: Node, b: Node): return a.name.naturalnocasecmp_to(b.name) < 0)
 
-	# 遍历每个页面，收集其下的 TextureRect 面板
-	for page in pages_temp:
-		page.visible = true  # 所有页面容器保持可见，以便面板积累显示
+	for page_idx in pages.size():
+		var page: Control = pages[page_idx]
+		page.visible = false  # 所有页初始隐藏，按需显示
 		for child in page.get_children():
 			if child is TextureRect:
 				child.visible = false
 				child.modulate.a = 1.0
 				child.scale = Vector2(PANEL_SCALE_END, PANEL_SCALE_END)
 				panels.append(child)
+				panel_page_idx.append(page_idx)
 
 
 # ============================================
@@ -93,9 +99,14 @@ func _show_first_panel() -> void:
 
 
 func _advance_to_panel(idx: int) -> void:
-	## 隐藏上一面板
-	if current_panel >= 0 and current_panel < panels.size():
-		panels[current_panel].visible = false
+	## 如果翻到新页，隐藏上一页
+	var new_page_idx: int = panel_page_idx[idx]
+	if current_panel >= 0:
+		var old_page_idx: int = panel_page_idx[current_panel]
+		if old_page_idx != new_page_idx:
+			pages[old_page_idx].visible = false
+	## 确保当前页可见（首次显示或翻页后）
+	pages[new_page_idx].visible = true
 	## 将第 idx 个面板淡入 + 缩放入场
 	var panel: TextureRect = panels[idx]
 	panel.visible = true
@@ -124,7 +135,7 @@ func _update_narration(idx: int) -> void:
 
 
 func _update_page_indicator() -> void:
-	page_indicator.text = "面板 %d / %d" % [current_panel + 1, panels.size()]
+	page_indicator.text = "页 %d / %d" % [panel_page_idx[current_panel] + 1, pages.size()]
 
 
 # ============================================
