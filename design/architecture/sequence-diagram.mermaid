@@ -1,0 +1,30 @@
+sequenceDiagram
+    participant Player
+    participant ChatDialogue
+    participant NPC
+    participant NPCRagRetriever
+    participant LLMClient
+    participant Proxy as LLM代理
+    participant ChatDatabase
+
+    Player->>NPC: 靠近NPC
+    NPC->>ChatDialogue: open(npc_ctrl, greeting)
+    ChatDialogue-->>Player: 显示对话面板 + 问候语
+
+    Player->>ChatDialogue: 输入消息
+    ChatDialogue->>ChatDialogue: _do_send()
+    ChatDialogue->>NPC: send_player_message(msg)
+
+    NPC->>NPCRagRetriever: assemble_prompt(npc_id, input, game_state)
+    NPCRagRetriever->>NPCRagRetriever: extract_keywords + retrieve + 组装
+    NPCRagRetriever-->>NPC: 返回 System Prompt
+
+    NPC->>LLMClient: chat_stream(prompt, user_msg)
+    LLMClient->>Proxy: HTTP POST /api/chat/completions
+    Proxy-->>LLMClient: 流式响应
+    LLMClient-->>ChatDialogue: stream_token(token) × N
+    ChatDialogue-->>Player: 逐字显示NPC回复
+    LLMClient-->>ChatDialogue: stream_completed(full_text)
+
+    NPC->>ChatDatabase: log_message(npc_id, role, content, ...)
+    ChatDatabase->>ChatDatabase: 写入_cache + _data + _save()

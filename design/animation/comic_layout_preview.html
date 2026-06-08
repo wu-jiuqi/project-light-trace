@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>开场动画 — 漫画分格布局预览（13格·6页）</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #1a1a1a;
+    color: #e0d8c8;
+    font-family: 'Georgia', 'Noto Serif SC', 'SimSun', serif;
+    padding: 40px 20px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 28px;
+    font-weight: normal;
+    letter-spacing: 0.15em;
+    margin-bottom: 8px;
+    color: #f0e4c8;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 14px;
+    color: #8a8070;
+    margin-bottom: 48px;
+    letter-spacing: 0.1em;
+  }
+
+  .page-group {
+    max-width: 1100px;
+    margin: 0 auto 60px;
+  }
+  .page-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #3a3428;
+  }
+  .page-num {
+    font-size: 13px;
+    color: #8a8070;
+    letter-spacing: 0.08em;
+  }
+  .page-title {
+    font-size: 20px;
+    color: #d4c8a8;
+    letter-spacing: 0.12em;
+  }
+  .page-rhythm {
+    font-size: 12px;
+    color: #6a6050;
+    margin-left: auto;
+    font-style: italic;
+  }
+
+  /* Page canvas — the "paper" */
+  .page-canvas {
+    background: #2a2520;
+    border: 1px solid #3a3428;
+    border-radius: 4px;
+    padding: 24px;
+    display: flex;
+    gap: 12px;
+    position: relative;
+    min-height: 400px;
+  }
+  .page-canvas.col-layout { flex-direction: column; }
+  .page-canvas.row-layout  { flex-direction: row; align-items: flex-start; }
+  .page-canvas.wrap-layout { flex-wrap: wrap; }
+
+  /* Panel blocks */
+  .panel {
+    border-radius: 3px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    border: 1px dashed rgba(255,255,255,0.12);
+    transition: border-color 0.2s;
+  }
+  .panel:hover {
+    border-color: rgba(255,255,255,0.35);
+    z-index: 2;
+  }
+
+  .panel-id {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+  }
+  .panel-label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.35);
+    text-align: center;
+    line-height: 1.4;
+    max-width: 90%;
+  }
+  .panel-dims {
+    font-size: 9px;
+    color: rgba(255,255,255,0.2);
+    margin-top: 4px;
+    font-family: monospace;
+  }
+
+  /* Color palette for panels */
+  .c-identity   { background: #2a3040; }
+  .c-panorama   { background: #3a3830; }
+  .c-coffee     { background: #3a2a20; }
+  .c-swing      { background: #2a3a2a; }
+  .c-oldhands   { background: #3a302a; }
+  .c-shatter    { background: #3a2025; }
+  .c-shards     { background: #2a2a30; }
+  .c-0001       { background: #3a3020; }
+  .c-folder     { background: #2a2820; }
+  .c-stamp      { background: #402020; }
+  .c-laogu      { background: #20203a; }
+  .c-logo       { background: #2a2a28; }
+  .c-starmap    { background: #202030; }
+
+  /* Arrows between panels on same page */
+  .arrow-hint {
+    position: absolute;
+    font-size: 14px;
+    color: rgba(255,255,255,0.15);
+  }
+
+  /* Legend */
+  .legend {
+    max-width: 1100px;
+    margin: 0 auto 40px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #8a8070;
+  }
+  .legend-swatch {
+    width: 16px;
+    height: 16px;
+    border-radius: 2px;
+  }
+
+  /* Summary table */
+  .summary {
+    max-width: 1100px;
+    margin: 60px auto 20px;
+  }
+  .summary table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  .summary th {
+    text-align: left;
+    padding: 6px 10px;
+    border-bottom: 1px solid #3a3428;
+    color: #8a8070;
+    font-weight: normal;
+    letter-spacing: 0.06em;
+  }
+  .summary td {
+    padding: 5px 10px;
+    border-bottom: 1px solid #2a2520;
+    color: #b0a898;
+  }
+  .summary tr:hover td {
+    background: rgba(255,255,255,0.02);
+  }
+  .sz-tag {
+    display: inline-block;
+    background: #3a3428;
+    padding: 1px 6px;
+    border-radius: 2px;
+    font-family: monospace;
+    font-size: 10px;
+    color: #8a8070;
+  }
+</style>
+</head>
+<body>
+
+<h1>开场动画 · 漫画分格布局</h1>
+<div class="subtitle">13 格 · 6 页 · 色块占位示意 &nbsp;|&nbsp; 溯光计划 / Project: Light Trace</div>
+
+<!-- Legend -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-swatch c-identity"></div>格1 身份确认</div>
+  <div class="legend-item"><div class="legend-swatch c-panorama"></div>格2 万象全景</div>
+  <div class="legend-item"><div class="legend-swatch c-coffee"></div>格3 咖啡手</div>
+  <div class="legend-item"><div class="legend-swatch c-swing"></div>格4 小孩秋千</div>
+  <div class="legend-item"><div class="legend-swatch c-oldhands"></div>格5 老人手</div>
+  <div class="legend-item"><div class="legend-swatch c-shatter"></div>格6 纸板碎裂</div>
+  <div class="legend-item"><div class="legend-swatch c-shards"></div>格7 碎片分离</div>
+  <div class="legend-item"><div class="legend-swatch c-0001"></div>格8 0001高亮</div>
+  <div class="legend-item"><div class="legend-swatch c-folder"></div>格9 档案夹</div>
+  <div class="legend-item"><div class="legend-swatch c-stamp"></div>格10 红色印章</div>
+  <div class="legend-item"><div class="legend-swatch c-laogu"></div>格11 老顾闪现</div>
+  <div class="legend-item"><div class="legend-swatch c-logo"></div>格12 Logo+冥府</div>
+  <div class="legend-item"><div class="legend-swatch c-starmap"></div>格13 星图过渡</div>
+</div>
+
+<!-- Page 1 -->
+<div class="page-group">
+  <div class="page-header">
+    <span class="page-num">第 1 页</span>
+    <span class="page-title">「万象」</span>
+    <span class="page-rhythm">极小 → 极大 &nbsp; 竖幅 → 跨页横幅</span>
+  </div>
+  <div class="page-canvas row-layout" style="padding-bottom:30px;">
+    <!-- Panel 1: narrow vertical left -->
+    <div class="panel c-identity" style="width:180px; height:100%; min-height:420px; flex-shrink:0;">
+      <div class="panel-id">格 1</div>
+      <div class="panel-label">身份确认<br>编号 TP-2077-03</div>
+      <div class="panel-dims">1024×1536</div>
+    </div>
+    <!-- Panel 2: full-width horizontal -->
+    <div class="panel c-panorama" style="flex:1; height:100%; min-height:420px;">
+      <div class="panel-id">格 2</div>
+      <div class="panel-label">万象全景 · 纸板城市鸟瞰</div>
+      <div class="panel-dims">1920×1080</div>
+    </div>
+  </div>
+</div>
+
+<!-- Page 2 -->
+<div class="page-group">
+  <div class="page-header">
+    <span class="page-num">第 2 页</span>
+    <span class="page-title">「47亿」</span>
+    <span class="page-rhythm">三联画并列 &nbsp; 成人 → 童年 → 暮年</span>
+  </div>
+  <div class="page-canvas row-layout" style="justify-content: center; gap: 16px; min-height:340px; align-items:center;">
+    <div class="panel c-coffee" style="width:280px; height:280px;">
+      <div class="panel-id">格 3</div>
+      <div class="panel-label">手握咖啡杯<br><span style="font-size:10px;color:rgba(255,255,255,0.2)">成人</span></div>
+      <div class="panel-dims">1024×1024</div>
+    </div>
+    <div class="panel c-swing" style="width:280px; height:280px;">
+      <div class="panel-id">格 4</div>
+      <div class="panel-label">小孩秋千<br><span style="font-size:10px;color:rgba(255,255,255,0.2)">童年</span></div>
+      <div class="panel-dims">1024×1024</div>
+    </div>
+    <div class="panel c-oldhands" style="width:280px; height:280px;">
+      <div class="panel-id">格 5</div>
+      <div class="panel-label">老人手部<br><span style="font-size:10px;color:rgba(255,255,255,0.2)">暮年</span></div>
+      <div class="panel-dims">1024×1024</div>
+    </div>
+  </div>
+</div>
+
+<!-- Page 3 -->
+<div class="page-group">
+  <div class="page-header">
+    <span class="page-num">第 3 页</span>
+    <span class="page-title">「碎裂」</span>
+    <span class="page-rhythm">最强情绪转折 &nbsp; 完整 → 破碎</span>
+  </div>
+  <div class="page-canvas col-layout" style="min-height:520px; gap:16px;">
+    <div class="panel c-shatter" style="width:100%; height:280px;">
+      <div class="panel-id">格 6</div>
+      <div class="panel-label">纸板碎裂 · 裂缝从中心蔓延</div>
+      <div class="panel-dims">1920×1080</div>
+    </div>
+    <div class="panel c-shards" style="width:100%; height:200px;">
+      <div class="panel-id">格 7</div>
+      <div class="panel-label">十二碎片分离 · 悬浮在灰色纸板上</div>
+      <div class="panel-dims">1280×896</div>
+    </div>
+  </div>
+</div>
+
+<!-- Page 4 -->
+<div class="page-group">
+  <div class="page-header">
+    <span class="page-num">第 4 页</span>
+    <span class="page-title">「任务」</span>
+    <span class="page-rhythm">聚焦单一碎片 → 档案夹翻开</span>
+  </div>
+  <div class="page-canvas row-layout" style="gap:16px; align-items:stretch;">
+    <div class="panel c-0001" style="width:300px; min-height:420px;">
+      <div class="panel-id">格 8</div>
+      <div class="panel-label">0001碎片高亮<br>淡金光照亮<br>其余11片灰色</div>
+      <div class="panel-dims">1024×1024</div>
+    </div>
+    <div class="panel c-folder" style="flex:1; min-height:420px;">
+      <div class="panel-id">格 9</div>
+      <div class="panel-label">档案夹翻开<br>打字机逐字：进入碎片——找到源印——</div>
+      <div class="panel-dims">1024×1536</div>
+    </div>
+  </div>
+</div>
+
+<!-- Page 5 -->
+<div class="page-group">
+  <div class="page-header">
+    <span class="page-num">第 5 页</span>
+    <span class="page-title">「警告」</span>
+    <span class="page-rhythm">印章暴力打断 + 剪影极速闪现</span>
+  </div>
+  <div class="page-canvas col-layout" style="min-height:460px; gap:14px; position:relative;">
+    <div class="panel c-stamp" style="width:100%; height:240px;">
+      <div class="panel-id">格 10</div>
+      <div class="panel-label">红色印章"注意" · 手写警告条目</div>
+      <div class="panel-dims">1280×896</div>
+    </div>
+    <div style="display:flex; justify-content:flex-end;">
+      <div class="panel c-laogu" style="width:160px; height:200px;">
+        <div class="panel-id">格 11</div>
+        <div class="panel-label">老顾闪现<br>银箔眼睛</div>
+        <div class="panel-dims">512×768</div>
+      </div>
+    </div>
+    <!-- visual hint: this small panel is positioned bottom-right -->
+  </div>
+</div>
+
+<!-- Page 6 -->
+<div class="page-group">
+  <div class="page-header">
+    <span class="page-num">第 6 页</span>
+    <span class="page-title">「谎言」</span>
+    <span class="page-rhythm">暗线B种子 + 过渡到游戏</span>
+  </div>
+  <div class="page-canvas row-layout" style="gap:16px; align-items:stretch;">
+    <div class="panel c-logo" style="width:300px; min-height:400px;">
+      <div class="panel-id">格 12</div>
+      <div class="panel-label">天枢Logo<br>四层纸板叠加<br>角落：冥府协议极小字</div>
+      <div class="panel-dims">1024×1024</div>
+    </div>
+    <div class="panel c-starmap" style="flex:1; min-height:400px;">
+      <div class="panel-id">格 13</div>
+      <div class="panel-label">星图展开 · 银箔四芒星<br>0001脉动金光 · 引导玩家选择</div>
+      <div class="panel-dims">1920×1080</div>
+    </div>
+  </div>
+</div>
+
+<!-- Summary table -->
+<div class="summary">
+  <table>
+    <thead>
+      <tr>
+        <th>页</th><th>格</th><th>文件名</th><th>尺寸</th><th>画面内容</th><th>叙事节奏</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td rowspan="2">1「万象」</td><td>1</td><td>comic_panel_01_identity</td><td><span class="sz-tag">1024×1536</span></td><td>身份确认 — 深灰纸板+描图纸透光文字</td><td>慢 — 建立身份</td></tr>
+      <tr><td>2</td><td>comic_panel_02_panorama</td><td><span class="sz-tag">1920×1080</span></td><td>万象全景 — 纸板城市鸟瞰模型</td><td>慢 — 建立世界</td></tr>
+
+      <tr><td rowspan="3">2「47亿」</td><td>3</td><td>comic_panel_03_coffee_hand</td><td><span class="sz-tag">1024×1024</span></td><td>手握咖啡杯 — 口红印</td><td rowspan="3">中速 — 三联画并置<br>成人→童年→暮年</td></tr>
+      <tr><td>4</td><td>comic_panel_04_child_swing</td><td><span class="sz-tag">1024×1024</span></td><td>小孩秋千 — 纸偶+线绳</td></tr>
+      <tr><td>5</td><td>comic_panel_05_old_hands</td><td><span class="sz-tag">1024×1024</span></td><td>老人手部 — 四层纸片+铆钉</td></tr>
+
+      <tr><td rowspan="2">3「碎裂」</td><td>6</td><td>comic_panel_06_shatter</td><td><span class="sz-tag">1920×1080</span></td><td>纸板撕裂 — 裂缝从中央爆发</td><td>快→急剧 — 最强转折</td></tr>
+      <tr><td>7</td><td>comic_panel_07_shards_separating</td><td><span class="sz-tag">1280×896</span></td><td>十二碎片分离 — 悬浮灰色纸板</td><td>静 — 碎裂后的沉默</td></tr>
+
+      <tr><td rowspan="2">4「任务」</td><td>8</td><td>comic_panel_08_shard_0001</td><td><span class="sz-tag">1024×1024</span></td><td>0001碎片高亮 — 淡金光照亮</td><td>收束 — 从全景到单一片段</td></tr>
+      <tr><td>9</td><td>comic_panel_09_folder_briefing</td><td><span class="sz-tag">1024×1536</span></td><td>档案夹翻开 — 任务简报</td><td>中速 — 任务指令</td></tr>
+
+      <tr><td rowspan="2">5「警告」</td><td>10</td><td>comic_panel_10_warning_stamp</td><td><span class="sz-tag">1280×896</span></td><td>红色印章"注意" — 手写警告</td><td>快 — 暴力打断</td></tr>
+      <tr><td>11</td><td>comic_panel_11_laogu_silhouette</td><td><span class="sz-tag">512×768</span></td><td>老顾剪影闪现 — 银箔眼睛</td><td>极快 — 闪现</td></tr>
+
+      <tr><td rowspan="2">6「谎言」</td><td>12</td><td>comic_panel_12_logo_hades</td><td><span class="sz-tag">1024×1024</span></td><td>天枢Logo+冥府协议 — 沉默</td><td>慢 — 暗线种子</td></tr>
+      <tr><td>13</td><td>comic_panel_13_starmap</td><td><span class="sz-tag">1920×1080</span></td><td>星图展开 — 0001脉动</td><td>过渡 — 进入游戏</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div style="text-align:center; margin:40px 0; font-size:11px; color:#4a4038; letter-spacing:0.08em;">
+  虚线框 = 单格边界 &nbsp;|&nbsp; 色块 = 占位示意，非实际内容 &nbsp;|&nbsp; 鼠标悬停高亮格边框
+</div>
+
+</body>
+</html>

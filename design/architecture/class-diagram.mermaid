@@ -1,0 +1,162 @@
+classDiagram
+    class GameManager {
+        +int current_phase
+        +float repair_progress
+        +int total_fragments
+        +int repaired_fragments
+        +String player_name
+        +float company_trust
+        +bool darkline_a_revealed
+        +bool darkline_b_revealed
+        +Array~String~ collected_clues
+        +Array~Dictionary~ source_mark_log
+        +Dictionary items_used
+        +Array~bool~ awakened_colors
+        +Dictionary npc_visit_count
+        +Dictionary npc_state_cache
+        +bool melody_triggered
+        +bool white_ready
+        +float oldpainter_trust
+        +new_game() void
+        +reset_fragment() void
+        +awaken_color(int) void
+        +record_source_mark(String, String, String) void
+        +save_npc_state(String, String, Vector2, float, int, bool) void
+        +load_npc_state(String, String) Dictionary
+    }
+
+    class FragmentManager {
+        +Array~FragmentData~ fragments
+        +FragmentData current_fragment
+        +String pending_completion_animation_id
+        +enter_fragment(FragmentData) bool
+        +complete_fragment(FragmentData) bool
+        +get_fragment_by_id(String) FragmentData
+        +reset_all_fragments() void
+    }
+
+    class FragmentData {
+        +String id
+        +String name
+        +String world_name
+        +String hint
+        +int difficulty
+        +bool is_story_critical
+        +String scene_path
+        +bool implemented
+        +bool completed
+    }
+
+    class SaveManager {
+        -int _current_slot
+        -Timer _auto_timer
+        -Dictionary save_data
+        +save_game(int) bool
+        +load_game(int) bool
+        +set_current_slot(int) void
+        +get_current_slot() int
+        +list_slots() Array~Dictionary~
+        +delete_slot(int) void
+        +manual_save() void
+        -_serialize_fragments() Array
+        -_deserialize_fragments(Array) void
+    }
+
+    class ChatDatabase {
+        -Dictionary _cache
+        -Dictionary _data
+        -int _current_slot
+        +log_message(String, String, String, int, float) void
+        +get_history_as_text(String, int) String
+        +get_page(String, int, int) Dictionary
+        +set_slot(int) void
+        +flush_to_disk() void
+        +restore_from(Dictionary) void
+        +clear_all_history() void
+    }
+
+    class SceneManager {
+        +String pending_spawn_point
+        +change_scene(String, String) void
+        +_raw_switch(String) void
+    }
+
+    class SceneFader {
+        -ColorRect _fader
+        +bool is_fading
+        +ensure_black() void
+        +fade_out_and_switch(String) void
+        +fade_in() void
+    }
+
+    class LLMClient {
+        -HTTPClient _client
+        -int _state
+        +chat_stream(String, String, Callable) void
+        +is_busy() bool
+        +is_api_key_configured() bool
+    }
+
+    class NPCRagRetriever {
+        -Dictionary _knowledge_bases
+        -Dictionary _l0_identities
+        -Array _world_chunks
+        +assemble_prompt(String, String, Dictionary) String
+        +retrieve(String, String, Dictionary) Array
+        +extract_keywords(String) Dictionary
+        +get_fallback_response(String) String
+        -_score_chunk(Dictionary, Array, Dictionary) float
+    }
+
+    class InventoryManager {
+        -Array~int~ _items
+        +bool backpack_open
+        +add_item(int) bool
+        +remove_item(int) bool
+        +has_item(int) bool
+        +get_all_items() Array~int~
+        +get_item_meta(int) Dictionary
+    }
+
+    class ChatDialogue {
+        +bool is_open
+        +String npc_name
+        +open(Node, String) void
+        +close() void
+        +stream_begin() void
+        +stream_add(String) void
+        +stream_end(String) void
+        +show_alert_popup(float, String, String, int, float) void
+        +show_alert_phase_change(String, int, int, String) void
+        +shake_screen(float) void
+    }
+
+    class BackpackUI {
+        -bool _is_open
+        +open() void
+        +close() void
+        +toggle() void
+        -_refresh_grid() void
+    }
+
+    class PauseMenu {
+        +bool is_open
+        +open() void
+        +close() void
+        +toggle() void
+        -_do_save(int) void
+        -_return_to_star_map() void
+        -_return_to_title() void
+    }
+
+    GameManager <--> FragmentManager : 双向调用
+    SaveManager --> GameManager : 读写~30属性
+    SaveManager --> FragmentManager : 序列化碎片
+    SaveManager --> ChatDatabase : flush/restore
+    SceneManager <--> SceneFader : 双向调用
+    ChatDialogue --> ChatDatabase : 查历史
+    BackpackUI --> InventoryManager : 读写物品
+    PauseMenu --> SaveManager : 存档操作
+    PauseMenu --> FragmentManager : 信号监听
+    PauseMenu --> SceneManager : 读写spawn_point
+    NPCRagRetriever --> GameManager : 读取状态上下文

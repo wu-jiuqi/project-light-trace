@@ -207,7 +207,7 @@ func extract_keywords(player_input: String) -> Dictionary:
 
 func _simple_tokenize(text: String) -> Array[String]:
 	## 简单分词：按中文常见标点和空格拆分
-	var result: Array[String] = []
+	var result: Array[String] = [] as Array[String]
 	var current = ""
 	for ch in text:
 		if ch in [" ", "，", "。", "！", "？", "、", "：", "；", "（", "）", "\n", "\t", "“", "”", "…", "——"]:
@@ -395,7 +395,7 @@ func assemble_prompt(npc_id: String, player_input: String, game_state: Dictionar
 	# 3. L1 输出约束
 	var l1_content = _l1_compact
 	if l1_content == "":
-		var parts: Array[String] = []
+		var parts: Array[String] = [] as Array[String]
 		for c in _l1_constraints:
 			parts.append(c.get("content", ""))
 		l1_content = "输出规则：%s" % " ".join(parts)
@@ -408,7 +408,7 @@ func assemble_prompt(npc_id: String, player_input: String, game_state: Dictionar
 	
 	var l2_content = ""
 	if retrieved.size() > 0:
-		var chunk_texts: Array[String] = []
+		var chunk_texts: Array[String] = [] as Array[String]
 		var seen_ids: Dictionary = {}
 		for chunk in retrieved:
 			var cid = chunk.get("id", "")
@@ -454,7 +454,7 @@ func assemble_prompt(npc_id: String, player_input: String, game_state: Dictionar
 
 func _build_state_context(npc_id: String, game_state: Dictionary) -> String:
 	## 构建L3游戏状态上下文 — 让NPC知道当前颜色觉醒状态和自我情绪
-	var parts: Array[String] = []
+	var parts: Array[String] = [] as Array[String]
 	
 	# 觉醒信息（注入具体颜色状态）
 	var colors = game_state.get("awakened_colors", [])
@@ -611,7 +611,7 @@ func _get_color_emotion_description(color: String) -> String:
 
 func _get_other_awakened_desc(npc_id: String, colors: Array) -> String:
 	## 返回其他觉醒 NPC 的描述（第一人称视角）
-	var others: Array[String] = []
+	var others: Array[String] = [] as Array[String]
 	var npc_colors = {"blacksmith": 0, "florist": 1, "baker": 2, "gravekeeper": 3, "violinist": 4}
 	var npc_descs = {
 		"blacksmith": {"self": "老霍", "desc": "那个铁匠——他的锤声变了。不再只是砸铁，像是在砸什么别的东西"},

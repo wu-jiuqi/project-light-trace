@@ -32,7 +32,7 @@ var darkline_c_unlocked: bool = false
 var company_trust: float = 1.0            # 公司信任度（影响暗线B）
 
 # === 已收集的线索（跨副本） ===
-var collected_clues: Array[String] = []
+var collected_clues: Array[String] = [] as Array[String]
 var source_mark_log: Array[Dictionary] = []  # 已解码的源印记录
 var items_used: Dictionary = {}             # 已被消耗的物品（交给NPC后标记）
 
@@ -62,7 +62,7 @@ func load_npc_state(scene_name: String, npc_kb_id: String) -> Dictionary:
 
 func clear_npc_state(scene_name: String) -> void:
 	## 清除指定场景的所有NPC状态（用于颜色觉醒等重置场景）
-	var to_remove: Array[String] = []
+	var to_remove: Array[String] = [] as Array[String]
 	for key in npc_state_cache:
 		if key.begins_with(scene_name + ":"):
 			to_remove.append(key)

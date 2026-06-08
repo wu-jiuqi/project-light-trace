@@ -1,0 +1,44 @@
+sequenceDiagram
+    participant User
+    participant SM as SaveManager
+    participant GM as GameManager
+    participant IM as InventoryManager
+    participant FM as FragmentManager
+    participant CD as ChatDatabase
+    participant SC as SaveChecksum
+    participant SMG as SaveMigration
+    participant FS as FileSystem
+
+    User->>SM: save_game(slot) / F5
+    SM->>SM: 验证 slot 有效性
+    SM->>CD: flush_to_disk()
+    CD->>FS: 写入 chat_{slot}.json
+
+    SM->>GM: to_dict()
+    GM-->>SM: global 子字典
+    SM->>IM: to_dict()
+    IM-->>SM: inventory 数组
+    SM->>FM: get_fragments_list()
+    FM-->>SM: fragments 数组
+    SM->>FM: get_fragment_states_dict()
+    FM-->>SM: fragment_states 子字典
+
+    SM->>SM: _assemble_save_dict() 组装完整存档字典
+
+    SM->>SC: compute(save_dict, ["checksum"])
+    SC-->>SM: checksum 字符串
+    SM->>SM: save_dict["checksum"] = checksum
+
+    SM->>FS: 序列化为 JSON 字符串
+    SM->>SM: _atomic_write(slot, json_str)
+    SM->>FS: 写入 save_{slot}.tmp
+    SM->>FS: rename save_{slot}.json → save_{slot}.bak
+    SM->>FS: rename save_{slot}.tmp → save_{slot}.json
+    SM->>FS: 验证新文件可读 + checksum 正确
+    alt 验证通过
+        SM->>FS: 删除 save_{slot}.bak
+        SM-->>User: 信号 save_completed(slot, true)
+    else 验证失败
+        SM->>FS: rename save_{slot}.bak → save_{slot}.json
+        SM-->>User: 信号 save_completed(slot, false)
+    end

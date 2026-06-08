@@ -1,0 +1,145 @@
+classDiagram
+    direction TB
+
+    class SaveConstants {
+        <<static>>
+        +SAVE_VERSION: String = "1.0.0"
+        +SAVE_DIR: String = "user://saves/"
+        +MAX_SLOTS: int = 5
+        +AUTO_SAVE_INTERVAL: float = 30.0
+        +TMP_SUFFIX: String = ".tmp"
+        +BAK_SUFFIX: String = ".bak"
+        +LAST_SLOT_PATH: String
+        +slot_path(slot) String
+        +chat_path(slot) String
+        +tmp_path(slot) String
+        +bak_path(slot) String
+    }
+
+    class SaveChecksum {
+        <<static>>
+        +compute(data: Dictionary, exclude_keys: Array) String
+        +verify(data: Dictionary, exclude_keys: Array) bool
+        -_canonical_json(data: Dictionary, exclude_keys: Array) String
+    }
+
+    class SaveMigration {
+        <<static>>
+        +MIGRATIONS: Dictionary
+        +migrate(data: Dictionary) Dictionary
+        +needs_migration(data: Dictionary) bool
+        -_version_lt(v1: String, v2: String) bool
+        -_version_eq(v1: String, v2: String) bool
+        -_migrate_0_3_0_to_1_0_0(data: Dictionary) Dictionary
+    }
+
+    class SaveManager {
+        -_current_slot: int
+        -_auto_timer: Timer
+        -save_data: Dictionary
+        +save_game(slot: int) bool
+        +load_game(slot: int) bool
+        +manual_save() void
+        +quick_save(slot: int) void
+        +list_slots() Array~Dictionary~
+        +delete_slot(slot: int) void
+        +set_current_slot(slot: int) void
+        +get_current_slot() int
+        +get_last_active_slot() int
+        +clear_active_slot() void
+        +has_any_save_files() bool
+        -_atomic_write(slot: int, json_str: String) bool
+        -_atomic_read(slot: int) Dictionary
+        -_verify_and_migrate(data: Dictionary) Dictionary
+        -_assemble_save_dict() Dictionary
+        -_disassemble_save_dict(data: Dictionary) void
+        -_backup_slot(slot: int) bool
+        -_restore_from_backup(slot: int) bool
+        -_setup_auto_save() void
+        -_stop_auto_save() void
+        -_show_save_notification() void
+        signal save_completed(slot: int, success: bool)
+        signal load_completed(slot: int, success: bool)
+        signal save_corrupted(slot: int)
+        signal save_recovered(slot: int)
+    }
+
+    class GameManager {
+        +current_phase: int
+        +repair_progress: float
+        +repaired_fragments: int
+        +player_name: String
+        +play_time_seconds: float
+        +company_trust: float
+        +darkline_a_revealed: bool
+        +darkline_b_revealed: bool
+        +darkline_c_unlocked: bool
+        +collected_clues: Array~String~
+        +source_mark_log: Array~Dictionary~
+        +items_used: Dictionary
+        +npc_state_cache: Dictionary
+        +npc_visit_count: Dictionary
+        +to_dict() Dictionary
+        +from_dict(data: Dictionary) void
+        +new_game() void
+        +reset_fragment() void
+    }
+
+    class InventoryManager {
+        -_items: Array~int~
+        +add_item(item_id: int) bool
+        +remove_item(item_id: int) bool
+        +has_item(item_id: int) bool
+        +get_all_items() Array~int~
+        +get_item_count() int
+        +to_dict() Dictionary
+        +from_dict(data: Dictionary) void
+        signal item_added(item_id: int)
+        signal item_removed(item_id: int)
+    }
+
+    class FragmentManager {
+        +fragments: Array~FragmentData~
+        +current_fragment: FragmentData
+        +is_replay_mode: bool
+        +get_fragment_by_id(id: String) FragmentData
+        +enter_fragment(fragment: FragmentData) bool
+        +complete_fragment(fragment: FragmentData) bool
+        +get_fragments_list() Array~Dictionary~
+        +get_fragment_states_dict() Dictionary
+        +apply_fragment_states(states: Dictionary) void
+        +reset_all_fragments() void
+        signal fragment_entered(fragment_id: String)
+        signal fragment_completed(fragment_id: String)
+    }
+
+    class FragmentData {
+        +id: String
+        +name: String
+        +completed: bool
+        +implemented: bool
+    }
+
+    class ChatDatabase {
+        -_data: Dictionary
+        -_cache: Dictionary
+        -_current_slot: int
+        +set_slot(slot: int) void
+        +log_message(npc_id, role, content, alert_phase, suspicion) void
+        +flush_to_disk() void
+        +clear_all_history() void
+        +delete_slot_file(slot: int) void
+        +has_any_data() bool
+        +get_statistics() Dictionary
+    }
+
+    SaveManager ..> SaveConstants : uses
+    SaveManager ..> SaveChecksum : uses
+    SaveManager ..> SaveMigration : uses
+    SaveManager --> GameManager : to_dict/from_dict
+    SaveManager --> InventoryManager : to_dict/from_dict
+    SaveManager --> FragmentManager : get_fragments_list/get_fragment_states_dict
+    SaveManager --> ChatDatabase : set_slot/flush_to_disk
+    FragmentManager --> GameManager : reset_fragment
+    FragmentManager *-- FragmentData : contains
+    ChatDatabase ..> SaveConstants : uses paths

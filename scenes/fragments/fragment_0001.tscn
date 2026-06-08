@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://vwste8w6ibmr"]
+[gd_scene format=3 uid="uid://dueqr41rnyb30"]
 
 [ext_resource type="Texture2D" uid="uid://fk0pkr55xuhi" path="res://assets/papercraft/fragments/id0001/environment2/fantasy_shop_11.png" id="1_q23m0"]
 [ext_resource type="Texture2D" uid="uid://cud0akhbd3n6x" path="res://assets/papercraft/fragments/id0001/environment2/road_crossing_25.png" id="1_sk1d4"]
@@ -246,13 +246,12 @@ scale = Vector2(0.06738895, 0.06117458)
 texture = ExtResource("7_jgijl")
 
 [node name="lantern4" type="Sprite2D" parent="back" unique_id=925568367]
-z_index = 10
 position = Vector2(144, 88)
 scale = Vector2(0.056442082, 0.058111325)
 texture = ExtResource("26_ff6ei")
 
 [node name="lantern5" type="Sprite2D" parent="back" unique_id=1844845169]
-z_index = 10
+z_index = -13
 position = Vector2(80, 88.00001)
 scale = Vector2(0.054003734, 0.058751788)
 texture = ExtResource("27_1c074")

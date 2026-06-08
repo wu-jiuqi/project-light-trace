@@ -682,7 +682,7 @@ func _update_hud() -> void:
 		hud_objective.text = "目标：回到钟楼观测台，校准日晷指针。"
 	else:
 		hud_objective.text = "目标：观察五个日晷，记录角度并找出缺失项。"
-	var parts: Array[String] = []
+	var parts: Array[String] = [] as Array[String]
 	for id in OBSERVATION_ORDER:
 		if observed_sundials.has(id):
 			parts.append("%s:%d°" % [id, observed_sundials[id]])

@@ -28,6 +28,8 @@ func _ready() -> void:
 	var animate_id = FragmentManager.consume_completion_animation_id()
 	shard_canvas.configure(FragmentManager.fragments, animate_id)
 	_close_detail_card(false)
+	# 在 UI 初始化完成后淡入，恢复 SceneFader 切场景时的全黑状态
+	SceneFader.fade_in()
 	print("[StarMap] 玻璃星图界面加载完成")
 
 

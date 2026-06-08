@@ -57,7 +57,7 @@ func _try_spawn(spawn_name: String) -> void:
 
 	var marker = spawns.get_node_or_null(spawn_name)
 	if not marker:
-		var names: Array[String] = []
+		var names: Array[String] = [] as Array[String]
 		for child in spawns.get_children():
 			names.append(child.name)
 		print("[PlayerController] 出生点 '%s' 未找到，可用: %s" % [spawn_name, names])

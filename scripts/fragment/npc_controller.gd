@@ -440,7 +440,7 @@ func check_player_input_for_alert(player_input: String) -> void:
 	
 	var input_lower = player_input.to_lower()
 	var hot_topics: Array = profile.get("hot_topics", [])
-	var triggered: Array[String] = []
+	var triggered: Array[String] = [] as Array[String]
 	
 	# 检查是否触碰到敏感话题（子串匹配）
 	for topic in hot_topics:
@@ -509,8 +509,8 @@ func get_alert_context_for_rag() -> String:
 	## 为RAG检索生成警觉上下文 — 指导LLM以不同警觉等级回应
 	if npc_alert_phase <= NPCAlertPhase.TRUSTING:
 		return ""
-	
-	var parts: Array[String] = []
+
+	var parts: Array[String] = [] as Array[String]
 	
 	# 身份怀疑标记
 	if doubts_player_identity:
@@ -610,7 +610,7 @@ func _analyze_llm_response_for_alert(response: String, player_input: String) -> 
 	
 	var response_lower = response.to_lower()
 	var delta: float = 0.0
-	var reasons: Array[String] = []
+	var reasons: Array[String] = [] as Array[String]
 	
 	# === 信号1: 极度简短的回复（<20字符）—— NPC不想说话 ===
 	if response.length() < 20:
