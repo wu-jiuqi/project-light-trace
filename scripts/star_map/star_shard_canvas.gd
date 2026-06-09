@@ -30,6 +30,8 @@ var fragments: Array = []
 var mask_alphas: Array[float] = []
 var hovered_index := -1
 var selected_index := -1
+var flash_index: int = -1
+var flash_alpha: float = 0.0
 
 signal fragment_selected(index: int)
 signal empty_clicked()
@@ -95,6 +97,9 @@ func _draw_mask(index: int) -> void:
 	elif index == hovered_index:
 		draw_colored_polygon(polygon, HOVER_COLOR)
 		_draw_outline(polygon, LINE_COLOR, 2.0)
+
+	if index == flash_index and flash_alpha > 0.01:
+		draw_colored_polygon(polygon, Color(1.0, 0.92, 0.4, flash_alpha * 0.55))
 
 	if index == selected_index:
 		_draw_outline(polygon, Color(1.0, 0.92, 0.58, 1.0), 3.4)
@@ -197,6 +202,34 @@ func _animate_reveal(index: int) -> void:
 		mask_alphas[index] = lerpf(start, 0.0, weight)
 		queue_redraw()
 	, 0.0, 1.0, REVEAL_DURATION)
+
+
+func flash_fragment(fragment_id: String, times: int = 3, interval: float = 0.35) -> void:
+	## Plays a golden flash animation on the specified fragment.
+	## [param times] Number of flash cycles (fade in → fade out).
+	## [param interval] Duration in seconds for one full cycle.
+	var index := _find_fragment_index(fragment_id)
+	if index < 0:
+		push_warning("[StarShardCanvas] flash_fragment: fragment '%s' not found." % fragment_id)
+		return
+	flash_index = index
+	var half := interval * 0.5
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_SINE)
+	tween.set_loops(times - 1)
+	tween.tween_method(func(value: float) -> void:
+		flash_alpha = value
+		queue_redraw()
+	, 0.0, 1.0, half)
+	tween.tween_method(func(value: float) -> void:
+		flash_alpha = 1.0 - value
+		queue_redraw()
+	, 0.0, 1.0, half)
+	tween.finished.connect(func():
+		flash_index = -1
+		flash_alpha = 0.0
+		queue_redraw()
+	)
 
 
 func _ensure_mask_alphas() -> void:

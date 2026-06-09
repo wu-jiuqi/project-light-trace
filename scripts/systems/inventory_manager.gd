@@ -105,4 +105,7 @@ func to_dict() -> Dictionary:
 
 func from_dict(data: Dictionary) -> void:
 	## 从字典恢复背包物品
-	_items = (data.get("inventory", []) as Array).duplicate()
+	_items.clear()
+	var raw_inv = data.get("inventory", [])
+	if raw_inv is Array:
+		_items.assign(raw_inv)

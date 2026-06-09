@@ -10,7 +10,7 @@ var _title_label: Label
 var _grid: GridContainer
 var _hint_label: Label
 var _is_open: bool = false
-var _item_cells: Array = []
+var _item_cells: Array[Panel] = []
 var _ui_built: bool = false
 
 

@@ -30,6 +30,11 @@ func _ready() -> void:
 	_close_detail_card(false)
 	# 在 UI 初始化完成后淡入，恢复 SceneFader 切场景时的全黑状态
 	SceneFader.fade_in()
+	# 从开场动画跳转过来时，对碎片 0001 播放高光闪烁引导
+	if SceneManager.pending_spawn_point == "from_cutscene":
+		SceneManager.pending_spawn_point = ""
+		await get_tree().create_timer(0.5).timeout
+		shard_canvas.flash_fragment("0001", 3, 0.35)
 	print("[StarMap] 玻璃星图界面加载完成")
 
 
@@ -136,10 +141,12 @@ func _open_detail_card() -> void:
 	_card_open = true
 	detail_card.visible = true
 	_layout_detail_card()
+	# Override x to off-screen right so the tween slides the card in.
+	detail_card.position.x = _get_detail_closed_x()
 	var tween = create_tween()
 	tween.set_trans(Tween.TRANS_QUAD)
 	tween.set_ease(Tween.EASE_OUT)
-	tween.tween_property(detail_card, "position:x", _get_detail_open_x(), 0.24)
+	tween.tween_property(detail_card, "position:x", _get_detail_open_x(), 0.2)
 	tween.tween_callback(_update_detail_highlight)
 
 

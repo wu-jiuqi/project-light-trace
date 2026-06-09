@@ -10,13 +10,15 @@ extends Area2D
 
 var _player_nearby: bool = false
 var _label: Label
+var _is_picked_up: bool = false  # 防止重复拾取
 
 
 func _ready() -> void:
+	add_to_group("pickup")  # 标记为可拾取物品，供玩家 _is_pickup_item() 检测
 	if item_pos_x != 0.0 or item_pos_y != 0.0:
 		position = Vector2(item_pos_x, item_pos_y)
-	collision_layer = 0
-	collision_mask = 1
+	collision_layer = 8  # layer 8: 可交互物品，供玩家 InteractionArea 检测
+	collision_mask = 1   # 检测 layer 1: 物理体（玩家 CharacterBody2D）
 	set_process(true)
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
@@ -74,6 +76,10 @@ func _on_body_exited(body: Node2D) -> void:
 
 
 func _pickup() -> void:
+	if _is_picked_up:
+		return
+	_is_picked_up = true
+
 	if not InventoryManager.has_method("add_item"): return
 	if InventoryManager.add_item(item_id):
 		print("[PickupItem] 拾取: %s" % item_name)

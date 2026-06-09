@@ -1,22 +1,40 @@
 [gd_scene format=3 uid="uid://ccb17gylpq2jq"]
 
 [ext_resource type="Script" uid="uid://0cwpn0xpd646" path="res://scripts/player/player_controller.gd" id="1_player_script"]
-[ext_resource type="Texture2D" uid="uid://dt87cquadlgu3" path="res://assets/papercraft/player/player.png" id="2_texture"]
+[ext_resource type="Texture2D" uid="uid://cvuaxmm8wrore" path="res://assets/papercraft/player/player_s.png" id="2_t61fv"]
 
 [sub_resource type="RectangleShape2D" id="Rect_body"]
-size = Vector2(24, 32)
+size = Vector2(33, 32)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_t61fv"]
+radius = 21.0
+height = 82.0
 
 [node name="Player" type="CharacterBody2D" unique_id=1555909685]
-z_as_relative = false
-y_sort_enabled = true
 collision_mask = 15
 script = ExtResource("1_player_script")
 
 [node name="BodyCollision" type="CollisionShape2D" parent="." unique_id=808120668]
-position = Vector2(0, -16)
+position = Vector2(0.5, -16)
 shape = SubResource("Rect_body")
 
-[node name="Visual" type="Sprite2D" parent="." unique_id=332735183]
-position = Vector2(0, -48)
+[node name="Visual Node2D" type="Node2D" parent="." unique_id=200031473]
+
+[node name="Visual" type="Sprite2D" parent="Visual Node2D" unique_id=332735183]
+position = Vector2(0, -44)
 scale = Vector2(0.5, 0.5)
-texture = ExtResource("2_texture")
+texture = ExtResource("2_t61fv")
+
+[node name="Shadow Sprite2D" type="Sprite2D" parent="Visual Node2D" unique_id=98165590]
+z_index = -1
+position = Vector2(0, -2)
+
+[node name="FeetMarker Marker2D" type="Marker2D" parent="." unique_id=178984350]
+
+[node name="InteractionArea Area2D" type="Area2D" parent="." unique_id=909984034]
+collision_mask = 15
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea Area2D" unique_id=256900451]
+position = Vector2(0, -42)
+shape = SubResource("CapsuleShape2D_t61fv")

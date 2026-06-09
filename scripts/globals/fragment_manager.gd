@@ -231,9 +231,9 @@ func set_fragment_state(fragment_id: String, key: String, value) -> void:
 # 序列化接口 — 供 SaveManager 调用
 # ============================================================
 
-func get_fragments_list() -> Array:
+func get_fragments_list() -> Array[Dictionary]:
 	## 返回所有碎片的 id 和 completed 状态列表
-	var result: Array = []
+	var result: Array[Dictionary] = []
 	for f in fragments:
 		result.append({
 			"id": f.id,

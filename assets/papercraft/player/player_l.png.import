@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cr7ur3hrp1352"
-path="res://.godot/imported/player.png-362cd7c3de7afe56589104a8f8b4b250.ctex"
+uid="uid://dgtrvhrqx7ohx"
+path="res://.godot/imported/player_l.png-96ee0c9e17d24f00d13c545df88d1000.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/papercraft/player/player.png"
-dest_files=["res://.godot/imported/player.png-362cd7c3de7afe56589104a8f8b4b250.ctex"]
+source_file="res://assets/papercraft/player/player_l.png"
+dest_files=["res://.godot/imported/player_l.png-96ee0c9e17d24f00d13c545df88d1000.ctex"]
 
 [params]
 

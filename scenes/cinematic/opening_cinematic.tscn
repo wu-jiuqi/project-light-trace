@@ -1,8 +1,21 @@
 [gd_scene format=3 uid="uid://bxunorh2ybu5q"]
 
-[ext_resource type="Script" path="res://scripts/cinematic/opening_cinematic.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://cxkxubp8tfn1n" path="res://scripts/cinematic/opening_cinematic.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://jw7iincaodnt" path="res://assets/cutscenes/opening/comic_panel_01_identity.png" id="2_gxivq"]
+[ext_resource type="Texture2D" uid="uid://cqtx0c52oeywg" path="res://assets/cutscenes/opening/comic_panel_02_panorama.png" id="3_xh0pf"]
+[ext_resource type="Texture2D" uid="uid://bjwwidl6lpxv7" path="res://assets/cutscenes/opening/comic_panel_03_coffee_hand.png" id="4_l1587"]
+[ext_resource type="Texture2D" uid="uid://clb7a87w8agqr" path="res://assets/cutscenes/opening/comic_panel_04_child_swing.png" id="5_c1scr"]
+[ext_resource type="Texture2D" uid="uid://ddo1c8txq8xjl" path="res://assets/cutscenes/opening/comic_panel_05_old_hands.png" id="6_2da8r"]
+[ext_resource type="Texture2D" uid="uid://bwuleidqvtp82" path="res://assets/cutscenes/opening/comic_panel_06_shatter.png" id="7_ktd1b"]
+[ext_resource type="Texture2D" uid="uid://q24vwjriun3e" path="res://assets/cutscenes/opening/comic_panel_07_shards_separating.png" id="8_1opuu"]
+[ext_resource type="Texture2D" uid="uid://biemx46jmtc1l" path="res://assets/cutscenes/opening/comic_panel_08_shard_0001.png" id="9_gx7mn"]
+[ext_resource type="Texture2D" uid="uid://ybibnrn36bdw" path="res://assets/cutscenes/opening/comic_panel_09_folder_briefing.png" id="10_83jha"]
+[ext_resource type="Texture2D" uid="uid://dmioce1ro538d" path="res://assets/cutscenes/opening/comic_panel_10_warning_stamp.png" id="11_7dhea"]
+[ext_resource type="Texture2D" uid="uid://busi3ctbqli8j" path="res://assets/cutscenes/opening/comic_panel_11_laogu_silhouette.png" id="12_vyonr"]
+[ext_resource type="Texture2D" uid="uid://cjffk1mpp42n6" path="res://assets/cutscenes/opening/comic_panel_12_logo_hades.png" id="13_icgjb"]
+[ext_resource type="Texture2D" uid="uid://dqhr7e57w4dne" path="res://assets/cutscenes/opening/comic_panel_13_starmap.png" id="14_1u0mo"]
 
-[node name="OpeningCinematic" type="Control"]
+[node name="OpeningCinematic" type="Control" unique_id=1017573760]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,389 +24,458 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
 
-[node name="PageContainer" type="Control" parent="."]
+[node name="PageContainer" type="Control" parent="." unique_id=684796162]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 
-; ── 第1页「万象」 ──
-
-[node name="Page1_Wanxiang" type="Control" parent="PageContainer"]
+[node name="Page1_Wanxiang" type="Control" parent="PageContainer" unique_id=2051149891]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-visible = true
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="Panel_01" type="ColorRect" parent="PageContainer/Page1_Wanxiang"]
+[node name="Panel_01" type="TextureRect" parent="PageContainer/Page1_Wanxiang" unique_id=2070531048]
 layout_mode = 1
+anchors_preset = -1
 anchor_left = 0.03
 anchor_top = 0.04
 anchor_right = 0.18
 anchor_bottom = 0.96
-color = Color(0.165, 0.188, 0.251, 1)
+offset_right = -1.5258789e-05
+texture = ExtResource("2_gxivq")
+expand_mode = 1
 
-[node name="Label" type="Label" parent="PageContainer/Page1_Wanxiang/Panel_01"]
+[node name="Label" type="Label" parent="PageContainer/Page1_Wanxiang/Panel_01" unique_id=238254191]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-text = "格 1
-身份确认"
+offset_top = 6.0
+offset_bottom = 6.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.9079908, 0.6266432, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 20
+text = "TP-2077-03 溯光者"
 horizontal_alignment = 1
 vertical_alignment = 1
-theme_override_font_sizes/font_size = 11
-theme_override_colors/font_color = Color(1, 1, 1, 0.35)
 
-[node name="Panel_02" type="ColorRect" parent="PageContainer/Page1_Wanxiang"]
+[node name="Panel_02" type="TextureRect" parent="PageContainer/Page1_Wanxiang" unique_id=1025944841]
 layout_mode = 1
+anchors_preset = -1
 anchor_left = 0.21
 anchor_top = 0.04
 anchor_right = 0.97
 anchor_bottom = 0.96
-color = Color(0.227, 0.22, 0.188, 1)
+offset_right = -0.00012207031
+texture = ExtResource("3_xh0pf")
+expand_mode = 1
 
-[node name="Label" type="Label" parent="PageContainer/Page1_Wanxiang/Panel_02"]
+[node name="Label" type="Label" parent="PageContainer/Page1_Wanxiang/Panel_02" unique_id=1697873749]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.35)
+theme_override_font_sizes/font_size = 11
 text = "格 2
 万象全景 · 纸板城市鸟瞰"
 horizontal_alignment = 1
 vertical_alignment = 1
-theme_override_font_sizes/font_size = 11
-theme_override_colors/font_color = Color(1, 1, 1, 0.35)
 
-; ── 第2页「47亿」 ──
-
-[node name="Page2_Lives" type="Control" parent="PageContainer"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+[node name="Page2_Lives" type="Control" parent="PageContainer" unique_id=721914441]
 visible = false
-
-[node name="Panel_03" type="ColorRect" parent="PageContainer/Page2_Lives"]
-layout_mode = 1
-anchor_left = 0.04
-anchor_top = 0.20
-anchor_right = 0.33
-anchor_bottom = 0.80
-color = Color(0.227, 0.165, 0.125, 1)
-
-[node name="Label" type="Label" parent="PageContainer/Page2_Lives/Panel_03"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel_03" type="TextureRect" parent="PageContainer/Page2_Lives" unique_id=1141623119]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.04
+anchor_top = 0.2
+anchor_right = 0.33
+anchor_bottom = 0.8
+texture = ExtResource("4_l1587")
+expand_mode = 1
+
+[node name="Label" type="Label" parent="PageContainer/Page2_Lives/Panel_03" unique_id=120678456]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.35)
+theme_override_font_sizes/font_size = 11
 text = "格 3
 手握咖啡杯"
 horizontal_alignment = 1
 vertical_alignment = 1
-theme_override_font_sizes/font_size = 11
-theme_override_colors/font_color = Color(1, 1, 1, 0.35)
 
-[node name="Panel_04" type="ColorRect" parent="PageContainer/Page2_Lives"]
+[node name="Panel_04" type="TextureRect" parent="PageContainer/Page2_Lives" unique_id=1264865208]
 layout_mode = 1
+anchors_preset = -1
 anchor_left = 0.35
-anchor_top = 0.20
+anchor_top = 0.2
 anchor_right = 0.64
-anchor_bottom = 0.80
-color = Color(0.165, 0.227, 0.165, 1)
+anchor_bottom = 0.8
+texture = ExtResource("5_c1scr")
+expand_mode = 1
 
-[node name="Label" type="Label" parent="PageContainer/Page2_Lives/Panel_04"]
+[node name="Label" type="Label" parent="PageContainer/Page2_Lives/Panel_04" unique_id=192773683]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.35)
+theme_override_font_sizes/font_size = 11
 text = "格 4
 小孩秋千"
 horizontal_alignment = 1
 vertical_alignment = 1
-theme_override_font_sizes/font_size = 11
-theme_override_colors/font_color = Color(1, 1, 1, 0.35)
 
-[node name="Panel_05" type="ColorRect" parent="PageContainer/Page2_Lives"]
+[node name="Panel_05" type="TextureRect" parent="PageContainer/Page2_Lives" unique_id=2094910227]
 layout_mode = 1
+anchors_preset = -1
 anchor_left = 0.66
-anchor_top = 0.20
+anchor_top = 0.2
 anchor_right = 0.95
-anchor_bottom = 0.80
-color = Color(0.227, 0.188, 0.165, 1)
+anchor_bottom = 0.8
+texture = ExtResource("6_2da8r")
+expand_mode = 1
 
-[node name="Label" type="Label" parent="PageContainer/Page2_Lives/Panel_05"]
+[node name="Label" type="Label" parent="PageContainer/Page2_Lives/Panel_05" unique_id=2087366685]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.35)
+theme_override_font_sizes/font_size = 11
 text = "格 5
 老人手部"
 horizontal_alignment = 1
 vertical_alignment = 1
-theme_override_font_sizes/font_size = 11
-theme_override_colors/font_color = Color(1, 1, 1, 0.35)
 
-; ── 第3页「碎裂」 ──
-
-[node name="Page3_Shatter" type="Control" parent="PageContainer"]
+[node name="Page3_Shatter" type="Control" parent="PageContainer" unique_id=1333121921]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-visible = false
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="Panel_06" type="ColorRect" parent="PageContainer/Page3_Shatter"]
+[node name="Panel_06" type="TextureRect" parent="PageContainer/Page3_Shatter" unique_id=1100515419]
 layout_mode = 1
+anchors_preset = -1
 anchor_left = 0.03
 anchor_top = 0.04
 anchor_right = 0.97
 anchor_bottom = 0.55
-color = Color(0.227, 0.125, 0.145, 1)
+texture = ExtResource("7_ktd1b")
+expand_mode = 1
 
-[node name="Label" type="Label" parent="PageContainer/Page3_Shatter/Panel_06"]
+[node name="Label" type="Label" parent="PageContainer/Page3_Shatter/Panel_06" unique_id=529969185]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.35)
+theme_override_font_sizes/font_size = 11
 text = "格 6
 纸板碎裂 · 裂缝蔓延"
 horizontal_alignment = 1
 vertical_alignment = 1
-theme_override_font_sizes/font_size = 11
-theme_override_colors/font_color = Color(1, 1, 1, 0.35)
 
-[node name="Panel_07" type="ColorRect" parent="PageContainer/Page3_Shatter"]
+[node name="Panel_07" type="TextureRect" parent="PageContainer/Page3_Shatter" unique_id=261987648]
 layout_mode = 1
-anchor_left = 0.10
-anchor_top = 0.60
-anchor_right = 0.90
+anchors_preset = -1
+anchor_left = 0.1
+anchor_top = 0.6
+anchor_right = 0.9
 anchor_bottom = 0.96
-color = Color(0.165, 0.165, 0.188, 1)
+texture = ExtResource("8_1opuu")
+expand_mode = 1
 
-[node name="Label" type="Label" parent="PageContainer/Page3_Shatter/Panel_07"]
+[node name="Label" type="Label" parent="PageContainer/Page3_Shatter/Panel_07" unique_id=42796836]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.35)
+theme_override_font_sizes/font_size = 11
 text = "格 7
 十二碎片分离"
 horizontal_alignment = 1
 vertical_alignment = 1
-theme_override_font_sizes/font_size = 11
-theme_override_colors/font_color = Color(1, 1, 1, 0.35)
 
-; ── 第4页「任务」 ──
-
-[node name="Page4_Mission" type="Control" parent="PageContainer"]
+[node name="Page4_Mission" type="Control" parent="PageContainer" unique_id=1505217159]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-visible = false
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="Panel_08" type="ColorRect" parent="PageContainer/Page4_Mission"]
+[node name="Panel_08" type="TextureRect" parent="PageContainer/Page4_Mission" unique_id=473676681]
 layout_mode = 1
+anchors_preset = -1
 anchor_left = 0.04
 anchor_top = 0.08
 anchor_right = 0.35
 anchor_bottom = 0.92
-color = Color(0.227, 0.188, 0.125, 1)
+texture = ExtResource("9_gx7mn")
+expand_mode = 1
 
-[node name="Label" type="Label" parent="PageContainer/Page4_Mission/Panel_08"]
+[node name="Label" type="Label" parent="PageContainer/Page4_Mission/Panel_08" unique_id=279779195]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.35)
+theme_override_font_sizes/font_size = 11
 text = "格 8
 0001碎片高亮"
 horizontal_alignment = 1
 vertical_alignment = 1
-theme_override_font_sizes/font_size = 11
-theme_override_colors/font_color = Color(1, 1, 1, 0.35)
 
-[node name="Panel_09" type="ColorRect" parent="PageContainer/Page4_Mission"]
+[node name="Panel_09" type="TextureRect" parent="PageContainer/Page4_Mission" unique_id=1449400793]
 layout_mode = 1
+anchors_preset = -1
 anchor_left = 0.38
 anchor_top = 0.04
 anchor_right = 0.96
 anchor_bottom = 0.96
-color = Color(0.165, 0.157, 0.125, 1)
+texture = ExtResource("10_83jha")
+expand_mode = 1
 
-[node name="Label" type="Label" parent="PageContainer/Page4_Mission/Panel_09"]
+[node name="Label" type="Label" parent="PageContainer/Page4_Mission/Panel_09" unique_id=793508829]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.35)
+theme_override_font_sizes/font_size = 11
 text = "格 9
 档案夹翻开 · 任务简报"
 horizontal_alignment = 1
 vertical_alignment = 1
-theme_override_font_sizes/font_size = 11
-theme_override_colors/font_color = Color(1, 1, 1, 0.35)
 
-; ── 第5页「警告」 ──
-
-[node name="Page5_Warning" type="Control" parent="PageContainer"]
+[node name="Page5_Warning" type="Control" parent="PageContainer" unique_id=942492998]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-visible = false
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="Panel_10" type="ColorRect" parent="PageContainer/Page5_Warning"]
+[node name="Panel_10" type="TextureRect" parent="PageContainer/Page5_Warning" unique_id=114938848]
 layout_mode = 1
+anchors_preset = -1
 anchor_left = 0.03
 anchor_top = 0.04
 anchor_right = 0.97
 anchor_bottom = 0.58
-color = Color(0.251, 0.125, 0.125, 1)
+texture = ExtResource("11_7dhea")
+expand_mode = 1
 
-[node name="Label" type="Label" parent="PageContainer/Page5_Warning/Panel_10"]
+[node name="Label" type="Label" parent="PageContainer/Page5_Warning/Panel_10" unique_id=762968942]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.35)
+theme_override_font_sizes/font_size = 11
 text = "格 10
 红色印章「注意」"
 horizontal_alignment = 1
 vertical_alignment = 1
-theme_override_font_sizes/font_size = 11
-theme_override_colors/font_color = Color(1, 1, 1, 0.35)
 
-[node name="Panel_11" type="ColorRect" parent="PageContainer/Page5_Warning"]
+[node name="Panel_11" type="TextureRect" parent="PageContainer/Page5_Warning" unique_id=424170440]
 layout_mode = 1
+anchors_preset = -1
 anchor_left = 0.72
 anchor_top = 0.64
 anchor_right = 0.96
 anchor_bottom = 0.96
-color = Color(0.125, 0.125, 0.227, 1)
+texture = ExtResource("12_vyonr")
+expand_mode = 1
 
-[node name="Label" type="Label" parent="PageContainer/Page5_Warning/Panel_11"]
+[node name="Label" type="Label" parent="PageContainer/Page5_Warning/Panel_11" unique_id=680315801]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.35)
+theme_override_font_sizes/font_size = 10
 text = "格 11
 老顾闪现"
 horizontal_alignment = 1
 vertical_alignment = 1
-theme_override_font_sizes/font_size = 10
-theme_override_colors/font_color = Color(1, 1, 1, 0.35)
 
-; ── 第6页「谎言」 ──
-
-[node name="Page6_Lies" type="Control" parent="PageContainer"]
+[node name="Page6_Lies" type="Control" parent="PageContainer" unique_id=447239581]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-visible = false
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="Panel_12" type="ColorRect" parent="PageContainer/Page6_Lies"]
+[node name="Panel_12" type="TextureRect" parent="PageContainer/Page6_Lies" unique_id=662027593]
 layout_mode = 1
+anchors_preset = -1
 anchor_left = 0.04
 anchor_top = 0.08
 anchor_right = 0.35
 anchor_bottom = 0.92
-color = Color(0.165, 0.165, 0.157, 1)
+texture = ExtResource("13_icgjb")
+expand_mode = 1
 
-[node name="Label" type="Label" parent="PageContainer/Page6_Lies/Panel_12"]
+[node name="Label" type="Label" parent="PageContainer/Page6_Lies/Panel_12" unique_id=734259856]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.35)
+theme_override_font_sizes/font_size = 11
 text = "格 12
 天枢Logo + 冥府协议"
 horizontal_alignment = 1
 vertical_alignment = 1
-theme_override_font_sizes/font_size = 11
-theme_override_colors/font_color = Color(1, 1, 1, 0.35)
 
-[node name="Panel_13" type="ColorRect" parent="PageContainer/Page6_Lies"]
+[node name="Panel_13" type="TextureRect" parent="PageContainer/Page6_Lies" unique_id=858449798]
 layout_mode = 1
+anchors_preset = -1
 anchor_left = 0.38
 anchor_top = 0.04
 anchor_right = 0.96
 anchor_bottom = 0.96
-color = Color(0.125, 0.125, 0.188, 1)
+texture = ExtResource("14_1u0mo")
+expand_mode = 1
 
-[node name="Label" type="Label" parent="PageContainer/Page6_Lies/Panel_13"]
+[node name="Label" type="Label" parent="PageContainer/Page6_Lies/Panel_13" unique_id=359938090]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.35)
+theme_override_font_sizes/font_size = 11
 text = "格 13
 星图展开 · 0001脉动"
 horizontal_alignment = 1
 vertical_alignment = 1
-theme_override_font_sizes/font_size = 11
-theme_override_colors/font_color = Color(1, 1, 1, 0.35)
 
-; ── 旁白叠加层 ──
-
-[node name="NarrationOverlay" type="Control" parent="."]
+[node name="NarrationOverlay" type="Control" parent="." unique_id=1605959694]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 
-[node name="BG" type="ColorRect" parent="NarrationOverlay"]
+[node name="BG" type="ColorRect" parent="NarrationOverlay" unique_id=1401229371]
 layout_mode = 1
+anchors_preset = -1
 anchor_left = 0.08
 anchor_top = 0.83
 anchor_right = 0.92
 anchor_bottom = 0.97
 color = Color(0.08, 0.08, 0.06, 0.75)
 
-[node name="Text" type="RichTextLabel" parent="NarrationOverlay"]
+[node name="Text" type="RichTextLabel" parent="NarrationOverlay" unique_id=2128564723]
 layout_mode = 1
-anchor_left = 0.10
+anchors_preset = -1
+anchor_left = 0.1
 anchor_top = 0.84
-anchor_right = 0.90
+anchor_right = 0.9
 anchor_bottom = 0.96
+theme_override_colors/default_color = Color(0.82, 0.78, 0.65, 1)
+theme_override_font_sizes/normal_font_size = 18
 bbcode_enabled = true
 text = "[center]编号 TP-2077-03-溯光者。身份确认。[/center]"
 fit_content = true
 scroll_active = false
-theme_override_font_sizes/normal_font_size = 18
-theme_override_colors/default_color = Color(0.82, 0.78, 0.65, 1)
 
-; ── 页码指示器 ──
-
-[node name="PageIndicator" type="Label" parent="."]
+[node name="PageIndicator" type="Label" parent="." unique_id=1178221341]
 layout_mode = 1
+anchors_preset = -1
 anchor_left = 0.92
 anchor_top = 0.02
 anchor_right = 0.99
 anchor_bottom = 0.06
+theme_override_colors/font_color = Color(1, 1, 1, 0.25)
+theme_override_font_sizes/font_size = 14
 text = "1 / 6"
 horizontal_alignment = 2
-theme_override_font_sizes/font_size = 14
-theme_override_colors/font_color = Color(1, 1, 1, 0.25)
 
-; ── 翻页提示 ──
-
-[node name="ClickHint" type="Label" parent="."]
+[node name="ClickHint" type="Label" parent="." unique_id=753103006]
 layout_mode = 1
+anchors_preset = -1
 anchor_left = 0.35
 anchor_top = 0.92
 anchor_right = 0.65
 anchor_bottom = 0.96
+theme_override_colors/font_color = Color(1, 1, 1, 0.3)
+theme_override_font_sizes/font_size = 14
 text = "点击或按任意键翻页"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 14
-theme_override_colors/font_color = Color(1, 1, 1, 0.3)
 
-; ── 全屏点击捕捉 ──
-
-[node name="ClickCatcher" type="ColorRect" parent="."]
+[node name="ClickCatcher" type="ColorRect" parent="." unique_id=92219161]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 color = Color(0, 0, 0, 0)
-mouse_filter = 0

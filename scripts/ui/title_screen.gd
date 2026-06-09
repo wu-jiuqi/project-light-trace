@@ -39,7 +39,7 @@ const PAPER_DIM := Color(0.36, 0.34, 0.30, 0.62)
 const REFERENCE_SIZE := Vector2(1280, 720)
 const BTN_COUNT := 5
 ## 5 个热区的矩形区域（设计稿精确坐标，1280×720 基准下）
-const HIT_RECTS: Array = [
+const HIT_RECTS: Array[Rect2] = [
 	Rect2(735, 75, 405, 100),   # 按钮1：开始游戏
 	Rect2(735, 195, 405, 85),   # 按钮2：游戏存档
 	Rect2(735, 300, 405, 80),   # 按钮3：成就
