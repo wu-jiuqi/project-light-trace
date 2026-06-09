@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://osvjldp020bg"
-path="res://.godot/imported/npc_03_wangdirector.png-28c368e88339e51b78546c3a7e04f899.ctex"
+uid="uid://b3n62rt8et0ar"
+path="res://.godot/imported/npc_02_chentechnology_s.png-a05c2878fc33f0576693dab4ad8b8a53.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/papercraft/fragments/id0001/characters/npc_03_wangdirector.png"
-dest_files=["res://.godot/imported/npc_03_wangdirector.png-28c368e88339e51b78546c3a7e04f899.ctex"]
+source_file="res://assets/papercraft/fragments/id0001/characters/npc_02_chentechnology_s.png"
+dest_files=["res://.godot/imported/npc_02_chentechnology_s.png-a05c2878fc33f0576693dab4ad8b8a53.ctex"]
 
 [params]
 

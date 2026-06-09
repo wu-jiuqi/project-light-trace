@@ -159,7 +159,7 @@ collision_size = Vector2(967, 259.69)
 collision_position = Vector2(0, -130.25)
 
 [node name="SundialA" parent="WorldRoot/DepthLayer/DepthLayer_1" unique_id=1051923950 instance=ExtResource("10_ff6ei")]
-position = Vector2(1226, 616)
+position = Vector2(573, 605)
 scale = Vector2(0.095, 0.095)
 
 [node name="BD" parent="WorldRoot/DepthLayer/DepthLayer_1" unique_id=2006739076 instance=ExtResource("14_ff6ei")]
@@ -171,7 +171,7 @@ collision_size = Vector2(967, 249.035)
 collision_position = Vector2(0, -147.525)
 
 [node name="SundialB" parent="WorldRoot/DepthLayer/DepthLayer_1" unique_id=871932599 instance=ExtResource("12_1c074")]
-position = Vector2(548, 586)
+position = Vector2(953.99994, 347)
 scale = Vector2(0.09, 0.09)
 
 [node name="BE" parent="WorldRoot/DepthLayer/DepthLayer_1" unique_id=1555593114 instance=ExtResource("14_ff6ei")]
@@ -206,11 +206,11 @@ collision_size = Vector2(1302.02, 270)
 collision_position = Vector2(0, -135)
 
 [node name="SundialC" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=1006328281 instance=ExtResource("19_dbv8g")]
-position = Vector2(205, 357)
+position = Vector2(1213, 617.00006)
 scale = Vector2(0.078, 0.077)
 
 [node name="SundialD" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=554321324 instance=ExtResource("20_yssys")]
-position = Vector2(1002, 363)
+position = Vector2(409, 355.00003)
 scale = Vector2(0.084, 0.083)
 
 [node name="2BC" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=2026980195 instance=ExtResource("14_ff6ei")]

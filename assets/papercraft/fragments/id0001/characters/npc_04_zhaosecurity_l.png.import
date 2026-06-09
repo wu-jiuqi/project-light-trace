@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://djws22vl1scs6"
-path="res://.godot/imported/npc_04_zhaosecurity.png-264b9405981ddd0fe585c525595d4c78.ctex"
+uid="uid://vpjpx3vphagf"
+path="res://.godot/imported/npc_04_zhaosecurity_l.png-09ff6f2b65f7a5b268c6345df7b66320.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/papercraft/fragments/id0001/characters/npc_04_zhaosecurity.png"
-dest_files=["res://.godot/imported/npc_04_zhaosecurity.png-264b9405981ddd0fe585c525595d4c78.ctex"]
+source_file="res://assets/papercraft/fragments/id0001/characters/npc_04_zhaosecurity_l.png"
+dest_files=["res://.godot/imported/npc_04_zhaosecurity_l.png-09ff6f2b65f7a5b268c6345df7b66320.ctex"]
 
 [params]
 
