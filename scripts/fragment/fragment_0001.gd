@@ -3,14 +3,6 @@ extends Node2D
 
 const PLAYER_SCENE: PackedScene = preload("res://scenes/characters/player/player.tscn")
 
-## Z 排序阈值（各层 z_index 间隙的中点）
-## Layer: back2(-40) < back(-30) < mid(-20) < root(-10) < front(0)
-const Z_FRONT: int = 5       # 玩家在 front 层前方（Y > 450）
-const Z_ROOT: int = -5       # 玩家在 front 与 root 之间
-const Z_MID: int = -15       # 玩家在 root 与 mid 之间
-const Z_BACK: int = -25      # 玩家在 mid 与 back 之间
-const Z_BACK2: int = -35     # 玩家在 back 后方
-
 ## DepthLayer Y 范围阈值
 const LAYER_1_Y: float = 450.0  # Y > 450 → DepthLayer_1（前景）
 const LAYER_2_Y: float = 250.0  # 250 < Y <= 450 → DepthLayer_2（中景）
@@ -22,11 +14,14 @@ var _player: CharacterBody2D = null
 var _current_layer: int = 0
 ## DepthLayer 节点缓存
 var _depth_layers: Dictionary = {}
+## 收集信息面板引用
+var _collection_panel: CanvasLayer = null
 
 
 func _ready() -> void:
 	_cache_depth_layers()
 	_spawn_player()
+	_setup_collection_panel()
 
 
 func _process(_delta: float) -> void:
@@ -99,24 +94,16 @@ func _spawn_player() -> void:
 		printerr("[Fragment0001] DepthLayer_%d 节点不存在，玩家降级添加到 WorldRoot" % target_layer)
 
 
-## 根据玩家 Y 坐标动态调整 z_index，使其正确嵌入各建筑层之间
+## 确保玩家 z_index=0，让 DepthLayer 的 y_sort_enabled 自动处理遮挡关系
+## y_sort 按节点 Y 坐标排序：Y 越大越靠前（靠近镜头），Y 越小越靠后（被遮挡）
 func _update_player_z() -> void:
 	if not _player:
-		# 尝试重新获取引用
 		_player = get_node_or_null("Player") as CharacterBody2D
 		if not _player:
 			return
-	var py: float = _player.global_position.y
-	if py > 450:
-		_player.z_index = Z_FRONT
-	elif py > 350:
-		_player.z_index = Z_ROOT
-	elif py > 250:
-		_player.z_index = Z_MID
-	elif py > 120:
-		_player.z_index = Z_BACK
-	else:
-		_player.z_index = Z_BACK2
+	# z_index 必须为 0，否则 y_sort 失效
+	if _player.z_index != 0:
+		_player.z_index = 0
 
 
 ## 当玩家 Y 坐标变化到另一个层范围时，自动切换父节点到对应的 DepthLayer_N
@@ -145,3 +132,63 @@ func _update_player_depth_layer() -> void:
 	var old_layer: int = _current_layer
 	_current_layer = target_layer
 	print("[Fragment0001] 玩家从 DepthLayer_%d 切换到 DepthLayer_%d (Y=%.0f)" % [old_layer, target_layer, player_y])
+
+
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_focus_next"):  # Tab 键
+		_toggle_collection_panel()
+
+
+## 创建收集信息面板（CanvasLayer）
+func _setup_collection_panel() -> void:
+	var layer = CanvasLayer.new()
+	layer.name = "CollectionPanelLayer"
+	layer.layer = 64
+	add_child(layer)
+
+	var bg = ColorRect.new()
+	bg.name = "PanelBg"
+	bg.color = Color(0, 0, 0, 0.7)
+	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.mouse_filter = Control.MOUSE_FILTER_STOP
+	layer.add_child(bg)
+
+	var panel = ColorRect.new()
+	panel.name = "CollectionPanel"
+	panel.color = Color(0.08, 0.08, 0.12, 0.95)
+	panel.size = Vector2(600, 400)
+	panel.position = Vector2(340, 160)
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	layer.add_child(panel)
+
+	var title = Label.new()
+	title.name = "Title"
+	title.text = "收集信息"
+	title.add_theme_color_override("font_color", Color(0.9, 0.85, 0.7, 1))
+	title.add_theme_font_size_override("font_size", 24)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.size = Vector2(600, 40)
+	title.position = Vector2(0, 15)
+	panel.add_child(title)
+
+	var hint = Label.new()
+	hint.name = "TabHint"
+	hint.text = "按 Tab 关闭"
+	hint.add_theme_color_override("font_color", Color(0.5, 0.5, 0.55, 1))
+	hint.add_theme_font_size_override("font_size", 14)
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hint.size = Vector2(600, 30)
+	hint.position = Vector2(0, 360)
+	panel.add_child(hint)
+
+	_collection_panel = layer
+	_collection_panel.hide()
+	print("[Fragment0001] 收集信息面板已创建")
+
+
+## 切换收集信息面板显隐
+func _toggle_collection_panel() -> void:
+	if not _collection_panel:
+		return
+	_collection_panel.visible = not _collection_panel.visible
+	print("[Fragment0001] 收集面板: %s" % ("打开" if _collection_panel.visible else "关闭"))

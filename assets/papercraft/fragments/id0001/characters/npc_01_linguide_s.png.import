@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b54imjpa5udur"
-path="res://.godot/imported/npc_01_linguide.png-df3a06b7544545f13732507fc01270d1.ctex"
+uid="uid://c7q5tcur13dhq"
+path="res://.godot/imported/npc_01_linguide_s.png-76b2904b889a7c2e2b34260289dce61f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/papercraft/fragments/id0001/characters/npc_01_linguide.png"
-dest_files=["res://.godot/imported/npc_01_linguide.png-df3a06b7544545f13732507fc01270d1.ctex"]
+source_file="res://assets/papercraft/fragments/id0001/characters/npc_01_linguide_s.png"
+dest_files=["res://.godot/imported/npc_01_linguide_s.png-76b2904b889a7c2e2b34260289dce61f.ctex"]
 
 [params]
 

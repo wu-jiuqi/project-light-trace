@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://daakdt2aeup5i"]
+
+[ext_resource type="Texture2D" uid="uid://25dx44mp0fs1" path="res://assets/papercraft/fragments/id0001/environment2/0001_env_light_wall.png" id="1_hjy7p"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_dghf6"]
+size = Vector2(1318, 979)
+
+[node name="LightWall" type="Node2D" unique_id=1723296003]
+
+[node name="Visual" type="Node2D" parent="." unique_id=2018375637]
+
+[node name="Body" type="Sprite2D" parent="Visual" unique_id=11339920]
+texture = ExtResource("1_hjy7p")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=1632286712]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=1491912759]
+position = Vector2(-1.9999695, 1.4999847)
+shape = SubResource("RectangleShape2D_dghf6")

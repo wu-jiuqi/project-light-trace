@@ -1,11 +1,28 @@
 [gd_scene format=3 uid="uid://bt48wpxxbxd7s"]
 
+[ext_resource type="Texture2D" uid="uid://fk0pkr55xuhi" path="res://assets/papercraft/fragments/id0001/environment2/fantasy_shop_11.png" id="1_svmej"]
+[ext_resource type="Script" uid="uid://23fa055a5d32" path="res://scripts/buildings/simple_building.gd" id="2_build_script"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_swwp4"]
+size = Vector2(967, 243.275)
+
 [node name="SimpleBuilding" type="Node2D" unique_id=638245969]
+script = ExtResource("2_build_script")
+building_texture = ExtResource("1_svmej")
+body_position = null
+collision_size = null
+collision_position = null
 
 [node name="Body" type="Sprite2D" parent="." unique_id=1749928241]
+position = Vector2(0, -620)
+texture = ExtResource("1_svmej")
 
 [node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=1552483933]
+collision_layer = 4
+collision_mask = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=1569361413]
+position = Vector2(0, -140.2)
+shape = SubResource("RectangleShape2D_swwp4")
 
 [node name="BaseMarker" type="Marker2D" parent="." unique_id=402645494]

@@ -15,6 +15,10 @@ var _closest_npc: Node2D = null
 var _nearby_pickups: Array[Area2D] = []
 ## 最近的可拾取物品
 var _closest_pickup: Area2D = null
+## 当前在交互范围内的可交互物件（日晷等）
+var _nearby_interactables: Array[Node2D] = []
+## 最近的可交互物件
+var _closest_interactable: Node2D = null
 ## 交互区域引用（场景中已有的 InteractionArea）
 var _interaction_area: Area2D = null
 ## 帧计数器，用于定期清理过期引用
@@ -27,6 +31,8 @@ var _frame_counter: int = 0
 @onready var _visual_root: Node2D = get_node("Visual Node2D")
 ## Visual Sprite2D — 控制镜像翻转的精灵节点
 @onready var _visual_sprite: Sprite2D = get_node("Visual Node2D/Visual")
+## Shadow Sprite2D — 脚底圆形阴影
+@onready var _shadow_sprite: Sprite2D = get_node("Visual Node2D/Shadow Sprite2D")
 
 ## 走路摇摆
 var _sway_time: float = 0.0
@@ -44,6 +50,9 @@ func _ready() -> void:
 
 	# 俯视角游戏使用 FLOATING 模式，避免地板检测导致NPC被粘在玩家头上
 	motion_mode = MOTION_MODE_FLOATING
+
+	# 设置脚底圆形阴影
+	_setup_shadow()
 
 	# 使用场景中已有的 InteractionArea，而非动态创建
 	_setup_interaction_area()
@@ -68,7 +77,7 @@ func _setup_interaction_area() -> void:
 	if _interaction_area:
 		# 设置 collision_layer 和 collision_mask
 		_interaction_area.collision_layer = 0  # 不占用任何层
-		_interaction_area.collision_mask = 4 | 8  # 检测 layer 4 (NPC InteractionZone) + layer 8 (可交互物品)
+		_interaction_area.collision_mask = 2 | 4 | 8  # 检测 layer 2 (可交互物件/日晷) + layer 4 (NPC) + layer 8 (物品)
 
 		# 为 InteractionArea/CollisionShape2D 赋予形状
 		var shape_node = _interaction_area.get_node_or_null("CollisionShape2D") as CollisionShape2D
@@ -166,10 +175,16 @@ func _input(event: InputEvent) -> void:
 			_nearby_pickups.size(),
 			_closest_pickup.item_name if _closest_pickup and is_instance_valid(_closest_pickup) and "item_name" in _closest_pickup else "无"
 		])
+		print("  附近物件: %d 个 | 最近: %s" % [
+			_nearby_interactables.size(),
+			_closest_interactable.name if _closest_interactable and is_instance_valid(_closest_interactable) else "无"
+		])
 
-		# 优先交互NPC，其次拾取物品
+		# 优先 NPC → 可交互物件（日晷等）→ 拾取物品 → 通用
 		if _closest_npc and is_instance_valid(_closest_npc) and not _closest_npc.is_queued_for_deletion():
 			_interact_with_nearest_npc()
+		elif _closest_interactable and is_instance_valid(_closest_interactable) and not _closest_interactable.is_queued_for_deletion():
+			_interact_with_interactable(_closest_interactable)
 		elif _closest_pickup and is_instance_valid(_closest_pickup) and not _closest_pickup.is_queued_for_deletion():
 			_interact_with_pickup(_closest_pickup)
 		else:
@@ -189,7 +204,7 @@ func _on_interaction_zone_entered(zone: Area2D) -> void:
 	if not is_instance_valid(zone) or zone.is_queued_for_deletion():
 		return
 
-	# 判断是 NPC InteractionZone 还是可拾取物品
+	# 判断是 NPC InteractionZone、可交互物件 还是可拾取物品
 	var parent = zone.get_parent()
 
 	if parent and is_instance_valid(parent) and parent.has_method("start_dialogue"):
@@ -198,6 +213,12 @@ func _on_interaction_zone_entered(zone: Area2D) -> void:
 			_nearby_npcs.append(parent)
 			_update_closest_npc()
 			print("[Player] 进入 %s 交互范围" % parent.npc_name)
+	elif parent and is_instance_valid(parent) and parent.is_in_group("interactable"):
+		# 可交互物件（日晷等），layer 2
+		if parent not in _nearby_interactables:
+			_nearby_interactables.append(parent)
+			_update_closest_interactable()
+			print("[Player] 进入可交互物件范围: %s" % parent.name)
 	elif _is_pickup_item(zone):
 		# 可拾取物品
 		if zone not in _nearby_pickups:
@@ -219,6 +240,12 @@ func _on_interaction_zone_exited(zone: Area2D) -> void:
 		_update_closest_npc()
 		var npc_name_str: String = parent.npc_name if "npc_name" in parent else parent.name
 		print("[Player] 离开 %s 交互范围" % npc_name_str)
+
+	# 可交互物件
+	if parent and is_instance_valid(parent) and parent in _nearby_interactables:
+		_nearby_interactables.erase(parent)
+		_update_closest_interactable()
+		print("[Player] 离开可交互物件范围: %s" % parent.name)
 
 	# 可拾取物品
 	if zone in _nearby_pickups:
@@ -290,6 +317,46 @@ func _interact_with_nearest_npc() -> void:
 ## 获取最近的NPC（供UI/HUD使用，显示"[E] 交谈"提示）
 func get_closest_npc() -> Node2D:
 	return _closest_npc
+
+
+# ============================================================
+# 可交互物件（日晷等）
+# ============================================================
+
+func _update_closest_interactable() -> void:
+	var closest: Node2D = null
+	var closest_dist: float = INF
+
+	for obj in _nearby_interactables:
+		if not is_instance_valid(obj):
+			continue
+		var dist = global_position.distance_to(obj.global_position)
+		if dist < closest_dist:
+			closest_dist = dist
+			closest = obj
+
+	_closest_interactable = closest
+	_update_interact_hint()
+
+
+func _interact_with_interactable(obj: Node2D) -> void:
+	if not is_instance_valid(obj):
+		return
+
+	# 优先调用对象的 interact 方法
+	if obj.has_method("interact"):
+		obj.interact()
+		print("[Player] 与 %s 交互 (interact)" % obj.name)
+		return
+
+	# 其次发送 interacted 信号
+	if obj.has_signal("interacted"):
+		obj.interacted.emit()
+		print("[Player] 触发 %s 的 interacted 信号" % obj.name)
+		return
+
+	# 默认行为：发送交互信号
+	print("[Player] 与 %s 交互（默认）" % obj.name)
 
 
 # ============================================================
@@ -407,9 +474,21 @@ func _cleanup_nearby_lists() -> void:
 		_nearby_pickups = valid_pickups
 		needs_update = true
 
+	# 清理已失效的可交互物件引用
+	var valid_interactables: Array[Node2D] = []
+	for obj in _nearby_interactables:
+		if is_instance_valid(obj) and not obj.is_queued_for_deletion():
+			valid_interactables.append(obj)
+	if valid_interactables.size() != _nearby_interactables.size():
+		_nearby_interactables = valid_interactables
+		needs_update = true
+
 	# 检查最近目标是否失效
 	if _closest_npc and (not is_instance_valid(_closest_npc) or _closest_npc.is_queued_for_deletion()):
 		_closest_npc = null
+		needs_update = true
+	if _closest_interactable and (not is_instance_valid(_closest_interactable) or _closest_interactable.is_queued_for_deletion()):
+		_closest_interactable = null
 		needs_update = true
 	if _closest_pickup and (not is_instance_valid(_closest_pickup) or _closest_pickup.is_queued_for_deletion()):
 		_closest_pickup = null
@@ -417,15 +496,18 @@ func _cleanup_nearby_lists() -> void:
 
 	if needs_update:
 		_update_closest_npc()
+		_update_closest_interactable()
 		_update_closest_pickup()
 		_update_interact_hint()
 
 func _update_interact_hint() -> void:
 	## 根据最近的交互目标更新提示标签，通过信号通知 HUD
-	# 优先级：NPC > 物品
+	# 优先级：NPC > 可交互物件 > 物品
 	if _closest_npc:
 		# NPC 的提示由 _update_closest_npc 管理（show_interact_hint / hide_interact_hint）
 		pass
+	elif _closest_interactable and is_instance_valid(_closest_interactable) and not _closest_interactable.is_queued_for_deletion():
+		interact_hint_changed.emit(true, "[E] 观察 %s" % _closest_interactable.name)
 	elif _closest_pickup and is_instance_valid(_closest_pickup) and not _closest_pickup.is_queued_for_deletion():
 		var item_name_str: String = _closest_pickup.item_name if "item_name" in _closest_pickup else "物品"
 		interact_hint_changed.emit(true, "[E] 拾取 %s" % item_name_str)
@@ -436,6 +518,31 @@ func _update_interact_hint() -> void:
 # ============================================================
 # 视觉动画
 # ============================================================
+
+## 生成脚底圆形阴影纹理并应用到 Shadow Sprite2D
+func _setup_shadow() -> void:
+	if not _shadow_sprite:
+		return
+
+	var size: int = 64
+	var image = Image.create(size, size, false, Image.FORMAT_RGBA8)
+	var center: float = size / 2.0
+	var radius: float = center - 2
+
+	for y in size:
+		for x in size:
+			var dist = Vector2(x - center, y - center).length()
+			var alpha: float = 0.0
+			if dist < radius:
+				# 中心 50% 不透明，边缘渐变到透明
+				alpha = max(0.0, 1.0 - dist / radius) * 0.5
+			image.set_pixel(x, y, Color(0, 0, 0, alpha))
+
+	_shadow_sprite.texture = ImageTexture.create_from_image(image)
+	_shadow_sprite.scale = Vector2(0.7, 0.7)
+	_shadow_sprite.position = Vector2(0, -4)
+	print("[PlayerController] 圆形阴影已生成")
+
 
 ## 检测水平输入方向变化（A↔D），触发镜像翻转动画
 func _detect_flip(h_input: float) -> void:

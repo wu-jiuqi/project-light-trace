@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://cvuaxmm8wrore" path="res://assets/papercraft/player/player_s.png" id="2_t61fv"]
 
 [sub_resource type="RectangleShape2D" id="Rect_body"]
-size = Vector2(33, 32)
+size = Vector2(33, 18)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_t61fv"]
 radius = 21.0
@@ -15,7 +15,7 @@ collision_mask = 15
 script = ExtResource("1_player_script")
 
 [node name="BodyCollision" type="CollisionShape2D" parent="." unique_id=808120668]
-position = Vector2(0.5, -16)
+position = Vector2(0.5, -9)
 shape = SubResource("Rect_body")
 
 [node name="Visual Node2D" type="Node2D" parent="." unique_id=200031473]

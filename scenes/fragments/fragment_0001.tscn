@@ -1,36 +1,42 @@
 [gd_scene format=3 uid="uid://dueqr41rnyb30"]
 
-[ext_resource type="Texture2D" uid="uid://fk0pkr55xuhi" path="res://assets/papercraft/fragments/id0001/environment2/fantasy_shop_11.png" id="1_q23m0"]
 [ext_resource type="Texture2D" uid="uid://cud0akhbd3n6x" path="res://assets/papercraft/fragments/id0001/environment2/road_crossing_25.png" id="1_sk1d4"]
+[ext_resource type="PackedScene" uid="uid://daakdt2aeup5i" path="res://scenes/buildings/id0001/LightWall.tscn" id="2_pbonl"]
 [ext_resource type="Texture2D" uid="uid://u731skvjowp3" path="res://assets/papercraft/fragments/id0001/environment2/fantasy_shop_03.png" id="3_pyfi5"]
 [ext_resource type="Texture2D" uid="uid://dotbmabd4mjx2" path="res://assets/papercraft/fragments/id0001/environment2/fishshop_13.png" id="4_vurmb"]
 [ext_resource type="Texture2D" uid="uid://rns664t3l77j" path="res://assets/papercraft/fragments/id0001/environment2/breadshop_06.png" id="5_jgijl"]
 [ext_resource type="Texture2D" uid="uid://ddngw1k5pxqq6" path="res://assets/papercraft/fragments/id0001/environment2/flowerpot_23.png" id="6_3mr5v"]
-[ext_resource type="Texture2D" uid="uid://iqul8pxdo67j" path="res://assets/papercraft/fragments/id0001/environment2/sundial_21.png" id="7_cmphu"]
 [ext_resource type="Texture2D" uid="uid://3ovls67ar2up" path="res://assets/papercraft/fragments/id0001/environment2/lantern_22.png" id="7_jgijl"]
 [ext_resource type="Texture2D" uid="uid://ck2otjlivkd8l" path="res://assets/papercraft/fragments/id0001/environment2/fantasy_shop_14.png" id="8_3mr5v"]
 [ext_resource type="Texture2D" uid="uid://dsiidfmhm7htr" path="res://assets/papercraft/fragments/id0001/environment2/road_18.png" id="9_4nsis"]
-[ext_resource type="Texture2D" uid="uid://8lptfu3px70t" path="res://assets/papercraft/fragments/id0001/environment2/sundial_20.png" id="9_cmphu"]
-[ext_resource type="Texture2D" uid="uid://cymqqlm5yxpne" path="res://assets/papercraft/fragments/id0001/environment2/fantasy_shop_15.png" id="10_oco2y"]
+[ext_resource type="PackedScene" uid="uid://ds2mxs64qsydu" path="res://scenes/buildings/id0001/SundialA.tscn" id="10_ff6ei"]
+[ext_resource type="PackedScene" uid="uid://n3p3u2xsv8d" path="res://scenes/buildings/id0001/SundialB.tscn" id="12_1c074"]
 [ext_resource type="Texture2D" uid="uid://lxs56palto81" path="res://assets/papercraft/fragments/id0001/environment2/building_27.png" id="13_bhmjt"]
+[ext_resource type="PackedScene" uid="uid://bt48wpxxbxd7s" path="res://scenes/buildings/id0001/SimpleBuilding.tscn" id="14_ff6ei"]
 [ext_resource type="Texture2D" uid="uid://chm4fqnsp6itt" path="res://assets/papercraft/fragments/id0001/environment2/building_17.png" id="14_j6apd"]
 [ext_resource type="Texture2D" uid="uid://205wpk1064tu" path="res://assets/papercraft/fragments/id0001/environment2/church_no_bg.png" id="15_nucfm"]
-[ext_resource type="Texture2D" uid="uid://bxbtg3m8k6gj7" path="res://assets/papercraft/fragments/id0001/environment2/foliage_24.png" id="16_dbv8g"]
-[ext_resource type="Texture2D" uid="uid://dtjkcjrqck0xg" path="res://assets/papercraft/fragments/id0001/environment2/sundial_19.png" id="17_yssys"]
-[ext_resource type="Texture2D" uid="uid://b8k2jmtribsmf" path="res://assets/papercraft/fragments/id0001/environment2/0001_env_admin_center.png" id="18_8bhro"]
-[ext_resource type="Texture2D" uid="uid://cy1mqfs44c3ea" path="res://assets/papercraft/fragments/id0001/environment2/fruitshop.png" id="19_3i7db"]
+[ext_resource type="PackedScene" uid="uid://p3iqtywixfbx" path="res://scenes/buildings/id0001/SundialC.tscn" id="19_dbv8g"]
 [ext_resource type="Texture2D" uid="uid://pydh4xqeum3v" path="res://assets/papercraft/fragments/id0001/environment2/castle_forest_28_denoised_sharp.png" id="19_j6apd"]
-[ext_resource type="Texture2D" uid="uid://clgp706t1cpvg" path="res://assets/papercraft/fragments/id0001/environment2/buildings_31.png" id="19_yssys"]
-[ext_resource type="Texture2D" uid="uid://b0a7a2ys1dpfx" path="res://assets/papercraft/fragments/id0001/environment2/fantasy_shop_12.png" id="20_h2wgi"]
 [ext_resource type="PackedScene" uid="uid://dp3o2ng12kyco" path="res://scenes/buildings/id0001/BellTower.tscn" id="20_oco2y"]
+[ext_resource type="PackedScene" uid="uid://dp7c47xcuv5tx" path="res://scenes/buildings/id0001/SundialD.tscn" id="20_yssys"]
 [ext_resource type="Texture2D" uid="uid://but3tqwombydj" path="res://assets/papercraft/fragments/id0001/environment2/fantasy_ground_16.png" id="21_oco2y"]
-[ext_resource type="Texture2D" uid="uid://ccbptudeicbq2" path="res://assets/papercraft/fragments/id0001/environment2/fantasy_shop_01.png" id="22_cnh1t"]
-[ext_resource type="Texture2D" uid="uid://dtcudjptetwrb" path="res://assets/papercraft/fragments/id0001/environment2/clockmakers_36.png" id="23_cnh1t"]
-[ext_resource type="Texture2D" uid="uid://25dx44mp0fs1" path="res://assets/papercraft/fragments/id0001/environment2/0001_env_light_wall.png" id="24_yssys"]
-[ext_resource type="Texture2D" uid="uid://b7fd6m0ptb6o" path="res://assets/papercraft/fragments/id0001/environment2/lantern_33.png" id="26_ff6ei"]
-[ext_resource type="Texture2D" uid="uid://d4gw2tv5x4gq5" path="res://assets/papercraft/fragments/id0001/environment2/lantern_35.png" id="27_1c074"]
+[ext_resource type="PackedScene" uid="uid://c588n0cfi2xt4" path="res://scenes/buildings/id0001/SundialE.tscn" id="23_8bhro"]
+[ext_resource type="Texture2D" uid="uid://cpoy6oau4rk76" path="res://assets/papercraft/fragments/id0001/environment2/fog.png" id="24_dbv8g"]
 [ext_resource type="Script" uid="uid://cpookq7xs8qki" path="res://scripts/stage/camera_rig.gd" id="28_camrig"]
 [ext_resource type="Script" uid="uid://bwsd4vqlvwgk8" path="res://scripts/fragment/fragment_0001.gd" id="29_frag001"]
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_dbv8g"]
+distance = -725.0
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_yssys"]
+normal = Vector2(0.9999823, -0.0059522754)
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_8bhro"]
+normal = Vector2(-1, 0)
+distance = 34.0
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_3i7db"]
+distance = 183.0
 
 [node name="Fragment0001" type="Node2D" unique_id=1371060065]
 script = ExtResource("29_frag001")
@@ -38,53 +44,46 @@ script = ExtResource("29_frag001")
 [node name="WorldRoot" type="Node2D" parent="." unique_id=1807008893]
 
 [node name="Background" type="Node2D" parent="WorldRoot" unique_id=1506054736]
+z_index = -5
 
-[node name="guangqiang" type="Sprite2D" parent="WorldRoot/Background" unique_id=1289736197]
-position = Vector2(82.18751, 53.312492)
-scale = Vector2(0.12241438, 0.11463904)
-texture = ExtResource("24_yssys")
+[node name="LightWall" parent="WorldRoot/Background" unique_id=1723296003 instance=ExtResource("2_pbonl")]
+position = Vector2(81.99999, 54)
+scale = Vector2(0.122, 0.115)
 
-[node name="guangqiang2" type="Sprite2D" parent="WorldRoot/Background" unique_id=1169792901]
-position = Vector2(230.1875, 53.312492)
-scale = Vector2(0.12241438, 0.11463904)
-texture = ExtResource("24_yssys")
+[node name="LightWall2" parent="WorldRoot/Background" unique_id=148165407 instance=ExtResource("2_pbonl")]
+position = Vector2(230, 54)
+scale = Vector2(0.122, 0.115)
 
-[node name="guangqiang3" type="Sprite2D" parent="WorldRoot/Background" unique_id=887932106]
-position = Vector2(379.1875, 53.312492)
-scale = Vector2(0.12241438, 0.11463904)
-texture = ExtResource("24_yssys")
+[node name="LightWall3" parent="WorldRoot/Background" unique_id=1752996522 instance=ExtResource("2_pbonl")]
+position = Vector2(378, 54)
+scale = Vector2(0.122, 0.115)
 
-[node name="guangqiang4" type="Sprite2D" parent="WorldRoot/Background" unique_id=814619694]
-position = Vector2(527.18744, 53.312492)
-scale = Vector2(0.12241438, 0.11463904)
-texture = ExtResource("24_yssys")
+[node name="LightWall4" parent="WorldRoot/Background" unique_id=1827069596 instance=ExtResource("2_pbonl")]
+position = Vector2(526, 54)
+scale = Vector2(0.122, 0.115)
 
-[node name="guangqiang5" type="Sprite2D" parent="WorldRoot/Background" unique_id=1697323166]
-position = Vector2(675.1875, 53.312492)
-scale = Vector2(0.12241438, 0.11463904)
-texture = ExtResource("24_yssys")
+[node name="LightWall5" parent="WorldRoot/Background" unique_id=1426828281 instance=ExtResource("2_pbonl")]
+position = Vector2(674, 54)
+scale = Vector2(0.122, 0.115)
 
-[node name="guangqiang6" type="Sprite2D" parent="WorldRoot/Background" unique_id=2008762573]
-position = Vector2(823.1875, 53.312492)
-scale = Vector2(0.12241438, 0.11463904)
-texture = ExtResource("24_yssys")
+[node name="LightWall6" parent="WorldRoot/Background" unique_id=2085545008 instance=ExtResource("2_pbonl")]
+position = Vector2(822, 54)
+scale = Vector2(0.122, 0.115)
 
-[node name="guangqiang7" type="Sprite2D" parent="WorldRoot/Background" unique_id=318619653]
-position = Vector2(971.18744, 53.312492)
-scale = Vector2(0.12241438, 0.11463904)
-texture = ExtResource("24_yssys")
+[node name="LightWall7" parent="WorldRoot/Background" unique_id=1666630916 instance=ExtResource("2_pbonl")]
+position = Vector2(970, 54)
+scale = Vector2(0.122, 0.115)
 
-[node name="guangqiang8" type="Sprite2D" parent="WorldRoot/Background" unique_id=96527793]
-position = Vector2(1119.1875, 53.312492)
-scale = Vector2(0.12241438, 0.11463904)
-texture = ExtResource("24_yssys")
+[node name="LightWall8" parent="WorldRoot/Background" unique_id=2096622918 instance=ExtResource("2_pbonl")]
+position = Vector2(1118, 54)
+scale = Vector2(0.122, 0.115)
 
-[node name="guangqiang9" type="Sprite2D" parent="WorldRoot/Background" unique_id=2052658325]
-position = Vector2(1267.1875, 53.312492)
-scale = Vector2(0.12241438, 0.11463904)
-texture = ExtResource("24_yssys")
+[node name="LightWall9" parent="WorldRoot/Background" unique_id=1984492341 instance=ExtResource("2_pbonl")]
+position = Vector2(1266, 54)
+scale = Vector2(0.122, 0.115)
 
 [node name="Ground" type="Node2D" parent="WorldRoot" unique_id=1155593448]
+z_index = -15
 
 [node name="MainRoad" type="Sprite2D" parent="WorldRoot/Ground" unique_id=703569109]
 z_index = -15
@@ -131,145 +130,137 @@ y_sort_enabled = true
 [node name="DepthLayer_1" type="Node2D" parent="WorldRoot/DepthLayer" unique_id=1329077132]
 y_sort_enabled = true
 
-[node name="building1" type="Node2D" parent="WorldRoot/DepthLayer/DepthLayer_1" unique_id=782370539]
-position = Vector2(910.4375, 604.4)
-
-[node name="Sprite2D" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_1/building1" unique_id=775490271]
-position = Vector2(0, -146.1)
-scale = Vector2(0.23094921, 0.20871966)
-texture = ExtResource("1_q23m0")
-
-[node name="building2" type="Node2D" parent="WorldRoot/DepthLayer/DepthLayer_1" unique_id=2093266592]
-position = Vector2(360, 624)
-
-[node name="Sprite2D" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_1/building2" unique_id=1790619005]
-position = Vector2(0, -160)
-scale = Vector2(0.23668672, 0.22853513)
-texture = ExtResource("3_pyfi5")
-
-[node name="building3" type="Node2D" parent="WorldRoot/DepthLayer/DepthLayer_1" unique_id=1354169896]
-position = Vector2(128, 622.4)
-
-[node name="Sprite2D" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_1/building3" unique_id=186644058]
-position = Vector2(0, -166.4)
-scale = Vector2(0.25559828, 0.23762934)
-texture = ExtResource("4_vurmb")
-
-[node name="building4" type="Node2D" parent="WorldRoot/DepthLayer/DepthLayer_1" unique_id=370762242]
-position = Vector2(1104.0001, 618.2)
-
-[node name="Sprite2D" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_1/building4" unique_id=941053882]
-position = Vector2(0, -154.2)
-scale = Vector2(0.25233963, 0.22013198)
-texture = ExtResource("5_jgijl")
-
 [node name="flower" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_1" unique_id=1326291933]
-position = Vector2(1272, 536.00006)
+position = Vector2(1264, 546.00006)
 scale = Vector2(0.05745357, 0.06515408)
 texture = ExtResource("6_3mr5v")
 
-[node name="rigui_black" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_1" unique_id=1893473559]
-position = Vector2(1224, 544.00006)
-scale = Vector2(0.10566642, 0.099452086)
-texture = ExtResource("10_oco2y")
+[node name="BA" parent="WorldRoot/DepthLayer/DepthLayer_1" unique_id=638245969 instance=ExtResource("14_ff6ei")]
+position = Vector2(924, 601)
+scale = Vector2(0.23, 0.23)
+body_position = Vector2(0, -624)
+collision_size = Vector2(967, 270)
+collision_position = Vector2(0, -135)
 
-[node name="fountain" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_1" unique_id=741153789]
-position = Vector2(640, 432)
-scale = Vector2(0.23056336, 0.23060462)
-texture = ExtResource("8_3mr5v")
+[node name="BB" parent="WorldRoot/DepthLayer/DepthLayer_1" unique_id=1465435575 instance=ExtResource("14_ff6ei")]
+position = Vector2(1118, 613)
+scale = Vector2(0.235, 0.235)
+building_texture = ExtResource("5_jgijl")
+body_position = Vector2(0, -624)
+collision_size = Vector2(839.61, 270)
+collision_position = Vector2(0, -199.96)
 
-[node name="rigui_white" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_1" unique_id=169072370]
-position = Vector2(560, 544.00006)
-scale = Vector2(0.098718226, 0.11023872)
-texture = ExtResource("9_cmphu")
+[node name="BC" parent="WorldRoot/DepthLayer/DepthLayer_1" unique_id=1835164867 instance=ExtResource("14_ff6ei")]
+position = Vector2(105, 612)
+scale = Vector2(0.23, 0.23)
+building_texture = ExtResource("3_pyfi5")
+body_position = Vector2(0, -616.705)
+collision_size = Vector2(967, 259.69)
+collision_position = Vector2(0, -130.25)
+
+[node name="SundialA" parent="WorldRoot/DepthLayer/DepthLayer_1" unique_id=1051923950 instance=ExtResource("10_ff6ei")]
+position = Vector2(1226, 616)
+scale = Vector2(0.095, 0.095)
+
+[node name="BD" parent="WorldRoot/DepthLayer/DepthLayer_1" unique_id=2006739076 instance=ExtResource("14_ff6ei")]
+position = Vector2(328, 610)
+scale = Vector2(0.23, 0.23)
+building_texture = ExtResource("4_vurmb")
+body_position = Vector2(0, -606.645)
+collision_size = Vector2(967, 249.035)
+collision_position = Vector2(0, -147.525)
+
+[node name="SundialB" parent="WorldRoot/DepthLayer/DepthLayer_1" unique_id=871932599 instance=ExtResource("12_1c074")]
+position = Vector2(548, 586)
+scale = Vector2(0.09, 0.09)
+
+[node name="BE" parent="WorldRoot/DepthLayer/DepthLayer_1" unique_id=1555593114 instance=ExtResource("14_ff6ei")]
+position = Vector2(636, 577.00006)
+scale = Vector2(0.205, 0.205)
+building_texture = ExtResource("8_3mr5v")
+body_position = Vector2(0, -485.09)
+collision_size = Vector2(1121.22, 366.805)
+collision_position = Vector2(0, -202.98)
 
 [node name="DepthLayer_2" type="Node2D" parent="WorldRoot/DepthLayer" unique_id=1438067706]
 y_sort_enabled = true
 
-[node name="lantern" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=635144508]
-position = Vector2(792, 256)
-scale = Vector2(0.109259546, 0.10958998)
-texture = ExtResource("7_jgijl")
-
-[node name="lantern2" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=65272862]
-position = Vector2(951.99994, 256)
-scale = Vector2(0.109259546, 0.10958998)
-texture = ExtResource("7_jgijl")
-
-[node name="tower" type="Node2D" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=1201750450]
-position = Vector2(104, 331.8)
-
-[node name="Sprite2D" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_2/tower" unique_id=1989384072]
-position = Vector2(0, -171.8)
-scale = Vector2(0.2871391, 0.31661227)
-texture = ExtResource("13_bhmjt")
-
-[node name="lab" type="Node2D" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=1681486193]
-position = Vector2(328.00003, 347)
-
-[node name="Sprite2D" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_2/lab" unique_id=280831223]
-position = Vector2(0, -123)
-scale = Vector2(0.25966856, 0.22656284)
-texture = ExtResource("14_j6apd")
-
-[node name="church" type="Node2D" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=1555653755]
-position = Vector2(1104, 341.7)
-
-[node name="Sprite2D" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_2/church" unique_id=369508096]
-position = Vector2(0, -154.8)
-scale = Vector2(0.32763815, 0.28522643)
-texture = ExtResource("15_nucfm")
-
-[node name="grass" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=309613093]
-position = Vector2(480, 296.00003)
-scale = Vector2(0.07890602, 0.091355555)
-texture = ExtResource("16_dbv8g")
-
-[node name="grass2" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=780781930]
-position = Vector2(15.9999695, 289.00003)
-scale = Vector2(0.07890602, 0.091355555)
-texture = ExtResource("16_dbv8g")
-
-[node name="rigui gray" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=745680769]
-position = Vector2(248, 344)
-scale = Vector2(0.07776954, 0.076555036)
-texture = ExtResource("17_yssys")
-
-[node name="rigui bronze2" type="Node2D" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=1650192806]
-
-[node name="rigui bronze" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_2/rigui bronze2" unique_id=470055846]
-position = Vector2(968.00006, 328)
-scale = Vector2(0.08354186, 0.082934655)
-texture = ExtResource("7_cmphu")
-
 [node name="BellTower" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=1026256625 instance=ExtResource("20_oco2y")]
-position = Vector2(873.99994, 322)
+position = Vector2(875, 321)
 scale = Vector2(0.248, 0.248)
+
+[node name="2BA" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=2035045265 instance=ExtResource("14_ff6ei")]
+position = Vector2(98.00001, 326)
+scale = Vector2(0.287, 0.317)
+building_texture = ExtResource("13_bhmjt")
+body_position = Vector2(0, -508.595)
+collision_size = Vector2(449.88, 209.255)
+collision_position = Vector2(0, -107.655)
+
+[node name="2BB" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=1419257177 instance=ExtResource("14_ff6ei")]
+position = Vector2(311, 324)
+scale = Vector2(0.26, 0.227)
+building_texture = ExtResource("14_j6apd")
+body_position = Vector2(0, -400.21)
+collision_size = Vector2(1302.02, 270)
+collision_position = Vector2(0, -135)
+
+[node name="SundialC" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=1006328281 instance=ExtResource("19_dbv8g")]
+position = Vector2(205, 357)
+scale = Vector2(0.078, 0.077)
+
+[node name="SundialD" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=554321324 instance=ExtResource("20_yssys")]
+position = Vector2(1002, 363)
+scale = Vector2(0.084, 0.083)
+
+[node name="2BC" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=2026980195 instance=ExtResource("14_ff6ei")]
+position = Vector2(1078, 318)
+scale = Vector2(0.328, 0.285)
+building_texture = ExtResource("15_nucfm")
+body_position = Vector2(0, -474.195)
+collision_size = Vector2(838.725, 270)
+collision_position = Vector2(0, -135)
+
+[node name="2BD" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=1325772572 instance=ExtResource("14_ff6ei")]
+position = Vector2(788.00006, 313)
+scale = Vector2(0.109, 0.11)
+building_texture = ExtResource("7_jgijl")
+body_position = Vector2(0, -576.555)
+collision_size = Vector2(217.795, 270)
+collision_position = Vector2(0, -135)
+
+[node name="2BD3" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=1953150633 instance=ExtResource("14_ff6ei")]
+position = Vector2(26.000015, 334)
+scale = Vector2(0.109, 0.11)
+building_texture = ExtResource("7_jgijl")
+body_position = Vector2(0, -576.555)
+collision_size = Vector2(217.795, 270)
+collision_position = Vector2(0, -135)
+
+[node name="2BD4" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=1877766654 instance=ExtResource("14_ff6ei")]
+position = Vector2(481, 340)
+scale = Vector2(0.109, 0.11)
+building_texture = ExtResource("7_jgijl")
+body_position = Vector2(0, -576.555)
+collision_size = Vector2(217.795, 270)
+collision_position = Vector2(0, -135)
+
+[node name="2BD2" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=487677588 instance=ExtResource("14_ff6ei")]
+position = Vector2(1242, 307)
+scale = Vector2(0.109, 0.11)
+building_texture = ExtResource("7_jgijl")
+body_position = Vector2(0, -576.555)
+collision_size = Vector2(217.795, 270)
+collision_position = Vector2(0, -135)
 
 [node name="DepthLayer_3" type="Node2D" parent="WorldRoot/DepthLayer" unique_id=1846010377]
 y_sort_enabled = true
-
-[node name="studio" type="Node2D" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=966437994]
-position = Vector2(424.00003, 139.9)
-
-[node name="Sprite2D" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_3/studio" unique_id=836191197]
-position = Vector2(0, -75.9)
-scale = Vector2(0.16339545, 0.14835389)
-texture = ExtResource("18_8bhro")
-
-[node name="building" type="Node2D" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=1020604881]
-position = Vector2(160, 160.7)
-
-[node name="Sprite2D" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_3/building" unique_id=533331959]
-position = Vector2(0, -102.7)
-scale = Vector2(0.20994475, 0.18931319)
-texture = ExtResource("19_yssys")
 
 [node name="forest1" type="Node2D" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=903466131]
 position = Vector2(968.00006, 113.4)
 
 [node name="Sprite2D" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_3/forest1" unique_id=1387949768]
-position = Vector2(0, -73.4)
+position = Vector2(-82, -49)
 scale = Vector2(0.19053365, 0.15608278)
 texture = ExtResource("19_j6apd")
 
@@ -277,72 +268,15 @@ texture = ExtResource("19_j6apd")
 position = Vector2(1168, 113.4)
 
 [node name="Sprite2D" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_3/forest2" unique_id=1214030568]
-position = Vector2(0, -73.4)
+position = Vector2(-2, -48)
 scale = Vector2(0.19053365, 0.15608278)
 texture = ExtResource("19_j6apd")
-
-[node name="shop1" type="Node2D" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=210033967]
-position = Vector2(912, 159.3)
-
-[node name="Sprite2D" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_3/shop1" unique_id=1214210015]
-position = Vector2(0, -87.3)
-scale = Vector2(0.1308705, 0.12461271)
-texture = ExtResource("19_3i7db")
-
-[node name="shop3" type="Node2D" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=348372857]
-position = Vector2(1168.0001, 138)
-
-[node name="Sprite2D" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_3/shop3" unique_id=1593113461]
-position = Vector2(0, -74)
-scale = Vector2(0.12247621, 0.11794117)
-texture = ExtResource("22_cnh1t")
-
-[node name="shop4" type="Node2D" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=523029063]
-position = Vector2(1048, 142.3)
-
-[node name="Sprite2D" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_3/shop4" unique_id=550785458]
-position = Vector2(0, -78.3)
-scale = Vector2(0.13877836, 0.111752324)
-texture = ExtResource("23_cnh1t")
-
-[node name="shop2" type="Node2D" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=876787085]
-position = Vector2(786.1454, 147.6)
-
-[node name="Sprite2D" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_3/shop2" unique_id=1231848117]
-position = Vector2(0, -79.8)
-scale = Vector2(0.110257745, 0.113892116)
-texture = ExtResource("20_h2wgi")
-
-[node name="flower2" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=1683729759]
-position = Vector2(840, 120)
-scale = Vector2(0.027122548, 0.027452836)
-texture = ExtResource("6_3mr5v")
-
-[node name="lantern3" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=1516786552]
-position = Vector2(231.99998, 96)
-scale = Vector2(0.06738895, 0.06117458)
-texture = ExtResource("7_jgijl")
-
-[node name="lantern4" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=925568367]
-position = Vector2(144, 88)
-scale = Vector2(0.056442082, 0.058111325)
-texture = ExtResource("26_ff6ei")
-
-[node name="lantern5" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=1844845169]
-position = Vector2(80, 88.00001)
-scale = Vector2(0.054003734, 0.058751788)
-texture = ExtResource("27_1c074")
-
-[node name="grass3" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=487216396]
-position = Vector2(1248, 101)
-scale = Vector2(0.064971425, 0.07757572)
-texture = ExtResource("16_dbv8g")
 
 [node name="forest3" type="Node2D" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=1896820049]
 position = Vector2(162.00002, 121.4)
 
 [node name="Sprite2D" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_3/forest3" unique_id=1965497902]
-position = Vector2(0, -73.4)
+position = Vector2(-7, -55)
 scale = Vector2(0.19053365, 0.15608278)
 texture = ExtResource("19_j6apd")
 
@@ -350,17 +284,70 @@ texture = ExtResource("19_j6apd")
 position = Vector2(352.00003, 121.4)
 
 [node name="Sprite2D" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_3/forest4" unique_id=81114933]
-position = Vector2(0, -73.4)
+position = Vector2(63, -55)
 scale = Vector2(0.19053365, 0.15608278)
 texture = ExtResource("19_j6apd")
+
+[node name="forest5" type="Node2D" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=1014361420]
+position = Vector2(582, 121.4)
+
+[node name="Sprite2D" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_3/forest5" unique_id=1704886792]
+position = Vector2(63, -55)
+scale = Vector2(0.19053365, 0.15608278)
+texture = ExtResource("19_j6apd")
+
+[node name="SundialE" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=1131946531 instance=ExtResource("23_8bhro")]
+position = Vector2(975, 186)
+scale = Vector2(0.06, 0.06)
 
 [node name="CameraRig" type="Node2D" parent="WorldRoot" unique_id=2136539517]
 position = Vector2(640, 360)
 script = ExtResource("28_camrig")
 
 [node name="Camera2D" type="Camera2D" parent="WorldRoot/CameraRig" unique_id=288345176]
+zoom = Vector2(1.9, 1.9)
+limit_left = -20
+limit_top = -20
+limit_right = 1300
+limit_bottom = 740
+limit_smoothed = true
 
 [node name="SpawnPoints" type="Node2D" parent="WorldRoot" unique_id=1319034066]
 
 [node name="Default" type="Marker2D" parent="WorldRoot/SpawnPoints" unique_id=1697172492]
 position = Vector2(637, 672)
+
+[node name="AirWall" type="Node2D" parent="WorldRoot" unique_id=684608751]
+
+[node name="AirWall_Down" type="StaticBody2D" parent="WorldRoot/AirWall" unique_id=1680381494]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/AirWall/AirWall_Down" unique_id=256207915]
+position = Vector2(40, -22)
+shape = SubResource("WorldBoundaryShape2D_dbv8g")
+
+[node name="AirWall_Left" type="StaticBody2D" parent="WorldRoot/AirWall" unique_id=1301419798]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/AirWall/AirWall_Left" unique_id=1549542091]
+position = Vector2(11, 302)
+shape = SubResource("WorldBoundaryShape2D_yssys")
+
+[node name="AirWall_Right" type="StaticBody2D" parent="WorldRoot/AirWall" unique_id=975868997]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/AirWall/AirWall_Right" unique_id=619041043]
+position = Vector2(1300, 387)
+shape = SubResource("WorldBoundaryShape2D_8bhro")
+
+[node name="AirWall_Up" type="StaticBody2D" parent="WorldRoot/AirWall" unique_id=1487592983]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/AirWall/AirWall_Up" unique_id=137324981]
+position = Vector2(638, -32)
+rotation = 3.1415927
+shape = SubResource("WorldBoundaryShape2D_3i7db")
+
+[node name="Fog" type="Node2D" parent="WorldRoot" unique_id=471879485]
+
+[node name="Sprite2D" type="Sprite2D" parent="WorldRoot/Fog" unique_id=2060264604]
+modulate = Color(1, 1, 1, 0.6431373)
+position = Vector2(637.99994, 359.12503)
+scale = Vector2(0.92822963, 0.9545695)
+texture = ExtResource("24_dbv8g")

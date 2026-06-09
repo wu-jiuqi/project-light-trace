@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://dp7c47xcuv5tx"]
+
+[ext_resource type="Texture2D" uid="uid://dtjkcjrqck0xg" path="res://assets/papercraft/fragments/id0001/environment2/sundial_19.png" id="1_yqsv6"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0e1fm"]
+size = Vector2(784, 217)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_aovec"]
+radius = 369.0
+height = 1180.0
+
+[node name="SundialD" type="Node2D" unique_id=554321324 groups=["interactable"]]
+
+[node name="Visual" type="Node2D" parent="." unique_id=1806067376]
+
+[node name="Body" type="Sprite2D" parent="Visual" unique_id=1635743955]
+position = Vector2(0, -535.245)
+texture = ExtResource("1_yqsv6")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=1691156174]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=1304111043]
+position = Vector2(-4, -148)
+shape = SubResource("RectangleShape2D_0e1fm")
+
+[node name="InteractableArea" type="Area2D" parent="." unique_id=572970150]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractableArea" unique_id=1403647078]
+position = Vector2(-2, -511)
+shape = SubResource("CapsuleShape2D_aovec")
+debug_color = Color(0.6663619, 0.5117015, 0, 0.41960785)
+
+[node name="BaseMarker" type="Marker2D" parent="." unique_id=1461565259]
