@@ -12,6 +12,9 @@ size = Vector2(261, 251.5)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_uyew4"]
 size = Vector2(142, 68)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_door"]
+size = Vector2(180, 250)
+
 [node name="BellTower" type="Node2D" unique_id=1026256625 groups=["interactable"]]
 script = ExtResource("1_script")
 
@@ -32,6 +35,11 @@ debug_color = Color(0.65457684, 0.5179122, 0, 0.41960785)
 position = Vector2(174, -127)
 shape = SubResource("RectangleShape2D_ufga2")
 debug_color = Color(0.68016684, 0.504128, 0, 0.41960785)
+
+[node name="DoorCollision" type="CollisionShape2D" parent="StaticBody2D" unique_id=281795533]
+position = Vector2(-4, -129)
+shape = SubResource("RectangleShape2D_door")
+debug_color = Color(0.85, 0.3, 0.3, 0.5)
 
 [node name="InteractableArea" type="Area2D" parent="." unique_id=1594146164]
 collision_layer = 2

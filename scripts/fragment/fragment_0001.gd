@@ -4,7 +4,6 @@ extends Node2D
 
 const PLAYER_SCENE: PackedScene = preload("res://scenes/characters/player/player.tscn")
 const ClueSystemScript = preload("res://scripts/systems/clue_system.gd")
-const SourceMarkScript = preload("res://scripts/buildings/source_mark.gd")
 
 ## DepthLayer Y 范围阈值
 const LAYER_1_Y: float = 450.0
@@ -126,14 +125,23 @@ func _spawn_player() -> void:
 	var spawn_marker: Marker2D = null
 	var spawn_points = get_node_or_null("WorldRoot/SpawnPoints")
 	if spawn_points:
-		spawn_marker = spawn_points.get_node_or_null("Default") as Marker2D
+		# 优先使用 SceneManager 指定的出生点（如从暗室返回的 "OutDoor"）
+		var pending = SceneManager.pending_spawn_point
+		if not pending.is_empty():
+			spawn_marker = spawn_points.get_node_or_null(pending) as Marker2D
+			if spawn_marker:
+				SceneManager.pending_spawn_point = ""  # 消费掉
+				print("[Fragment0001] 使用指定出生点 '%s'" % pending)
+		# 回退到默认
+		if not spawn_marker:
+			spawn_marker = spawn_points.get_node_or_null("Default") as Marker2D
 
 	var spawn_pos: Vector2 = Vector2(644, 655)
 	if spawn_marker:
 		spawn_pos = spawn_marker.global_position
-		print("[Fragment0001] 使用 SpawnPoints/Default 位置: %s" % str(spawn_pos))
+		print("[Fragment0001] 出生位置: %s" % str(spawn_pos))
 	else:
-		print("[Fragment0001] 未找到 Default 出生点，使用默认位置")
+		print("[Fragment0001] 未找到出生点，使用默认位置")
 
 	var target_layer = _get_layer_by_y(spawn_pos.y)
 	var layer_node = _depth_layers.get(target_layer) as Node2D
@@ -261,11 +269,7 @@ func on_sundial_interact(sundial: Node2D) -> void:
 # ============================================================
 
 func on_bell_tower_interact(bell_tower: Node2D) -> void:
-	## 钟楼 E 键交互处理入口
-	if source_mark_revealed:
-		_show_message("钟楼暗门", "暗门已经打开。晨曦之印在暗室石台上发出淡金色光。", 3.5)
-		return
-
+	## 钟楼 E 键交互处理入口（仅在门锁定时调用）
 	if observed_sundials.size() < 5:
 		_show_message(
 			"钟楼观测台",
@@ -388,7 +392,7 @@ func _update_angle_value() -> void:
 func _submit_clock_angle() -> bool:
 	if clock_angle == TARGET_CLOCK_ANGLE:
 		_close_angle_panel()
-		_reveal_source_mark()
+		_unlock_bell_tower_door()
 		return true
 
 	if abs(clock_angle - TARGET_CLOCK_ANGLE) <= 6:
@@ -411,75 +415,25 @@ func _close_angle_panel() -> void:
 # 源印显现与通关
 # ============================================================
 
-func _reveal_source_mark() -> void:
-	if source_mark_revealed:
-		return
+func _unlock_bell_tower_door() -> void:
+	## 校准正确后解锁钟楼门
+	var bell_tower = _find_bell_tower_node()
+	if bell_tower and bell_tower.has_method("unlock_door"):
+		bell_tower.unlock_door()
+	else:
+		printerr("[Fragment0001] 未找到 BellTower 节点，无法解锁门")
+
 	source_mark_revealed = true
 
 	_clue_system.locate_source_mark("晨曦之印", "钟楼底层暗室")
 
 	_show_message(
 		"钟楼暗室",
-		"66°。指针落下，钟楼下方传来齿轮咬合声。\n暗门打开，石台上显出一枚铜色日晷徽章：晨曦之印。",
-		6.0
+		"66°。指针落下，钟楼下方传来齿轮咬合声。\n暗门已打开，可再次靠近钟楼进入暗室。",
+		5.0
 	)
 
-	print("[Fragment0001] 源印显现：晨曦之印")
-
-	# 延迟创建源印可交互点（模拟暗室显现）
-	await get_tree().create_timer(2.0).timeout
-	_create_source_mark_interaction()
-	_update_clue_list()
-
-
-func _create_source_mark_interaction() -> void:
-	# 查找钟楼节点位置
-	var bell_tower = _find_bell_tower_node()
-	var pos := Vector2(637, 672)  # 默认出生点附近
-	if bell_tower:
-		pos = bell_tower.global_position + Vector2(0, 80)
-
-	# 创建源印交互区域（使用 SourceMark 脚本 + Area2D）
-	var mark_root = Node2D.new()
-	mark_root.name = "SourceMarkDawn"
-	mark_root.position = pos
-	mark_root.z_index = 0
-	mark_root.add_to_group("interactable")
-	mark_root.set_script(SourceMarkScript)
-	add_child(mark_root)
-
-	var area = Area2D.new()
-	area.name = "InteractableArea"
-	area.collision_layer = 2
-	area.collision_mask = 0
-	mark_root.add_child(area)
-
-	var shape_node = CollisionShape2D.new()
-	var circle = CircleShape2D.new()
-	circle.radius = 50.0
-	shape_node.shape = circle
-	area.add_child(shape_node)
-
-	# 发光视觉
-	var glow = ColorRect.new()
-	glow.name = "Glow"
-	glow.position = Vector2(-30, -30)
-	glow.size = Vector2(60, 60)
-	glow.color = Color(1.0, 0.72, 0.24, 0.72)
-	mark_root.add_child(glow)
-
-	var label = Label.new()
-	label.name = "Label"
-	label.position = Vector2(-70, 34)
-	label.size = Vector2(140, 24)
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.text = "晨曦之印"
-	label.add_theme_font_size_override("font_size", 14)
-	label.add_theme_color_override("font_color", Color(0.30, 0.18, 0.04, 1.0))
-	label.z_index = 1
-	mark_root.add_child(label)
-
-	print("[Fragment0001] 源印交互点已创建于 %s" % str(pos))
+	print("[Fragment0001] 钟楼门已解锁，暗室可进入")
 
 
 func _find_bell_tower_node() -> Node2D:

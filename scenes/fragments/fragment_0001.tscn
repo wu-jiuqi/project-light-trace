@@ -317,6 +317,9 @@ limit_smoothed = true
 [node name="Default" type="Marker2D" parent="WorldRoot/SpawnPoints" unique_id=1697172492]
 position = Vector2(637, 672)
 
+[node name="OutDoor" type="Marker2D" parent="WorldRoot/SpawnPoints" unique_id=626399177]
+position = Vector2(821, 351)
+
 [node name="AirWall" type="Node2D" parent="WorldRoot" unique_id=684608751]
 
 [node name="AirWall_Down" type="StaticBody2D" parent="WorldRoot/AirWall" unique_id=1680381494]
@@ -345,9 +348,11 @@ rotation = 3.1415927
 shape = SubResource("WorldBoundaryShape2D_3i7db")
 
 [node name="Fog" type="Node2D" parent="WorldRoot" unique_id=471879485]
+metadata/_edit_lock_ = true
 
 [node name="Sprite2D" type="Sprite2D" parent="WorldRoot/Fog" unique_id=2060264604]
 modulate = Color(1, 1, 1, 0.6431373)
 position = Vector2(637.99994, 359.12503)
 scale = Vector2(0.92822963, 0.9545695)
 texture = ExtResource("24_dbv8g")
+metadata/_edit_lock_ = true
