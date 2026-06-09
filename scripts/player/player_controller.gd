@@ -507,7 +507,10 @@ func _update_interact_hint() -> void:
 		# NPC 的提示由 _update_closest_npc 管理（show_interact_hint / hide_interact_hint）
 		pass
 	elif _closest_interactable and is_instance_valid(_closest_interactable) and not _closest_interactable.is_queued_for_deletion():
-		interact_hint_changed.emit(true, "[E] 观察 %s" % _closest_interactable.name)
+		var name_str: String = _closest_interactable.name
+		if "display_name" in _closest_interactable and not str(_closest_interactable.display_name).is_empty():
+			name_str = str(_closest_interactable.display_name)
+		interact_hint_changed.emit(true, "[E] 观察 %s" % name_str)
 	elif _closest_pickup and is_instance_valid(_closest_pickup) and not _closest_pickup.is_queued_for_deletion():
 		var item_name_str: String = _closest_pickup.item_name if "item_name" in _closest_pickup else "物品"
 		interact_hint_changed.emit(true, "[E] 拾取 %s" % item_name_str)

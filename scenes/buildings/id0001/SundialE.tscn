@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://c588n0cfi2xt4"]
 
-[ext_resource type="Texture2D" uid="uid://b8d8b4v7hh468" path="res://assets/papercraft/fragments/id0001/environment2/0001_prop_sundial_e_ruins.png" id="1_pa2r7"]
+[ext_resource type="Script" uid="uid://0001sundialscript" path="res://scripts/buildings/sundial.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://b8d8b4v7hh468" path="res://assets/papercraft/fragments/id0001/environment2/0001_prop_sundial_e_ruins.png" id="2_pa2r7"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_k0rut"]
 size = Vector2(911, 202.5)
@@ -10,12 +11,18 @@ radius = 643.0
 height = 1286.0
 
 [node name="SundialE" type="Node2D" unique_id=1131946531 groups=["interactable"]]
+script = ExtResource("1_script")
+sundial_id = "E"
+angle = 66
+place_name = "边界光墙前"
+description = "第五个日晷被砸碎了。碎片被整齐排成一条线，像有人替你留下了缺失项。"
+display_name = "观测点E · 边界残晷"
 
 [node name="Visual" type="Node2D" parent="." unique_id=217018193]
 
 [node name="Body" type="Sprite2D" parent="Visual" unique_id=1080701320]
 position = Vector2(0, -485.855)
-texture = ExtResource("1_pa2r7")
+texture = ExtResource("2_pa2r7")
 
 [node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=2075761665]
 
@@ -24,6 +31,7 @@ position = Vector2(-2.5, -117.75)
 shape = SubResource("RectangleShape2D_k0rut")
 
 [node name="InteractableArea" type="Area2D" parent="." unique_id=1288303499]
+collision_layer = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="InteractableArea" unique_id=1439665109]
 position = Vector2(-2, -445)

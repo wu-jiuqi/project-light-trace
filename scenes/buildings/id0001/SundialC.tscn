@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://p3iqtywixfbx"]
 
-[ext_resource type="Texture2D" uid="uid://8lptfu3px70t" path="res://assets/papercraft/fragments/id0001/environment2/sundial_20.png" id="1_vmy6n"]
+[ext_resource type="Script" uid="uid://0001sundialscript" path="res://scripts/buildings/sundial.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://8lptfu3px70t" path="res://assets/papercraft/fragments/id0001/environment2/sundial_20.png" id="2_vmy6n"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_gj4dm"]
 size = Vector2(918, 218)
@@ -10,12 +11,18 @@ radius = 511.0
 height = 1022.0
 
 [node name="SundialC" type="Node2D" unique_id=1006328281 groups=["interactable"]]
+script = ExtResource("1_script")
+sundial_id = "C"
+angle = 36
+place_name = "市集橱窗前"
+description = "黑石日晷投下 36° 阴影。橱窗里的七个面包排列得一动不动。"
+display_name = "观测点C · 市集日晷"
 
 [node name="Visual" type="Node2D" parent="." unique_id=391645487]
 
 [node name="Body" type="Sprite2D" parent="Visual" unique_id=1271329452]
 position = Vector2(0, -440.86)
-texture = ExtResource("1_vmy6n")
+texture = ExtResource("2_vmy6n")
 
 [node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=886354701]
 
@@ -24,6 +31,7 @@ position = Vector2(-5, -99)
 shape = SubResource("RectangleShape2D_gj4dm")
 
 [node name="InteractableArea" type="Area2D" parent="." unique_id=1723635798]
+collision_layer = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="InteractableArea" unique_id=775594736]
 position = Vector2(-4, -419)
