@@ -63,6 +63,8 @@ func _ready() -> void:
 	_setup_angle_panel()
 	_prepare_fragment_context()
 	_show_opening_message()
+	# 从暗室等场景返回时 SceneFader 处于黑屏状态，需要淡入
+	SceneFader.fade_in()
 	print("[Fragment0001] 启程之镇就绪 — E键观测日晷 | Tab键查看线索")
 
 
