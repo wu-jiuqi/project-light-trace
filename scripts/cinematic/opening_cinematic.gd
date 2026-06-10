@@ -34,6 +34,13 @@ const PANEL_SCALE_START: float = 0.95
 const PANEL_SCALE_END: float = 1.0
 
 # ============================================
+# BGM
+# ============================================
+
+var _bgm_player: AudioStreamPlayer = null
+const BGM_CINEMATIC = preload("res://assets/audio/bgm/bgm_opening_cinematic.ogg")
+
+# ============================================
 # 旁白文本（13段，按面板顺序）
 # ============================================
 
@@ -63,6 +70,8 @@ func _ready() -> void:
 		SaveManager._stop_auto_save()
 	_gather_panels()
 	_show_first_panel()
+	# 播放入场动画 BGM（55秒版本，结尾自动淡出）
+	_start_bgm()
 
 
 func _gather_panels() -> void:
@@ -180,7 +189,27 @@ func _next_panel() -> void:
 
 func _go_to_star_map() -> void:
 	is_transitioning = true
+	_stop_bgm()
 	SceneManager.change_scene("res://scenes/star_map.tscn", "from_cutscene")
+
+
+# ============================================
+# BGM 播放
+# ============================================
+
+func _start_bgm() -> void:
+	if _bgm_player == null:
+		_bgm_player = AudioStreamPlayer.new()
+		_bgm_player.name = "BGMPlayer"
+		_bgm_player.bus = "Master"
+		_bgm_player.volume_db = -6.0
+		add_child(_bgm_player)
+	_bgm_player.stream = BGM_CINEMATIC
+	_bgm_player.play()
+
+func _stop_bgm() -> void:
+	if _bgm_player != null and _bgm_player.playing:
+		_bgm_player.stop()
 
 
 # ============================================

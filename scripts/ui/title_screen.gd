@@ -122,6 +122,9 @@ func _ready() -> void:
 	_selected = 0  # 默认选中「开始游戏」
 	_update_selection()
 
+	# 播放标题画面主题曲
+	_start_bgm()
+
 
 func _apply_skin() -> void:
 	_bg.texture = PAPER_TITLE_BG
@@ -251,6 +254,28 @@ func _setup_save_slots_screen() -> void:
 			label.add_theme_constant_override("shadow_offset_x", 1)
 			label.add_theme_constant_override("shadow_offset_y", 1)
 
+
+# ============================================================
+# BGM 播放
+# ============================================================
+
+var _bgm_player: AudioStreamPlayer = null
+
+const BGM_MAIN_THEME = preload("res://assets/audio/bgm/bgm_main_theme.ogg")
+
+func _start_bgm() -> void:
+	if _bgm_player == null:
+		_bgm_player = AudioStreamPlayer.new()
+		_bgm_player.name = "BGMPlayer"
+		_bgm_player.bus = "Master"
+		_bgm_player.volume_db = -6.0
+		add_child(_bgm_player)
+	_bgm_player.stream = BGM_MAIN_THEME
+	_bgm_player.play()
+
+func _stop_bgm() -> void:
+	if _bgm_player != null and _bgm_player.playing:
+		_bgm_player.stop()
 
 # ============================================================
 # 响应式布局
@@ -726,6 +751,7 @@ func _start_new_game_in_slot_unchecked(slot: int) -> void:
 	ChatDatabase.clear_all_history()
 	SaveManager.save_game(slot)
 
+	_stop_bgm()
 	SceneManager.pending_spawn_point = "from_cutscene"
 	# 新游戏 → 开场动画 → 星图
 	get_tree().change_scene_to_file("res://scenes/cinematic/opening_cinematic.tscn")
@@ -738,6 +764,7 @@ func _continue_game() -> void:
 		return
 	print("[TitleScreen] 继续游戏 (slot %d)" % slot)
 	SaveManager.load_game(slot)
+	_stop_bgm()
 	SceneManager.pending_spawn_point = "from_cutscene"
 	get_tree().change_scene_to_file("res://scenes/star_map.tscn")
 
@@ -912,6 +939,7 @@ func _load_selected_slot() -> void:
 	var slot := _slot_selected
 	print("[TitleScreen] 加载存档 slot %d" % slot)
 	SaveManager.load_game(slot)
+	_stop_bgm()
 	SceneManager.pending_spawn_point = "from_cutscene"
 	get_tree().change_scene_to_file("res://scenes/star_map.tscn")
 

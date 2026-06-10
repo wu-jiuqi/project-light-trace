@@ -3,6 +3,7 @@ extends CanvasLayer
 
 const DETAIL_CARD_SIZE := Vector2(470, 628)
 const DETAIL_HIGHLIGHT_COLOR := Color(0.63, 0.42, 0.15, 0.18)
+const BGM_STAR_MAP = preload("res://assets/audio/bgm/bgm_star_map_loop.ogg")
 
 @onready var shard_canvas: StarShardCanvas = $FragmentContainer/ShardCanvas
 @onready var detail_card: Control = $UI/DetailCard
@@ -15,6 +16,7 @@ var _detail_selected: int = 0
 var _detail_highlight: ColorRect
 var enter_btn: Button
 var close_btn: Button
+var _bgm_player: AudioStreamPlayer = null
 
 
 func _ready() -> void:
@@ -36,6 +38,8 @@ func _ready() -> void:
 		await get_tree().create_timer(0.5).timeout
 		shard_canvas.flash_fragment("0001", 3, 0.35)
 	print("[StarMap] 玻璃星图界面加载完成")
+	# 播放星图界面循环 BGM
+	_start_bgm()
 
 
 func _apply_skin() -> void:
@@ -229,6 +233,26 @@ func _on_enter_btn_pressed() -> void:
 	if not FragmentManager.enter_fragment(selected_fragment):
 		return
 	if selected_fragment.scene_path and ResourceLoader.exists(selected_fragment.scene_path):
+		_stop_bgm()
 		get_tree().change_scene_to_file(selected_fragment.scene_path)
 	else:
 		printerr("[StarMap] 碎片场景不存在: %s" % selected_fragment.scene_path)
+
+
+# ============================================================
+# BGM 播放
+# ============================================================
+
+func _start_bgm() -> void:
+	if _bgm_player == null:
+		_bgm_player = AudioStreamPlayer.new()
+		_bgm_player.name = "BGMPlayer"
+		_bgm_player.bus = "Master"
+		_bgm_player.volume_db = -8.0
+		add_child(_bgm_player)
+	_bgm_player.stream = BGM_STAR_MAP
+	_bgm_player.play()
+
+func _stop_bgm() -> void:
+	if _bgm_player != null and _bgm_player.playing:
+		_bgm_player.stop()
