@@ -62,6 +62,8 @@ func _ready() -> void:
 	_setup_message_panel()
 	_setup_angle_panel()
 	_prepare_fragment_context()
+	# 恢复之前的探索进度（从暗室返回等情况）
+	_try_restore_state()
 	_show_opening_message()
 	# 从暗室等场景返回时 SceneFader 处于黑屏状态，需要淡入
 	SceneFader.fade_in()
@@ -451,6 +453,66 @@ func _find_bell_tower_node() -> Node2D:
 		if child.name.begins_with("BellTower"):
 			return child as Node2D
 	return null
+
+
+# ============================================================
+# 探索进度保存/恢复（跨暗室场景往返）
+# ============================================================
+
+func save_state() -> void:
+	## 将当前探索进度保存到 FragmentManager，供重新进入时恢复
+	var clues_data: Array[Dictionary] = []
+	if _clue_system and "discovered_clues" in _clue_system:
+		clues_data = _clue_system.discovered_clues.duplicate(true)
+
+	FragmentManager.set_fragment_state("0001", "observed_sundials", observed_sundials)
+	FragmentManager.set_fragment_state("0001", "compliance", compliance)
+	FragmentManager.set_fragment_state("0001", "source_mark_revealed", source_mark_revealed)
+	FragmentManager.set_fragment_state("0001", "discovered_clues", clues_data)
+	print("[Fragment0001] 探索进度已保存 — 日晷(%d/5) 合规度(%d) 源印(%s)" % [observed_sundials.size(), compliance, source_mark_revealed])
+
+
+func _try_restore_state() -> void:
+	## 尝试从 FragmentManager 恢复之前的探索进度
+	var saved_sundials = FragmentManager.get_fragment_state("0001", "observed_sundials")
+	if saved_sundials is Dictionary and not saved_sundials.is_empty():
+		observed_sundials = saved_sundials
+		# 重新标记场景中对应 Sundial 节点为已观测
+		for id in observed_sundials:
+			_mark_sundial_observed(id)
+
+	var saved_compliance = FragmentManager.get_fragment_state("0001", "compliance")
+	if typeof(saved_compliance) == TYPE_INT:
+		compliance = saved_compliance
+
+	var saved_revealed = FragmentManager.get_fragment_state("0001", "source_mark_revealed")
+	if typeof(saved_revealed) == TYPE_BOOL:
+		source_mark_revealed = saved_revealed
+
+	# 恢复线索系统
+	var saved_clues = FragmentManager.get_fragment_state("0001", "discovered_clues")
+	if saved_clues is Array and not saved_clues.is_empty():
+		_clue_system.discovered_clues = saved_clues.duplicate(true)
+		_update_clue_list()
+
+	if observed_sundials.size() > 0:
+		print("[Fragment0001] 探索进度已恢复 — 日晷(%d/5) 合规度(%d) 源印(%s)" % [observed_sundials.size(), compliance, source_mark_revealed])
+	else:
+		pass  # 首次进入，无需恢复
+
+
+func _mark_sundial_observed(id: String) -> void:
+	## 将场景中对应 Sundial 节点标记为已观测状态
+	var root = get_node_or_null("WorldRoot")
+	if not root:
+		root = self
+	var patterns := ["Sundial%s" % id, "Sundial_%s" % id]
+	for pattern in patterns:
+		var nodes = root.find_children(pattern + "*", "Node2D", true, false)
+		for node in nodes:
+			if node.has_method("mark_observed"):
+				node.mark_observed()
+				return
 
 
 func _complete_fragment() -> void:

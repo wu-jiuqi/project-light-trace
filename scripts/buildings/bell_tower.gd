@@ -23,9 +23,12 @@ var is_source_mark_revealed: bool = false
 
 func interact() -> void:
 	## E 键交互入口 — PlayerController 调用
-	# 门解锁后 → 跳转暗室
+	# 门解锁后 → 保存进度并跳转暗室
 	if not door_locked:
-		print("[BellTower] 门已解锁，进入暗室")
+		print("[BellTower] 门已解锁，保存进度并进入暗室")
+		var fragment = _find_fragment_scene()
+		if fragment and fragment.has_method("save_state"):
+			fragment.save_state()
 		SceneManager.change_scene(DARKROOM_PATH, "OutDoor")
 		return
 
