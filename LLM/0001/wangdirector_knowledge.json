@@ -118,7 +118,7 @@
     {
       "id": "wd_security_01",
       "category": "security",
-      "keywords": ["说谎", "真相", "公司在说谎", "骗局", "失控", "真相"],
+      "keywords": ["说谎", "公司在说谎", "骗局", "公司在隐瞒什么"],
       "relevance_gate": "triggered",
       "memory_stage": "any",
       "alert_required": 0,
@@ -128,7 +128,7 @@
     {
       "id": "wd_security_02",
       "category": "security",
-      "keywords": ["NPC", "AI", "代码", "程序", "游戏", "模拟"],
+      "keywords": ["NPC", "游戏", "模拟"],
       "relevance_gate": "triggered",
       "memory_stage": "any",
       "alert_required": 0,

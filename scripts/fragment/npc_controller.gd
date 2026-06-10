@@ -126,6 +126,39 @@ func _get_alert_profile() -> Dictionary:
 				"safe_actions": ["付房钱", "天气", "饿了", "累了", "老唐"],
 				"trust_modifier": -10.0
 			}
+		# --- 碎片0001 NPC（MONITORED合规度模式） ---
+		"linguide":
+			return {
+				"thresholds": {0:0, 1:15, 2:35, 3:55, 4:75, 5:92},
+				"hot_topics": ["脚本之外", "幕间", "记忆清除", "边界那边", "赵安保看到", "为什么骗"],
+				"personality": "林指导——微笑的提线木偶。她知道自己在读脚本但无法停止。在脚本缝隙里说真话。用句尾音调和沉默表达真实态度。",
+				"safe_actions": ["汇报进度", "日晷数据", "校准完成", "观测完毕"],
+				"trust_modifier": 0.0
+			}
+		"chentechnology":
+			return {
+				"thresholds": {0:0, 1:12, 2:30, 3:50, 4:72, 5:90},
+				"hot_topics": ["删除的信息", "碎片的便利贴", "0047", "为什么不让我看", "你在怕什么"],
+				"personality": "陈技术——被命令删除信息的人。技术术语快/非脚本慢的双速切换，手指会发抖。每句以'没问题吧？'确认安全边界。",
+				"safe_actions": ["观测数据", "角度规律", "等差数列", "调试设备"],
+				"trust_modifier": 0.0
+			}
+		"wangdirector":
+			return {
+				"thresholds": {0:0, 1:20, 2:42, 3:62, 4:80, 5:94},
+				"hot_topics": ["审查", "公关稿", "电子屏闪", "家人", "真相", "公司隐瞒"],
+				"personality": "王主管——说公司的版本但知道真相不是这样。宣讲流畅如公关稿，摄像头死角压低声音。第47秒电子屏会闪家人照片。",
+				"safe_actions": ["公共信息", "官方通告", "培训手册", "合规操作"],
+				"trust_modifier": 0.0
+			}
+		"zhaosecurity":
+			return {
+				"thresholds": {0:0, 1:8, 2:22, 3:40, 4:60, 5:82},
+				"hot_topics": ["光墙", "边界", "外面", "你看见了什么", "为什么不记录"],
+				"personality": "赵安保——越过一次光墙看到了外面。话极少（≤8字），安保术语精准。以不记录代替反抗。站在侧后方不挡路。",
+				"safe_actions": ["通过", "安全", "训练中", "无需协助"],
+				"trust_modifier": 0.0
+			}
 	return {
 		"thresholds": {0:0, 1:20, 2:40, 3:60, 4:80, 5:95},
 		"hot_topics": ["为什么没有颜色", "源印", "天枢", "不对劲", "奇怪"],
@@ -180,9 +213,6 @@ signal npc_state_changed(new_state: int)
 func _ready() -> void:
 	add_to_group("npc")
 	target_position = global_position
-	
-	# 创建交互提示标签（显示在NPC头顶）
-	_create_interact_label()
 	
 	# 查找碎片状态管理器
 	var states = get_tree().get_nodes_in_group("fragment_state")
@@ -791,6 +821,14 @@ func _get_initial_greeting() -> String:
 			return "你来了。坐。先去看那些颜色——不是我的颜色，是他们的。"
 		"innkeeper":
 			return "（冯婶托着腮帮子，头一点一点地在打瞌睡。听到脚步声，她迷迷糊糊地抬起眼皮。）……哦——醒了啊。没事吧现在？饿不饿？"
+		"linguide":
+			return "溯光者，编号确认通过。欢迎来到溯光计划第一阶段训练场。请先观察五个日晷，记录阴影角度。"
+		"chentechnology":
+			return "（终端屏幕闪了一下。）观测数据接口已开放。有任何技术问题——我可以协助。没问题吧？"
+		"wangdirector":
+			return "溯光者，欢迎来到启程之镇。天枢公司为您的训练体验提供了完善的公共信息服务。如有疑问，请查阅培训手册。"
+		"zhaosecurity":
+			return "（他站在侧后方，没有看你的眼睛。）训练区域安全。请保持在指定边界内。"
 	return "……"
 
 
@@ -818,6 +856,8 @@ func _get_partial_awake_greeting(count: int) -> String:
 		"innkeeper":
 			if count <= 2: return "（冯婶多翻了一页登记簿——虽然还是空的。）今天镇上好像不太一样——我说不上来。你也感觉到了？"
 			return "登记簿有字的那页——墨好像深了一点。你说奇怪不奇怪。算了——管它呢。"
+		"linguide", "chentechnology", "wangdirector", "zhaosecurity":
+			return _get_initial_greeting()
 	return "镇上有些不对劲——你感觉到了吗？"
 
 
@@ -842,6 +882,8 @@ func _get_post_awakening_greeting(count: int) -> String:
 		"violinist":
 			if count <= 3: return "（她拉了一个音。只有一个——但它没有消失。）……你想听吗？"
 			return "我在等第五个人——一个画画的。他知道一段旋律。不是琴声——但琴能听懂。"
+		"linguide", "chentechnology", "wangdirector", "zhaosecurity":
+			return _get_initial_greeting()
 	return "你回来了。世界不一样了——你也感觉到了吧？"
 
 
@@ -862,6 +904,8 @@ func _get_world_changed_greeting() -> String:
 			return "六色齐全了。画布上的裂痕合上了——不是被我补的。是被她们拼好的。"
 		"innkeeper":
 			return "今早我打开旅店大门——街上的颜色多得晃眼。我活了六十多年，第一次知道这条街长什么样。登记簿上——多了一行字。不是我的笔迹。但我认识它。"
+		"linguide", "chentechnology", "wangdirector", "zhaosecurity":
+			return _get_initial_greeting()
 	return "世界完整了——你做到了。"
 
 
@@ -875,6 +919,10 @@ func _get_alt_greeting(count: int) -> String:
 		"violinist":  return "（她点了点头，没有说话。）"
 		"oldpainter": return "颜色们在等你。进来吧。"
 		"innkeeper":  return "（冯婶翻了一页登记簿。）嗯？——哦，是你。饿了没？"
+		"linguide":   return "溯光者。你的观测进度还需要加速。需要教学提示吗？"
+		"chentechnology": return "（手指在终端上停了一下。）……需要技术支持吗？没问题。"
+		"wangdirector": return "关于启程之镇，天枢公司还有一些补充信息——你愿意听吗？"
+		"zhaosecurity": return "（他没有说话。只是往后退了一步，让出路来。）"
 	return "嗯？"
 
 
@@ -1204,30 +1252,4 @@ func _get_awakening_reaction() -> String:
 	return "世界发生了一些变化——颜色恢复了。(%d/6)" % c
 
 
-# ============================================================
-# 交互提示标签（Task 9 — 提示显示在NPC头上）
-# ============================================================
 
-func _create_interact_label() -> void:
-	var label = Label.new()
-	label.name = "InteractHint"
-	label.text = "[E] %s" % npc_name
-	label.position = Vector2(-30, -36)
-	label.add_theme_color_override("font_color", Color(1, 1, 0.85, 0.9))
-	label.add_theme_font_size_override("font_size", 11)
-	label.hide()
-	add_child(label)
-
-func show_interact_hint() -> void:
-	var label = get_node_or_null("InteractHint")
-	if label:
-		label.show()
-
-func hide_interact_hint() -> void:
-	var label = get_node_or_null("InteractHint")
-	if label:
-		label.hide()
-
-
-# ============================================================
-# 交互提示标签（Task 9 — 提示显示在NPC头上）

@@ -1,20 +1,46 @@
 [gd_scene format=3 uid="uid://c2j5leta63e2"]
 
-[ext_resource type="Texture2D" uid="uid://djws22vl1scs6" path="res://assets/papercraft/fragments/id0001/characters/npc_04_zhaosecurity.png" id="1_texture"]
+[ext_resource type="Texture2D" uid="uid://btoftosc0jr5i" path="res://assets/papercraft/fragments/id0001/characters/npc_04_zhaosecurity_s.png" id="1_7mcrn"]
+[ext_resource type="Script" uid="uid://ldw7x5fltxna" path="res://scripts/fragment/npc_controller.gd" id="2_script"]
 
 [sub_resource type="RectangleShape2D" id="Rect_body"]
-size = Vector2(36, 48)
+size = Vector2(29, 27)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_7mcrn"]
+radius = 18.0
+height = 88.0
 
 [node name="NPC_ZhaoSecurity" type="CharacterBody2D" unique_id=481594507]
 z_as_relative = false
 y_sort_enabled = true
-collision_layer = 4
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("2_script")
+npc_name = "赵安保"
+npc_role = "安保员"
+npc_kb_id = "zhaosecurity"
 
 [node name="BodyCollision" type="CollisionShape2D" parent="." unique_id=1257671554]
-position = Vector2(0, -24)
+position = Vector2(0.5, -13.5)
 shape = SubResource("Rect_body")
 
-[node name="Visual" type="Sprite2D" parent="." unique_id=1969576912]
-position = Vector2(0, -48)
+[node name="Visual Node2D" type="Node2D" parent="." unique_id=1351444106]
+
+[node name="Visual" type="Sprite2D" parent="Visual Node2D" unique_id=1969576912]
+position = Vector2(0, -43)
 scale = Vector2(0.5, 0.5)
-texture = ExtResource("1_texture")
+texture = ExtResource("1_7mcrn")
+
+[node name="Shadow Sprite2D" type="Sprite2D" parent="Visual Node2D" unique_id=73092370]
+
+[node name="FeetMarker Marker2D" type="Marker2D" parent="." unique_id=1326310423]
+
+[node name="InteractionArea Area2D" type="Area2D" parent="." unique_id=1071282413]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea Area2D" unique_id=876124619]
+position = Vector2(0, -42)
+shape = SubResource("CapsuleShape2D_7mcrn")
+debug_color = Color(0.6535111, 0.5184626, 3.85046e-07, 0.41960785)

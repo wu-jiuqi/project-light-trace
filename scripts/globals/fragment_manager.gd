@@ -163,11 +163,14 @@ func consume_completion_animation_id() -> String:
 # ============================================================
 
 func reset_all_fragments() -> void:
-	## 重置所有碎片的 completed 标记为 false
+	## 重置所有碎片的 completed 标记为 false，并清除所有碎片专属状态
 	for fragment in fragments:
 		fragment.completed = false
 	pending_completion_animation_id = ""
 	is_replay_mode = false
+	# 清除碎片专属状态，防止跨存档泄露（如线索数据）
+	_fragment_states.clear()
+	_ensure_default_fragment_states()
 	print("[FragmentManager] 所有 %d 个碎片已重置为未修复状态" % fragments.size())
 
 
@@ -252,6 +255,10 @@ func get_fragment_states_dict() -> Dictionary:
 
 func apply_fragment_states(states: Dictionary) -> void:
 	## 将 fragment_states 字典应用到对应碎片的专属状态
+	## 先清除旧状态再应用，防止跨存档状态泄露
+	_fragment_states.clear()
+	_ensure_default_fragment_states()
+	
 	if states.is_empty():
 		return
 	

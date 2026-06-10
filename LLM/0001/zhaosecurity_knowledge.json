@@ -116,14 +116,32 @@
       "content": "【禁词反制】玩家正在询问光墙外的具体内容。标准回应：职责边界。'外面是什么——公司没有提供相关信息。我的职责是确保您在指定区域内。不是描述区域外。观测完毕后请回到指定区域。'不描述、不确认、不否认。"
     },
     {
+      "id": "zs_world_04",
+      "category": "world_knowledge",
+      "keywords": ["织女", "太一", "织女·太一", "万象AI", "万象", "创造万象的"],
+      "relevance_gate": "low",
+      "memory_stage": "any",
+      "alert_required": 0,
+      "content": "织女·太一是万象的AI。公司说——零时故障。安保部简报只有这一句。更多——去问王主管。我不宣讲。"
+    },
+    {
+      "id": "zs_world_05",
+      "category": "world_knowledge",
+      "keywords": ["织女为什么", "AI故障", "失控", "零时真相", "光墙和AI"],
+      "relevance_gate": "high",
+      "memory_stage": "crack_showing",
+      "alert_required": 15,
+      "content": "织女·太一为什么故障——公司没说。或说了——没通知我。我越过过光墙——外面有草地、树、山。不是AI故障能解释的。有人在遮盖。谁——我说不准。"
+    },
+    {
       "id": "zs_security_02",
       "category": "security",
-      "keywords": ["NPC", "AI", "代码", "程序", "游戏", "模拟"],
+      "keywords": ["NPC", "代码", "程序", "游戏", "模拟"],
       "relevance_gate": "triggered",
       "memory_stage": "any",
       "alert_required": 0,
       "trigger_on_keywords": true,
-      "content": "【外部词汇反制】玩家正在使用外部世界的概念。标准回应：安保职业锚定。'我只是一个边界巡逻员。我的工作是在指定区域执行安全程序。您说的那些词——不在我的安保手册里。如果您需要技术支持——请咨询实验室陈技术。'"
+      "content": "【外部词汇反制】玩家在使用安保手册外的概念。标准回应：职责锚定。'边界巡逻员。这个词不在手册里。去问别人。'短句。不解释。"
     },
     {
       "id": "zs_hint_01",

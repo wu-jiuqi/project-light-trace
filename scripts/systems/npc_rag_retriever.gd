@@ -87,7 +87,44 @@ func _load_all_knowledge() -> void:
 			_knowledge_bases[npc_id] = kb
 			print("[NPCRagRetriever] 加载 %s: %d chunks" % [npc_id, chunks.size()])
 	
+	# 5. 加载碎片0001 NPC知识库（从 LLM/0001/）
+	_load_fragment_0001_knowledge()
+	
 	_is_loaded = true
+
+
+func _load_fragment_0001_knowledge() -> void:
+	## 加载碎片0001启程之镇的4个NPC知识库
+	var f0001_path = "res://LLM/0001/"
+	
+	# 加载L0核心身份
+	var l0_data = _load_json(f0001_path + "l0_core_identities.json")
+	if l0_data:
+		var identities = l0_data.get("l0_identities", {})
+		for npc_id in identities:
+			var id_info = identities[npc_id]
+			var identity_text = id_info.get("identity", "")
+			if not _l0_identities.has(npc_id):
+				_l0_identities[npc_id] = {
+					"id": npc_id,
+					"content": identity_text
+				}
+				print("[NPCRagRetriever] 加载碎片0001 L0身份: %s" % npc_id)
+	
+	# 加载各NPC知识chunks
+	var f0001_npcs = ["linguide", "chentechnology", "wangdirector", "zhaosecurity"]
+	for npc_id in f0001_npcs:
+		var data = _load_json(f0001_path + npc_id + "_knowledge.json")
+		if data:
+			var chunks = data.get("chunks", [])
+			if chunks.size() > 0:
+				var kb = {
+					"npc_id": npc_id,
+					"chunks": chunks,
+					"keyword_index": _build_keyword_index(npc_id, chunks)
+				}
+				_knowledge_bases[npc_id] = kb
+				print("[NPCRagRetriever] 加载碎片0001 NPC: %s, %d chunks" % [npc_id, chunks.size()])
 
 
 func _load_json(path: String) -> Dictionary:

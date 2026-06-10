@@ -4,6 +4,7 @@ extends Node2D
 
 const PLAYER_SCENE: PackedScene = preload("res://scenes/characters/player/player.tscn")
 const ClueSystemScript = preload("res://scripts/systems/clue_system.gd")
+const BGM_FRAGMENT_0001 = preload("res://assets/audio/bgm/bgm_fragment_0001_loop.ogg")
 
 ## DepthLayer Y 范围阈值
 const LAYER_1_Y: float = 450.0
@@ -25,6 +26,9 @@ var _player: CharacterBody2D = null
 var _current_layer: int = 0
 var _depth_layers: Dictionary = {}
 
+## BGM 播放
+var _bgm_player: AudioStreamPlayer = null
+
 ## 日晷状态
 var observed_sundials: Dictionary = {}
 var compliance: int = 100
@@ -35,28 +39,31 @@ var completed: bool = false
 ## 线索系统
 var _clue_system: Node = null
 
-## UI 引用
-var _collection_panel: CanvasLayer = null
-var _clue_list_container: VBoxContainer = null
-var _progress_label: Label = null
-var _message_panel: Panel = null
-var _message_title: Label = null
-var _message_body: Label = null
+## UI @onready 引用（节点预置于 fragment_0001.tscn 的 UIRoot 下）
+@onready var _ui_root: CanvasLayer = $UIRoot
+@onready var _interact_hint_label: Label = $UIRoot/InteractHint
+@onready var _message_panel_bg: ColorRect = $UIRoot/MessagePanelBg
+@onready var _message_panel: Panel = $UIRoot/MessagePanel
+@onready var _message_title: Label = $UIRoot/MessagePanel/MessageTitle
+@onready var _message_body: Label = $UIRoot/MessagePanel/MessageBody
+@onready var _angle_bg: ColorRect = $UIRoot/CalibrationBg
+@onready var _angle_panel: Panel = $UIRoot/CalibrationPanel
+@onready var _angle_value: Label = $UIRoot/CalibrationPanel/AngleValue
+@onready var _calibration_minus_btn: Button = $UIRoot/CalibrationPanel/MinusBtn
+@onready var _calibration_plus_btn: Button = $UIRoot/CalibrationPanel/PlusBtn
+@onready var _calibration_submit_btn: Button = $UIRoot/CalibrationPanel/SubmitBtn
+@onready var _calibration_close_btn: Button = $UIRoot/CalibrationPanel/CloseBtn
+@onready var _collection_panel_bg: ColorRect = $UIRoot/CollectionPanelBg
+@onready var _collection_panel: ColorRect = $UIRoot/CollectionPanel
+@onready var _collection_clue_list: VBoxContainer = $UIRoot/CollectionPanel/ClueScroll/ClueList
+@onready var _progress_label: Label = $UIRoot/CollectionPanel/ProgressLabel
+@onready var _compliance_bar_bg: ColorRect = $UIRoot/ComplianceBarContainer/ComplianceBarBg
+@onready var _compliance_bar_fill: ColorRect = $UIRoot/ComplianceBarContainer/ComplianceBarBg/ComplianceBarFill
+@onready var _compliance_label: Label = $UIRoot/ComplianceBarContainer/ComplianceLabel
+@onready var _compliance_value_label: Label = $UIRoot/ComplianceBarContainer/ComplianceValueLabel
+@onready var _compliance_warning_icon: Label = $UIRoot/ComplianceBarContainer/ComplianceWarningIcon
+
 var _message_timer = null
-var _angle_panel: Panel = null
-var _angle_value: Label = null
-var _angle_bg: ColorRect = null
-var _interact_hint_label: Label = null
-
-## UIRoot — 统一新增UI容器（所有新增UI均挂在此节点下）
-var _ui_root: CanvasLayer = null
-
-## 合规度条组件
-var _compliance_bar_bg: ColorRect = null
-var _compliance_bar_fill: ColorRect = null
-var _compliance_label: Label = null
-var _compliance_value_label: Label = null
-var _compliance_warning_icon: Label = null
 var _compliance_pulse_tween: Tween = null
 
 ## 林指导幕间事件追踪
@@ -70,6 +77,19 @@ var _boundary_cooldown: float = 0.0
 ## 合规度归零一次性标记（防重复创建 timer）
 var _compliance_zero_triggered: bool = false
 
+## L6 强制回归一次性标记（合规度 < 25% 触发）
+var _compliance_l6_triggered: bool = false
+
+## 边界光墙多级触碰计数
+var _boundary_touch_count: int = 0
+
+## 日晷E 首次接近标记
+var _sundial_e_proximity_triggered: bool = false
+
+## LayerMarker 引用（透明度控制）
+var _layer_marker_1_2: Marker2D = null
+var _layer_marker_2_3: Marker2D = null
+
 # ============================================================
 # 初始化
 # ============================================================
@@ -79,17 +99,18 @@ func _ready() -> void:
 	_create_clue_system()
 	_cache_depth_layers()
 	_spawn_player()
-	_setup_ui_root()          # 创建 UIRoot CanvasLayer + 合规度条
-	_setup_interact_hint()
-	_setup_collection_panel()
-	_setup_message_panel()
-	_setup_angle_panel()
+	_configure_ui_theme()       # 对预置节点应用字体/颜色/信号连接
 	_prepare_fragment_context()
 	# 恢复之前的探索进度（从暗室返回等情况）
 	_try_restore_state()
 	_show_opening_message()
 	# 从暗室等场景返回时 SceneFader 处于黑屏状态，需要淡入
 	SceneFader.fade_in()
+	# 连接光墙 InteractionArea 信号 + 缓存 LayerMarker
+	_connect_light_wall_signals()
+	_cache_layer_markers()
+	# 播放碎片探索 BGM（循环版本，淡入淡出处理）
+	_start_bgm()
 	print("[Fragment0001] 启程之镇就绪 — E键观测日晷 | Tab键查看线索")
 
 
@@ -114,25 +135,116 @@ func _show_opening_message() -> void:
 	)
 
 
+# ============================================================
+# 光墙 InteractionArea 信号连接 — 触碰光墙扣合规度
+# ============================================================
+
+## 缓存所有光墙 InteractionArea（用于碰撞检测）
+var _light_wall_areas: Array[Area2D] = []
+
+func _connect_light_wall_signals() -> void:
+	"""查找所有 LightWall 节点的 InteractionArea 并缓存"""
+	var world_root := get_node_or_null("WorldRoot")
+	if not world_root:
+		return
+	var light_walls: Array[Node] = world_root.find_children("LightWall*", "Node2D", true, false)
+	for wall in light_walls:
+		var ia := wall.get_node_or_null("InteractionArea") as Area2D
+		if ia:
+			_light_wall_areas.append(ia)
+	print("[Fragment0001] 已缓存 %d 个光墙 InteractionArea" % _light_wall_areas.size())
+
+
+func _is_inside_light_wall() -> bool:
+	"""检查玩家是否与任何光墙 InteractionArea 重叠"""
+	if not _player:
+		return false
+	for ia in _light_wall_areas:
+		if not is_instance_valid(ia):
+			continue
+		if ia.overlaps_body(_player):
+			return true
+	return false
+
+
+# ============================================================
+# LayerMarker 透明度控制
+# ============================================================
+
+func _cache_layer_markers() -> void:
+	"""缓存 LayerMarker 节点下的两个 Marker2D"""
+	var layer_marker := get_node_or_null("WorldRoot/LayerMarker")
+	if not layer_marker:
+		printerr("[Fragment0001] 未找到 WorldRoot/LayerMarker 节点")
+		return
+	_layer_marker_1_2 = layer_marker.get_node_or_null("Layer1_2") as Marker2D
+	_layer_marker_2_3 = layer_marker.get_node_or_null("Layer2_3") as Marker2D
+	if not _layer_marker_1_2 or not _layer_marker_2_3:
+		printerr("[Fragment0001] LayerMarker 子节点缺失")
+
+
+func _update_layer_transparency() -> void:
+	"""根据玩家 Y 与 LayerMarker 的位置关系，调整深度层透明度"""
+	if not _player or not _layer_marker_1_2 or not _layer_marker_2_3:
+		return
+
+	var player_y: float = _player.global_position.y
+	const TARGET_ALPHA: float = 0.35
+	const TRANSITION_SPEED: float = 4.0
+
+	# DepthLayer_1: 玩家 Y 小于 Layer1_2 时降低透明度（玩家在近景层前方/上方）
+	var dl1 := _depth_layers.get(1) as CanvasItem
+	if dl1:
+		var behind_1: bool = player_y < _layer_marker_1_2.global_position.y
+		var target_a: float = TARGET_ALPHA if behind_1 else 1.0
+		dl1.modulate.a = move_toward(dl1.modulate.a, target_a, TRANSITION_SPEED * get_process_delta_time())
+
+	# DepthLayer_2: 玩家 Y 小于 Layer2_3 时降低透明度
+	var dl2 := _depth_layers.get(2) as CanvasItem
+	if dl2:
+		var behind_2: bool = player_y < _layer_marker_2_3.global_position.y
+		var target_a: float = TARGET_ALPHA if behind_2 else 1.0
+		dl2.modulate.a = move_toward(dl2.modulate.a, target_a, TRANSITION_SPEED * get_process_delta_time())
+
+	# 补偿玩家透明度：player 是深度层的子节点，层透明度会影响 player，
+	# 需要反向补偿让 player 始终保持不透明
+	if _player:
+		var parent_node := _player.get_parent()
+		if parent_node and parent_node is CanvasItem:
+			var parent_modulate := (parent_node as CanvasItem).modulate
+			if parent_modulate.a < 0.999:
+				_player.modulate.a = 1.0 / max(parent_modulate.a, 0.01)
+			else:
+				_player.modulate.a = 1.0
+
+
 func _process(delta: float) -> void:
 	_update_player_z()
 	_update_player_depth_layer()
 	_check_lin_intermission(delta)
 	_check_boundary(delta)
+	_check_sundial_e_proximity(delta)
+	_update_layer_transparency()
 
 
 # ============================================================
 # UIRoot 初始化（所有新增UI统一挂载点）
 # ============================================================
 
-func _setup_ui_root() -> void:
-	"""创建 UIRoot CanvasLayer，作为所有新增UI的父节点"""
-	_ui_root = CanvasLayer.new()
-	_ui_root.name = "UIRoot"
-	_ui_root.layer = 70
-	add_child(_ui_root)
-	_setup_compliance_bar()
-	print("[Fragment0001] UIRoot 已创建")
+func _configure_ui_theme() -> void:
+	"""连接 .tscn 预置 UI 节点的信号（样式在编辑器中直接设置）"""
+	# --- 交互提示信号 ---
+	if _player and _player.has_signal("interact_hint_changed"):
+		if not _player.interact_hint_changed.is_connected(_on_interact_hint_changed):
+			_player.interact_hint_changed.connect(_on_interact_hint_changed)
+
+	# --- 校准面板按钮信号 ---
+	_calibration_minus_btn.pressed.connect(_on_clock_minus_pressed)
+	_calibration_plus_btn.pressed.connect(_on_clock_plus_pressed)
+	_calibration_submit_btn.pressed.connect(_submit_clock_angle)
+	_calibration_close_btn.pressed.connect(_close_angle_panel)
+
+	print("[Fragment0001] UI 信号连接完成")
 
 
 # ============================================================
@@ -292,11 +404,11 @@ func on_sundial_interact(sundial: Node2D) -> void:
 	# 额外叙事提示
 	var extra := ""
 	if id == "E":
-		extra = "\n四个已知角度是 12、24、36、48。第五项不是看到的，是推出来的：66。"
+		extra = "\n这个日晷被砸碎了。碎片被整齐排列——或许缺失的角度可以从其他数据推导。"
 	elif observed_sundials.size() == 2:
 		extra = "\n陈技术的终端亮了一下：阴影角度之间存在稳定间隔。"
 	elif observed_sundials.size() == 4:
-		extra = "\n林指导放低声音：第五个，不是用眼睛。"
+		extra = "\n林指导放低声音：第五个，不是用眼睛。五组数据，找规律不难。"
 
 	_show_message(
 		data["name"],
@@ -311,31 +423,31 @@ func on_sundial_interact(sundial: Node2D) -> void:
 	var obs_count: int = observed_sundials.size()
 
 	if obs_count == 1:
-		# #2 首次观测日晷后 — await 后再次确认状态有效
+		# #2 首次观测日晷后 — 日志提示
 		await get_tree().create_timer(2.0).timeout
 		if observed_sundials.size() >= 1:
 			_show_message(
 				"观测记录",
-				"你注意到日晷的阴影角度各不相同。也许这些数字之间存在某种规律。按 Tab 可以查看已收集的线索。",
-				5.0
+				"观测数据已记录。日志可在Tab面板查看。",
+				3.0
 			)
 	elif obs_count == 3:
-		# #3 观测到 3/5 日晷时 — await 后再次确认状态有效
+		# #3 观测到 3/5 日晷时 — 规律提示
 		await get_tree().create_timer(2.0).timeout
 		if observed_sundials.size() >= 3:
 			_show_message(
-				"进展",
-				"你已经观测了三个日晷。继续探索镇子——还有更多线索等着你。",
-				4.0
+				"系统",
+				"数据之间的间隔似乎有规律。",
+				3.0
 			)
 	elif obs_count == 5:
-		# #5 观测到 5/5 日晷时 — await 后再次确认状态有效
+		# #4 收集全部4个可观测日晷后 — 返回钟楼提示
 		await get_tree().create_timer(2.0).timeout
 		if observed_sundials.size() >= 5:
 			_show_message(
-				"全部收集",
-				"五个日晷全部记录完毕。数据之间的间隔似乎有规律——前往钟楼试试你的推断。",
-				5.0
+				"系统",
+				"所有观测数据已收集。请返回钟楼。",
+				4.0
 			)
 
 
@@ -370,84 +482,6 @@ func on_source_mark_interact() -> void:
 # ============================================================
 # 日晷校准面板
 # ============================================================
-
-func _setup_angle_panel() -> void:
-	var panel_layer = CanvasLayer.new()
-	panel_layer.name = "AnglePanelLayer"
-	panel_layer.layer = 80
-	add_child(panel_layer)
-
-	# 半透明遮罩（默认隐藏，校准面板打开时才显示）
-	_angle_bg = ColorRect.new()
-	_angle_bg.name = "AngleBg"
-	_angle_bg.color = Color(0, 0, 0, 0.55)
-	_angle_bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_angle_bg.mouse_filter = Control.MOUSE_FILTER_STOP
-	_angle_bg.visible = false
-	panel_layer.add_child(_angle_bg)
-
-	_angle_panel = Panel.new()
-	_angle_panel.name = "CalibrationPanel"
-	_angle_panel.position = Vector2(438, 178)
-	_angle_panel.size = Vector2(404, 280)
-	_angle_panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	_angle_panel.visible = false
-	panel_layer.add_child(_angle_panel)
-
-	var title = Label.new()
-	title.position = Vector2(24, 18)
-	title.size = Vector2(356, 26)
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.text = "钟楼日晷校准"
-	title.add_theme_font_size_override("font_size", 18)
-	_angle_panel.add_child(title)
-
-	var hint = Label.new()
-	hint.position = Vector2(30, 58)
-	hint.size = Vector2(344, 52)
-	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	hint.text = "用已记录的角度推断第五项。每次调整 6°。"
-	hint.add_theme_font_size_override("font_size", 13)
-	_angle_panel.add_child(hint)
-
-	_angle_value = Label.new()
-	_angle_value.position = Vector2(138, 116)
-	_angle_value.size = Vector2(128, 44)
-	_angle_value.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_angle_value.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_angle_value.text = "12°"
-	_angle_value.add_theme_font_size_override("font_size", 26)
-	_angle_panel.add_child(_angle_value)
-
-	var minus_btn = Button.new()
-	minus_btn.position = Vector2(56, 120)
-	minus_btn.size = Vector2(64, 40)
-	minus_btn.text = "-6°"
-	minus_btn.pressed.connect(_on_clock_minus_pressed)
-	_angle_panel.add_child(minus_btn)
-
-	var plus_btn = Button.new()
-	plus_btn.position = Vector2(284, 120)
-	plus_btn.size = Vector2(64, 40)
-	plus_btn.text = "+6°"
-	plus_btn.pressed.connect(_on_clock_plus_pressed)
-	_angle_panel.add_child(plus_btn)
-
-	var submit_btn = Button.new()
-	submit_btn.position = Vector2(56, 196)
-	submit_btn.size = Vector2(132, 42)
-	submit_btn.text = "验证"
-	submit_btn.pressed.connect(_submit_clock_angle)
-	_angle_panel.add_child(submit_btn)
-
-	var close_btn = Button.new()
-	close_btn.position = Vector2(216, 196)
-	close_btn.size = Vector2(132, 42)
-	close_btn.text = "关闭"
-	close_btn.pressed.connect(_close_angle_panel)
-	_angle_panel.add_child(close_btn)
-
 
 func _on_clock_minus_pressed() -> void:
 	clock_angle = wrapi(clock_angle - 6, 0, 360)
@@ -604,6 +638,9 @@ func save_state() -> void:
 	FragmentManager.set_fragment_state("0001", "compliance", compliance)
 	FragmentManager.set_fragment_state("0001", "source_mark_revealed", source_mark_revealed)
 	FragmentManager.set_fragment_state("0001", "discovered_clues", clues_data)
+	FragmentManager.set_fragment_state("0001", "boundary_touch_count", _boundary_touch_count)
+	FragmentManager.set_fragment_state("0001", "intermission_triggered", _intermission_triggered)
+	FragmentManager.set_fragment_state("0001", "sundial_e_proximity_triggered", _sundial_e_proximity_triggered)
 	print("[Fragment0001] 探索进度已保存 — 日晷(%d/5) 合规度(%d) 源印(%s)" % [observed_sundials.size(), compliance, source_mark_revealed])
 
 
@@ -627,12 +664,26 @@ func _try_restore_state() -> void:
 	# 恢复线索系统
 	var saved_clues = FragmentManager.get_fragment_state("0001", "discovered_clues")
 	if saved_clues is Array and not saved_clues.is_empty():
-		_clue_system.discovered_clues = saved_clues.duplicate(true)
+		_clue_system.discovered_clues.clear()
+		for entry in saved_clues:
+			if entry is Dictionary:
+				_clue_system.discovered_clues.append(entry.duplicate(true))
 		_update_clue_list()
 
 	# 恢复合规度条
 	if _compliance_bar_fill:
 		_update_compliance_bar()
+
+	# 恢复新增状态
+	var saved_boundary = FragmentManager.get_fragment_state("0001", "boundary_touch_count")
+	if typeof(saved_boundary) == TYPE_INT:
+		_boundary_touch_count = saved_boundary
+	var saved_intermission = FragmentManager.get_fragment_state("0001", "intermission_triggered")
+	if typeof(saved_intermission) == TYPE_BOOL:
+		_intermission_triggered = saved_intermission
+	var saved_e_proximity = FragmentManager.get_fragment_state("0001", "sundial_e_proximity_triggered")
+	if typeof(saved_e_proximity) == TYPE_BOOL:
+		_sundial_e_proximity_triggered = saved_e_proximity
 
 	if observed_sundials.size() > 0:
 		print("[Fragment0001] 探索进度已恢复 — 日晷(%d/5) 合规度(%d) 源印(%s)" % [observed_sundials.size(), compliance, source_mark_revealed])
@@ -677,10 +728,7 @@ func _complete_fragment() -> void:
 
 	print("[Fragment0001] 碎片完成！显示胜利画面")
 
-	# 3. 创建胜利画面面板（在 UIRoot 下）
-	if not _ui_root:
-		_setup_ui_root()
-
+	# 3. 创建胜利画面面板（UIRoot 已在 .tscn 中预置）
 	var victory_bg: ColorRect = ColorRect.new()
 	victory_bg.name = "VictoryBg"
 	victory_bg.color = Color(0, 0, 0, 0.6)
@@ -828,6 +876,7 @@ func _complete_fragment() -> void:
 func _on_return_to_star_map() -> void:
 	"""胜利画面 [返回星图] 按钮回调"""
 	print("[Fragment0001] 玩家选择返回星图")
+	_stop_bgm()
 	get_tree().change_scene_to_file("res://scenes/star_map.tscn")
 
 
@@ -856,23 +905,31 @@ func _modify_compliance(delta: int, reason: String) -> void:
 	# 更新合规度条UI
 	_update_compliance_bar()
 
-	# #8 合规度 ≤ 50：警告
-	if compliance <= 50 and compliance > 30:
+	# L6 强制回归：合规度 < 25%（仅触发一次）
+	if compliance < 25 and not _compliance_l6_triggered:
+		_compliance_l6_triggered = true
+		_trigger_l6_forced_return()
+		return
+
+	# #8 合规度降至 70% 以下（L3 警告区）
+	if compliance <= 70 and compliance >= 55:
+		# 仅在首次进入 L3 区间时弹一次消息
+		if not _compliance_zero_triggered and compliance > 54:
+			_show_message(
+				"⚠ 系统提示",
+				"您的训练行为正受到关注。请保持在指定活动区域内。",
+				4.0
+			)
+
+	# #9 合规度降至 40% 以下（L4 限制 / L5 封锁）
+	if compliance <= 40 and compliance >= 25:
 		_show_message(
-			"系统提示",
-			"合规度降低。注意：持续违规可能触发强制回训。",
+			"⛔ 系统警告",
+			"最终警告：您的训练权限即将受限。",
 			4.0
 		)
 
-	# #9 合规度 ≤ 30：严重警告
-	if compliance <= 30 and compliance > 0:
-		_show_message(
-			"⚠ 系统提示",
-			"合规度已进入临界区。如降至 0，将触发强制回归。",
-			5.0
-		)
-
-	# L6 强制返回：合规度归零（仅触发一次）
+	# 合规度归零备选（理论上由 L6 在 <25% 接管）
 	if compliance <= 0 and not _compliance_zero_triggered:
 		_compliance_zero_triggered = true
 		_show_message(
@@ -880,9 +937,9 @@ func _modify_compliance(delta: int, reason: String) -> void:
 			"合规度归零。系统启动强制回归协议。",
 			3.0
 		)
-		# 等待 3 秒后跳转星图
 		var timer := get_tree().create_timer(3.0)
 		timer.timeout.connect(func() -> void:
+			_stop_bgm()
 			get_tree().change_scene_to_file("res://scenes/star_map.tscn")
 		)
 
@@ -891,69 +948,8 @@ func _modify_compliance(delta: int, reason: String) -> void:
 # P1：合规度完整UI联动
 # ============================================================
 
-func _setup_compliance_bar() -> void:
-	"""在 UIRoot 下创建合规度条UI"""
-	if not _ui_root:
-		return
-
-	# 位置：右上角 (860, 20)，尺寸 (240, 32)
-	var bar_container: Control = Control.new()
-	bar_container.name = "ComplianceBarContainer"
-	bar_container.position = Vector2(860, 20)
-	bar_container.size = Vector2(280, 36)
-	_ui_root.add_child(bar_container)
-
-	# ⚠/⛔ 警告图标（合规度低时显示，位于条左侧）
-	_compliance_warning_icon = Label.new()
-	_compliance_warning_icon.name = "ComplianceWarningIcon"
-	_compliance_warning_icon.position = Vector2(0, 4)
-	_compliance_warning_icon.size = Vector2(24, 28)
-	_compliance_warning_icon.add_theme_font_size_override("font_size", 18)
-	_compliance_warning_icon.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_compliance_warning_icon.text = ""
-	bar_container.add_child(_compliance_warning_icon)
-
-	# 标签 "合规度"（图标右侧）
-	_compliance_label = Label.new()
-	_compliance_label.name = "ComplianceLabel"
-	_compliance_label.position = Vector2(28, 0)
-	_compliance_label.size = Vector2(60, 16)
-	_compliance_label.text = "合规度"
-	_compliance_label.add_theme_font_size_override("font_size", 12)
-	_compliance_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.75, 1.0))
-	bar_container.add_child(_compliance_label)
-
-	# 数值标签
-	_compliance_value_label = Label.new()
-	_compliance_value_label.name = "ComplianceValue"
-	_compliance_value_label.position = Vector2(88, 0)
-	_compliance_value_label.size = Vector2(48, 16)
-	_compliance_value_label.text = "100%"
-	_compliance_value_label.add_theme_font_size_override("font_size", 12)
-	_compliance_value_label.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 1.0))
-	bar_container.add_child(_compliance_value_label)
-
-	# 背景条（灰色 #333）
-	_compliance_bar_bg = ColorRect.new()
-	_compliance_bar_bg.name = "ComplianceBarBg"
-	_compliance_bar_bg.position = Vector2(0, 20)
-	_compliance_bar_bg.size = Vector2(240, 12)
-	_compliance_bar_bg.color = Color(0.2, 0.2, 0.2, 1.0)  # #333
-	bar_container.add_child(_compliance_bar_bg)
-
-	# 填充条
-	_compliance_bar_fill = ColorRect.new()
-	_compliance_bar_fill.name = "ComplianceBarFill"
-	_compliance_bar_fill.position = Vector2(0, 0)
-	_compliance_bar_fill.size = Vector2(240, 12)  # 初始100%
-	_compliance_bar_fill.color = Color(0.227, 0.482, 0.835, 1.0)  # #3a7bd5 蓝色
-	_compliance_bar_bg.add_child(_compliance_bar_fill)
-
-	print("[Fragment0001] 合规度条已创建")
-
-
 func _update_compliance_bar() -> void:
-	"""更新合规度条的颜色、宽度、图标和数值"""
+	"""更新合规度条的颜色、宽度、图标和数值（对齐UX L1-L6等级）"""
 	if not _compliance_bar_fill or not _compliance_value_label:
 		return
 
@@ -970,29 +966,150 @@ func _update_compliance_bar() -> void:
 		_compliance_pulse_tween.kill()
 		_compliance_pulse_tween = null
 
-	# 颜色动态切换
-	if compliance >= 70:
-		_compliance_bar_fill.color = Color(0.227, 0.482, 0.835, 1.0)  # 蓝色 #3a7bd5
-		if _compliance_warning_icon:
-			_compliance_warning_icon.text = ""
-	elif compliance >= 50:
-		_compliance_bar_fill.color = Color(0.831, 0.627, 0.09, 1.0)  # 琥珀色 #d4a017
-		if _compliance_warning_icon:
-			_compliance_warning_icon.text = ""
-	else:
-		_compliance_bar_fill.color = Color(0.8, 0.2, 0.2, 1.0)  # 红色 #cc3333
-		# 合规度 ≤ 50：显示 ⚠ 图标；≤ 30 显示 ⛔
-		if _compliance_warning_icon:
-			if compliance <= 30:
-				_compliance_warning_icon.text = "⛔"
-			else:
-				_compliance_warning_icon.text = "⚠"
+	# L1 良好 100-85% — 蓝色 #4A90D9
+	# L2 注意   84-70% — 蓝色（与L1相同色，无额外警告图标）
+	# L3 警告   69-55% — 琥珀色 + ⚠
+	# L4 限制   54-40% — 琥珀色 + ⚠ 闪烁
+	# L5 封锁   39-25% — 红色脉冲 + ⛔
+	# L6 强制  <25%     — 全屏红色边框（在 _trigger_l6_forced_return 中处理）
 
-		# 红色脉冲动画（透明度在 0.3~1.0 循环）
+	if compliance >= 70:
+		# L1/L2: 蓝色 #4A90D9
+		_compliance_bar_fill.color = Color(0.29, 0.565, 0.851, 1.0)  # #4A90D9
+		if _compliance_warning_icon:
+			_compliance_warning_icon.text = ""
+	elif compliance >= 55:
+		# L3: 琥珀色 #E8A838 + ⚠
+		_compliance_bar_fill.color = Color(0.91, 0.66, 0.22, 1.0)  # #E8A838
+		if _compliance_warning_icon:
+			_compliance_warning_icon.text = "⚠"
+	elif compliance >= 40:
+		# L4: 琥珀色 + ⚠ 闪烁（通过透明度脉冲实现）
+		_compliance_bar_fill.color = Color(0.91, 0.66, 0.22, 1.0)  # #E8A838
+		if _compliance_warning_icon:
+			_compliance_warning_icon.text = "⚠"
+		# ⚠ 闪烁动画
+		if _compliance_warning_icon:
+			_compliance_pulse_tween = create_tween()
+			_compliance_pulse_tween.set_loops()
+			_compliance_pulse_tween.tween_property(_compliance_warning_icon, "modulate:a", 0.25, 0.5)
+			_compliance_pulse_tween.tween_property(_compliance_warning_icon, "modulate:a", 1.0, 0.5)
+	else:
+		# L5: 红色 #D94A4A 脉冲 + ⛔
+		_compliance_bar_fill.color = Color(0.851, 0.29, 0.29, 1.0)  # #D94A4A
+		if _compliance_warning_icon:
+			_compliance_warning_icon.text = "⛔"
+		# 红色脉冲动画
 		_compliance_pulse_tween = create_tween()
 		_compliance_pulse_tween.set_loops()
 		_compliance_pulse_tween.tween_property(_compliance_bar_fill, "modulate:a", 0.3, 0.6)
 		_compliance_pulse_tween.tween_property(_compliance_bar_fill, "modulate:a", 1.0, 0.6)
+
+
+func _trigger_l6_forced_return() -> void:
+	"""L6 强制回归事件 — 全屏红色脉冲 → 黑屏 → 重生广场 → 合规度重置 85%"""
+	print("[Fragment0001] L6 强制回归触发 — 合规度 %d%%" % compliance)
+
+	# 阶段1：全屏红色边框脉冲 (0.3s 循环)
+	var red_border: ColorRect = ColorRect.new()
+	red_border.name = "L6RedBorder"
+	red_border.color = Color(0.85, 0.1, 0.1, 0.0)
+	red_border.set_anchors_preset(Control.PRESET_FULL_RECT)
+	red_border.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_ui_root.add_child(red_border)
+
+	var warning_label: Label = Label.new()
+	warning_label.name = "L6WarningText"
+	warning_label.text = "⚠ 训练行为偏离标准轨道"
+	warning_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	warning_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	warning_label.add_theme_font_size_override("font_size", 20)
+	warning_label.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3, 1.0))
+	warning_label.set_anchors_preset(Control.PRESET_CENTER)
+	warning_label.size = Vector2(500, 40)
+	_ui_root.add_child(warning_label)
+
+	# 红色边框脉冲动画
+	var pulse_tween := create_tween()
+	pulse_tween.set_loops()
+	pulse_tween.tween_property(red_border, "modulate:a", 0.5, 0.3)
+	pulse_tween.tween_property(red_border, "modulate:a", 0.15, 0.3)
+
+	# 阶段2：1.5s 后画面从边缘向中心淡出（黑色）
+	await get_tree().create_timer(1.5).timeout
+	if is_instance_valid(pulse_tween):
+		pulse_tween.kill()
+
+	# 创建黑屏遮罩
+	var dark_overlay: ColorRect = ColorRect.new()
+	dark_overlay.name = "L6DarkOverlay"
+	dark_overlay.color = Color(0, 0, 0, 0.0)
+	dark_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dark_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	_ui_root.add_child(dark_overlay)
+
+	var fade_tween := create_tween()
+	fade_tween.tween_property(dark_overlay, "color:a", 1.0, 1.0)
+
+	# 阶段3：黑屏中间文字停留 2s
+	await fade_tween.finished
+	if is_instance_valid(red_border):
+		red_border.queue_free()
+	if is_instance_valid(warning_label):
+		warning_label.queue_free()
+
+	var center_text: Label = Label.new()
+	center_text.name = "L6CenterText"
+	center_text.text = "您的训练行为已偏离标准轨道。\n我们需要重新开始。"
+	center_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	center_text.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	center_text.add_theme_font_size_override("font_size", 20)
+	center_text.add_theme_color_override("font_color", Color(0.9, 0.85, 0.7, 1.0))
+	center_text.set_anchors_preset(Control.PRESET_CENTER)
+	center_text.size = Vector2(500, 80)
+	dark_overlay.add_child(center_text)
+
+	await get_tree().create_timer(2.0).timeout
+
+	# 阶段4：重置合规度 + 移动玩家到广场中央
+	compliance = 85
+	_compliance_l6_triggered = false  # 允许再次触发
+	_update_compliance_bar()
+
+	if _player:
+		# 移动到默认出生点位置
+		var default_spawn: Marker2D = null
+		var spawn_points = get_node_or_null("WorldRoot/SpawnPoints")
+		if spawn_points:
+			default_spawn = spawn_points.get_node_or_null("Default") as Marker2D
+		if default_spawn:
+			_player.global_position = default_spawn.global_position
+			# 同步深度层
+			var target_layer = _get_layer_by_y(_player.global_position.y)
+			if target_layer != _current_layer:
+				var layer_node = _depth_layers.get(target_layer) as Node2D
+				if layer_node:
+					var saved_pos = _player.global_position
+					_player.reparent(layer_node)
+					_player.global_position = saved_pos
+					_current_layer = target_layer
+
+	# 淡入
+	fade_tween = create_tween()
+	fade_tween.tween_property(dark_overlay, "color:a", 0.0, 0.5)
+	await fade_tween.finished
+
+	if is_instance_valid(dark_overlay):
+		dark_overlay.queue_free()
+
+	# 阶段5：林指导消息弹窗
+	_show_message(
+		"林指导",
+		"请跟好我。我们重新来过。",
+		5.0
+	)
+
+	print("[Fragment0001] L6 强制回归完成 — 合规度重置为 85%%，进度保留")
 
 
 func _count_observed() -> int:
@@ -1007,30 +1124,6 @@ func _count_observed() -> int:
 # 交互提示（底部居中 "[E] 观察 xxx"）
 # ============================================================
 
-func _setup_interact_hint() -> void:
-	var hint_layer = CanvasLayer.new()
-	hint_layer.name = "InteractHintLayer"
-	hint_layer.layer = 40
-	add_child(hint_layer)
-
-	_interact_hint_label = Label.new()
-	_interact_hint_label.name = "InteractHint"
-	_interact_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_interact_hint_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_interact_hint_label.size = Vector2(320, 32)
-	_interact_hint_label.position = Vector2(480, 660)
-	_interact_hint_label.add_theme_color_override("font_color", Color(1.0, 0.90, 0.50, 1.0))
-	_interact_hint_label.add_theme_font_size_override("font_size", 16)
-	_interact_hint_label.text = ""
-	_interact_hint_label.visible = false
-	hint_layer.add_child(_interact_hint_label)
-
-	# 连接到 PlayerController 的交互提示信号
-	if _player and _player.has_signal("interact_hint_changed"):
-		if not _player.interact_hint_changed.is_connected(_on_interact_hint_changed):
-			_player.interact_hint_changed.connect(_on_interact_hint_changed)
-
-
 func _on_interact_hint_changed(show: bool, hint_text: String) -> void:
 	if _interact_hint_label:
 		_interact_hint_label.text = hint_text
@@ -1041,42 +1134,14 @@ func _on_interact_hint_changed(show: bool, hint_text: String) -> void:
 # 消息面板（底部弹出提示）
 # ============================================================
 
-func _setup_message_panel() -> void:
-	var msg_layer = CanvasLayer.new()
-	msg_layer.name = "MessageLayer"
-	msg_layer.layer = 60
-	add_child(msg_layer)
-
-	_message_panel = Panel.new()
-	_message_panel.name = "MessagePanel"
-	_message_panel.position = Vector2(300, 520)
-	_message_panel.size = Vector2(680, 148)
-	_message_panel.visible = false
-	msg_layer.add_child(_message_panel)
-
-	_message_title = Label.new()
-	_message_title.name = "MessageTitle"
-	_message_title.position = Vector2(18, 14)
-	_message_title.size = Vector2(640, 24)
-	_message_title.add_theme_font_size_override("font_size", 16)
-	_message_title.add_theme_color_override("font_color", Color(0.22, 0.50, 0.78, 1.0))
-	_message_panel.add_child(_message_title)
-
-	_message_body = Label.new()
-	_message_body.name = "MessageBody"
-	_message_body.position = Vector2(18, 44)
-	_message_body.size = Vector2(640, 88)
-	_message_body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_message_body.add_theme_font_size_override("font_size", 14)
-	_message_panel.add_child(_message_body)
-
-
 func _show_message(title: String, body: String, duration: float = 4.0) -> void:
 	if not _message_title or not _message_body:
 		return
 	_message_title.text = title
 	_message_body.text = body
 	_message_panel.visible = true
+	if _message_panel_bg:
+		_message_panel_bg.visible = true
 
 	# 清除之前的定时器
 	if _message_timer and _message_timer.timeout.is_connected(_hide_message):
@@ -1089,6 +1154,8 @@ func _show_message(title: String, body: String, duration: float = 4.0) -> void:
 func _hide_message() -> void:
 	if _message_panel:
 		_message_panel.visible = false
+	if _message_panel_bg:
+		_message_panel_bg.visible = false
 
 
 # ============================================================
@@ -1109,81 +1176,16 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 
-func _setup_collection_panel() -> void:
-	var layer = CanvasLayer.new()
-	layer.name = "CollectionPanelLayer"
-	layer.layer = 64
-	add_child(layer)
-
-	var bg = ColorRect.new()
-	bg.name = "PanelBg"
-	bg.color = Color(0, 0, 0, 0.7)
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	bg.mouse_filter = Control.MOUSE_FILTER_STOP
-	layer.add_child(bg)
-
-	var panel = ColorRect.new()
-	panel.name = "CollectionPanel"
-	panel.color = Color(0.08, 0.08, 0.12, 0.95)
-	panel.size = Vector2(640, 440)
-	panel.position = Vector2(320, 140)
-	panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	layer.add_child(panel)
-
-	var title = Label.new()
-	title.name = "Title"
-	title.text = "收集信息 — 碎片 #0001 启程之镇"
-	title.add_theme_color_override("font_color", Color(0.9, 0.85, 0.7, 1))
-	title.add_theme_font_size_override("font_size", 22)
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.size = Vector2(620, 36)
-	title.position = Vector2(10, 12)
-	panel.add_child(title)
-
-	# 观测进度
-	_progress_label = Label.new()
-	_progress_label.name = "ProgressLabel"
-	_progress_label.text = "日晷观测：0/5"
-	_progress_label.add_theme_color_override("font_color", Color(0.6, 0.7, 0.8, 1))
-	_progress_label.add_theme_font_size_override("font_size", 15)
-	_progress_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_progress_label.size = Vector2(620, 24)
-	_progress_label.position = Vector2(10, 50)
-	panel.add_child(_progress_label)
-
-	# 线索滚动区域
-	var scroll = ScrollContainer.new()
-	scroll.name = "ClueScroll"
-	scroll.position = Vector2(16, 84)
-	scroll.size = Vector2(608, 300)
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	panel.add_child(scroll)
-
-	_clue_list_container = VBoxContainer.new()
-	_clue_list_container.name = "ClueList"
-	_clue_list_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_clue_list_container.add_theme_constant_override("separation", 6)
-	scroll.add_child(_clue_list_container)
-
-	var hint = Label.new()
-	hint.name = "TabHint"
-	hint.text = "按 Tab 关闭  |  靠近日晷按 E 观测  |  收集全部后前往钟楼校准"
-	hint.add_theme_color_override("font_color", Color(0.5, 0.5, 0.55, 1))
-	hint.add_theme_font_size_override("font_size", 13)
-	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.size = Vector2(620, 30)
-	hint.position = Vector2(10, 398)
-	panel.add_child(hint)
-
-	_collection_panel = layer
-	_collection_panel.hide()
-	print("[Fragment0001] 收集信息面板已创建")
-
-
 func _toggle_collection_panel() -> void:
 	if not _collection_panel:
 		return
-	_collection_panel.visible = not _collection_panel.visible
+	var show_panel: bool = not _collection_panel.visible
+	_collection_panel.visible = show_panel
+	if _collection_panel_bg:
+		_collection_panel_bg.visible = show_panel
+	if show_panel:
+		_update_clue_list()
+	print("[Fragment0001] 收集面板: %s" % ("打开" if show_panel else "关闭"))
 	if _collection_panel.visible:
 		_update_clue_list()
 	print("[Fragment0001] 收集面板: %s" % ("打开" if _collection_panel.visible else "关闭"))
@@ -1191,11 +1193,11 @@ func _toggle_collection_panel() -> void:
 
 func _update_clue_list() -> void:
 	"""刷新 Tab 面板中的线索列表和进度标签"""
-	if not _clue_list_container:
+	if not _collection_clue_list:
 		return
 
 	# 清空旧列表
-	for child in _clue_list_container.get_children():
+	for child in _collection_clue_list.get_children():
 		child.queue_free()
 
 	# 更新进度标签
@@ -1214,12 +1216,12 @@ func _update_clue_list() -> void:
 		empty_label.add_theme_font_size_override("font_size", 14)
 		empty_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		empty_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		_clue_list_container.add_child(empty_label)
+		_collection_clue_list.add_child(empty_label)
 		return
 
 	for clue in clues:
 		var item = _create_clue_item(clue)
-		_clue_list_container.add_child(item)
+		_collection_clue_list.add_child(item)
 
 	# P2：当观测到 3+ 日晷时，在列表底部添加规律提示
 	if observed_sundials.size() >= 3:
@@ -1231,7 +1233,7 @@ func _update_clue_list() -> void:
 		hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		hint_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		# 斜体：在 Godot 4 中通过添加字体变体实现
-		_clue_list_container.add_child(hint_label)
+		_collection_clue_list.add_child(hint_label)
 
 
 func _create_clue_item(clue: Dictionary) -> Control:
@@ -1272,6 +1274,7 @@ func _create_clue_item(clue: Dictionary) -> Control:
 	desc_label.add_theme_font_size_override("font_size", 13)
 	desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	desc_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	desc_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	container.add_child(desc_label)
 
 	return container
@@ -1297,7 +1300,7 @@ func _find_lin_npc_position() -> Vector2:
 
 
 func _check_lin_intermission(delta: float) -> void:
-	"""在 _process 中追踪林指导幕间事件触发条件"""
+	"""在 _process 中追踪林指导幕间事件触发条件 — 多阶段视觉效果"""
 	if _intermission_triggered or not _player:
 		return
 
@@ -1322,16 +1325,97 @@ func _check_lin_intermission(delta: float) -> void:
 	_intermission_triggered = true
 	print("[Fragment0001] 林指导幕间事件触发 — 玩家空闲 %.1fs，距林 %.0fpx" % [_player_idle_time, dist_to_lin])
 
+	# === 阶段1: 世界"卡顿" (1.5s) ===
+	# 降低画面饱和度 10%
+	var scene_root: Node = get_tree().current_scene
+	var original_modulate: Color = scene_root.modulate if scene_root else Color(1, 1, 1, 1)
+	var desat_modulate: Color = Color(0.9, 0.9, 0.9, 1.0)  # 轻微去饱和
+	if scene_root:
+		scene_root.modulate = desat_modulate
+
+	# HUD 隐藏
+	if _ui_root:
+		_ui_root.visible = false
+
+	# 暂停 NPC 巡逻（通过 group 查找所有 NPC Controller，设置 process_mode 为 DISABLED）
+	var npcs: Array[Node] = get_tree().get_nodes_in_group("npc")
+	for npc in npcs:
+		if npc is CharacterBody2D:
+			npc.set_process(false)
+			npc.set_physics_process(false)
+
+	await get_tree().create_timer(1.5).timeout
+
+	# === 阶段2: 林指导独白 (8s) ===
+	# Camera2D 平滑移动到林指导位置
+	var camera_rig: Node2D = _find_camera_rig()
+	var original_cam_pos: Vector2 = Vector2(640, 360)
+	if camera_rig:
+		original_cam_pos = camera_rig.position
+		var cam_tween: Tween = create_tween()
+		cam_tween.tween_property(camera_rig, "position", lin_pos, 1.5).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_CUBIC)
+
+	# 逐行显示林指导幕间台词
 	_show_message(
 		"林指导的低语",
 		"（通讯器里传来一阵微弱的声音。林指导的语调比平时慢了一些，像是在回忆什么。）\n\n" +
-		"\"你见过凌晨四点的训练场吗？我见过——很多次。不是因为勤奋。是因为睡不着。\"\n\n" +
-		"停顿。然后通讯器又恢复了平时的冷漠。",
+		"\"17个。这17个月——我在镇子里送了17批人。\"\n" +
+		"\"只有3个人走到过边界墙。\"\n" +
+		"\"你知道边界那边是什么吗？我不知道。\"\n" +
+		"\"但赵安保知道——他从来不说。\"\n" +
+		"\"别告诉任何人我说了这些。\"\n" +
+		"\"因为这些话——不在培训脚本里。\"\n\n" +
+		"（通讯器发出一声刺耳的杂音。）\n" +
+		"\"哦。时间到了。\"",
 		8.0
 	)
 
 	# 降低合规度 -3
 	_modify_compliance(-3, "林指导情绪波动——系统判定为异常")
+
+	await get_tree().create_timer(8.0).timeout
+
+	# === 阶段3: 恢复正常 (1.5s) ===
+	# Camera2D 平滑回到玩家位置
+	if camera_rig:
+		var cam_tween: Tween = create_tween()
+		cam_tween.tween_property(camera_rig, "position", original_cam_pos, 1.5).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_CUBIC)
+
+	# 恢复画面饱和度
+	if scene_root:
+		scene_root.modulate = original_modulate
+
+	# 恢复 NPC 巡逻
+	for npc in npcs:
+		if npc is CharacterBody2D:
+			npc.set_process(true)
+			npc.set_physics_process(true)
+
+	await get_tree().create_timer(1.5).timeout
+
+	# HUD 全面恢复
+	if _ui_root:
+		_ui_root.visible = true
+
+	# 林指导恢复标准对话
+	_show_message(
+		"林指导",
+		"溯光者！观测数据请及时提交到钟楼观测台！",
+		5.0
+	)
+
+	print("[Fragment0001] 林指导幕间事件结束")
+
+
+func _find_camera_rig() -> Node2D:
+	"""查找 CameraRig 节点（用于幕间运镜）"""
+	var world_root := get_node_or_null("WorldRoot")
+	if not world_root:
+		return null
+	var rig := world_root.get_node_or_null("CameraRig")
+	if rig is Node2D:
+		return rig as Node2D
+	return null
 
 
 # ============================================================
@@ -1339,7 +1423,7 @@ func _check_lin_intermission(delta: float) -> void:
 # ============================================================
 
 func _check_boundary(delta: float) -> void:
-	"""在 _process 中追踪玩家是否靠近场景边界"""
+	"""在 _process 中追踪玩家是否靠近场景边界 — 三级触碰系统 + 光墙区域检测"""
 	if not _player:
 		return
 
@@ -1351,22 +1435,146 @@ func _check_boundary(delta: float) -> void:
 	var pos: Vector2 = _player.global_position
 	var near_boundary: bool = false
 
-	if pos.x < 50.0 or pos.x > 1150.0 or pos.y < 50.0 or pos.y > 750.0:
+	# 边界范围（与 AirWall 对齐）
+	if pos.x < 50.0 or pos.x > 1250.0 or pos.y < 50.0 or pos.y > 750.0:
+		near_boundary = true
+
+	# 也检查光墙 InteractionArea 重叠（额外检测）
+	if not near_boundary and _is_inside_light_wall():
 		near_boundary = true
 
 	if not near_boundary:
 		return
 
-	# 边界触碰 — 触发（冷却 30 秒）
-	_boundary_warning_triggered = true
-	_boundary_cooldown = 30.0
+	# 触碰计数递增
+	_boundary_touch_count += 1
+	_boundary_cooldown = 30.0  # 冷却 30 秒
 
-	print("[Fragment0001] 边界光墙触碰 — 玩家位置: (%d, %d)" % [int(pos.x), int(pos.y)])
+	print("[Fragment0001] 边界光墙触碰 #%d — 玩家位置: (%d, %d)" % [_boundary_touch_count, int(pos.x), int(pos.y)])
 
-	_show_message(
-		"边界警告",
-		"你触碰到了训练场的边缘。光墙在你指尖泛起涟漪——不是阻拦，是提醒。前方不在本次训练范围之内。",
-		5.5
+	# 光墙波纹视觉特效
+	_create_boundary_ripple_effect(pos)
+
+	match _boundary_touch_count:
+		1:
+			_modify_compliance(-5, "触碰边界光墙一次")
+			_show_message(
+				"赵安保",
+				"触碰边界光墙一次——警告。合规度扣除5%。",
+				4.0
+			)
+		2:
+			_modify_compliance(-10, "触碰边界光墙两次")
+			_show_message(
+				"赵安保",
+				"触碰第二次——限制令。请立即回到指定区域。",
+				4.5
+			)
+		3:
+			# 第三次直接触发 L6 强制回归
+			_compliance_l6_triggered = false  # 确保 L6 可以被触发
+			compliance = 24  # 设置合规度到 L6 阈值以下
+			_update_compliance_bar()
+			_show_message(
+				"赵安保",
+				"别碰第三次。为了您的——",
+				3.0
+			)
+			await get_tree().create_timer(1.5).timeout
+			_trigger_l6_forced_return()
+			_boundary_touch_count = 0  # 重置计数（L6 回归后）
+
+
+func _check_sundial_e_proximity(_delta: float) -> void:
+	"""检测玩家是否首次接近观测点E（边界残晷）"""
+	if _sundial_e_proximity_triggered or not _player:
+		return
+
+	# 查找 SundialE 节点
+	var sundial_e: Node2D = _find_sundial_e_node()
+	if not sundial_e:
+		return
+
+	var dist: float = _player.global_position.distance_to(sundial_e.global_position)
+	if dist < 120.0:
+		_sundial_e_proximity_triggered = true
+		_show_message(
+			"系统",
+			"这个日晷被砸碎了。碎片被整齐排列——或许缺失的角度可以从其他数据推导。",
+			5.0
+		)
+		print("[Fragment0001] 首次接近观测点E（边界残晷），自动触发提示")
+
+
+func _find_sundial_e_node() -> Node2D:
+	"""查找 SundialE 节点"""
+	var world_root := get_node_or_null("WorldRoot")
+	if not world_root:
+		return null
+	var nodes: Array[Node] = world_root.find_children("SundialE", "Node2D", true, false)
+	if nodes.size() > 0:
+		return nodes[0] as Node2D
+	return null
+
+
+func _create_boundary_ripple_effect(at_position: Vector2) -> void:
+	"""在触碰点创建光墙水波光晕效果（0.2s 透明波纹扩散）"""
+	if not _ui_root:
+		return
+
+	var ripple: ColorRect = ColorRect.new()
+	ripple.name = "BoundaryRipple"
+	ripple.color = Color(0.35, 0.6, 0.9, 0.4)  # 光墙蓝色
+	ripple.size = Vector2(40, 40)
+	ripple.position = at_position - Vector2(20, 20)
+	ripple.pivot_offset = Vector2(20, 20)
+	ripple.scale = Vector2(0.5, 0.5)
+	_ui_root.add_child(ripple)
+
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(ripple, "scale", Vector2(3.0, 3.0), 0.4)
+	tween.tween_property(ripple, "modulate:a", 0.0, 0.4).from(0.5)
+	tween.finished.connect(func() -> void:
+		if is_instance_valid(ripple):
+			ripple.queue_free()
 	)
 
-	_modify_compliance(-2, "触碰训练场边界")
+	# 光墙短暂透明效果：在触碰点模拟"透过光墙看到外面"
+	var transparency_glimpse: ColorRect = ColorRect.new()
+	transparency_glimpse.name = "BoundaryGlimpse"
+	# 在触碰点附近显示一个小范围的外景颜色提示
+	transparency_glimpse.color = Color(0.25, 0.55, 0.25, 0.35)  # 绿色（草地外景）
+	transparency_glimpse.size = Vector2(60, 60)
+	transparency_glimpse.position = at_position - Vector2(30, 30)
+	transparency_glimpse.pivot_offset = Vector2(30, 30)
+	_ui_root.add_child(transparency_glimpse)
+
+	var glimpse_tween := create_tween()
+	glimpse_tween.tween_interval(0.15)
+	glimpse_tween.tween_property(transparency_glimpse, "modulate:a", 0.0, 0.15)
+	glimpse_tween.finished.connect(func() -> void:
+		if is_instance_valid(transparency_glimpse):
+			transparency_glimpse.queue_free()
+	)
+
+
+# ============================================================
+# BGM 播放
+# ============================================================
+
+func _start_bgm() -> void:
+	if _bgm_player == null:
+		_bgm_player = AudioStreamPlayer.new()
+		_bgm_player.name = "BGMPlayer_Fragment0001"
+		_bgm_player.bus = "Master"
+		_bgm_player.volume_db = -10.0
+		add_child(_bgm_player)
+	_bgm_player.stream = BGM_FRAGMENT_0001
+	_bgm_player.play()
+	print("[Fragment0001] 探索 BGM 已开始播放")
+
+func _stop_bgm() -> void:
+	if _bgm_player != null and _bgm_player.playing:
+		_bgm_player.stop()
+		print("[Fragment0001] 探索 BGM 已停止")

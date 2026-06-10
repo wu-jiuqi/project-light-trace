@@ -158,47 +158,148 @@ func _show_completion_overlay() -> void:
 
 	var bg = ColorRect.new()
 	bg.name = "CompletionBg"
-	bg.color = Color(0, 0, 0, 0.65)
+	bg.color = Color(0, 0, 0, 0.6)
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.mouse_filter = Control.MOUSE_FILTER_STOP
 	overlay.add_child(bg)
 
 	var panel = Panel.new()
-	panel.position = Vector2(340, 180)
-	panel.size = Vector2(600, 360)
+	panel.name = "VictoryPanel"
+	panel.position = Vector2(340, 120)
+	panel.size = Vector2(600, 480)
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP
+
+	# 暗色半透明背景 + 金色边框
+	var panel_style := StyleBoxFlat.new()
+	panel_style.bg_color = Color(0.102, 0.102, 0.18, 0.92)
+	panel_style.border_width_left = 2
+	panel_style.border_width_right = 2
+	panel_style.border_width_top = 2
+	panel_style.border_width_bottom = 2
+	panel_style.border_color = Color(0.85, 0.72, 0.28, 1.0)
+	panel_style.corner_radius_top_left = 12
+	panel_style.corner_radius_top_right = 12
+	panel_style.corner_radius_bottom_left = 12
+	panel_style.corner_radius_bottom_right = 12
+	panel.add_theme_stylebox_override("panel", panel_style)
 	overlay.add_child(panel)
 
-	var title = Label.new()
-	title.text = "晨曦之印"
+	# VBox 主布局
+	var vbox := VBoxContainer.new()
+	vbox.name = "VictoryVBox"
+	vbox.position = Vector2(40, 30)
+	vbox.size = Vector2(520, 420)
+	vbox.add_theme_constant_override("separation", 14)
+	panel.add_child(vbox)
+
+	# 标题 — 源印解码成功
+	var title := Label.new()
+	title.name = "VictoryTitle"
+	title.text = "◇ 源印解码成功 ◇"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 28)
-	title.add_theme_color_override("font_color", Color(0.22, 0.50, 0.78, 1.0))
-	title.position = Vector2(20, 30)
-	title.size = Vector2(560, 40)
-	panel.add_child(title)
+	title.add_theme_color_override("font_color", Color(0.95, 0.85, 0.35, 1.0))  # 金色
+	title.size = Vector2(520, 40)
+	vbox.add_child(title)
 
-	var body = Label.new()
-	body.text = "源印归位。星图已更新。\n碎片 #0001「启程之镇」— 完成。"
-	body.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	body.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	body.add_theme_font_size_override("font_size", 18)
-	body.position = Vector2(30, 90)
-	body.size = Vector2(540, 140)
-	panel.add_child(body)
+	# 源印信息行
+	var source_row := HBoxContainer.new()
+	source_row.name = "SourceInfoRow"
+	source_row.add_theme_constant_override("separation", 8)
+	source_row.size = Vector2(520, 30)
+	vbox.add_child(source_row)
 
-	var hint = Label.new()
-	hint.text = "即将返回星图..."
-	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.add_theme_font_size_override("font_size", 14)
-	hint.add_theme_color_override("font_color", Color(0.5, 0.5, 0.55, 1.0))
-	hint.position = Vector2(30, 280)
-	hint.size = Vector2(540, 30)
-	panel.add_child(hint)
+	var source_icon := Label.new()
+	source_icon.text = "✦"
+	source_icon.add_theme_font_size_override("font_size", 22)
+	source_icon.add_theme_color_override("font_color", Color(1.0, 0.72, 0.24, 1.0))
+	source_row.add_child(source_icon)
 
-	var timer = get_tree().create_timer(3.0)
-	timer.timeout.connect(func():
+	var source_name := Label.new()
+	source_name.text = "晨曦之印"
+	source_name.add_theme_font_size_override("font_size", 18)
+	source_name.add_theme_color_override("font_color", Color(0.9, 0.88, 0.82, 1.0))
+	source_name.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	source_row.add_child(source_name)
+
+	var source_status := Label.new()
+	source_status.text = "已解析"
+	source_status.add_theme_font_size_override("font_size", 14)
+	source_status.add_theme_color_override("font_color", Color(0.35, 0.78, 0.55, 1.0))  # 绿色
+	source_status.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	source_row.add_child(source_status)
+
+	# 修复进度 8.3%
+	var progress_label := Label.new()
+	progress_label.text = "修复进度：8.3%  —  已修复碎片：1/12"
+	progress_label.add_theme_font_size_override("font_size", 14)
+	progress_label.add_theme_color_override("font_color", Color(0.6, 0.7, 0.8, 1.0))
+	progress_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	progress_label.size = Vector2(520, 24)
+	vbox.add_child(progress_label)
+
+	var progress_bg := ColorRect.new()
+	progress_bg.name = "ProgressBg"
+	progress_bg.color = Color(0.2, 0.2, 0.24, 1.0)
+	progress_bg.size = Vector2(520, 16)
+	vbox.add_child(progress_bg)
+
+	var progress_fill := ColorRect.new()
+	progress_fill.name = "ProgressFill"
+	progress_fill.color = Color(0.22, 0.48, 0.84, 1.0)  # 蓝色填充
+	progress_fill.size = Vector2(520 * 0.083, 16)  # 8.3%
+	progress_bg.add_child(progress_fill)
+
+	# 林指导通关祝贺
+	var congrats := Label.new()
+	congrats.name = "CongratsText"
+	congrats.text = "溯光者——恭喜完成第一阶段训练。\n您接下来可以进入黄昏驿站继续任务。\n\n\"最后一个训练提示，不在脚本里：\n在公司里，不是所有问题都有答案。\n但所有答案——都可能被修改过。\""
+	congrats.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	congrats.add_theme_font_size_override("font_size", 14)
+	congrats.add_theme_color_override("font_color", Color(0.85, 0.83, 0.78, 1.0))
+	congrats.size = Vector2(520, 0)
+	congrats.custom_minimum_size = Vector2(520, 120)
+	vbox.add_child(congrats)
+
+	# 分隔间距
+	var spacer := Control.new()
+	spacer.size = Vector2(520, 10)
+	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	vbox.add_child(spacer)
+
+	# 按钮横排
+	var button_row := HBoxContainer.new()
+	button_row.name = "ButtonRow"
+	button_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	button_row.add_theme_constant_override("separation", 40)
+	button_row.size = Vector2(520, 44)
+	vbox.add_child(button_row)
+
+	var return_btn := Button.new()
+	return_btn.name = "ReturnBtn"
+	return_btn.text = "返回星图"
+	return_btn.size = Vector2(180, 44)
+	return_btn.add_theme_font_size_override("font_size", 16)
+	return_btn.pressed.connect(func() -> void:
 		get_tree().change_scene_to_file("res://scenes/star_map.tscn")
 	)
+	button_row.add_child(return_btn)
+
+	var continue_btn := Button.new()
+	continue_btn.name = "ContinueBtn"
+	continue_btn.text = "继续游玩"
+	continue_btn.size = Vector2(180, 44)
+	continue_btn.add_theme_font_size_override("font_size", 16)
+	continue_btn.pressed.connect(func() -> void:
+		print("[Darkroom] 玩家选择继续游玩 — 返回启程之镇 (OutDoor)")
+		SceneManager.change_scene(EXIT_SCENE, "OutDoor")
+	)
+	button_row.add_child(continue_btn)
+
+	# 面板淡入动画
+	panel.modulate = Color(1, 1, 1, 0)
+	var fade_tween := create_tween()
+	fade_tween.tween_property(panel, "modulate:a", 1.0, 0.4)
 
 
 # ============================================================

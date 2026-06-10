@@ -1,20 +1,46 @@
 [gd_scene format=3 uid="uid://wbeu05wrv640"]
 
-[ext_resource type="Texture2D" uid="uid://cmem78bo5gglm" path="res://assets/papercraft/fragments/id0001/characters/npc_02_chentechnology.png" id="1_texture"]
+[ext_resource type="Texture2D" uid="uid://b3n62rt8et0ar" path="res://assets/papercraft/fragments/id0001/characters/npc_02_chentechnology_s.png" id="1_eplng"]
+[ext_resource type="Script" uid="uid://ldw7x5fltxna" path="res://scripts/fragment/npc_controller.gd" id="2_script"]
 
 [sub_resource type="RectangleShape2D" id="Rect_body"]
-size = Vector2(36, 48)
+size = Vector2(36, 28)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_p0812"]
+radius = 19.0
+height = 86.0
 
 [node name="NPC_ChenTechnology" type="CharacterBody2D" unique_id=409151335]
 z_as_relative = false
 y_sort_enabled = true
-collision_layer = 4
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("2_script")
+npc_name = "陈技术"
+npc_role = "技术员"
+npc_kb_id = "chentechnology"
 
 [node name="BodyCollision" type="CollisionShape2D" parent="." unique_id=1779919288]
-position = Vector2(0, -24)
+position = Vector2(0, -14)
 shape = SubResource("Rect_body")
 
-[node name="Visual" type="Sprite2D" parent="." unique_id=1133109294]
-position = Vector2(0, -48)
+[node name="Visual Node2D" type="Node2D" parent="." unique_id=1771798247]
+
+[node name="Visual" type="Sprite2D" parent="Visual Node2D" unique_id=1133109294]
+position = Vector2(0, -44)
 scale = Vector2(0.5, 0.5)
-texture = ExtResource("1_texture")
+texture = ExtResource("1_eplng")
+
+[node name="Shadow Sprite2D" type="Sprite2D" parent="Visual Node2D" unique_id=607699862]
+
+[node name="FeetMarker Marker2D" type="Marker2D" parent="." unique_id=612988502]
+
+[node name="InteractionArea Area2D" type="Area2D" parent="." unique_id=1897196378]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea Area2D" unique_id=585955948]
+position = Vector2(0, -45)
+shape = SubResource("CapsuleShape2D_p0812")
+debug_color = Color(0.65570503, 0.51732755, 0, 0.41960785)

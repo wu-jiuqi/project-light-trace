@@ -285,12 +285,6 @@ func _update_closest_npc() -> void:
 			closest = npc
 
 	if _closest_npc != closest:
-		# 隐藏旧最近NPC的提示
-		if _closest_npc and _closest_npc.has_method("hide_interact_hint"):
-			_closest_npc.hide_interact_hint()
-		# 显示新最近NPC的提示
-		if closest and closest.has_method("show_interact_hint"):
-			closest.show_interact_hint()
 		_closest_npc = closest
 
 	# 更新交互提示显示
@@ -503,9 +497,9 @@ func _cleanup_nearby_lists() -> void:
 func _update_interact_hint() -> void:
 	## 根据最近的交互目标更新提示标签，通过信号通知 HUD
 	# 优先级：NPC > 可交互物件 > 物品
-	if _closest_npc:
-		# NPC 的提示由 _update_closest_npc 管理（show_interact_hint / hide_interact_hint）
-		pass
+	if _closest_npc and is_instance_valid(_closest_npc) and not _closest_npc.is_queued_for_deletion():
+		# NPC 提示同时更新 NPC 头顶标签和底部中央 InteractHint
+		interact_hint_changed.emit(true, "[E] %s" % _closest_npc.npc_name)
 	elif _closest_interactable and is_instance_valid(_closest_interactable) and not _closest_interactable.is_queued_for_deletion():
 		var name_str: String = _closest_interactable.name
 		if "display_name" in _closest_interactable and not str(_closest_interactable.display_name).is_empty():
