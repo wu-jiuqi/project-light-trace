@@ -1,0 +1,85 @@
+[gd_resource type="Theme" load_steps=12 format=3]
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_button_normal"]
+texture = load("res://assets/papercraft/core/ui/dialogue_box/button_plate.png")
+texture_margin_left = 12.0
+texture_margin_top = 8.0
+texture_margin_right = 12.0
+texture_margin_bottom = 8.0
+modulate_color = Color(1.0, 1.0, 1.0, 1.0)
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_button_hover"]
+texture = load("res://assets/papercraft/core/ui/dialogue_box/button_plate.png")
+texture_margin_left = 12.0
+texture_margin_top = 8.0
+texture_margin_right = 12.0
+texture_margin_bottom = 8.0
+modulate_color = Color(1.15, 1.1, 0.95, 1.0)
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_button_pressed"]
+texture = load("res://assets/papercraft/core/ui/dialogue_box/button_plate.png")
+texture_margin_left = 12.0
+texture_margin_top = 8.0
+texture_margin_right = 12.0
+texture_margin_bottom = 8.0
+modulate_color = Color(0.85, 0.8, 0.7, 1.0)
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_button_disabled"]
+texture = load("res://assets/papercraft/core/ui/dialogue_box/button_plate.png")
+texture_margin_left = 12.0
+texture_margin_top = 8.0
+texture_margin_right = 12.0
+texture_margin_bottom = 8.0
+modulate_color = Color(0.6, 0.55, 0.45, 0.5)
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_large_page"]
+texture = load("res://assets/papercraft/core/ui/dialogue_box/large_page.png")
+modulate_color = Color(0.92, 0.88, 0.78, 0.75)
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_backpack_notebook"]
+texture = load("res://assets/papercraft/core/ui/backpack_notebook.png")
+content_margin_left = 48.0
+content_margin_top = 42.0
+content_margin_right = 36.0
+content_margin_bottom = 28.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_detail_card"]
+texture = load("res://assets/papercraft/core/ui/detail_card.png")
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_title_panel"]
+texture = load("res://assets/papercraft/core/ui/title_menu_panel.png")
+content_margin_left = 64.0
+content_margin_top = 48.0
+content_margin_right = 48.0
+content_margin_bottom = 36.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_star_map_bg"]
+texture = load("res://assets/papercraft/core/ui/star_map_background.png")
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_tracing_paper"]
+texture = load("res://assets/papercraft/core/ui/star_shard_tracing_paper.png")
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_dialogue_panel"]
+texture = load("res://assets/papercraft/core/ui/dialogue_box/dialogue_panel.png")
+content_margin_left = 72.0
+content_margin_top = 42.0
+content_margin_right = 42.0
+content_margin_bottom = 26.0
+
+[resource]
+resource_local_to_scene = false
+Button/styles/normal = SubResource("StyleBox_button_normal")
+Button/styles/hover = SubResource("StyleBox_button_hover")
+Button/styles/pressed = SubResource("StyleBox_button_pressed")
+Button/styles/disabled = SubResource("StyleBox_button_disabled")
+Panel/styles/large_page = SubResource("StyleBox_large_page")
+Panel/styles/backpack_notebook = SubResource("StyleBox_backpack_notebook")
+Panel/styles/detail_card = SubResource("StyleBox_detail_card")
+Panel/styles/title_panel = SubResource("StyleBox_title_panel")
+Panel/styles/star_map_bg = SubResource("StyleBox_star_map_bg")
+Panel/styles/tracing_paper = SubResource("StyleBox_tracing_paper")
+Panel/styles/dialogue_panel = SubResource("StyleBox_dialogue_panel")
