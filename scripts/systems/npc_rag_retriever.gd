@@ -175,8 +175,7 @@ func _build_keyword_index(source_id: String, chunks: Array) -> Dictionary:
 const RISK_KEYWORDS: Array[String] = [
 	"npc", "ai", "代码", "程序", "游戏", "模拟", "虚拟",
 	"源印", "天枢", "万象", "溯光者", "溯光计划", "冥府协议",
-	"你是假的", "你不是真实的", "这是游戏", "你是代码",
-	"织女", "太一"
+	"你是假的", "你不是真实的", "这是游戏", "你是代码"
 ]
 
 ## 通用停用词（对话中不携带信息的高频词）
@@ -320,17 +319,21 @@ func _score_chunk(chunk: Dictionary, keywords: Array, game_state: Dictionary) ->
 
 func _is_stage_accessible(chunk_stage: String, current_stage: String) -> bool:
 	## 检查chunk要求的memory_stage在当前进度下是否可访问
-	## 阶段递进: initial → partial_awake → {color}_awakened → advanced_awake → full_awake
+	## 阶段递进：
+	##   fragment 0001（MONITORED）: initial → crack_showing → script_reset
+	##   fragment 0762（觉醒）: partial_awake → {color}_awakened → advanced_awake → full_awake
 	var stage_order = {
 		"initial": 0,
-		"partial_awake": 1,
-		"red_awakened": 2,
-		"blue_awakened": 2,
-		"yellow_awakened": 2,
-		"green_awakened": 2,
-		"purple_awakened": 2,
-		"advanced_awake": 3,
-		"full_awake": 4
+		"crack_showing": 1,
+		"script_reset": 2,
+		"partial_awake": 3,
+		"red_awakened": 4,
+		"blue_awakened": 4,
+		"yellow_awakened": 4,
+		"green_awakened": 4,
+		"purple_awakened": 4,
+		"advanced_awake": 5,
+		"full_awake": 6
 	}
 	
 	var required_order = stage_order.get(chunk_stage, 0)

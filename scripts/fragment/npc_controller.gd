@@ -210,6 +210,17 @@ var _llm_last_input: String = ""          # 上一轮玩家的输入（用于LLM
 
 signal npc_state_changed(new_state: int)
 
+
+func _uses_fragment_compliance_mode() -> bool:
+	if _fragment_state == null:
+		var states = get_tree().get_nodes_in_group("fragment_state")
+		if states.size() > 0:
+			_fragment_state = states[0]
+	return _fragment_state != null \
+		and _fragment_state.has_method("uses_compliance_mode") \
+		and _fragment_state.uses_compliance_mode()
+
+
 func _ready() -> void:
 	add_to_group("npc")
 	target_position = global_position
@@ -222,11 +233,16 @@ func _ready() -> void:
 	# 初始化警觉系统
 	var profile = _get_alert_profile()
 	var base_trust = profile.get("trust_modifier", 0.0)
+	var compliance_mode := _uses_fragment_compliance_mode()
 	
 	# 尝试从持久化缓存恢复状态（重进房间不重置位置和警觉）
 	var scene_name = get_parent().name if get_parent() else ""
 	var saved = GameManager.load_npc_state(scene_name, npc_kb_id)
-	if not saved.is_empty():
+	if compliance_mode:
+		npc_suspicion = 0.0
+		npc_alert_phase = NPCAlertPhase.TRUSTING
+		doubts_player_identity = false
+	elif not saved.is_empty():
 		global_position = Vector2(saved.get("position_x", global_position.x), saved.get("position_y", global_position.y))
 		npc_suspicion = saved.get("suspicion", 0.0)
 		npc_alert_phase = saved.get("alert_phase", NPCAlertPhase.TRUSTING)
@@ -261,6 +277,8 @@ func _ready() -> void:
 func _on_tree_exiting() -> void:
 	## 节点从场景树移除前保存状态
 	if npc_kb_id == "": return
+	if _uses_fragment_compliance_mode():
+		return
 	var scene_name = get_parent().name if get_parent() else ""
 	GameManager.save_npc_state(scene_name, npc_kb_id, global_position, npc_suspicion, npc_alert_phase, doubts_player_identity)
 	print("[NPC] %s 状态已缓存: sus=%.0f phase=%d pos=(%.0f,%.0f)" % 
@@ -384,6 +402,8 @@ func end_dialogue() -> void:
 
 func _process_alert_decay(delta: float) -> void:
 	## 警觉自然衰减（不对话时缓慢降低）
+	if _uses_fragment_compliance_mode():
+		return
 	if current_state == NPCState.TALKING:
 		return  # 对话中不衰减
 	if npc_suspicion <= 0:
@@ -398,6 +418,8 @@ func _process_alert_decay(delta: float) -> void:
 
 func modify_alert(amount: float, reason: String = "") -> void:
 	## 修改NPC警觉值
+	if _uses_fragment_compliance_mode():
+		return
 	var old_phase = npc_alert_phase
 	npc_suspicion = clampf(npc_suspicion + amount, 0.0, 100.0)
 	_last_alert_change_time = Time.get_unix_time_from_system()
@@ -465,7 +487,7 @@ func _update_behavior_from_alert() -> void:
 func check_player_input_for_alert(player_input: String) -> void:
 	## 分析玩家输入，如果触及敏感话题则增加警觉
 	var profile = _get_alert_profile()
-	if npc_kb_id == "oldpainter":
+	if npc_kb_id == "oldpainter" or _uses_fragment_compliance_mode():
 		return  # 老画家完全信任玩家
 	
 	var input_lower = player_input.to_lower()
@@ -506,6 +528,8 @@ func check_player_input_for_alert(player_input: String) -> void:
 
 func check_safe_action(player_input: String) -> void:
 	## 检查玩家的行为是否能降低警觉
+	if _uses_fragment_compliance_mode():
+		return
 	var profile = _get_alert_profile()
 	if npc_suspicion <= 0:
 		return
@@ -635,7 +659,7 @@ func _analyze_llm_response_for_alert(response: String, player_input: String) -> 
 	## 分析LLM的回复内容来判断NPC是否变得警觉
 	## 不是关键词匹配——是观察NPC的自然反应
 	## 如果NPC回复变得简短、抗拒、回避，说明玩家的问题让他不安
-	if response == "" or npc_kb_id == "oldpainter":
+	if response == "" or npc_kb_id == "oldpainter" or _uses_fragment_compliance_mode():
 		return
 	
 	var response_lower = response.to_lower()
@@ -951,15 +975,17 @@ func _collect_game_state() -> Dictionary:
 	## 从碎片状态管理器收集当前游戏状态
 	if _fragment_state and _fragment_state.has_method("get_game_state"):
 		var state = _fragment_state.get_game_state(npc_kb_id)
-		# 使用 NPC 实际警觉值；该值已由 GameManager.npc_state_cache 跨房间持久化。
-		state["alert_level"] = int(npc_suspicion)
+		if not _uses_fragment_compliance_mode():
+			# 使用 NPC 实际警觉值；该值已由 GameManager.npc_state_cache 跨房间持久化。
+			state["alert_level"] = int(npc_suspicion)
 		# 注入 NPC 情绪状态
 		if _npc_mood != "":
 			state["npc_mood"] = _npc_mood
 		# 注入 警觉上下文
-		var alert_context = get_alert_context_for_rag()
-		if alert_context != "":
-			state["alert_context"] = alert_context
+		if not _uses_fragment_compliance_mode():
+			var alert_context = get_alert_context_for_rag()
+			if alert_context != "":
+				state["alert_context"] = alert_context
 		return state
 	
 	# 降级：返回默认状态
@@ -969,7 +995,7 @@ func _collect_game_state() -> Dictionary:
 		"trust_level": 0,
 		"awakened_colors": [],
 		"npc_mood": _npc_mood,
-		"alert_context": get_alert_context_for_rag()
+		"alert_context": "" if _uses_fragment_compliance_mode() else get_alert_context_for_rag()
 	}
 
 
@@ -1250,6 +1276,3 @@ func _get_awakening_reaction() -> String:
 		"violinist":
 			return "（琴弓停在半空。她听到了什么——不是琴声，是记忆里的旋律。）\n\n“……紫色的。你听过这个词吗？”\n\n弦没声音，不是因为弦坏了——是因为她等的那个听琴的人还没来。"
 	return "世界发生了一些变化——颜色恢复了。(%d/6)" % c
-
-
-

@@ -34,7 +34,7 @@
 |------|------|
 | `scripts/fragment/npc_controller.gd` | + system_prompt export_multiline |
 | `scripts/fragment/fragment_base.gd` | + E键交互 (_try_interact) |
-| `scenes/fragments/fragment_world.tscn` | + dialogue.gd 脚本绑定 |
+| `scenes/fragments/fragment_world.tscn` | 碎片世界模板，交互对话走 ChatDialogue |
 | `scenes/star_map.tscn` | + HintLabel autowrap |
 
 ---

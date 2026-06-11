@@ -1,8 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://fragment_world"]
+[gd_scene load_steps=4 format=3 uid="uid://fragment_world"]
 
 [ext_resource type="Script" path="res://scripts/fragment/fragment_base.gd" id="1_base"]
 [ext_resource type="Script" path="res://scripts/player/player_controller.gd" id="2_player"]
-[ext_resource type="Script" path="res://scripts/ui/dialogue.gd" id="3_dialogue"]
 
 [sub_resource type="CircleShape2D" id="Circle_player"]
 radius = 14.0
@@ -28,10 +27,6 @@ shape = SubResource("Circle_player")
 position_smoothing_enabled = true
 
 [node name="UILayer" type="CanvasLayer" parent="."]
-
-[node name="DialogueUI" type="Control" parent="UILayer"]
-layout_mode = 0
-script = ExtResource("3_dialogue")
 
 [node name="WantedIndicator" type="Control" parent="UILayer"]
 layout_mode = 0

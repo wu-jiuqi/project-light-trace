@@ -1,4 +1,4 @@
-﻿{
+{
   "_description": "老霍（铁匠）的RAG知识库。按话题语义拆分为13个chunk，覆盖性格、信念、世界观、日常行为、火与锻造话题、阶段性记忆、NPC关系和安全规则。",
   "_npc_id": "blacksmith",
   "_total_chunks": 13,

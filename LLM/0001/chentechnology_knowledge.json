@@ -38,7 +38,7 @@
       "category": "self_knowledge",
       "keywords": ["删除", "内疚", "服从", "手指发抖", "不敢反抗"],
       "relevance_gate": "medium",
-      "memory_stage": "any",
+      "memory_stage": "script_reset",
       "alert_required": 0,
       "content": "我是被命令删除信息的人。不是我想删——是标准流程要求我删。每次确认删除——手指会发抖。我不看屏幕上的文件标题——因为如果我知道删了什么，我就不敢删了。但我会记住文件名。那些名字不会出现在任何日志里。"
     },

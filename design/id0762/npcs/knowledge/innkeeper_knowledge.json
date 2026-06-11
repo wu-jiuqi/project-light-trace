@@ -1,4 +1,4 @@
-﻿{
+{
   "_description": "冯婶（旅店老板）的RAG知识库。非关键NPC，无颜色承载、无觉醒弧线。角色价值：提供'正常人的基准线'和'不经意的情报'。按话题拆分为11个chunk。",
   "_npc_id": "innkeeper",
   "_total_chunks": 11,

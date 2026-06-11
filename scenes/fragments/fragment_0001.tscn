@@ -28,6 +28,7 @@
 [ext_resource type="PackedScene" uid="uid://c2j5leta63e2" path="res://scenes/characters/id0001/npc_zhaosecurity.tscn" id="26_pbonl"]
 [ext_resource type="Script" uid="uid://cpookq7xs8qki" path="res://scripts/stage/camera_rig.gd" id="28_camrig"]
 [ext_resource type="Script" uid="uid://bwsd4vqlvwgk8" path="res://scripts/fragment/fragment_0001.gd" id="29_frag001"]
+[ext_resource type="PackedScene" uid="uid://duiql0mgjrtjc" path="res://scenes/ui/DialogueBox.tscn" id="29_oco2y"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_dbv8g"]
 distance = -725.0
@@ -409,9 +410,9 @@ color = Color(0, 0, 0, 0.45)
 [node name="MessagePanel" type="Panel" parent="UIRoot" unique_id=705032725]
 visible = false
 offset_left = 300.0
-offset_top = 520.0
+offset_top = 546.0
 offset_right = 980.0
-offset_bottom = 668.0
+offset_bottom = 694.0
 mouse_filter = 2
 
 [node name="MessageTitle" type="Label" parent="UIRoot/MessagePanel" unique_id=705032726]
@@ -420,7 +421,9 @@ offset_left = 18.0
 offset_top = 14.0
 offset_right = 658.0
 offset_bottom = 38.0
-theme_override_colors/font_color = Color(0.22, 0.5, 0.78, 1)
+theme_override_colors/font_color = Color(0.831, 0.722, 0.416, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 16
 
 [node name="MessageBody" type="Label" parent="UIRoot/MessagePanel" unique_id=705032727]
@@ -622,3 +625,6 @@ layout_mode = 0
 offset_right = 240.0
 offset_bottom = 12.0
 color = Color(0.29, 0.565, 0.851, 1)
+
+[node name="DialogueBox" parent="UIRoot" unique_id=1256299883 instance=ExtResource("29_oco2y")]
+visible = false

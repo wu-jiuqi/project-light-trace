@@ -94,8 +94,11 @@ var _layer_marker_2_3: Marker2D = null
 # 初始化
 # ============================================================
 
-func _ready() -> void:
+func _enter_tree() -> void:
 	add_to_group("fragment_state")
+
+
+func _ready() -> void:
 	_create_clue_system()
 	_cache_depth_layers()
 	_spawn_player()
@@ -124,6 +127,8 @@ func _create_clue_system() -> void:
 	_clue_system = ClueSystemScript.new()
 	_clue_system.name = "ClueSystem0001"
 	add_child(_clue_system)
+	if _clue_system.has_signal("clue_discovered") and not _clue_system.clue_discovered.is_connected(_on_clue_discovered):
+		_clue_system.clue_discovered.connect(_on_clue_discovered)
 	print("[Fragment0001] ClueSystem 已创建")
 
 
@@ -598,6 +603,7 @@ func _unlock_bell_tower_door() -> void:
 	source_mark_revealed = true
 
 	_clue_system.locate_source_mark("晨曦之印", "钟楼底层暗室")
+	save_state()
 
 	# #10 源印显现后 — 已有处理
 	_show_message(
@@ -636,12 +642,51 @@ func save_state() -> void:
 
 	FragmentManager.set_fragment_state("0001", "observed_sundials", observed_sundials)
 	FragmentManager.set_fragment_state("0001", "compliance", compliance)
+	FragmentManager.set_fragment_state("0001", "clock_angle", clock_angle)
 	FragmentManager.set_fragment_state("0001", "source_mark_revealed", source_mark_revealed)
+	FragmentManager.set_fragment_state("0001", "completed", completed)
 	FragmentManager.set_fragment_state("0001", "discovered_clues", clues_data)
 	FragmentManager.set_fragment_state("0001", "boundary_touch_count", _boundary_touch_count)
 	FragmentManager.set_fragment_state("0001", "intermission_triggered", _intermission_triggered)
 	FragmentManager.set_fragment_state("0001", "sundial_e_proximity_triggered", _sundial_e_proximity_triggered)
 	print("[Fragment0001] 探索进度已保存 — 日晷(%d/5) 合规度(%d) 源印(%s)" % [observed_sundials.size(), compliance, source_mark_revealed])
+
+
+func _on_clue_discovered(_clue: Dictionary) -> void:
+	## 线索发现后立即同步到 FragmentManager，确保下一次自动/手动存档能拿到最新线索。
+	save_state()
+	_update_clue_list()
+
+
+# ============================================================
+# memory_stage 映射（供 NPC RAG 系统调用）
+# ============================================================
+
+func get_memory_stage() -> String:
+	## 根据当前游戏进度返回 RAG memory_stage
+	## 阶段递进: initial(探索) → crack_showing(裂缝显现) → script_reset(幕间)
+	if _intermission_triggered:
+		return "script_reset"
+	if observed_sundials.size() >= 2:
+		return "crack_showing"
+	return "initial"
+
+
+func get_game_state(npc_id: String = "") -> Dictionary:
+	## 供 npc_controller 调用，返回 RAG 检索所需的游戏状态
+	var stage = get_memory_stage()
+	return {
+		"memory_stage": stage,
+		"alert_level": 0,
+		"trust_level": 0,
+		"awakened_colors": [],
+		"awakened_count": 0
+	}
+
+
+func uses_compliance_mode() -> bool:
+	## 碎片 #0001 使用 MONITORED 合规度模式，不接入通用 NPC 警觉度。
+	return true
 
 
 func _try_restore_state() -> void:
@@ -656,10 +701,16 @@ func _try_restore_state() -> void:
 	var saved_compliance = FragmentManager.get_fragment_state("0001", "compliance")
 	if typeof(saved_compliance) == TYPE_INT:
 		compliance = saved_compliance
+	var saved_clock_angle = FragmentManager.get_fragment_state("0001", "clock_angle")
+	if typeof(saved_clock_angle) == TYPE_INT:
+		clock_angle = saved_clock_angle
 
 	var saved_revealed = FragmentManager.get_fragment_state("0001", "source_mark_revealed")
 	if typeof(saved_revealed) == TYPE_BOOL:
 		source_mark_revealed = saved_revealed
+	var saved_completed = FragmentManager.get_fragment_state("0001", "completed")
+	if typeof(saved_completed) == TYPE_BOOL:
+		completed = saved_completed
 
 	# 恢复线索系统
 	var saved_clues = FragmentManager.get_fragment_state("0001", "discovered_clues")
@@ -714,10 +765,7 @@ func _complete_fragment() -> void:
 		return
 	completed = true
 
-	# 1. 自动保存
-	SaveManager.save_game()
-
-	# 2. 标记源印与碎片完成
+	# 1. 标记源印与碎片完成
 	_clue_system.decode_source_mark("晨曦之印", "晨曦镇训练场完成校准，钟楼暗室已开启。")
 	GameManager.record_source_mark("0001", "晨曦之印", "钟楼暗室便笺：所有答案都可能被修改过。")
 
@@ -725,6 +773,10 @@ func _complete_fragment() -> void:
 	if fragment == null:
 		fragment = FragmentManager.get_fragment_by_id("0001")
 	FragmentManager.complete_fragment(fragment)
+	save_state()
+
+	# 2. 自动保存：必须在源印线索和碎片完成状态写入之后执行
+	SaveManager.save_game()
 
 	print("[Fragment0001] 碎片完成！显示胜利画面")
 
@@ -904,6 +956,7 @@ func _modify_compliance(delta: int, reason: String) -> void:
 
 	# 更新合规度条UI
 	_update_compliance_bar()
+	save_state()
 
 	# L6 强制回归：合规度 < 25%（仅触发一次）
 	if compliance < 25 and not _compliance_l6_triggered:
@@ -1075,6 +1128,7 @@ func _trigger_l6_forced_return() -> void:
 	compliance = 85
 	_compliance_l6_triggered = false  # 允许再次触发
 	_update_compliance_bar()
+	save_state()
 
 	if _player:
 		# 移动到默认出生点位置
@@ -1323,6 +1377,7 @@ func _check_lin_intermission(delta: float) -> void:
 
 	# 两个条件同时满足 — 触发幕间事件（仅一次）
 	_intermission_triggered = true
+	save_state()
 	print("[Fragment0001] 林指导幕间事件触发 — 玩家空闲 %.1fs，距林 %.0fpx" % [_player_idle_time, dist_to_lin])
 
 	# === 阶段1: 世界"卡顿" (1.5s) ===
@@ -1475,6 +1530,7 @@ func _check_boundary(delta: float) -> void:
 			_compliance_l6_triggered = false  # 确保 L6 可以被触发
 			compliance = 24  # 设置合规度到 L6 阈值以下
 			_update_compliance_bar()
+			save_state()
 			_show_message(
 				"赵安保",
 				"别碰第三次。为了您的——",
@@ -1578,3 +1634,49 @@ func _stop_bgm() -> void:
 	if _bgm_player != null and _bgm_player.playing:
 		_bgm_player.stop()
 		print("[Fragment0001] 探索 BGM 已停止")
+
+
+# ============================================================
+# 测试钩子（供 scripts/tests/test_fragment_0001_smoke.gd 驱动正式场景）
+# ============================================================
+
+func has_player_for_test() -> bool:
+	return _player != null
+
+
+func observe_sundial_for_test(id: String) -> void:
+	var sundial := _find_sundial_node_for_test(id)
+	if sundial:
+		on_sundial_interact(sundial)
+
+
+func set_clock_angle_for_test(value: int) -> void:
+	clock_angle = value
+	_update_angle_value()
+
+
+func submit_clock_angle_for_test() -> bool:
+	return await _submit_clock_angle()
+
+
+func get_observed_count_for_test() -> int:
+	return observed_sundials.size()
+
+
+func get_compliance_for_test() -> int:
+	return compliance
+
+
+func is_source_mark_revealed_for_test() -> bool:
+	return source_mark_revealed
+
+
+func _find_sundial_node_for_test(id: String) -> Node2D:
+	var world_root := get_node_or_null("WorldRoot")
+	var search_root: Node = world_root if world_root else self
+	var patterns := ["Sundial%s" % id, "Sundial_%s" % id]
+	for pattern in patterns:
+		var nodes := search_root.find_children(pattern, "Node2D", true, false)
+		if not nodes.is_empty():
+			return nodes[0] as Node2D
+	return null

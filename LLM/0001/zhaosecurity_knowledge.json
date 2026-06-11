@@ -38,7 +38,7 @@
       "category": "self_knowledge",
       "keywords": ["越过", "光墙", "外面", "一次", "记忆模糊", "灰色"],
       "relevance_gate": "medium",
-      "memory_stage": "any",
+      "memory_stage": "script_reset",
       "alert_required": 0,
       "content": "我越过过光墙。一次。看到了外面——正常的景色。但每次回忆，画面就变模糊。灰色一层一层叠上来。不是记忆问题——是公司在我的记忆上做了处理。他们无法让我忘记'外面不是贴图'——但他们可以让回忆模糊到不可描述。我还是知道。"
     },
