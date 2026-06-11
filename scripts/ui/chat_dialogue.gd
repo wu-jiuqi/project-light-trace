@@ -4,6 +4,10 @@ extends Control
 ## 使用 CanvasLayer 确保渲染在最上层
 
 const UITheme = preload("res://scripts/ui/ui_theme.gd")
+const DIALOGUE_BOX_SCENE = preload("res://scenes/ui/DialogueBox.tscn")
+const DIALOGUE_DESIGN_SIZE := Vector2(1280.0, 720.0)
+const PORTRAIT_DIM: float = 0.45
+const PORTRAIT_FULL: float = 1.0
 
 signal dialogue_opened(npc_name: String)
 signal dialogue_closed()
@@ -12,6 +16,9 @@ signal player_message_sent(message: String)
 # UI
 var _canvas: CanvasLayer
 var _overlay: ColorRect
+var _dialogue_box: Control
+var _dialogue_stage: Control
+var _dialogue_host: Node
 var _panel: Panel
 var _name_label: Label
 var _chat_display: RichTextLabel
@@ -21,6 +28,8 @@ var _send_btn: Button
 var _give_btn: Button
 var _history_btn: Button
 var _think_label: Label
+var _player_portrait: TextureRect
+var _npc_portrait: TextureRect
 
 # 历史模式
 var _history_mode: bool = false
@@ -55,8 +64,6 @@ func _ready() -> void:
 	_canvas.name = "ChatDialogueLayer"
 	add_child(_canvas)
 	
-	# 等下一帧视口就绪后构建
-	call_deferred("_ensure_ui")
 	
 	set_process_input(true)
 	set_process_unhandled_input(true)
@@ -72,133 +79,110 @@ func _ensure_ui() -> void:
 
 
 func _build_ui() -> void:
-	# 基于视口尺寸计算布局
 	var vs = get_viewport_rect().size
 	if vs.x <= 0 or vs.y <= 0:
 		vs = Vector2(1280, 720)  # 回退默认值
 		print("[ChatDialogue] 视口无效，使用默认 1280x720")
 	
-	# === 遮罩层（全屏，半透明黑色） ===
+	_dialogue_box = _find_scene_dialogue_box()
+	if _dialogue_box:
+		_dialogue_host = _dialogue_box.get_parent()
+	else:
+		_dialogue_host = _canvas
+
 	_overlay = ColorRect.new()
 	_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_overlay.color = Color(0, 0, 0, 0.25)
+	_overlay.color = Color(0, 0, 0, 0.18)
 	_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
 	_overlay.visible = false
-	_canvas.add_child(_overlay)
-	
-	# === 对话面板（底部60%） ===
-	var panel_h = int(vs.y * 0.6)
-	_panel = Panel.new()
-	_panel.position = Vector2(0, vs.y - panel_h)  # 从底部向上
-	_panel.size = Vector2(vs.x, panel_h)
-	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	var ps = StyleBoxFlat.new()
-	ps.bg_color = Color(0.2, 0.2, 0.22, 0.65)
-	ps.set_corner_radius_all(0)
-	ps.border_width_top = 1
-	ps.border_color = Color(0.4, 0.4, 0.45, 0.3)
-	_panel.add_theme_stylebox_override("panel", ps)
-	_panel.add_theme_stylebox_override("panel", UITheme.panel_style())
-	_panel.visible = false
-	_canvas.add_child(_panel)
-	
-	# --- NPC名字 ---
-	_name_label = Label.new()
-	_name_label.position = Vector2(20, 12)
-	_name_label.add_theme_color_override("font_color", Color(0.3, 0.8, 1, 1))
-	_name_label.add_theme_font_size_override("font_size", 15)
-	_panel.add_child(_name_label)
-	
-	# --- 思考中 ---
+	_dialogue_host.add_child(_overlay)
+
+	if _dialogue_box:
+		_dialogue_host.move_child(_overlay, _dialogue_box.get_index())
+	else:
+		_dialogue_box = DIALOGUE_BOX_SCENE.instantiate() as Control
+		_dialogue_box.visible = false
+		_dialogue_host.add_child(_dialogue_box)
+
+	_dialogue_stage = _dialogue_box.get_node_or_null("Stage") as Control
+	if _dialogue_stage == null:
+		_dialogue_stage = _dialogue_box
+
+	_panel = _dialogue_stage.get_node("DialoguePanel") as Panel
+	_player_portrait = _dialogue_stage.get_node_or_null("PlayerPortrait") as TextureRect
+	_npc_portrait = _dialogue_stage.get_node_or_null("NpcPortrait") as TextureRect
+	_name_label = _dialogue_stage.get_node_or_null("DialoguePanel/NamePlate/NameLabel") as Label
+	if _name_label == null:
+		_name_label = _dialogue_stage.get_node_or_null("DialoguePanel/NameLabel") as Label
+	_chat_display = _dialogue_stage.get_node("DialoguePanel/ChatDisplay") as RichTextLabel
+	_input_bar = _dialogue_stage.get_node("DialoguePanel/InputBar") as Panel
+	_input_box = _dialogue_stage.get_node("DialoguePanel/InputBar/InputBox") as LineEdit
+	_send_btn = _dialogue_stage.get_node("DialoguePanel/ButtonRow/SendButton") as Button
+	_give_btn = _dialogue_stage.get_node("DialoguePanel/ButtonRow/GiveButton") as Button
+	_history_btn = _dialogue_stage.get_node("DialoguePanel/ButtonRow/HistoryButton") as Button
+
+	if _name_label == null:
+		push_error("[ChatDialogue] DialogueBox.tscn 缺少 NameLabel，请放在 DialoguePanel/NamePlate/NameLabel 或 DialoguePanel/NameLabel")
+		_name_label = Label.new()
+		_name_label.name = "NameLabel"
+		_name_label.position = Vector2(24, -44)
+		_name_label.size = Vector2(220, 36)
+		_name_label.add_theme_color_override("font_color", Color(0.41, 0.27, 0.08, 1.0))
+		_name_label.add_theme_font_size_override("font_size", 22)
+		_panel.add_child(_name_label)
+
 	_think_label = Label.new()
-	_think_label.position = Vector2(vs.x - 120, 12)
-	_think_label.add_theme_color_override("font_color", Color(0.5, 0.8, 1, 0.7))
-	_think_label.add_theme_font_size_override("font_size", 12)
+	_think_label.name = "ThinkLabel"
+	_think_label.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_think_label.position = Vector2(-220, 16)
+	_think_label.size = Vector2(190, 28)
+	_think_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_think_label.add_theme_color_override("font_color", Color(0.38, 0.28, 0.16, 0.72))
+	_think_label.add_theme_font_size_override("font_size", 15)
 	_panel.add_child(_think_label)
-	
-	# --- 聊天区 ---
-	var chat_h = panel_h - 36 - 84
-	_chat_display = RichTextLabel.new()
-	_chat_display.position = Vector2(16, 36)
-	_chat_display.size = Vector2(vs.x - 32, chat_h)
-	_chat_display.bbcode_enabled = true
-	_chat_display.scroll_active = true
-	_chat_display.scroll_following = true
-	_chat_display.selection_enabled = true
-	_chat_display.add_theme_font_size_override("normal_font_size", 14)
-	var cds = StyleBoxFlat.new()
-	cds.bg_color = Color(0.15, 0.15, 0.17, 0.3)
-	cds.set_corner_radius_all(6)
-	_chat_display.add_theme_stylebox_override("normal", cds)
-	_chat_display.add_theme_stylebox_override("normal", UITheme.panel_style(true))
-	_panel.add_child(_chat_display)
-	
-	# --- 底部输入栏 ---
-	var bar_h = 84
-	_input_bar = Panel.new()
-	_input_bar.position = Vector2(0, panel_h - bar_h)
-	_input_bar.size = Vector2(vs.x, bar_h)
-	var ibs = StyleBoxFlat.new()
-	ibs.bg_color = Color(0.15, 0.15, 0.17, 0.6)
-	ibs.border_width_top = 1
-	ibs.border_color = Color(0.25, 0.25, 0.28, 0.4)
-	_input_bar.add_theme_stylebox_override("panel", ibs)
-	_input_bar.add_theme_stylebox_override("panel", UITheme.panel_style(true))
-	_panel.add_child(_input_bar)
-	
-	# 输入框
-	_input_box = LineEdit.new()
-	_input_box.position = Vector2(16, 16)
-	_input_box.size = Vector2(vs.x - 32 - 88, 52)
-	_input_box.placeholder_text = "输入消息..."
-	_input_box.add_theme_font_size_override("font_size", 15)
-	var iis = StyleBoxFlat.new()
-	iis.bg_color = Color(0.18, 0.18, 0.2, 0.7)
-	iis.set_corner_radius_all(8)
-	iis.border_width_left = 1; iis.border_width_right = 1
-	iis.border_width_top = 1; iis.border_width_bottom = 1
-	iis.border_color = Color(0.35, 0.35, 0.4, 0.3)
-	_input_box.add_theme_stylebox_override("normal", iis)
-	_input_box.add_theme_color_override("font_color", Color(1, 1, 1, 0.9))
-	UITheme.apply_line_edit(_input_box)
+
 	_input_box.text_submitted.connect(_do_send)
-	_input_bar.add_child(_input_box)
-	
-	# 发送按钮
-	_send_btn = Button.new()
-	_send_btn.position = Vector2(vs.x - 96, 16)
-	_send_btn.size = Vector2(80, 52)
-	_send_btn.text = "发送"
-	_send_btn.add_theme_font_size_override("font_size", 14)
-	UITheme.apply_button(_send_btn)
 	_send_btn.pressed.connect(_do_send.bind(""))
-	_input_bar.add_child(_send_btn)
-	
-	# 给予按钮
-	_give_btn = Button.new()
-	_give_btn.position = Vector2(vs.x - 184, 16)
-	_give_btn.size = Vector2(80, 52)
-	_give_btn.text = "给予"
-	_give_btn.add_theme_font_size_override("font_size", 14)
-	_give_btn.add_theme_color_override("font_color", Color(0.9, 0.85, 0.4, 1))
-	UITheme.apply_button(_give_btn, true)
 	_give_btn.pressed.connect(_do_give)
-	_give_btn.visible = false
-	_input_bar.add_child(_give_btn)
-	
-	# 历史按钮
-	_history_btn = Button.new()
-	_history_btn.position = Vector2(vs.x - 272, 16)
-	_history_btn.size = Vector2(80, 52)
-	_history_btn.text = "历史"
-	_history_btn.add_theme_font_size_override("font_size", 14)
-	_history_btn.add_theme_color_override("font_color", Color(0.6, 0.8, 1, 1))
-	UITheme.apply_button(_history_btn)
+	_give_btn.visible = true
+	_give_btn.disabled = true
 	_history_btn.pressed.connect(_show_history)
-	_input_bar.add_child(_history_btn)
 	
-	# === 全屏历史面板 ===
+	if not get_viewport().size_changed.is_connected(_layout_dialogue_box):
+		get_viewport().size_changed.connect(_layout_dialogue_box)
+	_layout_dialogue_box()
 	_build_history_panel(vs)
+
+
+func _find_scene_dialogue_box() -> Control:
+	var scene := get_tree().current_scene
+	if scene == null:
+		return null
+	var found := scene.find_child("DialogueBox", true, false)
+	if found is Control:
+		return found as Control
+	return null
+
+
+func _layout_dialogue_box() -> void:
+	if not _dialogue_box or not _dialogue_stage:
+		return
+
+	var vs: Vector2 = get_viewport_rect().size
+	if vs.x <= 0.0 or vs.y <= 0.0:
+		vs = DIALOGUE_DESIGN_SIZE
+
+	_dialogue_box.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_dialogue_box.offset_left = 0.0
+	_dialogue_box.offset_top = 0.0
+	_dialogue_box.offset_right = 0.0
+	_dialogue_box.offset_bottom = 0.0
+
+	var scale_factor: float = min(vs.x / DIALOGUE_DESIGN_SIZE.x, vs.y / DIALOGUE_DESIGN_SIZE.y)
+	var scaled_size: Vector2 = DIALOGUE_DESIGN_SIZE * scale_factor
+	_dialogue_stage.position = (vs - scaled_size) * 0.5
+	_dialogue_stage.size = DIALOGUE_DESIGN_SIZE
+	_dialogue_stage.scale = Vector2(scale_factor, scale_factor)
 
 
 func _build_history_panel(vs: Vector2) -> void:
@@ -211,7 +195,7 @@ func _build_history_panel(vs: Vector2) -> void:
 	_history_panel.add_theme_stylebox_override("panel", hps)
 	_history_panel.add_theme_stylebox_override("panel", UITheme.panel_style())
 	_history_panel.visible = false
-	_canvas.add_child(_history_panel)
+	(_dialogue_host if _dialogue_host else _canvas).add_child(_history_panel)
 	
 	# 标题
 	_history_title = Label.new()
@@ -314,7 +298,7 @@ func open(npc_ctrl: Node, greeting: String = "") -> void:
 		return
 	
 	# 确保UI已构建
-	call_deferred("_ensure_ui")
+	_ensure_ui()
 	
 	_npc = npc_ctrl
 	npc_name = npc_ctrl.npc_name
@@ -327,8 +311,14 @@ func open(npc_ctrl: Node, greeting: String = "") -> void:
 	_input_box.text = ""
 	_input_box.editable = true
 	_send_btn.disabled = false
+	_give_btn.visible = true
+	_give_btn.disabled = true
+	_set_portraits(npc_ctrl)
+	_set_portrait_state(true)
+	_layout_dialogue_box()
 	
 	_overlay.visible = true
+	_dialogue_box.visible = true
 	_panel.visible = true
 	is_open = true
 	
@@ -342,13 +332,11 @@ func open(npc_ctrl: Node, greeting: String = "") -> void:
 	if _npc.has_method("can_give_item"):
 		var givable = _npc.can_give_item()
 		if givable:
-			var item = _npc.get_givable_item()
-			_give_btn.text = "给予 %s" % item.get("icon", "?")
-			_give_btn.visible = true
+			_give_btn.disabled = false
 		else:
-			_give_btn.visible = false
+			_give_btn.disabled = true
 	else:
-		_give_btn.visible = false
+		_give_btn.disabled = true
 	
 	dialogue_opened.emit(npc_name)
 	print("[Chat] 打开: %s" % npc_name)
@@ -360,6 +348,7 @@ func close() -> void:
 	is_open = false
 	_focus_retry_count = 0
 	_overlay.visible = false
+	_dialogue_box.visible = false
 	_panel.visible = false
 	
 	if _npc and _npc.has_method("end_dialogue"):
@@ -370,6 +359,12 @@ func close() -> void:
 	npc_name = ""
 	_chat_display.text = ""
 	print("[Chat] 关闭: %s" % name)
+	if _npc_portrait:
+		_npc_portrait.texture = null
+		_npc_portrait.visible = false
+		_npc_portrait.modulate.a = PORTRAIT_FULL
+	if _player_portrait:
+		_player_portrait.modulate.a = PORTRAIT_FULL
 	dialogue_closed.emit()
 	_close_history()
 
@@ -388,6 +383,7 @@ func _show_history() -> void:
 	_history_page = 0
 	_history_mode = true
 	
+	_dialogue_box.visible = false
 	_panel.visible = false
 	_overlay.visible = true
 	_history_panel.visible = true
@@ -402,6 +398,7 @@ func _close_history() -> void:
 	_history_mode = false
 	_history_panel.visible = false
 	if is_open:
+		_dialogue_box.visible = true
 		_panel.visible = true
 
 
@@ -432,7 +429,7 @@ func _load_history_page(kb_id: String) -> void:
 			text += "[right][color=#777777]%s[/color]  [color=#5599cc][ 你 ][/color] %s[/right]\n" % [time_str, content]
 		else:
 			var phase_tag = _alert_phase_tag(phase)
-			text += "[color=#777777]%s[/color]  [color=#88aacc][%s][/color]%s %s\n" % [time_str, npc_name, phase_tag, content]
+			text += "[color=#777777]%s[/color]  [outline_size=2][outline_color=black][color=#D4B86A][%s][/color][/outline_color][/outline_size]%s %s\n" % [time_str, npc_name, phase_tag, content]
 	
 	_history_display.text = text
 
@@ -472,18 +469,20 @@ func stream_begin() -> void:
 	_think_label.text = "正在输入..."
 	_input_box.editable = false
 	_send_btn.disabled = true
+	_set_portrait_state(false)
 
 
 func stream_add(token: String) -> void:
 	_stream_text += token
-	_chat_display.text = _base_text + "[color=#88aacc][%s][/color] %s" % [npc_name, _stream_text]
+	_chat_display.text = _base_text + "[outline_size=2][outline_color=black][color=#D4B86A][%s][/color][/outline_color][/outline_size] %s" % [npc_name, _stream_text]
 
 
 func stream_end(full_text: String) -> void:
 	_stream_text = ""
-	_chat_display.text = _base_text + "[color=#88aacc][%s][/color] %s\n" % [npc_name, full_text]
+	_chat_display.text = _base_text + "[outline_size=2][outline_color=black][color=#D4B86A][%s][/color][/outline_color][/outline_size] %s\n" % [npc_name, full_text]
 	_base_text = _chat_display.text
 	_think_label.text = ""
+	_set_portrait_state(true)
 	_input_restore()
 
 
@@ -498,6 +497,7 @@ func add_player_msg(text: String) -> void:
 
 
 func input_restore() -> void:
+	_set_portrait_state(true)
 	_input_box.editable = true
 	_send_btn.disabled = false
 	_focus_retry_count = FOCUS_MAX_RETRIES
@@ -539,16 +539,72 @@ func _do_give() -> void:
 	if item.is_empty(): return
 	
 	_npc.send_give_item(item["item_id"])
-	_give_btn.visible = false
+	_give_btn.disabled = true
 
 
 func _add_npc_msg(text: String) -> void:
-	_chat_display.text += "[color=#88aacc][%s][/color] %s\n" % [npc_name, text]
+	_chat_display.text += "[outline_size=2][outline_color=black][color=#D4B86A][%s][/color][/outline_color][/outline_size] %s\n" % [npc_name, text]
 	_base_text = _chat_display.text
 
 
 func _input_restore() -> void:
 	input_restore()
+
+
+func _set_portraits(npc_ctrl: Node) -> void:
+	if _player_portrait:
+		_player_portrait.visible = _player_portrait.texture != null
+	if not _npc_portrait:
+		return
+
+	var portrait := _load_npc_portrait(npc_ctrl)
+	_npc_portrait.texture = portrait
+	_npc_portrait.visible = portrait != null
+
+
+## 根据当前"谁在说话"调整两个立绘透明度
+## player_active=true  → 玩家立绘完全显示，NPC 立绘半透明（玩家打字/输入状态）
+## player_active=false → NPC 立绘完全显示，玩家立绘半透明（NPC 流式输出中）
+func _set_portrait_state(player_active: bool) -> void:
+	if _npc_portrait:
+		_npc_portrait.modulate.a = PORTRAIT_DIM if player_active else PORTRAIT_FULL
+	if _player_portrait:
+		_player_portrait.modulate.a = PORTRAIT_FULL if player_active else PORTRAIT_DIM
+
+
+func _load_npc_portrait(npc_ctrl: Node) -> Texture2D:
+	if not npc_ctrl or not ("npc_kb_id" in npc_ctrl):
+		return null
+
+	var npc_id := String(npc_ctrl.npc_kb_id)
+	if npc_id == "":
+		return null
+
+	var fragment_dir := _get_portrait_fragment_dir(npc_ctrl)
+	var portrait_dir := "res://assets/papercraft/fragments/%s/characters" % fragment_dir
+	var files := DirAccess.get_files_at(portrait_dir)
+	for file_name in files:
+		if file_name.ends_with("_l.png") and file_name.find(npc_id) != -1:
+			var path := "%s/%s" % [portrait_dir, file_name]
+			if ResourceLoader.exists(path):
+				return load(path) as Texture2D
+
+	push_warning("[ChatDialogue] No large portrait found for npc_id=%s in %s" % [npc_id, portrait_dir])
+	return null
+
+
+func _get_portrait_fragment_dir(npc_ctrl: Node) -> String:
+	if FragmentManager.current_fragment != null:
+		var current_id := String(FragmentManager.current_fragment.id)
+		if current_id.begins_with("id"):
+			return current_id
+		return "id%s" % current_id
+
+	var scene_path := npc_ctrl.scene_file_path
+	for part in scene_path.split("/"):
+		if String(part).begins_with("id"):
+			return String(part)
+	return "id0001"
 
 
 # ============================================================

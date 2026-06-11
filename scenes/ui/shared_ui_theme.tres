@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=12 format=3]
+[gd_resource type="Theme" load_steps=14 format=3]
 
 [sub_resource type="StyleBoxTexture" id="StyleBox_button_normal"]
 texture = load("res://assets/papercraft/core/ui/dialogue_box/button_plate.png")
@@ -36,7 +36,7 @@ modulate_color = Color(0.6, 0.55, 0.45, 0.5)
 texture = load("res://assets/papercraft/core/ui/dialogue_box/large_page.png")
 modulate_color = Color(0.92, 0.88, 0.78, 0.75)
 
-[sub_resource type="StyleBoxTexture" id="StyleBox_backpack_notebook"]
+[sub_resource type="StyleBoxTexture" id="StyleBox_notebook_panel"]
 texture = load("res://assets/papercraft/core/ui/backpack_notebook.png")
 content_margin_left = 48.0
 content_margin_top = 42.0
@@ -57,10 +57,13 @@ content_margin_top = 48.0
 content_margin_right = 48.0
 content_margin_bottom = 36.0
 
+[sub_resource type="StyleBoxTexture" id="StyleBox_title_bg"]
+texture = load("res://assets/papercraft/core/ui/title_background.png")
+
 [sub_resource type="StyleBoxTexture" id="StyleBox_star_map_bg"]
 texture = load("res://assets/papercraft/core/ui/star_map_background.png")
 
-[sub_resource type="StyleBoxTexture" id="StyleBox_tracing_paper"]
+[sub_resource type="StyleBoxTexture" id="StyleBox_star_shard_overlay"]
 texture = load("res://assets/papercraft/core/ui/star_shard_tracing_paper.png")
 
 [sub_resource type="StyleBoxTexture" id="StyleBox_dialogue_panel"]
@@ -76,10 +79,15 @@ Button/styles/normal = SubResource("StyleBox_button_normal")
 Button/styles/hover = SubResource("StyleBox_button_hover")
 Button/styles/pressed = SubResource("StyleBox_button_pressed")
 Button/styles/disabled = SubResource("StyleBox_button_disabled")
-Panel/styles/large_page = SubResource("StyleBox_large_page")
-Panel/styles/backpack_notebook = SubResource("StyleBox_backpack_notebook")
+Button/styles/panel_button_normal = SubResource("StyleBox_button_normal")
+Button/styles/panel_button_hover = SubResource("StyleBox_button_hover")
+Button/styles/panel_button_pressed = SubResource("StyleBox_button_pressed")
+Button/styles/panel_button_disabled = SubResource("StyleBox_button_disabled")
+Panel/styles/notebook_panel = SubResource("StyleBox_notebook_panel")
 Panel/styles/detail_card = SubResource("StyleBox_detail_card")
-Panel/styles/title_panel = SubResource("StyleBox_title_panel")
 Panel/styles/star_map_bg = SubResource("StyleBox_star_map_bg")
-Panel/styles/tracing_paper = SubResource("StyleBox_tracing_paper")
+Panel/styles/star_shard_overlay = SubResource("StyleBox_star_shard_overlay")
+Panel/styles/title_panel = SubResource("StyleBox_title_panel")
+Panel/styles/title_bg = SubResource("StyleBox_title_bg")
+Panel/styles/large_page = SubResource("StyleBox_large_page")
 Panel/styles/dialogue_panel = SubResource("StyleBox_dialogue_panel")

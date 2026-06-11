@@ -1,0 +1,191 @@
+[gd_scene load_steps=5 format=3 uid="uid://dsettpanel0001"]
+
+[ext_resource type="Script" id="1_script" path="res://scripts/ui/settings_panel.gd"]
+[ext_resource type="Theme" id="2_theme" path="res://scenes/ui/shared_ui_theme.tres"]
+[ext_resource type="Texture2D" id="3_title_bg" path="res://assets/papercraft/core/ui/title_background.png"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_title_panel"]
+texture = load("res://assets/papercraft/core/ui/title_menu_panel.png")
+content_margin_left = 64.0
+content_margin_top = 48.0
+content_margin_right = 48.0
+content_margin_bottom = 36.0
+
+[node name="SettingsPanel" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_script")
+theme = ExtResource("2_theme")
+
+[node name="Vignette" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.1, 0.06, 0.03, 0.55)
+mouse_filter = 2
+
+[node name="Stage" type="Control" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -640.0
+offset_top = -360.0
+offset_right = 640.0
+offset_bottom = 360.0
+mouse_filter = 1
+
+[node name="TitleBg" type="TextureRect" parent="Stage"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("3_title_bg")
+stretch_mode = 1
+
+[node name="SettingsContainer" type="Panel" parent="Stage"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = -240.0
+offset_right = 320.0
+offset_bottom = 240.0
+theme_override_styles/panel = SubResource("StyleBox_title_panel")
+
+[node name="TitleLabel" type="Label" parent="Stage/SettingsContainer"]
+anchor_top = 0.0
+anchors_preset = 4
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -100.0
+offset_top = 18.0
+offset_right = 100.0
+offset_bottom = 46.0
+text = "设    置"
+horizontal_alignment = 1
+add_theme_color_override("font_color", Color(0.698, 0.557, 0.318, 1.0))
+add_theme_font_size_override("font_size", 25)
+
+[node name="ContentArea" type="VBoxContainer" parent="Stage/SettingsContainer"]
+anchor_left = 0.0
+anchor_right = 1.0
+anchor_top = 0.0
+anchor_bottom = 1.0
+offset_left = 48.0
+offset_top = 60.0
+offset_right = -48.0
+offset_bottom = -70.0
+theme_override_constants/separation = 16
+
+[node name="VolumeSection" type="VBoxContainer" parent="Stage/SettingsContainer/ContentArea"]
+
+[node name="SectionLabel" type="Label" parent="Stage/SettingsContainer/ContentArea/VolumeSection"]
+text = "♫ 音量设置"
+add_theme_color_override("font_color", Color(0.698, 0.557, 0.318, 1.0))
+add_theme_font_size_override("font_size", 20)
+
+[node name="MasterRow" type="HBoxContainer" parent="Stage/SettingsContainer/ContentArea/VolumeSection"]
+
+[node name="RowLabel" type="Label" parent="Stage/SettingsContainer/ContentArea/VolumeSection/MasterRow"]
+text = "主音量"
+custom_minimum_size = Vector2(100, 0)
+add_theme_color_override("font_color", Color(0.173, 0.122, 0.078, 1.0))
+
+[node name="MasterSlider" type="HSlider" parent="Stage/SettingsContainer/ContentArea/VolumeSection/MasterRow"]
+min_value = 0.0
+max_value = 100.0
+step = 1.0
+value = 100.0
+size_flags_horizontal = 3
+
+[node name="MasterValue" type="Label" parent="Stage/SettingsContainer/ContentArea/VolumeSection/MasterRow"]
+text = "100%"
+custom_minimum_size = Vector2(50, 0)
+add_theme_color_override("font_color", Color(0.173, 0.122, 0.078, 1.0))
+
+[node name="BgmRow" type="HBoxContainer" parent="Stage/SettingsContainer/ContentArea/VolumeSection"]
+
+[node name="RowLabel2" type="Label" parent="Stage/SettingsContainer/ContentArea/VolumeSection/BgmRow"]
+text = "背景音乐"
+custom_minimum_size = Vector2(100, 0)
+add_theme_color_override("font_color", Color(0.173, 0.122, 0.078, 1.0))
+
+[node name="BgmSlider" type="HSlider" parent="Stage/SettingsContainer/ContentArea/VolumeSection/BgmRow"]
+min_value = 0.0
+max_value = 100.0
+step = 1.0
+value = 100.0
+size_flags_horizontal = 3
+
+[node name="BgmValue" type="Label" parent="Stage/SettingsContainer/ContentArea/VolumeSection/BgmRow"]
+text = "100%"
+custom_minimum_size = Vector2(50, 0)
+add_theme_color_override("font_color", Color(0.173, 0.122, 0.078, 1.0))
+
+[node name="SfxRow" type="HBoxContainer" parent="Stage/SettingsContainer/ContentArea/VolumeSection"]
+
+[node name="RowLabel3" type="Label" parent="Stage/SettingsContainer/ContentArea/VolumeSection/SfxRow"]
+text = "音效"
+custom_minimum_size = Vector2(100, 0)
+add_theme_color_override("font_color", Color(0.173, 0.122, 0.078, 1.0))
+
+[node name="SfxSlider" type="HSlider" parent="Stage/SettingsContainer/ContentArea/VolumeSection/SfxRow"]
+min_value = 0.0
+max_value = 100.0
+step = 1.0
+value = 100.0
+size_flags_horizontal = 3
+
+[node name="SfxValue" type="Label" parent="Stage/SettingsContainer/ContentArea/VolumeSection/SfxRow"]
+text = "100%"
+custom_minimum_size = Vector2(50, 0)
+add_theme_color_override("font_color", Color(0.173, 0.122, 0.078, 1.0))
+
+[node name="HSeparator" type="HSeparator" parent="Stage/SettingsContainer/ContentArea"]
+
+[node name="DisplaySection" type="VBoxContainer" parent="Stage/SettingsContainer/ContentArea"]
+
+[node name="SectionLabel2" type="Label" parent="Stage/SettingsContainer/ContentArea/DisplaySection"]
+text = "⚙ 显示设置"
+add_theme_color_override("font_color", Color(0.698, 0.557, 0.318, 1.0))
+add_theme_font_size_override("font_size", 20)
+
+[node name="FullscreenRow" type="HBoxContainer" parent="Stage/SettingsContainer/ContentArea/DisplaySection"]
+
+[node name="RowLabel4" type="Label" parent="Stage/SettingsContainer/ContentArea/DisplaySection/FullscreenRow"]
+text = "全屏模式"
+add_theme_color_override("font_color", Color(0.173, 0.122, 0.078, 1.0))
+
+[node name="Spacer" type="Control" parent="Stage/SettingsContainer/ContentArea/DisplaySection/FullscreenRow"]
+size_flags_horizontal = 3
+
+[node name="FullscreenCheck" type="CheckButton" parent="Stage/SettingsContainer/ContentArea/DisplaySection/FullscreenRow"]
+
+[node name="CountdownLabel" type="Label" parent="Stage/SettingsContainer/ContentArea/DisplaySection/FullscreenRow"]
+text = ""
+custom_minimum_size = Vector2(140, 0)
+horizontal_alignment = 2
+add_theme_color_override("font_color", Color(0.698, 0.557, 0.318, 1.0))
+add_theme_font_size_override("font_size", 14)
+
+[node name="ButtonRow" type="HBoxContainer" parent="Stage/SettingsContainer"]
+anchor_bottom = 1.0
+anchor_right = 1.0
+offset_left = -176.0
+offset_top = -12.0
+offset_right = -48.0
+offset_bottom = -12.0
+theme_override_constants/separation = 16
+
+[node name="SaveButton" type="Button" parent="Stage/SettingsContainer/ButtonRow"]
+custom_minimum_size = Vector2(104, 42)
+text = "保存"
+
+[node name="CancelButton" type="Button" parent="Stage/SettingsContainer/ButtonRow"]
+custom_minimum_size = Vector2(104, 42)
+text = "取消"
+
+[node name="ResolutionTimer" type="Timer" parent="Stage/SettingsContainer/ButtonRow"]
+one_shot = true
+wait_time = 15.0
