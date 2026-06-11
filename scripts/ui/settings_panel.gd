@@ -77,8 +77,9 @@ func _on_slider_changed(_value: float, bus: String, slider: HSlider, label: Labe
 	label.text = "%d%%" % int(slider.value)
 	var vol: float = slider.value / 100.0
 	var bus_map: Dictionary = {"master": "Master", "bgm": "BGM", "sfx": "SFX"}
-	# 实时预览音量
-	AudioServer.set_bus_volume_db(AudioServer.get_bus_index(bus_map[bus]), linear_to_db(vol))
+	# 实时预览音量（避免 linear_to_db(0.0) 返回 -inf）
+	var db: float = linear_to_db(vol)
+	AudioServer.set_bus_volume_db(AudioServer.get_bus_index(bus_map[bus]), maxf(db, -80.0))
 
 
 func _on_fullscreen_toggled(_pressed: bool) -> void:

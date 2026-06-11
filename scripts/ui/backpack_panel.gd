@@ -36,7 +36,21 @@ func refresh_items() -> void:
 
 	# TODO: 从 InventorySystem 获取物品列表
 	var items: Array = []
-	if items.is_empty():
+
+	# Filter by current filter mode
+	var filtered: Array = []
+	for item: Dictionary in items:
+		match current_filter:
+			"usable":
+				if item.get("usable", false):
+					filtered.append(item)
+			"give":
+				if item.get("givable", false):
+					filtered.append(item)
+			_:
+				filtered.append(item)
+
+	if filtered.is_empty():
 		empty_hint_label.visible = true
 		item_grid.visible = false
 		return
@@ -44,7 +58,7 @@ func refresh_items() -> void:
 	empty_hint_label.visible = false
 	item_grid.visible = true
 	var ItemSlotScene: PackedScene = preload("res://scenes/ui/components/ItemSlot.tscn")
-	for data: Dictionary in items:
+	for data: Dictionary in filtered:
 		var slot: ItemSlot = ItemSlotScene.instantiate() as ItemSlot
 		slot.set_item(data)
 		slot.pressed.connect(show_item_detail.bind(data.get("id", -1)))
