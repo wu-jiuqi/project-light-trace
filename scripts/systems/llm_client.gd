@@ -1,19 +1,7 @@
 extends Node
-## LLM 客户端 — 双模：编辑器直连 / Web 代理
-##
-## 编辑器/桌面运行（非 Web 平台）：
-##   从环境变量 DEEPSEEK_API_KEY 读取密钥，直接 HTTPS 请求 api.deepseek.com。
-##   环境变量设置方式（PowerShell）：
-##     $env:DEEPSEEK_API_KEY="sk-xxxxxxxx"
-##     然后在同一终端中启动 Godot 编辑器。
-##
-## Web 导出：
-##   浏览器 CORS 限制无法直连外部 API，必须通过同源 Node 代理转发。
-##   代理从 process.env.DEEPSEEK_API_KEY 读取密钥，返回简化 JSON。
-
-const DEEPSEEK_API_HOST = "api.deepseek.com"
-const DEEPSEEK_API_PATH = "/v1/chat/completions"
-const DEEPSEEK_MODEL = "deepseek-chat"
+## LLM client with two modes:
+## - builtin: same-origin/local proxy at /api/chat/completions
+## - custom: OpenAI-compatible API configured from SettingsPanel
 
 const PROXY_API_PATH = "/api/chat/completions"
 const DEFAULT_PROXY_HOST = "127.0.0.1"
@@ -25,6 +13,7 @@ enum State {
 	CONNECTING,
 	REQUESTING,
 	RECEIVING,
+	EMITTING,
 	DONE
 }
 
@@ -34,12 +23,14 @@ signal stream_failed(error: String)
 
 var _client: HTTPClient
 var _state: int = State.IDLE
-var _proxy_host: String = DEFAULT_PROXY_HOST
-var _proxy_port: int = DEFAULT_PROXY_PORT
-var _proxy_ssl: bool = false
+var _host: String = DEFAULT_PROXY_HOST
+var _port: int = DEFAULT_PROXY_PORT
+var _ssl: bool = false
 var _api_path: String = PROXY_API_PATH
-var _use_direct_api: bool = false
+var _use_custom_api: bool = false
 var _api_key: String = ""
+var _model: String = ""
+var _settings_error: String = ""
 var _request_headers: PackedStringArray = []
 var _pending_body: String = ""
 var _response_body: String = ""
@@ -47,34 +38,58 @@ var _response_code: int = 0
 var _response_started: bool = false
 var _current_callback: Callable
 var _connection_attempt_time: float = 0.0
+var _stream_mode: bool = false
+var _stream_buffer: String = ""
+var _stream_full_text: String = ""
+var _stream_completed_once: bool = false
 
 
 func _ready() -> void:
 	_client = HTTPClient.new()
-	_configure_connection()
-	var mode_label = "直连 DeepSeek API" if _use_direct_api else "同源代理"
+	reload_settings()
+
+
+func reload_settings() -> void:
+	SettingsManager.load()
+	_settings_error = SettingsManager.validate_llm_settings()
+	_use_custom_api = SettingsManager.is_custom_llm_ready()
+	if _use_custom_api:
+		_configure_custom_api(SettingsManager.llm_base_url)
+		_api_key = SettingsManager.llm_api_key.strip_edges()
+		_model = SettingsManager.llm_model.strip_edges()
+	else:
+		_configure_builtin_proxy()
+		_api_key = ""
+		_model = ""
+
+	var mode_label := "自定义 OpenAI-compatible API" if _use_custom_api else "官方试玩代理"
+	if SettingsManager.llm_mode == SettingsManager.LLM_MODE_CUSTOM and not _settings_error.is_empty():
+		mode_label = "自定义 API 配置未启用：%s" % _settings_error
 	print("[LLMClient] %s 就绪 (%s://%s:%d%s)" % [
 		mode_label,
-		"https" if _proxy_ssl else "http",
-		_proxy_host,
-		_proxy_port,
+		"https" if _ssl else "http",
+		_host,
+		_port,
 		_api_path
 	])
 
 
-func _configure_connection() -> void:
-	# --- 环境变量覆盖代理配置（始终有效） ---
-	var env_host = OS.get_environment("SHUOGUANG_LLM_PROXY_HOST")
-	var env_port = OS.get_environment("SHUOGUANG_LLM_PROXY_PORT")
-	var env_ssl = OS.get_environment("SHUOGUANG_LLM_PROXY_SSL")
-	if not env_host.is_empty():
-		_proxy_host = env_host
-	if env_port.is_valid_int():
-		_proxy_port = env_port.to_int()
-	if env_ssl.to_lower() in ["1", "true", "yes"]:
-		_proxy_ssl = true
+func _configure_builtin_proxy() -> void:
+	_host = DEFAULT_PROXY_HOST
+	_port = DEFAULT_PROXY_PORT
+	_ssl = false
+	_api_path = PROXY_API_PATH
 
-	# --- Web 平台：始终走同源代理 ---
+	var env_host := OS.get_environment("SHUOGUANG_LLM_PROXY_HOST")
+	var env_port := OS.get_environment("SHUOGUANG_LLM_PROXY_PORT")
+	var env_ssl := OS.get_environment("SHUOGUANG_LLM_PROXY_SSL")
+	if not env_host.is_empty():
+		_host = env_host
+	if env_port.is_valid_int():
+		_port = env_port.to_int()
+	if env_ssl.to_lower() in ["1", "true", "yes"]:
+		_ssl = true
+
 	if OS.has_feature("web") and Engine.has_singleton("JavaScriptBridge"):
 		var bridge = Engine.get_singleton("JavaScriptBridge")
 		var location_json = bridge.eval(
@@ -84,35 +99,49 @@ func _configure_connection() -> void:
 		if location_json is String and json.parse(location_json) == OK:
 			var location = json.get_data()
 			if location is Dictionary:
-				_proxy_host = location.get("hostname", _proxy_host)
-				_proxy_ssl = location.get("protocol", "http:") == "https:"
+				_host = location.get("hostname", _host)
+				_ssl = location.get("protocol", "http:") == "https:"
 				var port_text = location.get("port", "")
 				if port_text is String and port_text.is_valid_int():
-					_proxy_port = port_text.to_int()
+					_port = port_text.to_int()
 				else:
-					_proxy_port = 443 if _proxy_ssl else 80
-		_api_path = PROXY_API_PATH
-		_use_direct_api = false
-		return
+					_port = 443 if _ssl else 80
 
-	# --- 非 Web 平台：检测 DEEPSEEK_API_KEY → 直连 ---
-	var key = OS.get_environment("DEEPSEEK_API_KEY")
-	if not key.is_empty():
-		_api_key = key
-		_proxy_host = DEEPSEEK_API_HOST
-		_proxy_port = 443
-		_proxy_ssl = true
-		_api_path = DEEPSEEK_API_PATH
-		_use_direct_api = true
-		return
 
-	# --- 无密钥：回退代理模式 ---
-	_api_path = PROXY_API_PATH
-	_use_direct_api = false
+func _configure_custom_api(base_url: String) -> void:
+	var url := SettingsManager.normalize_llm_base_url(base_url)
+	_ssl = true
+	if url.begins_with("https://"):
+		url = url.substr(8)
+		_ssl = true
+	elif url.begins_with("http://"):
+		url = url.substr(7)
+		_ssl = false
+
+	var slash_index := url.find("/")
+	var host_port := url
+	var path_prefix := ""
+	if slash_index >= 0:
+		host_port = url.substr(0, slash_index)
+		path_prefix = url.substr(slash_index).trim_suffix("/")
+
+	_host = host_port
+	_port = 443 if _ssl else 80
+	var colon_index := host_port.rfind(":")
+	if colon_index > 0:
+		var port_text := host_port.substr(colon_index + 1)
+		if port_text.is_valid_int():
+			_port = port_text.to_int()
+			_host = host_port.substr(0, colon_index)
+
+	if path_prefix.ends_with("/chat/completions"):
+		_api_path = path_prefix
+	else:
+		_api_path = path_prefix + "/chat/completions"
 
 
 func _process(_delta: float) -> void:
-	if _state in [State.IDLE, State.DONE]:
+	if _state in [State.IDLE, State.EMITTING, State.DONE]:
 		return
 	if Time.get_ticks_msec() / 1000.0 - _connection_attempt_time > CONNECTION_TIMEOUT:
 		_fail("请求超时 (%.0fs)" % CONNECTION_TIMEOUT)
@@ -122,53 +151,58 @@ func _process(_delta: float) -> void:
 
 func chat_stream(system_prompt: String, user_message: String, callback: Callable = Callable()) -> void:
 	if _state not in [State.IDLE, State.DONE]:
-		printerr("[LLMClient] 已有请求在进行中")
+		printerr("[LLMClient] 已有请求正在进行中")
 		return
 
 	_current_callback = callback
+	reload_settings()
+	if SettingsManager.llm_mode == SettingsManager.LLM_MODE_CUSTOM and not _use_custom_api:
+		_fail("自定义 API 配置无效：%s" % _settings_error)
+		return
+
 	var messages = [
 		{"role": "system", "content": system_prompt},
 		{"role": "user", "content": user_message}
 	]
 
-	if _use_direct_api:
-		# 直连 DeepSeek API：构建完整请求体
+	if _use_custom_api:
 		_pending_body = JSON.stringify({
-			"model": DEEPSEEK_MODEL,
+			"model": _model,
 			"messages": messages,
 			"max_tokens": 512,
 			"temperature": 0.8,
-			"stream": false
+			"stream": true
 		})
 		_request_headers = [
 			"Content-Type: application/json",
-			"Accept: application/json",
+			"Accept: text/event-stream",
 			"Authorization: Bearer " + _api_key
 		]
+		_stream_mode = true
 	else:
-		# 代理模式：代理会补充 model 等字段
-		_pending_body = JSON.stringify({"messages": messages})
+		_pending_body = JSON.stringify({"messages": messages, "stream": true})
 		_request_headers = [
 			"Content-Type: application/json",
-			"Accept: application/json"
+			"Accept: text/event-stream"
 		]
+		_stream_mode = true
 
 	_response_body = ""
 	_response_code = 0
 	_response_started = false
+	_stream_buffer = ""
+	_stream_full_text = ""
+	_stream_completed_once = false
 
-	var tls_options = TLSOptions.client() if _proxy_ssl else null
-	var err = _client.connect_to_host(_proxy_host, _proxy_port, tls_options)
+	var tls_options = TLSOptions.client() if _ssl else null
+	var err = _client.connect_to_host(_host, _port, tls_options)
 	if err != OK:
 		_fail("连接发起失败: %d" % err)
 		return
 
 	_state = State.CONNECTING
 	_connection_attempt_time = Time.get_ticks_msec() / 1000.0
-	var target_label = "DeepSeek API" if _use_direct_api else "同源代理"
-	print("[LLMClient] 请求 %s → %s:%d (prompt=%d chars)" % [
-		target_label, _proxy_host, _proxy_port, system_prompt.length()
-	])
+	print("[LLMClient] 请求 %s:%d%s (prompt=%d chars)" % [_host, _port, _api_path, system_prompt.length()])
 
 
 func _poll_request() -> void:
@@ -182,12 +216,7 @@ func _poll_request() -> void:
 			if status != HTTPClient.STATUS_CONNECTED:
 				_fail("连接失败: status=%d" % status)
 				return
-			var err = _client.request(
-				HTTPClient.METHOD_POST,
-				_api_path,
-				_request_headers,
-				_pending_body
-			)
+			var err = _client.request(HTTPClient.METHOD_POST, _api_path, _request_headers, _pending_body)
 			if err != OK:
 				_fail("请求发送失败: %d" % err)
 				return
@@ -203,9 +232,15 @@ func _poll_request() -> void:
 				_state = State.RECEIVING
 				var chunk = _client.read_response_body_chunk()
 				if not chunk.is_empty():
-					_response_body += chunk.get_string_from_utf8()
+					var chunk_text := chunk.get_string_from_utf8()
+					_response_body += chunk_text
+					if _stream_mode and _response_code == 200:
+						_consume_stream_chunk(chunk_text)
 				return
 			if _response_started and status in [HTTPClient.STATUS_CONNECTED, HTTPClient.STATUS_DISCONNECTED]:
+				if _stream_mode:
+					_finish_stream_response()
+					return
 				_finish_response()
 				return
 			if status == HTTPClient.STATUS_DISCONNECTED:
@@ -215,7 +250,6 @@ func _poll_request() -> void:
 
 
 func _finish_response() -> void:
-	_state = State.DONE
 	_client.close()
 	if _response_code != 200:
 		_fail("HTTP %d: %s" % [_response_code, _response_body.left(200)])
@@ -230,28 +264,119 @@ func _finish_response() -> void:
 		_fail("响应格式错误")
 		return
 
-	var content: String = ""
-	if _use_direct_api:
-		# DeepSeek API 格式：{choices: [{message: {content: "..."}}]}
+	var content := ""
+	if _use_custom_api:
 		var choices = payload.get("choices", [])
 		if choices is Array and choices.size() > 0:
 			var message = choices[0].get("message", {})
-			content = message.get("content", "")
+			if message is Dictionary:
+				content = _string_or_empty(message.get("content", ""))
 	else:
-		# 代理格式：{content: "..."}
-		content = payload.get("content", "")
+		content = _string_or_empty(payload.get("content", ""))
 
 	if content.is_empty():
-		_fail(payload.get("error", "未返回文本内容"))
+		_fail(str(payload.get("error", "未返回文本内容")))
 		return
 
-	# 保持既有 UI 信号兼容
-	stream_token.emit(content)
+	_emit_text_as_stream(content)
+
+
+func _consume_stream_chunk(chunk_text: String) -> void:
+	_stream_buffer += chunk_text.replace("\r\n", "\n")
+	while true:
+		var event_end := _stream_buffer.find("\n\n")
+		if event_end < 0:
+			break
+		var event_text := _stream_buffer.substr(0, event_end)
+		_stream_buffer = _stream_buffer.substr(event_end + 2)
+		_process_stream_event(event_text)
+
+
+func _process_stream_event(event_text: String) -> void:
+	for raw_line in event_text.split("\n"):
+		var line := String(raw_line).strip_edges()
+		if not line.begins_with("data:"):
+			continue
+		var data := line.substr(5).strip_edges()
+		if data == "[DONE]":
+			_complete_stream_response()
+			return
+		if data.is_empty():
+			continue
+		var delta := _extract_stream_delta(data)
+		if delta.is_empty():
+			continue
+		_stream_full_text += delta
+		stream_token.emit(delta)
+
+
+func _extract_stream_delta(data: String) -> String:
+	var json := JSON.new()
+	if json.parse(data) != OK:
+		return ""
+	var payload = json.get_data()
+	if payload is not Dictionary:
+		return ""
+	var choices = payload.get("choices", [])
+	if choices is Array and choices.size() > 0:
+		var choice = choices[0]
+		if choice is Dictionary:
+			var delta = choice.get("delta", {})
+			if delta is Dictionary:
+				return _string_or_empty(delta.get("content", ""))
+			var message = choice.get("message", {})
+			if message is Dictionary:
+				return _string_or_empty(message.get("content", ""))
+	return _string_or_empty(payload.get("content", ""))
+
+
+func _string_or_empty(value: Variant) -> String:
+	if value == null:
+		return ""
+	return str(value)
+
+
+func _finish_stream_response() -> void:
+	if _stream_completed_once:
+		return
+	if _stream_buffer.strip_edges() != "":
+		_process_stream_event(_stream_buffer)
+		_stream_buffer = ""
+	if _stream_full_text.is_empty():
+		_stream_mode = false
+		_finish_response()
+		return
+	_complete_stream_response()
+
+
+func _complete_stream_response() -> void:
+	if _stream_completed_once:
+		return
+	_stream_completed_once = true
+	_state = State.DONE
+	if _client:
+		_client.close()
+	stream_completed.emit(_stream_full_text)
+	if _current_callback.is_valid():
+		_current_callback.call(_stream_full_text)
+	print("[LLMClient] 流式响应完成 (%d chars)" % _stream_full_text.length())
+
+
+func _emit_text_as_stream(content: String) -> void:
+	_state = State.EMITTING
+	_stream_full_text = content
+	var index := 0
+	var chunk_size := 3
+	while index < content.length():
+		var length: int = mini(chunk_size, content.length() - index)
+		stream_token.emit(content.substr(index, length))
+		index += length
+		await get_tree().create_timer(0.015).timeout
+	_state = State.DONE
 	stream_completed.emit(content)
 	if _current_callback.is_valid():
 		_current_callback.call(content)
-	var source_label = "DeepSeek" if _use_direct_api else "代理"
-	print("[LLMClient] %s 响应完成 (%d chars)" % [source_label, content.length()])
+	print("[LLMClient] 响应完成 (%d chars)" % content.length())
 
 
 func _fail(message: String) -> void:
@@ -265,11 +390,9 @@ func _fail(message: String) -> void:
 
 
 func is_api_key_configured() -> bool:
-	## 直连模式：检查环境变量是否有密钥
-	## 代理模式：检查代理地址是否已配置
-	if _use_direct_api:
+	if _use_custom_api:
 		return not _api_key.is_empty()
-	return not _proxy_host.is_empty() and _proxy_port > 0
+	return not _host.is_empty() and _port > 0
 
 
 func is_busy() -> bool:

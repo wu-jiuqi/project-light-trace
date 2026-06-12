@@ -4,6 +4,7 @@ extends Node2D
 
 const PLAYER_SCENE: PackedScene = preload("res://scenes/characters/player/player.tscn")
 const ClueSystemScript = preload("res://scripts/systems/clue_system.gd")
+const CLUE_PANEL_SCENE: PackedScene = preload("res://scenes/ui/CluePanel.tscn")
 const BGM_FRAGMENT_0001 = preload("res://assets/audio/bgm/bgm_fragment_0001_loop.ogg")
 
 ## DepthLayer Y 范围阈值
@@ -53,10 +54,6 @@ var _clue_system: Node = null
 @onready var _calibration_plus_btn: Button = $UIRoot/CalibrationPanel/PlusBtn
 @onready var _calibration_submit_btn: Button = $UIRoot/CalibrationPanel/SubmitBtn
 @onready var _calibration_close_btn: Button = $UIRoot/CalibrationPanel/CloseBtn
-@onready var _collection_panel_bg: ColorRect = $UIRoot/CollectionPanelBg
-@onready var _collection_panel: ColorRect = $UIRoot/CollectionPanel
-@onready var _collection_clue_list: VBoxContainer = $UIRoot/CollectionPanel/ClueScroll/ClueList
-@onready var _progress_label: Label = $UIRoot/CollectionPanel/ProgressLabel
 @onready var _compliance_bar_bg: ColorRect = $UIRoot/ComplianceBarContainer/ComplianceBarBg
 @onready var _compliance_bar_fill: ColorRect = $UIRoot/ComplianceBarContainer/ComplianceBarBg/ComplianceBarFill
 @onready var _compliance_label: Label = $UIRoot/ComplianceBarContainer/ComplianceLabel
@@ -65,6 +62,7 @@ var _clue_system: Node = null
 
 var _message_timer = null
 var _compliance_pulse_tween: Tween = null
+var _clue_panel: CluePanel = null
 
 ## 林指导幕间事件追踪
 var _player_idle_time: float = 0.0
@@ -103,6 +101,7 @@ func _ready() -> void:
 	_cache_depth_layers()
 	_spawn_player()
 	_configure_ui_theme()       # 对预置节点应用字体/颜色/信号连接
+	_ensure_clue_panel()
 	_prepare_fragment_context()
 	# 恢复之前的探索进度（从暗室返回等情况）
 	_try_restore_state()
@@ -130,6 +129,15 @@ func _create_clue_system() -> void:
 	if _clue_system.has_signal("clue_discovered") and not _clue_system.clue_discovered.is_connected(_on_clue_discovered):
 		_clue_system.clue_discovered.connect(_on_clue_discovered)
 	print("[Fragment0001] ClueSystem 已创建")
+
+
+func _ensure_clue_panel() -> void:
+	if is_instance_valid(_clue_panel):
+		return
+	_clue_panel = CLUE_PANEL_SCENE.instantiate() as CluePanel
+	_clue_panel.name = "CluePanel"
+	_clue_panel.visible = false
+	_ui_root.add_child(_clue_panel)
 
 
 func _show_opening_message() -> void:
@@ -244,10 +252,10 @@ func _configure_ui_theme() -> void:
 			_player.interact_hint_changed.connect(_on_interact_hint_changed)
 
 	# --- 校准面板按钮信号 ---
-	_calibration_minus_btn.pressed.connect(_on_clock_minus_pressed)
-	_calibration_plus_btn.pressed.connect(_on_clock_plus_pressed)
-	_calibration_submit_btn.pressed.connect(_submit_clock_angle)
-	_calibration_close_btn.pressed.connect(_close_angle_panel)
+	_connect_button_pressed(_calibration_minus_btn, _on_clock_minus_pressed, "UIRoot/CalibrationPanel/MinusBtn")
+	_connect_button_pressed(_calibration_plus_btn, _on_clock_plus_pressed, "UIRoot/CalibrationPanel/PlusBtn")
+	_connect_button_pressed(_calibration_submit_btn, _submit_clock_angle, "UIRoot/CalibrationPanel/SubmitBtn")
+	_connect_button_pressed(_calibration_close_btn, _close_angle_panel, "UIRoot/CalibrationPanel/CloseBtn")
 
 	print("[Fragment0001] UI 信号连接完成")
 
@@ -255,6 +263,15 @@ func _configure_ui_theme() -> void:
 # ============================================================
 # 玩家管理
 # ============================================================
+
+func _connect_button_pressed(button: Button, callback: Callable, node_path: String) -> bool:
+	if button == null:
+		push_error("[Fragment0001] Missing Button node: %s" % node_path)
+		return false
+	if not button.pressed.is_connected(callback):
+		button.pressed.connect(callback)
+	return true
+
 
 func _cache_depth_layers() -> void:
 	var depth_layer_root = get_node_or_null("WorldRoot/DepthLayer")
@@ -462,6 +479,7 @@ func on_sundial_interact(sundial: Node2D) -> void:
 
 func on_bell_tower_interact(bell_tower: Node2D) -> void:
 	## 钟楼 E 键交互处理入口（仅在门锁定时调用）
+	_resolve_ui_refs()
 	if observed_sundials.size() < 5:
 		_show_message(
 			"钟楼观测台",
@@ -471,10 +489,14 @@ func on_bell_tower_interact(bell_tower: Node2D) -> void:
 		return
 
 	# 打开校准面板
-	clock_angle = 12  # 重置初始角度
 	if _angle_bg:
 		_angle_bg.visible = true
-	_angle_panel.visible = true
+	if _angle_panel:
+		_angle_panel.visible = true
+		_set_player_controls_locked(true)
+	else:
+		push_warning("[Fragment0001] 缺少 UIRoot/CalibrationPanel，无法打开校准面板")
+		return
 	_update_angle_value()
 	print("[Fragment0001] 钟楼校准面板已打开")
 
@@ -490,20 +512,28 @@ func on_source_mark_interact() -> void:
 
 func _on_clock_minus_pressed() -> void:
 	clock_angle = wrapi(clock_angle - 6, 0, 360)
+	_persist_clock_angle()
 	_update_angle_value()
 
 
 func _on_clock_plus_pressed() -> void:
 	clock_angle = wrapi(clock_angle + 6, 0, 360)
+	_persist_clock_angle()
 	_update_angle_value()
 
 
+func _persist_clock_angle() -> void:
+	FragmentManager.set_fragment_state("0001", "clock_angle", clock_angle)
+
+
 func _update_angle_value() -> void:
+	_resolve_ui_refs()
 	if _angle_value:
 		_angle_value.text = "%d°" % clock_angle
 
 
 func _submit_clock_angle() -> bool:
+	_persist_clock_angle()
 	if clock_angle == TARGET_CLOCK_ANGLE:
 		# 正确校准 — 金色光扩散效果
 		var bell_pos: Vector2 = _get_bell_tower_position()
@@ -581,11 +611,18 @@ func _create_light_spread_effect(at_position: Vector2, glow_color: Color, durati
 	)
 
 
+func _set_player_controls_locked(locked: bool) -> void:
+	if _player and _player.has_method("set_controls_locked"):
+		_player.set_controls_locked(locked)
+
+
 func _close_angle_panel() -> void:
+	_resolve_ui_refs()
 	if _angle_bg:
 		_angle_bg.visible = false
 	if _angle_panel:
 		_angle_panel.visible = false
+	_set_player_controls_locked(false)
 
 
 # ============================================================
@@ -708,6 +745,8 @@ func _try_restore_state() -> void:
 	var saved_revealed = FragmentManager.get_fragment_state("0001", "source_mark_revealed")
 	if typeof(saved_revealed) == TYPE_BOOL:
 		source_mark_revealed = saved_revealed
+	if source_mark_revealed:
+		call_deferred("_sync_bell_tower_unlock_state")
 	var saved_completed = FragmentManager.get_fragment_state("0001", "completed")
 	if typeof(saved_completed) == TYPE_BOOL:
 		completed = saved_completed
@@ -759,6 +798,12 @@ func _mark_sundial_observed(id: String) -> void:
 # ============================================================
 # P0：完整胜利画面 — 替换 _complete_fragment()
 # ============================================================
+
+func _sync_bell_tower_unlock_state() -> void:
+	var bell_tower = _find_bell_tower_node()
+	if bell_tower and bell_tower.has_method("unlock_door"):
+		bell_tower.unlock_door()
+
 
 func _complete_fragment() -> void:
 	if completed:
@@ -1003,6 +1048,7 @@ func _modify_compliance(delta: int, reason: String) -> void:
 
 func _update_compliance_bar() -> void:
 	"""更新合规度条的颜色、宽度、图标和数值（对齐UX L1-L6等级）"""
+	_resolve_ui_refs()
 	if not _compliance_bar_fill or not _compliance_value_label:
 		return
 
@@ -1189,7 +1235,9 @@ func _on_interact_hint_changed(show: bool, hint_text: String) -> void:
 # ============================================================
 
 func _show_message(title: String, body: String, duration: float = 4.0) -> void:
+	_resolve_ui_refs()
 	if not _message_title or not _message_body:
+		push_warning("[Fragment0001] 缺少消息面板文本节点，跳过提示：%s" % title)
 		return
 	_message_title.text = title
 	_message_body.text = body
@@ -1212,6 +1260,39 @@ func _hide_message() -> void:
 		_message_panel_bg.visible = false
 
 
+func _resolve_ui_refs() -> void:
+	if _ui_root == null:
+		_ui_root = get_node_or_null("UIRoot") as CanvasLayer
+	if _ui_root == null:
+		return
+	if _interact_hint_label == null:
+		_interact_hint_label = _ui_root.get_node_or_null("InteractHint") as Label
+	if _message_panel_bg == null:
+		_message_panel_bg = _ui_root.get_node_or_null("MessagePanelBg") as ColorRect
+	if _message_panel == null:
+		_message_panel = _ui_root.get_node_or_null("MessagePanel") as Panel
+	if _message_title == null:
+		_message_title = _ui_root.get_node_or_null("MessagePanel/MessageTitle") as Label
+	if _message_body == null:
+		_message_body = _ui_root.get_node_or_null("MessagePanel/MessageBody") as Label
+	if _angle_bg == null:
+		_angle_bg = _ui_root.get_node_or_null("CalibrationBg") as ColorRect
+	if _angle_panel == null:
+		_angle_panel = _ui_root.get_node_or_null("CalibrationPanel") as Panel
+	if _angle_value == null:
+		_angle_value = _ui_root.get_node_or_null("CalibrationPanel/AngleValue") as Label
+	if _compliance_bar_bg == null:
+		_compliance_bar_bg = _ui_root.get_node_or_null("ComplianceBarContainer/ComplianceBarBg") as ColorRect
+	if _compliance_bar_fill == null:
+		_compliance_bar_fill = _ui_root.get_node_or_null("ComplianceBarContainer/ComplianceBarBg/ComplianceBarFill") as ColorRect
+	if _compliance_label == null:
+		_compliance_label = _ui_root.get_node_or_null("ComplianceBarContainer/ComplianceLabel") as Label
+	if _compliance_value_label == null:
+		_compliance_value_label = _ui_root.get_node_or_null("ComplianceBarContainer/ComplianceValueLabel") as Label
+	if _compliance_warning_icon == null:
+		_compliance_warning_icon = _ui_root.get_node_or_null("ComplianceBarContainer/ComplianceWarningIcon") as Label
+
+
 # ============================================================
 # Tab 键 : 收集信息面板（显示 ClueSystem 线索列表）
 # ============================================================
@@ -1222,6 +1303,7 @@ func _input(event: InputEvent) -> void:
 		if _angle_panel and _angle_panel.visible:
 			return
 		_toggle_collection_panel()
+		get_viewport().set_input_as_handled()
 
 	# 校准面板快捷键
 	if event.is_action_pressed("escape"):
@@ -1231,107 +1313,46 @@ func _input(event: InputEvent) -> void:
 
 
 func _toggle_collection_panel() -> void:
-	if not _collection_panel:
+	_ensure_clue_panel()
+	if not is_instance_valid(_clue_panel):
 		return
-	var show_panel: bool = not _collection_panel.visible
-	_collection_panel.visible = show_panel
-	if _collection_panel_bg:
-		_collection_panel_bg.visible = show_panel
-	if show_panel:
+	if _clue_panel.is_open:
+		_clue_panel.close()
+		print("[Fragment0001] 线索面板: 关闭")
+	else:
 		_update_clue_list()
-	print("[Fragment0001] 收集面板: %s" % ("打开" if show_panel else "关闭"))
-	if _collection_panel.visible:
-		_update_clue_list()
-	print("[Fragment0001] 收集面板: %s" % ("打开" if _collection_panel.visible else "关闭"))
+		_clue_panel.open()
+		print("[Fragment0001] 线索面板: 打开")
 
 
 func _update_clue_list() -> void:
-	"""刷新 Tab 面板中的线索列表和进度标签"""
-	if not _collection_clue_list:
+	"""刷新预置 CluePanel 中的线索卡片。"""
+	_ensure_clue_panel()
+	if not is_instance_valid(_clue_panel):
 		return
 
-	# 清空旧列表
-	for child in _collection_clue_list.get_children():
-		child.queue_free()
+	var clues: Array[Dictionary] = []
+	var discovered_clues = _clue_system.get("discovered_clues") if _clue_system else []
+	if discovered_clues is Array:
+		for i in range(discovered_clues.size()):
+			if discovered_clues[i] is not Dictionary:
+				continue
+			var clue: Dictionary = discovered_clues[i].duplicate(true)
+			clue["id"] = i
+			clue["is_discovered"] = true
+			clues.append(clue)
 
-	# 更新进度标签
-	if _progress_label:
-		_progress_label.text = "日晷观测：%d/5" % observed_sundials.size()
-
-	# 显示已发现线索
-	var clues: Array = []
-	if _clue_system:
-		clues = _clue_system.discovered_clues
-
-	if clues.is_empty():
-		var empty_label = Label.new()
-		empty_label.text = "暂无线索。靠近场景中的日晷，按 E 键观测。"
-		empty_label.add_theme_color_override("font_color", Color(0.45, 0.45, 0.5, 1))
-		empty_label.add_theme_font_size_override("font_size", 14)
-		empty_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		empty_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		_collection_clue_list.add_child(empty_label)
-		return
-
-	for clue in clues:
-		var item = _create_clue_item(clue)
-		_collection_clue_list.add_child(item)
-
-	# P2：当观测到 3+ 日晷时，在列表底部添加规律提示
 	if observed_sundials.size() >= 3:
-		var hint_label := Label.new()
-		hint_label.name = "PatternHint"
-		hint_label.text = "数据之间的间隔似乎有规律——这些角度应该不是随机的。"
-		hint_label.add_theme_color_override("font_color", Color(0.5, 0.75, 0.85, 0.8))
-		hint_label.add_theme_font_size_override("font_size", 13)
-		hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		hint_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		# 斜体：在 Godot 4 中通过添加字体变体实现
-		_collection_clue_list.add_child(hint_label)
+		clues.append({
+			"id": clues.size(),
+			"name": "日晷间隔规律",
+			"type": "hint",
+			"description": "数据之间的间隔似乎有规律，这些角度应该不是随机的。",
+			"location": "线索簿",
+			"is_discovered": true,
+		})
 
-
-func _create_clue_item(clue: Dictionary) -> Control:
-	"""创建单条线索的 UI 行"""
-	var container = HBoxContainer.new()
-	container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	container.add_theme_constant_override("separation", 8)
-
-	# 类型标签
-	var type_icon = Label.new()
-	var type_text: String = clue.get("type", "?")
-	match type_text:
-		"observation": type_text = "[观测]"
-		"hint": type_text = "[提示]"
-		"dialogue": type_text = "[对话]"
-		"item": type_text = "[物品]"
-		"source_mark": type_text = "[源印]"
-		_: type_text = "[%s]" % type_text
-	type_icon.text = type_text
-	type_icon.add_theme_color_override("font_color", Color(0.35, 0.65, 0.85, 1))
-	type_icon.add_theme_font_size_override("font_size", 13)
-	type_icon.custom_minimum_size = Vector2(56, 0)
-	container.add_child(type_icon)
-
-	# 线索名称
-	var name_label = Label.new()
-	name_label.text = str(clue.get("name", "未知"))
-	name_label.add_theme_color_override("font_color", Color(0.9, 0.88, 0.82, 1))
-	name_label.add_theme_font_size_override("font_size", 14)
-	name_label.custom_minimum_size = Vector2(180, 0)
-	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	container.add_child(name_label)
-
-	# 描述
-	var desc_label = Label.new()
-	desc_label.text = str(clue.get("description", ""))
-	desc_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.65, 1))
-	desc_label.add_theme_font_size_override("font_size", 13)
-	desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	desc_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	desc_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	container.add_child(desc_label)
-
-	return container
+	_clue_panel.set_clues_from_dictionaries(clues)
 
 
 # ============================================================
@@ -1627,6 +1648,9 @@ func _start_bgm() -> void:
 		_bgm_player.volume_db = -10.0
 		add_child(_bgm_player)
 	_bgm_player.stream = BGM_FRAGMENT_0001
+	var ogg_stream := _bgm_player.stream as AudioStreamOggVorbis
+	if ogg_stream != null:
+		ogg_stream.loop = true
 	_bgm_player.play()
 	print("[Fragment0001] 探索 BGM 已开始播放")
 

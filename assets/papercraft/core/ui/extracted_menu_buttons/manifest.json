@@ -1,0 +1,178 @@
+[
+  {
+    "state": "hover",
+    "name": "back_to_game",
+    "file": "D:\\WorkBuddy WorkSpace\\shuoguang_project\\assets\\papercraft\\core\\ui\\extracted_menu_buttons\\hover_back_to_game.png",
+    "source": "D:\\Chrome\\ChromeDownloads\\ChatGPT Image 2026年6月12日 17_09_13.png",
+    "source_box": [
+      213,
+      252,
+      785,
+      433
+    ],
+    "canvas": [
+      620,
+      220
+    ],
+    "nontransparent_bbox": [
+      25,
+      22,
+      595,
+      202
+    ]
+  },
+  {
+    "state": "hover",
+    "name": "settings",
+    "file": "D:\\WorkBuddy WorkSpace\\shuoguang_project\\assets\\papercraft\\core\\ui\\extracted_menu_buttons\\hover_settings.png",
+    "source": "D:\\Chrome\\ChromeDownloads\\ChatGPT Image 2026年6月12日 17_09_13.png",
+    "source_box": [
+      883,
+      252,
+      1449,
+      433
+    ],
+    "canvas": [
+      620,
+      220
+    ],
+    "nontransparent_bbox": [
+      28,
+      21,
+      592,
+      202
+    ]
+  },
+  {
+    "state": "hover",
+    "name": "return_star_map",
+    "file": "D:\\WorkBuddy WorkSpace\\shuoguang_project\\assets\\papercraft\\core\\ui\\extracted_menu_buttons\\hover_return_star_map.png",
+    "source": "D:\\Chrome\\ChromeDownloads\\ChatGPT Image 2026年6月12日 17_09_13.png",
+    "source_box": [
+      213,
+      519,
+      784,
+      699
+    ],
+    "canvas": [
+      620,
+      220
+    ],
+    "nontransparent_bbox": [
+      26,
+      21,
+      595,
+      200
+    ]
+  },
+  {
+    "state": "hover",
+    "name": "return_title",
+    "file": "D:\\WorkBuddy WorkSpace\\shuoguang_project\\assets\\papercraft\\core\\ui\\extracted_menu_buttons\\hover_return_title.png",
+    "source": "D:\\Chrome\\ChromeDownloads\\ChatGPT Image 2026年6月12日 17_09_13.png",
+    "source_box": [
+      883,
+      519,
+      1450,
+      698
+    ],
+    "canvas": [
+      620,
+      220
+    ],
+    "nontransparent_bbox": [
+      28,
+      22,
+      593,
+      201
+    ]
+  },
+  {
+    "state": "default",
+    "name": "back_to_game",
+    "file": "D:\\WorkBuddy WorkSpace\\shuoguang_project\\assets\\papercraft\\core\\ui\\extracted_menu_buttons\\default_back_to_game.png",
+    "source": "D:\\Chrome\\ChromeDownloads\\ChatGPT Image 2026年6月12日 17_07_03.png",
+    "source_box": [
+      226,
+      284,
+      778,
+      446
+    ],
+    "canvas": [
+      620,
+      220
+    ],
+    "nontransparent_bbox": [
+      34,
+      29,
+      586,
+      191
+    ]
+  },
+  {
+    "state": "default",
+    "name": "settings",
+    "file": "D:\\WorkBuddy WorkSpace\\shuoguang_project\\assets\\papercraft\\core\\ui\\extracted_menu_buttons\\default_settings.png",
+    "source": "D:\\Chrome\\ChromeDownloads\\ChatGPT Image 2026年6月12日 17_07_03.png",
+    "source_box": [
+      889,
+      284,
+      1439,
+      446
+    ],
+    "canvas": [
+      620,
+      220
+    ],
+    "nontransparent_bbox": [
+      34,
+      29,
+      585,
+      191
+    ]
+  },
+  {
+    "state": "default",
+    "name": "return_star_map",
+    "file": "D:\\WorkBuddy WorkSpace\\shuoguang_project\\assets\\papercraft\\core\\ui\\extracted_menu_buttons\\default_return_star_map.png",
+    "source": "D:\\Chrome\\ChromeDownloads\\ChatGPT Image 2026年6月12日 17_07_03.png",
+    "source_box": [
+      226,
+      540,
+      777,
+      702
+    ],
+    "canvas": [
+      620,
+      220
+    ],
+    "nontransparent_bbox": [
+      35,
+      30,
+      586,
+      191
+    ]
+  },
+  {
+    "state": "default",
+    "name": "return_title",
+    "file": "D:\\WorkBuddy WorkSpace\\shuoguang_project\\assets\\papercraft\\core\\ui\\extracted_menu_buttons\\default_return_title.png",
+    "source": "D:\\Chrome\\ChromeDownloads\\ChatGPT Image 2026年6月12日 17_07_03.png",
+    "source_box": [
+      888,
+      540,
+      1439,
+      701
+    ],
+    "canvas": [
+      620,
+      220
+    ],
+    "nontransparent_bbox": [
+      35,
+      30,
+      586,
+      192
+    ]
+  }
+]

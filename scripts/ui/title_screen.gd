@@ -18,11 +18,11 @@ extends Control
 # 纸雕纹理预加载
 # ============================================================
 const PAPER_TITLE_BG = preload("res://assets/ui/title_start_bg.jpg")
-const PAPER_PANEL = preload("res://assets/papercraft/core/ui/dialogue_panel.png")
-const PAPER_BUTTON_NORMAL = preload("res://assets/papercraft/core/ui/button_normal.png")
-const PAPER_BUTTON_HOVER = preload("res://assets/papercraft/core/ui/button_hover.png")
-const PAPER_BUTTON_PRESSED = preload("res://assets/papercraft/core/ui/button_pressed.png")
-const PAPER_BUTTON_DISABLED = preload("res://assets/papercraft/core/ui/button_disabled.png")
+const PAPER_PANEL = preload("res://assets/papercraft/core/ui/dialogue_box/dialogue_panel.png")
+const PAPER_BUTTON_NORMAL = preload("res://assets/papercraft/core/ui/dialogue_box/button_plate.png")
+const PAPER_BUTTON_HOVER = preload("res://assets/papercraft/core/ui/extracted_buttons/hover_blank.png")
+const PAPER_BUTTON_PRESSED = preload("res://assets/papercraft/core/ui/extracted_buttons/pressed_blank.png")
+const PAPER_BUTTON_DISABLED = preload("res://assets/papercraft/core/ui/dialogue_box/button_plate.png")
 
 # ============================================================
 # 颜色常量
@@ -51,6 +51,10 @@ const START_DIALOG_SIZE := Vector2(1659, 948)
 const DIALOG_HIGHLIGHT_COLOR := Color(0.75, 0.50, 0.18, 0.24)
 const SAVE_SLOT_HOVER_COLOR := Color(0.70, 0.46, 0.16, 0.22)
 const SAVE_SLOT_SELECTED_COLOR := Color(0.95, 0.62, 0.16, 0.32)
+const SAVE_SLOT_GOLD := Color(0.92, 0.70, 0.30, 0.98)
+const SAVE_SLOT_GOLD_MUTED := Color(0.72, 0.55, 0.28, 0.72)
+const SAVE_SLOT_OUTLINE := Color(0.0, 0.0, 0.0, 1.0)
+const SAVE_SLOT_OUTLINE_SIZE := 3
 
 # ============================================================
 # 成员变量
@@ -101,6 +105,8 @@ var _overwrite_target_slot: int = -1
 @onready var _save_slot_buttons: Array[Button] = [$SaveSlotsScreen/PanelRoot/Slot1Button, $SaveSlotsScreen/PanelRoot/Slot2Button, $SaveSlotsScreen/PanelRoot/Slot3Button]
 @onready var _save_slot_load_button: Button = $SaveSlotsScreen/PanelRoot/LoadButton
 @onready var _save_slot_delete_button: Button = $SaveSlotsScreen/PanelRoot/DeleteButton
+@onready var _settings_gear_button: BaseButton = $SettingsGearButton
+@onready var _settings_panel: SettingsPanel = $SettingsPanel
 
 
 # ============================================================
@@ -115,6 +121,7 @@ func _ready() -> void:
 	_setup_save_not_found_dialog()
 	_setup_save_overwrite_dialog()
 	_setup_save_slots_screen()
+	_setup_settings_panel()
 	_layout_all()
 	get_viewport().size_changed.connect(_layout_all)
 
@@ -151,8 +158,11 @@ func _setup_start_save_dialog() -> void:
 	_start_save_dialog.mouse_filter = Control.MOUSE_FILTER_STOP
 	_start_dialog_highlight.color = DIALOG_HIGHLIGHT_COLOR
 	_start_dialog_highlight.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_start_new_game_button.pressed.connect(_on_start_dialog_new_game)
-	_continue_game_button.pressed.connect(_on_start_dialog_continue_game)
+	var buttons_ready := true
+	buttons_ready = _connect_button_pressed(_start_new_game_button, _on_start_dialog_new_game, "StartSaveDialog/PanelRoot/StartNewGameButton") and buttons_ready
+	buttons_ready = _connect_button_pressed(_continue_game_button, _on_start_dialog_continue_game, "StartSaveDialog/PanelRoot/ContinueGameButton") and buttons_ready
+	if not buttons_ready:
+		return
 	_start_new_game_button.mouse_entered.connect(_select_start_dialog_button.bind(0))
 	_continue_game_button.mouse_entered.connect(_select_start_dialog_button.bind(1))
 	_start_new_game_button.focus_entered.connect(_select_start_dialog_button.bind(0))
@@ -166,7 +176,8 @@ func _setup_no_save_dialog() -> void:
 	_start_no_save_dialog.mouse_filter = Control.MOUSE_FILTER_STOP
 	_no_save_dialog_highlight.color = DIALOG_HIGHLIGHT_COLOR
 	_no_save_dialog_highlight.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_no_save_new_game_button.pressed.connect(_on_no_save_dialog_new_game)
+	if not _connect_button_pressed(_no_save_new_game_button, _on_no_save_dialog_new_game, "StartNoSaveDialog/PanelRoot/StartNewGameButton"):
+		return
 	_no_save_new_game_button.mouse_entered.connect(_update_no_save_dialog_highlight)
 	_no_save_new_game_button.focus_entered.connect(_update_no_save_dialog_highlight)
 	_apply_transparent_button(_no_save_new_game_button)
@@ -177,7 +188,8 @@ func _setup_save_not_found_dialog() -> void:
 	_save_not_found_dialog.mouse_filter = Control.MOUSE_FILTER_STOP
 	_save_not_found_dialog_highlight.color = DIALOG_HIGHLIGHT_COLOR
 	_save_not_found_dialog_highlight.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_save_not_found_ok_button.pressed.connect(_hide_save_not_found_dialog)
+	if not _connect_button_pressed(_save_not_found_ok_button, _hide_save_not_found_dialog, "SaveNotFoundDialog/PanelRoot/OkButton"):
+		return
 	_save_not_found_ok_button.mouse_entered.connect(_update_save_not_found_dialog_highlight)
 	_save_not_found_ok_button.focus_entered.connect(_update_save_not_found_dialog_highlight)
 	_apply_transparent_button(_save_not_found_ok_button)
@@ -188,8 +200,11 @@ func _setup_save_overwrite_dialog() -> void:
 	_save_overwrite_dialog.mouse_filter = Control.MOUSE_FILTER_STOP
 	_save_overwrite_dialog_highlight.color = DIALOG_HIGHLIGHT_COLOR
 	_save_overwrite_dialog_highlight.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_save_overwrite_yes_button.pressed.connect(_confirm_overwrite_save)
-	_save_overwrite_no_button.pressed.connect(_hide_save_overwrite_dialog)
+	var buttons_ready := true
+	buttons_ready = _connect_button_pressed(_save_overwrite_yes_button, _confirm_overwrite_save, "SaveOverwriteDialog/PanelRoot/YesButton") and buttons_ready
+	buttons_ready = _connect_button_pressed(_save_overwrite_no_button, _hide_save_overwrite_dialog, "SaveOverwriteDialog/PanelRoot/NoButton") and buttons_ready
+	if not buttons_ready:
+		return
 	_save_overwrite_yes_button.mouse_entered.connect(_select_overwrite_dialog_button.bind(0))
 	_save_overwrite_no_button.mouse_entered.connect(_select_overwrite_dialog_button.bind(1))
 	_save_overwrite_yes_button.focus_entered.connect(_select_overwrite_dialog_button.bind(0))
@@ -230,29 +245,67 @@ func _setup_save_slots_screen() -> void:
 	for i in _save_slot_buttons.size():
 		var idx := i
 		var button := _save_slot_buttons[i]
+		if button == null:
+			push_error("[TitleScreen] Missing save slot button at index %d" % idx)
+			continue
 		_apply_transparent_button(button)
 		button.mouse_entered.connect(_hover_save_slot.bind(idx))
 		button.focus_entered.connect(_select_slot.bind(idx))
-		button.pressed.connect(_select_slot.bind(idx))
+		_connect_button_pressed(button, _select_slot.bind(idx), "SaveSlotsScreen/PanelRoot/Slot%dButton" % (idx + 1))
 
+	var controls_ready := true
+	controls_ready = _connect_button_pressed(_save_slot_load_button, _activate_selected_slot, "SaveSlotsScreen/PanelRoot/LoadButton") and controls_ready
+	controls_ready = _connect_button_pressed(_save_slot_delete_button, _delete_selected_slot, "SaveSlotsScreen/PanelRoot/DeleteButton") and controls_ready
+	if not controls_ready:
+		return
 	_apply_transparent_button(_save_slot_load_button)
 	_apply_transparent_button(_save_slot_delete_button)
 	_save_slot_load_button.mouse_entered.connect(_highlight_save_control.bind(_save_slot_load_button))
 	_save_slot_delete_button.mouse_entered.connect(_highlight_save_control.bind(_save_slot_delete_button))
 	_save_slot_load_button.focus_entered.connect(_highlight_save_control.bind(_save_slot_load_button))
 	_save_slot_delete_button.focus_entered.connect(_highlight_save_control.bind(_save_slot_delete_button))
-	_save_slot_load_button.pressed.connect(_activate_selected_slot)
-	_save_slot_delete_button.pressed.connect(_delete_selected_slot)
 
 	for label_set in _save_slot_labels:
 		for key in label_set:
 			var label := label_set[key] as Label
-			label.add_theme_color_override("font_color", Color(0.14, 0.09, 0.055, 0.98))
-			label.add_theme_color_override("font_outline_color", Color(0.14, 0.09, 0.055, 0.45))
-			label.add_theme_color_override("font_shadow_color", Color(0.86, 0.75, 0.56, 0.42))
-			label.add_theme_constant_override("outline_size", 1)
+			label.add_theme_color_override("font_color", SAVE_SLOT_GOLD)
+			label.add_theme_color_override("font_outline_color", SAVE_SLOT_OUTLINE)
+			label.add_theme_color_override("font_shadow_color", Color(0.95, 0.72, 0.28, 0.35))
+			label.add_theme_constant_override("outline_size", SAVE_SLOT_OUTLINE_SIZE)
 			label.add_theme_constant_override("shadow_offset_x", 1)
 			label.add_theme_constant_override("shadow_offset_y", 1)
+
+
+func _setup_settings_panel() -> void:
+	if _settings_panel == null:
+		push_error("[TitleScreen] Missing SettingsPanel node")
+		return
+	_settings_panel.visible = false
+	if not _connect_button_pressed(_settings_gear_button, _show_settings_panel, "SettingsGearButton"):
+		return
+	_settings_panel.panel_opened.connect(func():
+		_hit_container.visible = false
+		_version_label.visible = false
+	)
+	_settings_panel.panel_closed.connect(func():
+		if not _save_slots_visible:
+			_hit_container.visible = true
+			_version_label.visible = true
+			_update_selection()
+	)
+
+
+func _show_settings_panel() -> void:
+	_settings_panel.open()
+
+
+func _connect_button_pressed(button: BaseButton, callback: Callable, node_path: String) -> bool:
+	if button == null:
+		push_error("[TitleScreen] Missing BaseButton node: %s" % node_path)
+		return false
+	if not button.pressed.is_connected(callback):
+		button.pressed.connect(callback)
+	return true
 
 
 # ============================================================
@@ -271,6 +324,9 @@ func _start_bgm() -> void:
 		_bgm_player.volume_db = -6.0
 		add_child(_bgm_player)
 	_bgm_player.stream = BGM_MAIN_THEME
+	var ogg_stream := _bgm_player.stream as AudioStreamOggVorbis
+	if ogg_stream != null:
+		ogg_stream.loop = true
 	_bgm_player.play()
 
 func _stop_bgm() -> void:
@@ -494,6 +550,12 @@ func _update_save_slot_highlight() -> void:
 # ============================================================
 
 func _input(event: InputEvent) -> void:
+	if _settings_panel and _settings_panel.is_open:
+		if event.is_action_pressed("ui_cancel") or event.is_action_pressed("escape"):
+			_settings_panel.cancel()
+			get_viewport().set_input_as_handled()
+		return
+
 	if _save_overwrite_dialog.visible:
 		if event.is_action_pressed("ui_cancel") or event.is_action_pressed("escape"):
 			_hide_save_overwrite_dialog()
@@ -874,8 +936,8 @@ func _refresh_slot_list(slots: Array) -> void:
 		}
 		var labels: Dictionary = _save_slot_labels[i]
 		var occupied: bool = s.get("occupied", false)
-		var muted := Color(0.30, 0.24, 0.17, 0.66)
-		var ink := Color(0.14, 0.09, 0.055, 0.98)
+		var muted := SAVE_SLOT_GOLD_MUTED
+		var ink := SAVE_SLOT_GOLD
 
 		if occupied:
 			(labels["name"] as Label).text = s.get("save_name", _default_save_name(i))

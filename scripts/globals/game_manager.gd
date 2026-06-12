@@ -138,6 +138,7 @@ signal decryption_complete(fragment_id: String)
 signal clue_collected(clue: String)
 
 func _ready() -> void:
+	SettingsManager.load_and_apply()
 	print("[GameManager] 溯光计划 V0.1.0")
 
 

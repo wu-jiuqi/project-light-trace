@@ -11,7 +11,7 @@ func _run() -> void:
 	var scene_paths: Array[String] = [] as Array[String]
 	_collect_scenes("res://scenes", scene_paths)
 	scene_paths.sort()
-	_check(scene_paths.size() == 46, "expected 46 project scenes")
+	_check(scene_paths.size() == 47, "expected 47 project scenes")
 
 	for scene_path in scene_paths:
 		var resource = load(scene_path)

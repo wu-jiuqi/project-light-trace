@@ -21,9 +21,12 @@ func _run() -> void:
 	await process_frame
 	await process_frame
 
-	_check(_has_texture_panel(root.get_node("ChatDialogue").get("_panel")), "chat panel uses texture skin")
-	_check(_has_texture_panel(root.get_node("BackpackUI").get("_panel")), "backpack panel uses texture skin")
-	_check(_has_texture_panel(root.get_node("PauseMenu").get("_panel")), "pause panel uses texture skin")
+	_check_scene_panel("res://scenes/ui/DialogueBox.tscn", "Stage/DialoguePanel", "chat panel uses texture skin")
+	_check_scene_panel("res://scenes/ui/Backpack.tscn", "Stage/MainNotebook", "backpack scene uses texture skin")
+	_check_scene_panel("res://scenes/ui/DialogueHistory.tscn", "Stage/DialoguePanel", "dialogue history scene uses texture skin")
+	_check_scene_panel("res://scenes/ui/CluePanel.tscn", "Stage/MainContainer", "clue panel scene uses texture skin")
+	_check_scene_panel("res://scenes/ui/SettingsPanel.tscn", "Stage/SettingsContainer", "settings panel scene uses texture skin")
+	_check_scene_panel("res://scenes/ui/PauseMenu.tscn", "Stage/PauseContainer", "pause menu scene uses texture skin")
 
 	var title_scene = load("res://scenes/ui/title_screen.tscn").instantiate()
 	root.add_child(title_scene)
@@ -31,6 +34,8 @@ func _run() -> void:
 	await process_frame
 	_check(title_scene.get_node("BG") is TextureRect, "title screen uses generated background")
 	_check(title_scene.has_node("HitContainer"), "title screen builds hit container")
+	_check(title_scene.has_node("SettingsGearButton"), "title screen has settings gear button")
+	_check(title_scene.has_node("SettingsPanel"), "title screen has settings panel instance")
 	_check_title_hit_layout(title_scene, Vector2(1280, 720), "title hit areas align at reference size")
 	_check_title_hit_layout(title_scene, Vector2(1920, 1080), "title hit areas scale at 16:9 fullscreen")
 	_check_title_hit_layout(title_scene, Vector2(1280, 800), "title hit areas account for cover crop")
@@ -59,6 +64,14 @@ func _run() -> void:
 
 func _has_texture_panel(panel: Panel) -> bool:
 	return panel != null and panel.get_theme_stylebox("panel") is StyleBoxTexture
+
+
+func _check_scene_panel(scene_path: String, panel_path: String, message: String) -> void:
+	var scene = load(scene_path).instantiate()
+	root.add_child(scene)
+	var panel := scene.get_node_or_null(panel_path) as Panel
+	_check(_has_texture_panel(panel), message)
+	scene.queue_free()
 
 
 func _check_title_hit_layout(title_scene: Control, layout_size: Vector2, message: String) -> void:

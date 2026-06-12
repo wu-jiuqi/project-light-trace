@@ -5,6 +5,7 @@ extends Control
 
 const UITheme = preload("res://scripts/ui/ui_theme.gd")
 const DIALOGUE_BOX_SCENE = preload("res://scenes/ui/DialogueBox.tscn")
+const DIALOGUE_HISTORY_SCENE = preload("res://scenes/ui/DialogueHistory.tscn")
 const DIALOGUE_DESIGN_SIZE := Vector2(1280.0, 720.0)
 const PORTRAIT_DIM: float = 0.45
 const PORTRAIT_FULL: float = 1.0
@@ -33,16 +34,7 @@ var _npc_portrait: TextureRect
 
 # 历史模式
 var _history_mode: bool = false
-var _history_panel: Panel
-var _history_display: RichTextLabel
-var _history_title: Label
-var _history_prev: Button
-var _history_next: Button
-var _history_close: Button
-var _history_page: int = 0
-var _history_total_pages: int = 0
-var _history_page_info: Label
-const HISTORY_PAGE_SIZE: int = 30
+var _history_panel: DialogueHistoryPanel
 
 # 状态
 var is_open: bool = false
@@ -68,14 +60,60 @@ func _ready() -> void:
 	set_process_input(true)
 	set_process_unhandled_input(true)
 	set_process(true)
+	if not SceneManager.scene_changing.is_connected(_on_scene_changing):
+		SceneManager.scene_changing.connect(_on_scene_changing)
+
+
+func _on_scene_changing(_target_scene: String, _spawn_point: String) -> void:
+	_reset_scene_ui_refs()
+	_ui_built = false
+	_npc = null
+	npc_name = ""
+	if is_instance_valid(_history_panel):
+		_history_panel.visible = false
 
 
 func _ensure_ui() -> void:
-	if _ui_built:
+	if _ui_built and _has_live_ui():
 		return
-	_ui_built = true
+	_reset_scene_ui_refs()
 	_build_ui()
+	_ui_built = true
+	_has_required_dialogue_nodes()
 	print("[ChatDialogue] UI就绪 | 视口=%dx%d" % [get_viewport_rect().size.x, get_viewport_rect().size.y])
+
+
+func _has_live_ui() -> bool:
+	return is_instance_valid(_dialogue_box) \
+		and is_instance_valid(_dialogue_stage) \
+		and is_instance_valid(_panel) \
+		and is_instance_valid(_chat_display) \
+		and is_instance_valid(_input_box) \
+		and is_instance_valid(_send_btn) \
+		and is_instance_valid(_history_btn)
+
+
+func _reset_scene_ui_refs() -> void:
+	is_open = false
+	_history_mode = false
+	_focus_retry_count = 0
+	_overlay = null
+	_dialogue_box = null
+	_dialogue_stage = null
+	_dialogue_host = null
+	_panel = null
+	_name_label = null
+	_chat_display = null
+	_input_bar = null
+	_input_box = null
+	_send_btn = null
+	_give_btn = null
+	_history_btn = null
+	_think_label = null
+	_player_portrait = null
+	_npc_portrait = null
+	_base_text = ""
+	_stream_text = ""
 
 
 func _build_ui() -> void:
@@ -108,20 +146,20 @@ func _build_ui() -> void:
 	if _dialogue_stage == null:
 		_dialogue_stage = _dialogue_box
 
-	_panel = _dialogue_stage.get_node("DialoguePanel") as Panel
+	_panel = _dialogue_stage.get_node_or_null("DialoguePanel") as Panel
 	_player_portrait = _dialogue_stage.get_node_or_null("PlayerPortrait") as TextureRect
 	_npc_portrait = _dialogue_stage.get_node_or_null("NpcPortrait") as TextureRect
 	_name_label = _dialogue_stage.get_node_or_null("DialoguePanel/NamePlate/NameLabel") as Label
 	if _name_label == null:
 		_name_label = _dialogue_stage.get_node_or_null("DialoguePanel/NameLabel") as Label
-	_chat_display = _dialogue_stage.get_node("DialoguePanel/ChatDisplay") as RichTextLabel
-	_input_bar = _dialogue_stage.get_node("DialoguePanel/InputBar") as Panel
-	_input_box = _dialogue_stage.get_node("DialoguePanel/InputBar/InputBox") as LineEdit
-	_send_btn = _dialogue_stage.get_node("DialoguePanel/ButtonRow/SendButton") as Button
-	_give_btn = _dialogue_stage.get_node("DialoguePanel/ButtonRow/GiveButton") as Button
-	_history_btn = _dialogue_stage.get_node("DialoguePanel/ButtonRow/HistoryButton") as Button
+	_chat_display = _dialogue_stage.get_node_or_null("DialoguePanel/ChatDisplay") as RichTextLabel
+	_input_bar = _dialogue_stage.get_node_or_null("DialoguePanel/InputBar") as Panel
+	_input_box = _dialogue_stage.get_node_or_null("DialoguePanel/InputBar/InputBox") as LineEdit
+	_send_btn = _dialogue_stage.get_node_or_null("DialoguePanel/ButtonRow/SendButton") as Button
+	_give_btn = _dialogue_stage.get_node_or_null("DialoguePanel/ButtonRow/GiveButton") as Button
+	_history_btn = _dialogue_stage.get_node_or_null("DialoguePanel/ButtonRow/HistoryButton") as Button
 
-	if _name_label == null:
+	if _name_label == null and _panel != null:
 		push_error("[ChatDialogue] DialogueBox.tscn 缺少 NameLabel，请放在 DialoguePanel/NamePlate/NameLabel 或 DialoguePanel/NameLabel")
 		_name_label = Label.new()
 		_name_label.name = "NameLabel"
@@ -139,19 +177,55 @@ func _build_ui() -> void:
 	_think_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_think_label.add_theme_color_override("font_color", Color(0.38, 0.28, 0.16, 0.72))
 	_think_label.add_theme_font_size_override("font_size", 15)
-	_panel.add_child(_think_label)
+	if _panel != null:
+		_panel.add_child(_think_label)
 
-	_input_box.text_submitted.connect(_do_send)
-	_send_btn.pressed.connect(_do_send.bind(""))
-	_give_btn.pressed.connect(_do_give)
-	_give_btn.visible = true
-	_give_btn.disabled = true
-	_history_btn.pressed.connect(_show_history)
+	if _input_box:
+		_input_box.text_submitted.connect(_do_send)
+	_connect_button_pressed(_send_btn, _do_send.bind(""), "DialoguePanel/ButtonRow/SendButton")
+	if _connect_button_pressed(_give_btn, _do_give, "DialoguePanel/ButtonRow/GiveButton"):
+		_give_btn.visible = true
+		_give_btn.disabled = true
+	_connect_button_pressed(_history_btn, _show_history, "DialoguePanel/ButtonRow/HistoryButton")
 	
 	if not get_viewport().size_changed.is_connected(_layout_dialogue_box):
 		get_viewport().size_changed.connect(_layout_dialogue_box)
 	_layout_dialogue_box()
 	_build_history_panel(vs)
+
+
+func _has_required_dialogue_nodes() -> bool:
+	var missing: Array[String] = []
+	if not is_instance_valid(_dialogue_box):
+		missing.append("DialogueBox")
+	if not is_instance_valid(_dialogue_stage):
+		missing.append("Stage")
+	if not is_instance_valid(_panel):
+		missing.append("DialoguePanel")
+	if not is_instance_valid(_chat_display):
+		missing.append("DialoguePanel/ChatDisplay")
+	if not is_instance_valid(_input_box):
+		missing.append("DialoguePanel/InputBar/InputBox")
+	if not is_instance_valid(_send_btn):
+		missing.append("DialoguePanel/ButtonRow/SendButton")
+	if not is_instance_valid(_give_btn):
+		missing.append("DialoguePanel/ButtonRow/GiveButton")
+	if not is_instance_valid(_history_btn):
+		missing.append("DialoguePanel/ButtonRow/HistoryButton")
+	if not is_instance_valid(_name_label):
+		missing.append("DialoguePanel/NameLabel")
+	if not missing.is_empty():
+		push_error("[ChatDialogue] UI节点缺失，已阻止写入空节点: %s" % ", ".join(missing))
+		return false
+	return true
+
+
+func _ensure_required_dialogue_nodes(context: String) -> bool:
+	_ensure_ui()
+	if _has_required_dialogue_nodes():
+		return true
+	push_error("[ChatDialogue] %s 失败：对话UI未就绪" % context)
+	return false
 
 
 func _find_scene_dialogue_box() -> Control:
@@ -162,6 +236,15 @@ func _find_scene_dialogue_box() -> Control:
 	if found is Control:
 		return found as Control
 	return null
+
+
+func _connect_button_pressed(button: Button, callback: Callable, node_path: String) -> bool:
+	if button == null:
+		push_error("[ChatDialogue] Missing Button node: %s" % node_path)
+		return false
+	if not button.pressed.is_connected(callback):
+		button.pressed.connect(callback)
+	return true
 
 
 func _layout_dialogue_box() -> void:
@@ -185,81 +268,13 @@ func _layout_dialogue_box() -> void:
 	_dialogue_stage.scale = Vector2(scale_factor, scale_factor)
 
 
-func _build_history_panel(vs: Vector2) -> void:
-	_history_panel = Panel.new()
-	_history_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_history_panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	var hps = StyleBoxFlat.new()
-	hps.bg_color = Color(0.08, 0.08, 0.1, 0.95)
-	hps.set_corner_radius_all(0)
-	_history_panel.add_theme_stylebox_override("panel", hps)
-	_history_panel.add_theme_stylebox_override("panel", UITheme.panel_style())
+func _build_history_panel(_vs: Vector2) -> void:
+	if is_instance_valid(_history_panel):
+		return
+	_history_panel = DIALOGUE_HISTORY_SCENE.instantiate() as DialogueHistoryPanel
 	_history_panel.visible = false
-	(_dialogue_host if _dialogue_host else _canvas).add_child(_history_panel)
-	
-	# 标题
-	_history_title = Label.new()
-	_history_title.position = Vector2(20, 16)
-	_history_title.text = "对话历史"
-	_history_title.add_theme_color_override("font_color", Color(0.5, 0.85, 1, 1))
-	_history_title.add_theme_font_size_override("font_size", 18)
-	_history_panel.add_child(_history_title)
-	
-	# 分页信息
-	_history_page_info = Label.new()
-	_history_page_info.position = Vector2(160, 20)
-	_history_page_info.add_theme_color_override("font_color", Color(0.6, 0.65, 0.7, 1))
-	_history_page_info.add_theme_font_size_override("font_size", 13)
-	_history_panel.add_child(_history_page_info)
-	
-	# 关闭按钮
-	_history_close = Button.new()
-	_history_close.position = Vector2(vs.x - 120, 14)
-	_history_close.size = Vector2(100, 36)
-	_history_close.text = "关闭 (Esc)"
-	_history_close.add_theme_font_size_override("font_size", 13)
-	UITheme.apply_button(_history_close)
-	_history_close.pressed.connect(_close_history)
-	_history_panel.add_child(_history_close)
-	
-	# 历史内容区
-	var content_top = 60
-	var content_bottom = 60
-	_history_display = RichTextLabel.new()
-	_history_display.position = Vector2(20, content_top)
-	_history_display.size = Vector2(vs.x - 40, vs.y - content_top - content_bottom)
-	_history_display.bbcode_enabled = true
-	_history_display.scroll_active = true
-	_history_display.selection_enabled = true
-	_history_display.add_theme_font_size_override("normal_font_size", 14)
-	var hds = StyleBoxFlat.new()
-	hds.bg_color = Color(0.12, 0.12, 0.14, 0.5)
-	hds.set_corner_radius_all(8)
-	_history_display.add_theme_stylebox_override("normal", hds)
-	_history_display.add_theme_stylebox_override("normal", UITheme.panel_style(true))
-	_history_panel.add_child(_history_display)
-	
-	# 翻页按钮
-	var btn_w = 120
-	var btn_y = vs.y - 48
-	_history_prev = Button.new()
-	_history_prev.position = Vector2(vs.x / 2 - btn_w - 20, btn_y)
-	_history_prev.size = Vector2(btn_w, 36)
-	_history_prev.text = "< 上一页"
-	_history_prev.add_theme_font_size_override("font_size", 14)
-	UITheme.apply_button(_history_prev)
-	_history_prev.pressed.connect(_prev_page)
-	_history_panel.add_child(_history_prev)
-	
-	_history_next = Button.new()
-	_history_next.position = Vector2(vs.x / 2 + 20, btn_y)
-	_history_next.size = Vector2(btn_w, 36)
-	_history_next.text = "下一页 >"
-	_history_next.add_theme_font_size_override("font_size", 14)
-	UITheme.apply_button(_history_next)
-	_history_next.pressed.connect(_next_page)
-	_history_panel.add_child(_history_next)
-
+	_history_panel.panel_closed.connect(_on_history_panel_closed)
+	_canvas.add_child(_history_panel)
 
 func _process(_delta: float) -> void:
 	if not is_open or _focus_retry_count <= 0:
@@ -298,7 +313,8 @@ func open(npc_ctrl: Node, greeting: String = "") -> void:
 		return
 	
 	# 确保UI已构建
-	_ensure_ui()
+	if not _ensure_required_dialogue_nodes("open"):
+		return
 	
 	_npc = npc_ctrl
 	npc_name = npc_ctrl.npc_name
@@ -323,7 +339,7 @@ func open(npc_ctrl: Node, greeting: String = "") -> void:
 	is_open = true
 	
 	if greeting != "":
-		_add_npc_msg(greeting)
+		stream_local_npc_msg(greeting)
 	
 	_focus_retry_count = FOCUS_MAX_RETRIES
 	call_deferred("_grab_input_focus")
@@ -345,6 +361,9 @@ func open(npc_ctrl: Node, greeting: String = "") -> void:
 func close() -> void:
 	if not is_open:
 		return
+	_history_mode = false
+	if _history_panel and _history_panel.is_open:
+		_history_panel.close()
 	is_open = false
 	_focus_retry_count = 0
 	_overlay.visible = false
@@ -366,7 +385,6 @@ func close() -> void:
 	if _player_portrait:
 		_player_portrait.modulate.a = PORTRAIT_FULL
 	dialogue_closed.emit()
-	_close_history()
 
 
 # ============================================================
@@ -376,76 +394,45 @@ func close() -> void:
 func _show_history() -> void:
 	if not _npc or npc_name == "":
 		return
+	if not _ensure_required_dialogue_nodes("_show_history"):
+		return
+	if not is_instance_valid(_history_panel):
+		_build_history_panel(get_viewport_rect().size)
 	var kb_id = _npc.npc_kb_id
 	if kb_id == "":
 		return
 	
-	_history_page = 0
 	_history_mode = true
 	
 	_dialogue_box.visible = false
 	_panel.visible = false
 	_overlay.visible = true
-	_history_panel.visible = true
-	_history_title.text = "对话历史 —— %s" % npc_name
-	
-	_load_history_page(kb_id)
+	_history_panel.open_for_npc(kb_id, npc_name)
 
 
 func _close_history() -> void:
 	if not _history_mode:
 		return
 	_history_mode = false
-	_history_panel.visible = false
+	if _history_panel and _history_panel.is_open:
+		_history_panel.close()
+	_restore_dialogue_after_history()
+
+
+func _on_history_panel_closed() -> void:
+	if not _history_mode:
+		return
+	_history_mode = false
+	_restore_dialogue_after_history()
+
+
+func _restore_dialogue_after_history() -> void:
 	if is_open:
+		_overlay.visible = true
 		_dialogue_box.visible = true
 		_panel.visible = true
-
-
-func _load_history_page(kb_id: String) -> void:
-	var result = ChatDatabase.get_page(kb_id, _history_page, HISTORY_PAGE_SIZE)
-	_history_total_pages = result["total_pages"]
-	_history_page = result["page"]
-	var messages: Array = result["messages"]
-	var total = result["total"]
-	
-	_history_page_info.text = "第 %d/%d 页 (共 %d 条)" % [_history_page + 1, _history_total_pages, total]
-	_history_prev.disabled = _history_page <= 0
-	_history_next.disabled = _history_page >= _history_total_pages - 1
-	
-	if messages.is_empty():
-		_history_display.text = "[center][color=#555555]暂无对话记录[/color][/center]"
-		return
-	
-	var text: String = ""
-	for msg in messages:
-		var role = msg.get("role", "")
-		var content = msg.get("content", "")
-		var ts = msg.get("timestamp", 0)
-		var time_str = _format_time(ts)
-		var phase = msg.get("alert_phase", 0)
-		
-		if role == "player":
-			text += "[right][color=#777777]%s[/color]  [color=#5599cc][ 你 ][/color] %s[/right]\n" % [time_str, content]
-		else:
-			var phase_tag = _alert_phase_tag(phase)
-			text += "[color=#777777]%s[/color]  [outline_size=2][outline_color=black][color=#D4B86A][%s][/color][/outline_color][/outline_size]%s %s\n" % [time_str, npc_name, phase_tag, content]
-	
-	_history_display.text = text
-
-
-func _prev_page() -> void:
-	if _history_page <= 0 or not _npc:
-		return
-	_history_page -= 1
-	_load_history_page(_npc.npc_kb_id)
-
-
-func _next_page() -> void:
-	if _history_page >= _history_total_pages - 1 or not _npc:
-		return
-	_history_page += 1
-	_load_history_page(_npc.npc_kb_id)
+		_focus_retry_count = FOCUS_MAX_RETRIES
+		call_deferred("_grab_input_focus")
 
 
 func _format_time(ts: int) -> String:
@@ -464,6 +451,8 @@ func _alert_phase_tag(phase: int) -> String:
 
 
 func stream_begin() -> void:
+	if not _ensure_required_dialogue_nodes("stream_begin"):
+		return
 	_stream_text = ""
 	_base_text = _chat_display.text
 	_think_label.text = "正在输入..."
@@ -473,11 +462,15 @@ func stream_begin() -> void:
 
 
 func stream_add(token: String) -> void:
+	if not _ensure_required_dialogue_nodes("stream_add"):
+		return
 	_stream_text += token
 	_chat_display.text = _base_text + "[outline_size=2][outline_color=black][color=#D4B86A][%s][/color][/outline_color][/outline_size] %s" % [npc_name, _stream_text]
 
 
 func stream_end(full_text: String) -> void:
+	if not _ensure_required_dialogue_nodes("stream_end"):
+		return
 	_stream_text = ""
 	_chat_display.text = _base_text + "[outline_size=2][outline_color=black][color=#D4B86A][%s][/color][/outline_color][/outline_size] %s\n" % [npc_name, full_text]
 	_base_text = _chat_display.text
@@ -487,16 +480,37 @@ func stream_end(full_text: String) -> void:
 
 
 func add_npc_msg(text: String) -> void:
+	if not _ensure_required_dialogue_nodes("add_npc_msg"):
+		return
 	_add_npc_msg(text)
 	_input_restore()
 
 
+func stream_local_npc_msg(text: String) -> void:
+	if not _ensure_required_dialogue_nodes("stream_local_npc_msg"):
+		return
+	stream_begin()
+	var index := 0
+	var chunk_size := 2
+	while is_open and index < text.length():
+		var length: int = mini(chunk_size, text.length() - index)
+		stream_add(text.substr(index, length))
+		index += length
+		await get_tree().create_timer(0.02).timeout
+	if is_open:
+		stream_end(text)
+
+
 func add_player_msg(text: String) -> void:
+	if not _ensure_required_dialogue_nodes("add_player_msg"):
+		return
 	_chat_display.text += "[right][color=#5599cc][ 你 ][/color] %s[/right]\n" % text
 	_base_text = _chat_display.text
 
 
 func input_restore() -> void:
+	if not _ensure_required_dialogue_nodes("input_restore"):
+		return
 	_set_portrait_state(true)
 	_input_box.editable = true
 	_send_btn.disabled = false
@@ -510,6 +524,8 @@ func _grab_input_focus() -> void:
 
 
 func _do_send(text: String = "") -> void:
+	if not _ensure_required_dialogue_nodes("_do_send"):
+		return
 	var msg = text.strip_edges()
 	if msg == "":
 		msg = _input_box.text.strip_edges()
@@ -543,6 +559,9 @@ func _do_give() -> void:
 
 
 func _add_npc_msg(text: String) -> void:
+	if _chat_display == null:
+		push_error("[ChatDialogue] _add_npc_msg 失败：ChatDisplay 为空")
+		return
 	_chat_display.text += "[outline_size=2][outline_color=black][color=#D4B86A][%s][/color][/outline_color][/outline_size] %s\n" % [npc_name, text]
 	_base_text = _chat_display.text
 

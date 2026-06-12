@@ -251,6 +251,9 @@ func _start_bgm() -> void:
 		_bgm_player.volume_db = -8.0
 		add_child(_bgm_player)
 	_bgm_player.stream = BGM_STAR_MAP
+	var ogg_stream := _bgm_player.stream as AudioStreamOggVorbis
+	if ogg_stream != null:
+		ogg_stream.loop = true
 	_bgm_player.play()
 
 func _stop_bgm() -> void:

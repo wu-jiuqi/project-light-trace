@@ -207,6 +207,7 @@ var _last_greeting: String = ""           # 上次使用的开场白（避免连
 var _greeting_phase: int = 0              # 开场白阶段
 var _own_color_was_awakened: bool = false # 是否刚觉醒
 var _llm_last_input: String = ""          # 上一轮玩家的输入（用于LLM回复后分析警觉）
+var _stream_suppress_asterisk_action: bool = false
 
 signal npc_state_changed(new_state: int)
 
@@ -419,6 +420,7 @@ func _process_alert_decay(delta: float) -> void:
 func modify_alert(amount: float, reason: String = "") -> void:
 	## 修改NPC警觉值
 	if _uses_fragment_compliance_mode():
+		_modify_fragment_compliance_from_alert(amount, reason)
 		return
 	var old_phase = npc_alert_phase
 	npc_suspicion = clampf(npc_suspicion + amount, 0.0, 100.0)
@@ -438,6 +440,18 @@ func modify_alert(amount: float, reason: String = "") -> void:
 		if npc_alert_phase >= NPCAlertPhase.ALARMED and not doubts_player_identity:
 			doubts_player_identity = true
 			print("[NPC:%s] 开始怀疑玩家身份" % npc_name)
+
+func _modify_fragment_compliance_from_alert(amount: float, reason: String = "") -> void:
+	## MONITORED 模式把 NPC 警觉事件映射为碎片 #0001 的共享合规度扣减。
+	if amount <= 0.0:
+		return
+	if not _fragment_state or not _fragment_state.has_method("_modify_compliance"):
+		return
+	var divisor := 6.0
+	if reason.begins_with("LLM判断"):
+		divisor = 12.0
+	var compliance_delta := -maxi(1, ceili(amount / divisor))
+	_fragment_state.call("_modify_compliance", compliance_delta, "NPC对话触发: %s" % reason)
 
 func _update_alert_phase() -> void:
 	## 根据当前警觉值更新警觉阶段
@@ -487,7 +501,7 @@ func _update_behavior_from_alert() -> void:
 func check_player_input_for_alert(player_input: String) -> void:
 	## 分析玩家输入，如果触及敏感话题则增加警觉
 	var profile = _get_alert_profile()
-	if npc_kb_id == "oldpainter" or _uses_fragment_compliance_mode():
+	if npc_kb_id == "oldpainter":
 		return  # 老画家完全信任玩家
 	
 	var input_lower = player_input.to_lower()
@@ -659,7 +673,8 @@ func _analyze_llm_response_for_alert(response: String, player_input: String) -> 
 	## 分析LLM的回复内容来判断NPC是否变得警觉
 	## 不是关键词匹配——是观察NPC的自然反应
 	## 如果NPC回复变得简短、抗拒、回避，说明玩家的问题让他不安
-	if response == "" or npc_kb_id == "oldpainter" or _uses_fragment_compliance_mode():
+	var compliance_mode := _uses_fragment_compliance_mode()
+	if response == "" or npc_kb_id == "oldpainter":
 		return
 	
 	var response_lower = response.to_lower()
@@ -667,7 +682,7 @@ func _analyze_llm_response_for_alert(response: String, player_input: String) -> 
 	var reasons: Array[String] = [] as Array[String]
 	
 	# === 信号1: 极度简短的回复（<20字符）—— NPC不想说话 ===
-	if response.length() < 20:
+	if response.length() < 20 and not compliance_mode:
 		delta += 15.0
 		reasons.append("回复极短——NPC不想多谈")
 	
@@ -1001,9 +1016,11 @@ func _collect_game_state() -> Dictionary:
 
 func send_player_message(message: String) -> void:
 	## 玩家输入 → RAG → LLM流式 → 聊天UI逐字显示
-	## 警觉由LLM的回复内容自然体现，不在输入层做关键词过滤
+	## 先用本地规则更新警觉/合规度，再让LLM按最新状态自然表现态度
 	print("[NPC] %s 收到: \"%s\"" % [npc_name, message])
 	_llm_last_input = message  # 记下玩家输入，等LLM回复后分析
+	check_safe_action(message)
+	check_player_input_for_alert(message)
 	
 	# 记录对话历史到SQLite数据库
 	ChatDatabase.log_message(npc_kb_id, "player", message, npc_alert_phase, npc_suspicion)
@@ -1048,6 +1065,7 @@ func _send_to_llm(message: String, game_state: Dictionary) -> void:
 		  [npc_name, system_prompt.length(), npc_kb_id, npc_suspicion, npc_alert_phase])
 	
 	# 开始流式输出
+	_stream_suppress_asterisk_action = false
 	ChatDialogue.stream_begin()
 	
 	# 连接流式信号（先断开旧的）
@@ -1199,21 +1217,70 @@ func _disconnect_stream_signals() -> void:
 
 
 func _on_stream_token(token: String) -> void:
-	ChatDialogue.stream_add(token)
+	var visible_token := _filter_stream_action_markup(token)
+	if visible_token != "":
+		ChatDialogue.stream_add(visible_token)
 
 
 func _on_stream_completed(full_text: String) -> void:
 	_disconnect_stream_signals()
-	ChatDialogue.stream_end(full_text)
+	var clean_text := _clean_model_dialogue_text(full_text)
+	ChatDialogue.stream_end(clean_text)
 	# 记录NPC回复到SQLite数据库
-	ChatDatabase.log_message(npc_kb_id, "npc", full_text, npc_alert_phase, npc_suspicion)
-	print("[NPC] %s 流式完成 (%d chars)" % [npc_name, full_text.length()])
+	ChatDatabase.log_message(npc_kb_id, "npc", clean_text, npc_alert_phase, npc_suspicion)
+	print("[NPC] %s 流式完成 (%d chars)" % [npc_name, clean_text.length()])
 	
 	# === LLM判断警觉：分析LLM的回复内容，而不是做关键词匹配 ===
-	_analyze_llm_response_for_alert(full_text, _llm_last_input)
+	_analyze_llm_response_for_alert(clean_text, _llm_last_input)
 	
 	# 对话完成后检查颜色触发
 	_check_color_trigger()
+
+
+func _clean_model_dialogue_text(raw_text: String) -> String:
+	var text := raw_text.strip_edges()
+	if text.is_empty():
+		return text
+
+	var speaker_prefixes := [
+		"[%s]" % npc_name,
+		"【%s】" % npc_name,
+		"%s：" % npc_name,
+		"%s:" % npc_name,
+		"[NPC]",
+		"【NPC】"
+	]
+	for prefix in speaker_prefixes:
+		if text.begins_with(prefix):
+			text = text.substr(prefix.length()).strip_edges()
+
+	var paren_regex := RegEx.new()
+	if paren_regex.compile("\\s*[（(][^）)]*[）)]\\s*") == OK:
+		text = paren_regex.sub(text, "", true).strip_edges()
+
+	var asterisk_regex := RegEx.new()
+	if asterisk_regex.compile("\\s*\\*[^*\\n]{1,120}\\*\\s*") == OK:
+		text = asterisk_regex.sub(text, "", true).strip_edges()
+
+	var bracket_narration_regex := RegEx.new()
+	if bracket_narration_regex.compile("\\s*[【\\[]?(旁白|动作|表情|心理|内心|舞台指令)[：:][^】\\]\\n]*[】\\]]?\\s*") == OK:
+		text = bracket_narration_regex.sub(text, "", true).strip_edges()
+
+	text = text.replace("*", "").strip_edges()
+	return text
+
+
+func _filter_stream_action_markup(token: String) -> String:
+	## 流式阶段先隐藏 *动作/旁白* 内容，最终文本仍由 _clean_model_dialogue_text 兜底清理。
+	var visible := ""
+	for ch in token:
+		if ch == "*":
+			_stream_suppress_asterisk_action = not _stream_suppress_asterisk_action
+			continue
+		if _stream_suppress_asterisk_action:
+			continue
+		visible += ch
+	return visible
 
 
 func _on_stream_failed(error: String) -> void:

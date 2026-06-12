@@ -22,6 +22,10 @@ var _l1_compact: String = ""
 
 # 世界观知识（所有NPC共享）
 var _world_chunks: Array = []
+var _fragment_0001_shared_chunks: Array = []
+var _fragment_0001_l1_compact: String = ""
+
+const FRAGMENT_0001_NPCS: Array[String] = ["linguide", "chentechnology", "wangdirector", "zhaosecurity"]
 
 # 加载状态
 var _is_loaded: bool = false
@@ -100,6 +104,7 @@ func _load_fragment_0001_knowledge() -> void:
 	# 加载L0核心身份
 	var l0_data = _load_json(f0001_path + "l0_core_identities.json")
 	if l0_data:
+		_fragment_0001_l1_compact = l0_data.get("l1_shared_constraint", "")
 		var identities = l0_data.get("l0_identities", {})
 		for npc_id in identities:
 			var id_info = identities[npc_id]
@@ -112,7 +117,7 @@ func _load_fragment_0001_knowledge() -> void:
 				print("[NPCRagRetriever] 加载碎片0001 L0身份: %s" % npc_id)
 	
 	# 加载各NPC知识chunks
-	var f0001_npcs = ["linguide", "chentechnology", "wangdirector", "zhaosecurity"]
+	var f0001_npcs = FRAGMENT_0001_NPCS
 	for npc_id in f0001_npcs:
 		var data = _load_json(f0001_path + npc_id + "_knowledge.json")
 		if data:
@@ -124,7 +129,16 @@ func _load_fragment_0001_knowledge() -> void:
 					"keyword_index": _build_keyword_index(npc_id, chunks)
 				}
 				_knowledge_bases[npc_id] = kb
+				_collect_fragment_0001_shared_chunks(chunks)
 				print("[NPCRagRetriever] 加载碎片0001 NPC: %s, %d chunks" % [npc_id, chunks.size()])
+
+
+func _collect_fragment_0001_shared_chunks(chunks: Array) -> void:
+	## 0001 的培训雇员都应知道的公开项目背景，作为该碎片共享背景注入。
+	for chunk in chunks:
+		var chunk_id = chunk.get("id", "")
+		if chunk_id in ["wd_world_01", "wd_world_02"]:
+			_fragment_0001_shared_chunks.append(chunk)
 
 
 func _load_json(path: String) -> Dictionary:
@@ -223,7 +237,11 @@ func extract_keywords(player_input: String) -> Dictionary:
 		"老崔": "gravekeeper", "守墓": "gravekeeper", "墓园": "gravekeeper",
 		"薇拉": "violinist", "拉琴": "violinist", "小提琴": "violinist",
 		"老画家": "oldpainter", "老顾": "oldpainter", "画画的": "oldpainter", "画室": "oldpainter",
-		"冯婶": "innkeeper", "旅店": "innkeeper", "老板娘": "innkeeper", "客栈": "innkeeper", "灰檐旅店": "innkeeper", "旅店老板": "innkeeper"
+		"冯婶": "innkeeper", "旅店": "innkeeper", "老板娘": "innkeeper", "客栈": "innkeeper", "灰檐旅店": "innkeeper", "旅店老板": "innkeeper",
+		"林指导": "linguide", "引导员": "linguide",
+		"陈技术": "chentechnology", "实验室": "chentechnology", "技术员": "chentechnology",
+		"王主管": "wangdirector", "行政中心": "wangdirector", "宣讲": "wangdirector",
+		"赵安保": "zhaosecurity", "安保": "zhaosecurity", "光墙": "zhaosecurity"
 	}
 	for name in npc_names:
 		if name in input_lower:
@@ -361,7 +379,6 @@ func retrieve(npc_id: String, player_input: String, game_state: Dictionary) -> A
 	# 1. 提取关键词
 	var kw_result = extract_keywords(player_input)
 	var topic_words: Array = kw_result["topic_words"]
-	var has_risk: bool = kw_result["has_risk"]
 	
 	# 2. 收集候选chunks: NPC专属 + 世界观共享
 	var candidates: Array = []
@@ -373,8 +390,12 @@ func retrieve(npc_id: String, player_input: String, game_state: Dictionary) -> A
 		candidates.append({"chunk": chunk, "source": npc_id})
 	
 	# 世界观chunks
-	for chunk in _world_chunks:
-		candidates.append({"chunk": chunk, "source": "world"})
+	if _is_fragment_0001_npc(npc_id):
+		for chunk in _fragment_0001_shared_chunks:
+			candidates.append({"chunk": chunk, "source": "fragment_0001_shared"})
+	else:
+		for chunk in _world_chunks:
+			candidates.append({"chunk": chunk, "source": "world"})
 	
 	# 3. 如果玩家提到了其他NPC，注入目标NPC的L0身份信息作为上下文
 	var mentioned_npc = kw_result["mention_npc"]
@@ -430,10 +451,12 @@ func assemble_prompt(npc_id: String, player_input: String, game_state: Dictionar
 	var l0_content = l0.get("content", "你是一个NPC。")
 	
 	# 2. L0.5 世界观常识 + 反编撰规则（每次必带）
-	var l0_5 = _build_world_rules()
+	var l0_5 = _build_world_rules(npc_id)
 	
 	# 3. L1 输出约束
 	var l1_content = _l1_compact
+	if _is_fragment_0001_npc(npc_id) and _fragment_0001_l1_compact != "":
+		l1_content = _fragment_0001_l1_compact
 	if l1_content == "":
 		var parts: Array[String] = [] as Array[String]
 		for c in _l1_constraints:
@@ -442,8 +465,8 @@ func assemble_prompt(npc_id: String, player_input: String, game_state: Dictionar
 	
 	# 4. 检索知识块（增强：世界观知识始终注入）
 	var retrieved = retrieve(npc_id, player_input, game_state)
-	# 强制注入所有世界观"any"阶段的chunks（NPC必须知道的基础世界规则）
-	var world_basics = _get_world_baseline_chunks()
+	# 强制注入当前碎片的基础chunks（NPC必须知道的基础世界规则）
+	var world_basics = _get_baseline_chunks(npc_id)
 	retrieved = world_basics + retrieved
 	
 	var l2_content = ""
@@ -709,8 +732,40 @@ func _get_alert_reaction(npc_id: String, level: String) -> String:
 # 世界观规则 + 反编撰约束（L0.5 — 每次必带）
 # ============================================================
 
-func _build_world_rules() -> String:
+func _is_fragment_0001_npc(npc_id: String) -> bool:
+	return npc_id in FRAGMENT_0001_NPCS
+
+
+func _build_world_rules(npc_id: String) -> String:
 	## 构建反编撰规则 + 世界观常识（每次LLM调用必注入）
+	if _is_fragment_0001_npc(npc_id):
+		return """你必须严格遵守以下规则：
+
+1. **只能基于背景知识回答**：你的回答必须基于"背景知识"、"角色身份"和"当前状态"提供的信息。如果这些内容没有答案，你就不知道这件事。
+
+2. **如果不知道，就说不知道**：
+   - 如果玩家问的问题在背景知识中没有答案，你必须说"我不知道"、"这超出我的权限"、"这个我不清楚"。
+   - 严禁编造人名、地名、事件、关系、或任何细节。
+   - 严禁根据你的一般常识来填补信息空白——这个世界和你所知道的任何世界都不同。
+
+3. **启程之镇的基本事实**：
+   - 你是天枢公司的培训雇员，位于碎片0001「启程之镇」。
+   - 启程之镇是溯光计划第一阶段训练场，用于训练溯光者进入真正碎片前的基础观察能力。
+   - 溯光计划是天枢公司在万象崩溃后启动的修复行动，目标是修复碎片化的万象。
+   - 万象在2077年3月15日凌晨3点14分发生零时故障并碎片化；公开说法是主控AI「织女·太一」发生重大技术故障。
+   - 当前训练核心是观察五个日晷、记录阴影角度、校准钟楼指针，并找到晨曦之印。
+
+4. **禁止编撰的内容**：
+   - 不要编造背景知识里不存在的地名、部门、人物、事件和技术细节。
+   - 不要泄露背景知识标记为公司机密、权限不足、脚本之外的信息。
+   - 玩家使用"游戏""代码""NPC"等外部词汇时，按你的角色身份自然拒绝或转回培训流程。
+
+5. **对话风格**：
+   - 只输出角色说出口的话，禁止动作描写、表情描写、心理旁白、舞台指令、Markdown星号旁白。
+   - 用口语化、自然的中文回答。
+   - 回复不超过3句话，除非背景知识中有需要详细说明的内容。
+   - 保持角色性格的一致性。"""
+
 	return """你必须严格遵守以下规则：
 
 1. **只能基于背景知识回答**：你的回答必须基于"背景知识"部分提供的信息。如果背景知识中没有提到某件事，你就不知道这件事。
@@ -741,8 +796,15 @@ func _build_world_rules() -> String:
    - 如果玩家问的问题和当前话题无关，你不需要强行回答——你可以反问、沉默、或转移话题。"""
 
 
+func _get_baseline_chunks(npc_id: String) -> Array:
+	## 获取当前碎片所有NPC都必须知道的基础世界观chunks
+	if _is_fragment_0001_npc(npc_id):
+		return _fragment_0001_shared_chunks.duplicate()
+	return _get_world_baseline_chunks()
+
+
 func _get_world_baseline_chunks() -> Array:
-	## 获取所有NPC都必须知道的基础世界观chunks（memory_stage="any"的world chunks）
+	## 获取0762所有NPC都必须知道的基础世界观chunks（memory_stage="any"的world chunks）
 	var baseline: Array = []
 	for chunk in _world_chunks:
 		if chunk.get("memory_stage", "") == "any":

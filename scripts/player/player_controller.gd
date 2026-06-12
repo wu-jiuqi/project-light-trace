@@ -23,6 +23,7 @@ var _closest_interactable: Node2D = null
 var _interaction_area: Area2D = null
 ## 帧计数器，用于定期清理过期引用
 var _frame_counter: int = 0
+var _controls_locked: bool = false
 
 # ============================================================
 # 视觉动画
@@ -56,6 +57,7 @@ func _ready() -> void:
 
 	# 使用场景中已有的 InteractionArea，而非动态创建
 	_setup_interaction_area()
+	call_deferred("_refresh_interaction_overlaps")
 
 	# 跨场景出生点定位（由 SceneManager 设定）
 	var spawn_name = SceneManager.pending_spawn_point
@@ -104,6 +106,21 @@ func _setup_interaction_area() -> void:
 		printerr("[PlayerController] 未找到 InteractionArea 节点，交互功能不可用")
 
 
+func set_controls_locked(locked: bool) -> void:
+	_controls_locked = locked
+	if locked:
+		velocity = Vector2.ZERO
+		_nearby_npcs.clear()
+		_nearby_pickups.clear()
+		_nearby_interactables.clear()
+		_closest_npc = null
+		_closest_pickup = null
+		_closest_interactable = null
+		_update_interact_hint()
+	else:
+		call_deferred("_refresh_interaction_overlaps")
+
+
 func _try_spawn(spawn_name: String) -> void:
 	# 从当前节点向上查找 SpawnPoints 节点
 	# Player 可能在 DepthLayer_N 下，需要向上遍历到 WorldRoot
@@ -138,7 +155,7 @@ func _try_spawn(spawn_name: String) -> void:
 
 func _physics_process(delta: float) -> void:
 	# 对话或背包打开时锁定移动
-	if ChatDialogue.is_open or InventoryManager.backpack_open:
+	if _controls_locked or ChatDialogue.is_open or InventoryManager.backpack_open:
 		velocity = Vector2.ZERO
 		move_and_slide()
 		_settle_sway(delta)
@@ -162,10 +179,14 @@ func _physics_process(delta: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if _controls_locked:
+		return
+
 	if event.is_action_pressed("interact"):
 		# 对话已打开时不重复触发
 		if ChatDialogue.is_open:
 			return
+		_refresh_interaction_overlaps()
 		print("══════════ [Player] E键按下 ══════════")
 		print("  附近NPC: %d 个 | 最近: %s" % [
 			_nearby_npcs.size(),
@@ -207,7 +228,7 @@ func _on_interaction_zone_entered(zone: Area2D) -> void:
 	# 判断是 NPC InteractionZone、可交互物件 还是可拾取物品
 	var parent = zone.get_parent()
 
-	if parent and is_instance_valid(parent) and parent.has_method("start_dialogue"):
+	if _is_npc_node(parent):
 		# NPC 交互区域
 		if parent not in _nearby_npcs:
 			_nearby_npcs.append(parent)
@@ -270,9 +291,51 @@ func _is_pickup_item(zone: Area2D) -> bool:
 	return false
 
 
+func _is_npc_node(node: Node) -> bool:
+	if not node or not is_instance_valid(node):
+		return false
+	if node.is_in_group("npc"):
+		return true
+	return node.has_method("start_dialogue") and "npc_name" in node
+
+
 # ============================================================
 # NPC 交互
 # ============================================================
+
+func _refresh_interaction_overlaps() -> void:
+	if not _interaction_area:
+		return
+
+	_nearby_npcs.clear()
+	_nearby_pickups.clear()
+	_nearby_interactables.clear()
+
+	for zone in _interaction_area.get_overlapping_areas():
+		if not is_instance_valid(zone) or zone.is_queued_for_deletion():
+			continue
+		var parent = zone.get_parent()
+
+		if _is_npc_node(parent):
+			if parent not in _nearby_npcs:
+				_nearby_npcs.append(parent)
+		elif parent and is_instance_valid(parent) and parent.is_in_group("interactable"):
+			if parent not in _nearby_interactables:
+				_nearby_interactables.append(parent)
+		elif _is_pickup_item(zone):
+			if zone not in _nearby_pickups:
+				_nearby_pickups.append(zone)
+
+	for body in _interaction_area.get_overlapping_bodies():
+		if body == self or not _is_npc_node(body):
+			continue
+		if body not in _nearby_npcs:
+			_nearby_npcs.append(body)
+
+	_update_closest_npc()
+	_update_closest_interactable()
+	_update_closest_pickup()
+
 
 func _update_closest_npc() -> void:
 	var closest: Node2D = null
@@ -305,7 +368,10 @@ func _interact_with_nearest_npc() -> void:
 
 		print("[Player] 与 %s 对话" % _closest_npc.npc_name)
 		ChatDialogue.open(_closest_npc, greeting)
-		_closest_npc.start_dialogue()
+		if ChatDialogue.is_open:
+			_closest_npc.start_dialogue()
+		else:
+			push_warning("[Player] 对话UI未能打开，取消 NPC TALKING 状态切换")
 
 
 ## 获取最近的NPC（供UI/HUD使用，显示"[E] 交谈"提示）

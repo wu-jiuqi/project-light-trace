@@ -1,26 +1,33 @@
 class_name BackpackPanel
 extends BasePanel
 
+const ItemSlotScene: PackedScene = preload("res://scenes/ui/components/ItemSlot.tscn")
+
 @onready var item_grid: GridContainer = $"Stage/MainNotebook/ContentArea/ItemGridSection/ItemGrid"
 @onready var detail_panel: Panel = $"Stage/MainNotebook/ContentArea/DetailPanel"
 @onready var empty_hint_label: Label = $"Stage/MainNotebook/ContentArea/ItemGridSection/EmptyHint"
 @onready var filter_bar: HBoxContainer = $"Stage/MainNotebook/FilterBar"
 @onready var item_name_label: Label = $"Stage/MainNotebook/ContentArea/DetailPanel/ItemName"
 @onready var item_desc_label: RichTextLabel = $"Stage/MainNotebook/ContentArea/DetailPanel/ItemDesc"
-@onready var item_icon_rect: TextureRect = $"Stage/MainNotebook/ContentArea/DetailPanel/ItemIcon"
+@onready var item_icon_label: Label = $"Stage/MainNotebook/ContentArea/DetailPanel/ItemIconLabel"
 @onready var item_count_label: Label = $"Stage/MainNotebook/ContentArea/DetailPanel/ItemCount"
 @onready var action_button: Button = $"Stage/MainNotebook/ContentArea/DetailPanel/ActionButton"
 @onready var close_button: Button = $"Stage/MainNotebook/TitleBar/CloseButton"
 
 var current_filter: String = "all"
 var filter_mode: String = "default"
+var selected_item_id: int = -1
 
 
 func _on_ready() -> void:
-	close_button.pressed.connect(close)
-	action_button.pressed.connect(_on_action_pressed)
-	for btn: Button in filter_bar.get_children().filter(func(c): return c is Button):
-		btn.pressed.connect(_on_filter_changed.bind(btn))
+	hide()
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_connect_button_pressed(close_button, close, "Stage/MainNotebook/TitleBar/CloseButton")
+	_connect_button_pressed(action_button, _on_action_pressed, "Stage/MainNotebook/ContentArea/DetailPanel/ActionButton")
+	for child in filter_bar.get_children():
+		if child is Button:
+			child.pressed.connect(_on_filter_changed.bind(child))
+	hide_item_detail()
 
 
 func open(p_filter_mode: String = "default") -> void:
@@ -30,47 +37,47 @@ func open(p_filter_mode: String = "default") -> void:
 
 
 func refresh_items() -> void:
-	# Clear existing slots
 	for child in item_grid.get_children():
 		child.queue_free()
 
-	# TODO: 从 InventorySystem 获取物品列表
-	var items: Array = []
-
-	# Filter by current filter mode
-	var filtered: Array = []
-	for item: Dictionary in items:
-		match current_filter:
-			"usable":
-				if item.get("usable", false):
-					filtered.append(item)
-			"give":
-				if item.get("givable", false):
-					filtered.append(item)
-			_:
-				filtered.append(item)
-
+	var filtered := _get_filtered_items()
 	if filtered.is_empty():
 		empty_hint_label.visible = true
 		item_grid.visible = false
-		return
+		hide_item_detail()
+	else:
+		empty_hint_label.visible = false
+		item_grid.visible = true
+		for data in filtered:
+			var slot := ItemSlotScene.instantiate() as ItemSlot
+			slot.set_item(data)
+			slot.pressed.connect(show_item_detail.bind(int(data.get("id", -1))))
+			item_grid.add_child(slot)
 
-	empty_hint_label.visible = false
-	item_grid.visible = true
-	var ItemSlotScene: PackedScene = preload("res://scenes/ui/components/ItemSlot.tscn")
-	for data: Dictionary in filtered:
-		var slot: ItemSlot = ItemSlotScene.instantiate() as ItemSlot
-		slot.set_item(data)
-		slot.pressed.connect(show_item_detail.bind(data.get("id", -1)))
+	for i in range(filtered.size(), 8):
+		var slot := ItemSlotScene.instantiate() as ItemSlot
+		slot.clear()
+		slot.disabled = true
 		item_grid.add_child(slot)
 
 
 func show_item_detail(item_id: int) -> void:
+	selected_item_id = item_id
+	var meta := InventoryManager.get_item_meta(item_id)
+	if meta.is_empty():
+		hide_item_detail()
+		return
 	detail_panel.visible = true
-	# TODO: 从数据源获取物品详情
+	item_name_label.text = str(meta.get("name", "Unknown Item"))
+	item_desc_label.text = str(meta.get("desc", "No description."))
+	item_icon_label.text = str(meta.get("icon", "?"))
+	item_count_label.text = "Count: 1"
+	action_button.disabled = filter_mode != "give"
+	action_button.text = "Give" if filter_mode == "give" else "View"
 
 
 func hide_item_detail() -> void:
+	selected_item_id = -1
 	detail_panel.visible = false
 
 
@@ -79,10 +86,40 @@ func set_filter(mode: String) -> void:
 	refresh_items()
 
 
+func _get_filtered_items() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for item_id in InventoryManager.get_all_items():
+		var meta := InventoryManager.get_item_meta(item_id)
+		if meta.is_empty():
+			continue
+		if current_filter == "give" and not bool(meta.get("givable", true)):
+			continue
+		if current_filter == "usable" and not bool(meta.get("usable", true)):
+			continue
+		result.append({
+			"id": item_id,
+			"name": meta.get("name", "Unknown Item"),
+			"icon": meta.get("icon", "?"),
+			"count": 1,
+			"color": meta.get("color", Color(0.7, 0.56, 0.32, 1.0)),
+		})
+	return result
+
+
 func _on_filter_changed(btn: Button) -> void:
-	var filter_map: Dictionary = {"全部": "all", "可用": "usable", "可给予": "give"}
+	var filter_map := {
+		"All": "all",
+		"Usable": "usable",
+		"Give": "give",
+		"全部": "all",
+		"可用": "usable",
+		"可给予": "give",
+	}
 	set_filter(filter_map.get(btn.text, "all"))
 
 
 func _on_action_pressed() -> void:
-	pass  # TODO: 根据 filter_mode 执行"使用"或"给予"逻辑
+	if selected_item_id < 0:
+		return
+	if filter_mode == "give":
+		print("[BackpackPanel] give requested: %d" % selected_item_id)

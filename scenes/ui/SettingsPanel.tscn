@@ -1,0 +1,548 @@
+[gd_scene format=3 uid="uid://yw0t7erbhlwi"]
+
+[ext_resource type="Script" uid="uid://dm17vkfmr2deh" path="res://scripts/ui/settings_panel.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://clfcuckupjq85" path="res://assets/ui/large_page.png" id="2_large"]
+[ext_resource type="Texture2D" uid="uid://b4m603ykww1pj" path="res://assets/ui/corner_compass.png" id="3_compass"]
+[ext_resource type="Texture2D" uid="uid://bmm00ow3kqimw" path="res://assets/ui/right_banner.png" id="4_banner"]
+[ext_resource type="Texture2D" uid="uid://cpd21am68weh8" path="res://assets/ui/left_mountains.png" id="5_left_mountains"]
+[ext_resource type="Texture2D" uid="uid://fpc1e12tqf1q" path="res://assets/ui/right_mountains.png" id="6_right_mountains"]
+[ext_resource type="Texture2D" uid="uid://ci2nn4aead8ld" path="res://assets/papercraft/core/ui/default_buttons/button_close.png" id="7_w07ho"]
+[ext_resource type="Texture2D" uid="uid://crtokeki7imt0" path="res://assets/ui/input_strip.png" id="8_input"]
+[ext_resource type="Texture2D" uid="uid://bqmnbh6l6tcdm" path="res://assets/papercraft/core/ui/extracted_buttons/pressed_close.png" id="8_x2qc7"]
+[ext_resource type="Texture2D" uid="uid://cjyllvkpm5xns" path="res://assets/papercraft/core/ui/extracted_buttons/hover_close.png" id="9_gg4r3"]
+[ext_resource type="Texture2D" uid="uid://djyeqgruwetrn" path="res://assets/papercraft/core/ui/banner/settings_banner.png" id="10_x2qc7"]
+[ext_resource type="Texture2D" uid="uid://dt0hd2ti4bmi4" path="res://assets/papercraft/core/ui/dialogue_box/large_page.png" id="11_x2qc7"]
+[ext_resource type="Texture2D" uid="uid://be3sc7cjwntkv" path="res://assets/papercraft/core/ui/dialogue_box/corner_compass.png" id="12_gg4r3"]
+[ext_resource type="Texture2D" uid="uid://cavnl5fxurw4g" path="res://assets/papercraft/core/ui/extracted_buttons/pressed_cancel.png" id="14_lr8i7"]
+[ext_resource type="Texture2D" uid="uid://wg6y5skpqvhs" path="res://assets/papercraft/core/ui/default_buttons/button_cancel.png" id="14_x2qc7"]
+[ext_resource type="Texture2D" uid="uid://cpb3aih8ndcpt" path="res://assets/papercraft/core/ui/extracted_buttons/hover_cancel.png" id="15_rgvy3"]
+[ext_resource type="Texture2D" uid="uid://buivakopqm5kt" path="res://assets/papercraft/core/ui/extracted_buttons/pressed_save.png" id="17_cjj4y"]
+[ext_resource type="Texture2D" uid="uid://cel5mcyy4fna1" path="res://assets/papercraft/core/ui/default_buttons/button_save.png" id="17_gg4r3"]
+[ext_resource type="Texture2D" uid="uid://ciixb3gvovmrh" path="res://assets/papercraft/core/ui/extracted_buttons/hover_save.png" id="18_axfkq"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_input"]
+content_margin_left = 22.0
+content_margin_top = 8.0
+content_margin_right = 22.0
+content_margin_bottom = 8.0
+texture = ExtResource("8_input")
+texture_margin_left = 42.0
+texture_margin_top = 34.0
+texture_margin_right = 42.0
+texture_margin_bottom = 34.0
+
+[node name="SettingsPanel" type="Control" unique_id=703497385]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Vignette" type="ColorRect" parent="." unique_id=1072814170]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.035, 0.031, 0.027, 0.82)
+
+[node name="Stage" type="Control" parent="." unique_id=956010972]
+layout_mode = 1
+anchors_preset = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+mouse_filter = 2
+
+[node name="LargePage" type="TextureRect" parent="Stage" unique_id=195718253]
+modulate = Color(1.0698581, 1.0698581, 1.0196832, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 18.0
+offset_top = -111.0
+offset_right = -18.0
+offset_bottom = -139.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(1, 1.35)
+mouse_filter = 2
+texture = ExtResource("2_large")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CornerCompass" type="TextureRect" parent="Stage" unique_id=717168986]
+modulate = Color(1, 1, 1, 0.58)
+layout_mode = 1
+offset_left = 18.0
+offset_top = 11.0
+offset_right = 196.0
+offset_bottom = 149.0
+mouse_filter = 2
+texture = ExtResource("3_compass")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RightBanner" type="TextureRect" parent="Stage" unique_id=351275709]
+modulate = Color(1, 1, 1, 0.6)
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -131.0
+offset_top = 8.0
+offset_right = -15.0
+offset_bottom = 178.0
+grow_horizontal = 0
+mouse_filter = 2
+texture = ExtResource("4_banner")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LeftMountains" type="TextureRect" parent="Stage" unique_id=911982498]
+modulate = Color(1, 1, 1, 0.72)
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -16.0
+offset_top = -235.0
+offset_right = 176.0
+offset_bottom = -23.0
+grow_vertical = 0
+mouse_filter = 2
+texture = ExtResource("5_left_mountains")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RightMountains" type="TextureRect" parent="Stage" unique_id=1442788712]
+modulate = Color(1, 1, 1, 0.72)
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -185.0
+offset_top = -197.0
+offset_right = -1.0
+offset_bottom = -21.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+texture = ExtResource("6_right_mountains")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SettingsContainer" type="Panel" parent="Stage" unique_id=654471394]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="TitleBar" type="Control" parent="Stage/SettingsContainer" unique_id=757049858]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 216.0
+offset_top = 90.0
+offset_right = 1066.0
+offset_bottom = 136.0
+grow_horizontal = 2
+
+[node name="CloseButton" type="TextureButton" parent="Stage/SettingsContainer/TitleBar" unique_id=988102704]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -56.0
+offset_top = -50.0
+offset_right = 60.0
+offset_bottom = -8.0
+grow_horizontal = 0
+texture_normal = ExtResource("7_w07ho")
+texture_pressed = ExtResource("8_x2qc7")
+texture_hover = ExtResource("9_gg4r3")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="TextureRect" type="TextureRect" parent="Stage/SettingsContainer/TitleBar" unique_id=897833648]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -261.0
+offset_top = -66.0
+offset_right = 261.0
+offset_bottom = 39.0
+grow_horizontal = 2
+texture = ExtResource("10_x2qc7")
+expand_mode = 1
+
+[node name="ContentArea" type="VBoxContainer" parent="Stage/SettingsContainer" unique_id=1485344734]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 176.0
+offset_top = 139.0
+offset_right = 1055.0
+offset_bottom = 553.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="AudioSection" type="TextureRect" parent="Stage/SettingsContainer/ContentArea" unique_id=1699027045]
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+texture = ExtResource("11_x2qc7")
+expand_mode = 1
+
+[node name="SectionTitle" type="Label" parent="Stage/SettingsContainer/ContentArea/AudioSection" unique_id=324579810]
+layout_mode = 1
+offset_left = 40.0
+offset_top = 13.0
+offset_right = 220.0
+offset_bottom = 50.0
+theme_override_colors/font_color = Color(0.7, 0.56, 0.32, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 25
+text = "音量"
+
+[node name="MasterRow" type="HBoxContainer" parent="Stage/SettingsContainer/ContentArea/AudioSection" unique_id=1085270217]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -316.0
+offset_top = -26.0
+offset_right = 316.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="MasterLabel" type="Label" parent="Stage/SettingsContainer/ContentArea/AudioSection/MasterRow" unique_id=833718113]
+custom_minimum_size = Vector2(76, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.18, 0.12, 0.075, 1)
+theme_override_font_sizes/font_size = 16
+text = "主音量"
+vertical_alignment = 1
+
+[node name="MasterSlider" type="HSlider" parent="Stage/SettingsContainer/ContentArea/AudioSection/MasterRow" unique_id=1628448685]
+custom_minimum_size = Vector2(410, 30)
+layout_mode = 2
+size_flags_horizontal = 3
+value = 100.0
+
+[node name="MasterValue" type="Label" parent="Stage/SettingsContainer/ContentArea/AudioSection/MasterRow" unique_id=681534531]
+custom_minimum_size = Vector2(58, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.18, 0.12, 0.075, 1)
+theme_override_font_sizes/font_size = 16
+text = "100%"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="BgmRow" type="HBoxContainer" parent="Stage/SettingsContainer/ContentArea/AudioSection" unique_id=1928011735]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -316.0
+offset_top = 4.0
+offset_right = 316.0
+offset_bottom = 34.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="BgmLabel" type="Label" parent="Stage/SettingsContainer/ContentArea/AudioSection/BgmRow" unique_id=1073225771]
+custom_minimum_size = Vector2(76, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.18, 0.12, 0.075, 1)
+theme_override_font_sizes/font_size = 16
+text = "音乐"
+vertical_alignment = 1
+
+[node name="BgmSlider" type="HSlider" parent="Stage/SettingsContainer/ContentArea/AudioSection/BgmRow" unique_id=1473133699]
+custom_minimum_size = Vector2(410, 30)
+layout_mode = 2
+size_flags_horizontal = 3
+value = 100.0
+
+[node name="BgmValue" type="Label" parent="Stage/SettingsContainer/ContentArea/AudioSection/BgmRow" unique_id=807170645]
+custom_minimum_size = Vector2(58, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.18, 0.12, 0.075, 1)
+theme_override_font_sizes/font_size = 16
+text = "100%"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="SfxRow" type="HBoxContainer" parent="Stage/SettingsContainer/ContentArea/AudioSection" unique_id=1610312931]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -316.0
+offset_top = 34.0
+offset_right = 316.0
+offset_bottom = 64.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="SfxLabel" type="Label" parent="Stage/SettingsContainer/ContentArea/AudioSection/SfxRow" unique_id=2029845781]
+custom_minimum_size = Vector2(76, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.18, 0.12, 0.075, 1)
+theme_override_font_sizes/font_size = 16
+text = "音效"
+vertical_alignment = 1
+
+[node name="SfxSlider" type="HSlider" parent="Stage/SettingsContainer/ContentArea/AudioSection/SfxRow" unique_id=984385079]
+custom_minimum_size = Vector2(410, 30)
+layout_mode = 2
+size_flags_horizontal = 3
+value = 100.0
+
+[node name="SfxValue" type="Label" parent="Stage/SettingsContainer/ContentArea/AudioSection/SfxRow" unique_id=1541260296]
+custom_minimum_size = Vector2(58, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.18, 0.12, 0.075, 1)
+theme_override_font_sizes/font_size = 16
+text = "100%"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LeftCorner" type="TextureRect" parent="Stage/SettingsContainer/ContentArea/AudioSection" unique_id=2074148857]
+layout_mode = 0
+offset_left = 3.0
+offset_right = 55.0
+offset_bottom = 40.0
+texture = ExtResource("12_gg4r3")
+expand_mode = 1
+
+[node name="DisplaySection" type="TextureRect" parent="Stage/SettingsContainer/ContentArea" unique_id=1534637087]
+custom_minimum_size = Vector2(0, 70)
+layout_mode = 2
+texture = ExtResource("11_x2qc7")
+expand_mode = 1
+
+[node name="SectionTitle" type="Label" parent="Stage/SettingsContainer/ContentArea/DisplaySection" unique_id=13694614]
+layout_mode = 1
+offset_left = 40.0
+offset_top = 5.0
+offset_right = 160.0
+offset_bottom = 42.0
+theme_override_colors/font_color = Color(0.7, 0.56, 0.32, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 25
+text = "显示"
+
+[node name="FullscreenRow" type="HBoxContainer" parent="Stage/SettingsContainer/ContentArea/DisplaySection" unique_id=2118982916]
+layout_mode = 1
+offset_left = 144.0
+offset_top = 24.0
+offset_right = 474.0
+offset_bottom = 62.0
+theme_override_constants/separation = 14
+
+[node name="FullscreenLabel" type="Label" parent="Stage/SettingsContainer/ContentArea/DisplaySection/FullscreenRow" unique_id=1218444660]
+custom_minimum_size = Vector2(96, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.18, 0.12, 0.075, 1)
+theme_override_font_sizes/font_size = 16
+text = "全屏"
+vertical_alignment = 1
+
+[node name="FullscreenCheck" type="CheckButton" parent="Stage/SettingsContainer/ContentArea/DisplaySection/FullscreenRow" unique_id=1137558487]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.18, 0.12, 0.075, 1)
+theme_override_font_sizes/font_size = 15
+text = "开启"
+
+[node name="LeftCorner" type="TextureRect" parent="Stage/SettingsContainer/ContentArea/DisplaySection" unique_id=1468665418]
+layout_mode = 0
+offset_right = 47.0
+offset_bottom = 40.0
+texture = ExtResource("12_gg4r3")
+expand_mode = 1
+
+[node name="ApiSection" type="TextureRect" parent="Stage/SettingsContainer/ContentArea" unique_id=508267907]
+custom_minimum_size = Vector2(0, 250)
+layout_mode = 2
+texture = ExtResource("11_x2qc7")
+expand_mode = 1
+
+[node name="SectionTitle" type="Label" parent="Stage/SettingsContainer/ContentArea/ApiSection" unique_id=1790093184]
+layout_mode = 1
+offset_left = 40.0
+offset_top = 13.0
+offset_right = 240.0
+offset_bottom = 50.0
+theme_override_colors/font_color = Color(0.7, 0.56, 0.32, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 25
+text = "大模型 API"
+
+[node name="ModeRow" type="HBoxContainer" parent="Stage/SettingsContainer/ContentArea/ApiSection" unique_id=903853327]
+layout_mode = 1
+offset_left = 40.0
+offset_top = 58.0
+offset_right = 742.0
+offset_bottom = 94.0
+theme_override_constants/separation = 12
+
+[node name="ModeLabel" type="Label" parent="Stage/SettingsContainer/ContentArea/ApiSection/ModeRow" unique_id=1392382383]
+custom_minimum_size = Vector2(104, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.18, 0.12, 0.075, 1)
+theme_override_font_sizes/font_size = 16
+text = "模式"
+vertical_alignment = 1
+
+[node name="ModeOption" type="OptionButton" parent="Stage/SettingsContainer/ContentArea/ApiSection/ModeRow" unique_id=2099006026]
+custom_minimum_size = Vector2(220, 34)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.18, 0.12, 0.075, 1)
+theme_override_font_sizes/font_size = 15
+
+[node name="BaseUrlRow" type="HBoxContainer" parent="Stage/SettingsContainer/ContentArea/ApiSection" unique_id=1754926540]
+layout_mode = 1
+offset_left = 40.0
+offset_top = 96.0
+offset_right = 742.0
+offset_bottom = 130.0
+theme_override_constants/separation = 12
+
+[node name="BaseUrlLabel" type="Label" parent="Stage/SettingsContainer/ContentArea/ApiSection/BaseUrlRow" unique_id=2078279660]
+custom_minimum_size = Vector2(104, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.18, 0.12, 0.075, 1)
+theme_override_font_sizes/font_size = 16
+text = "Base URL"
+vertical_alignment = 1
+
+[node name="BaseUrlEdit" type="LineEdit" parent="Stage/SettingsContainer/ContentArea/ApiSection/BaseUrlRow" unique_id=1650032946]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.18, 0.12, 0.075, 1)
+theme_override_colors/font_placeholder_color = Color(0.26, 0.2, 0.15, 0.62)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBox_input")
+theme_override_styles/focus = SubResource("StyleBox_input")
+placeholder_text = "https://api.deepseek.com"
+
+[node name="ModelRow" type="HBoxContainer" parent="Stage/SettingsContainer/ContentArea/ApiSection" unique_id=1488256928]
+layout_mode = 1
+offset_left = 40.0
+offset_top = 132.0
+offset_right = 742.0
+offset_bottom = 166.0
+theme_override_constants/separation = 12
+
+[node name="ModelLabel" type="Label" parent="Stage/SettingsContainer/ContentArea/ApiSection/ModelRow" unique_id=1898672002]
+custom_minimum_size = Vector2(104, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.18, 0.12, 0.075, 1)
+theme_override_font_sizes/font_size = 16
+text = "模型"
+vertical_alignment = 1
+
+[node name="ModelEdit" type="LineEdit" parent="Stage/SettingsContainer/ContentArea/ApiSection/ModelRow" unique_id=169197775]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.18, 0.12, 0.075, 1)
+theme_override_colors/font_placeholder_color = Color(0.26, 0.2, 0.15, 0.62)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBox_input")
+theme_override_styles/focus = SubResource("StyleBox_input")
+placeholder_text = "deepseek-v4-flash"
+
+[node name="ApiKeyRow" type="HBoxContainer" parent="Stage/SettingsContainer/ContentArea/ApiSection" unique_id=1042277048]
+layout_mode = 1
+offset_left = 40.0
+offset_top = 168.0
+offset_right = 742.0
+offset_bottom = 202.0
+theme_override_constants/separation = 12
+
+[node name="ApiKeyLabel" type="Label" parent="Stage/SettingsContainer/ContentArea/ApiSection/ApiKeyRow" unique_id=321622613]
+custom_minimum_size = Vector2(104, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.18, 0.12, 0.075, 1)
+theme_override_font_sizes/font_size = 16
+text = "API Key"
+vertical_alignment = 1
+
+[node name="ApiKeyEdit" type="LineEdit" parent="Stage/SettingsContainer/ContentArea/ApiSection/ApiKeyRow" unique_id=1005031020]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.18, 0.12, 0.075, 1)
+theme_override_colors/font_placeholder_color = Color(0.26, 0.2, 0.15, 0.62)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBox_input")
+theme_override_styles/focus = SubResource("StyleBox_input")
+placeholder_text = "sk-..."
+secret = true
+
+[node name="StatusLabel" type="Label" parent="Stage/SettingsContainer/ContentArea/ApiSection" unique_id=1540114680]
+layout_mode = 1
+offset_left = 40.0
+offset_top = 215.0
+offset_right = 742.0
+offset_bottom = 239.0
+theme_override_colors/font_color = Color(0.26, 0.2, 0.15, 0.72)
+theme_override_font_sizes/font_size = 13
+text = "官方试玩会使用当前同源代理；自定义 API 使用 OpenAI-compatible /chat/completions。"
+
+[node name="LeftCorner" type="TextureRect" parent="Stage/SettingsContainer/ContentArea/ApiSection" unique_id=191099071]
+layout_mode = 0
+offset_left = 3.0
+offset_top = 3.0
+offset_right = 55.0
+offset_bottom = 44.0
+texture = ExtResource("3_compass")
+expand_mode = 1
+
+[node name="ButtonRow" type="HBoxContainer" parent="Stage/SettingsContainer" unique_id=76625168]
+layout_mode = 0
+offset_left = 445.0
+offset_top = 629.0
+offset_right = 833.0
+offset_bottom = 671.0
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="CancelButton" type="TextureButton" parent="Stage/SettingsContainer/ButtonRow" unique_id=2008165320]
+custom_minimum_size = Vector2(132, 42)
+layout_mode = 2
+texture_normal = ExtResource("14_x2qc7")
+texture_pressed = ExtResource("14_lr8i7")
+texture_hover = ExtResource("15_rgvy3")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Spacer" type="Control" parent="Stage/SettingsContainer/ButtonRow" unique_id=781357922]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SaveButton" type="TextureButton" parent="Stage/SettingsContainer/ButtonRow" unique_id=1798462784]
+custom_minimum_size = Vector2(132, 42)
+layout_mode = 2
+texture_normal = ExtResource("17_gg4r3")
+texture_pressed = ExtResource("17_cjj4y")
+texture_hover = ExtResource("18_axfkq")
+ignore_texture_size = true
+stretch_mode = 0

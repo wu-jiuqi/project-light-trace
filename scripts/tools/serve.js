@@ -122,6 +122,57 @@ function requestProvider(messages, apiKey) {
     });
 }
 
+function requestProviderStream(messages, apiKey, res) {
+    return new Promise((resolve, reject) => {
+        const body = JSON.stringify({
+            model: PROVIDER_MODEL,
+            messages,
+            max_tokens: 512,
+            temperature: 0.8,
+            stream: true,
+        });
+        const upstream = https.request({
+            hostname: PROVIDER_HOST,
+            port: 443,
+            path: PROVIDER_PATH,
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json',
+                'Accept': 'text/event-stream',
+                'Content-Length': Buffer.byteLength(body),
+            },
+            timeout: 30000,
+        }, response => {
+            if (response.statusCode !== 200) {
+                const chunks = [];
+                response.on('data', chunk => chunks.push(chunk));
+                response.on('end', () => {
+                    const text = Buffer.concat(chunks).toString('utf8');
+                    reject(new Error(`DeepSeek HTTP ${response.statusCode}: ${text.slice(0, 200)}`));
+                });
+                return;
+            }
+
+            res.writeHead(200, {
+                ...WEB_HEADERS,
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'text/event-stream; charset=utf-8',
+                'Connection': 'keep-alive',
+                'X-Accel-Buffering': 'no',
+            });
+            response.on('data', chunk => res.write(chunk));
+            response.on('end', () => {
+                res.end();
+                resolve();
+            });
+        });
+        upstream.on('timeout', () => upstream.destroy(new Error('DeepSeek 请求超时')));
+        upstream.on('error', reject);
+        upstream.end(body);
+    });
+}
+
 async function handleChatProxy(req, res) {
     if (req.method !== 'POST') {
         sendJson(res, 405, { error: 'Method Not Allowed' });
@@ -138,9 +189,17 @@ async function handleChatProxy(req, res) {
             sendJson(res, 400, { error: 'messages 必须是非空数组' });
             return;
         }
+        if (payload.stream === true) {
+            await requestProviderStream(payload.messages, apiKey, res);
+            return;
+        }
         const content = await requestProvider(payload.messages, apiKey);
         sendJson(res, 200, { content });
     } catch (error) {
+        if (res.headersSent) {
+            res.end();
+            return;
+        }
         sendJson(res, 502, { error: error.message });
     }
 }
