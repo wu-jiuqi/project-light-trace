@@ -15,18 +15,21 @@ const ITEM_META: Dictionary = {
 	ItemID.FORGE_LOG: {
 		"name": "铸造日志",
 		"icon": "文",
+		"icon_path": "res://assets/papercraft/fragments/id0762/props/forge_log.png",
 		"color": Color(0.9, 0.3, 0.3, 1),  # 红色
 		"desc": "铁匠铺的日志，记载零时前火特别旺——老霍锻造了一把刀但没交给任何人。"
 	},
 	ItemID.CORNFLOWER: {
 		"name": "不太一样的矢车菊",
 		"icon": "花",
+		"icon_path": "res://assets/papercraft/fragments/id0762/props/cornflower.png",
 		"color": Color(0.3, 0.4, 0.9, 1),  # 蓝色
 		"desc": "花店后巷最早的颜色残留——它在这个灰色世界里带着一丝蓝。"
 	},
 	ItemID.FIRE_SEED: {
 		"name": "火种",
 		"icon": "火",
+		"icon_path": "res://assets/papercraft/fragments/id0762/props/fire_seed.png",
 		"color": Color(0.9, 0.7, 0.2, 1),  # 黄色
 		"desc": "老霍给你的火种——锻造台恢复真火后留下的。他说：'拿去吧，也许有用。'"
 	}

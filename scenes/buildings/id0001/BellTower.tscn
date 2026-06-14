@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dp3o2ng12kyco"]
 
-[ext_resource type="Script" uid="uid://0001belltowerscript" path="res://scripts/buildings/bell_tower.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://be3ehmyocl3uh" path="res://scripts/buildings/bell_tower.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://c246ct1w5miuy" path="res://assets/papercraft/fragments/id0001/environment2/0001_env_clocktower.png" id="2_xtq5t"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1rpkj"]
@@ -9,11 +9,11 @@ size = Vector2(197, 254.5)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ufga2"]
 size = Vector2(261, 251.5)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_uyew4"]
-size = Vector2(142, 68)
-
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_door"]
 size = Vector2(180, 250)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_uyew4"]
+size = Vector2(142, 68)
 
 [node name="BellTower" type="Node2D" unique_id=1026256625 groups=["interactable"]]
 script = ExtResource("1_script")
@@ -25,6 +25,8 @@ position = Vector2(0, -631.005)
 texture = ExtResource("2_xtq5t")
 
 [node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=1245031941]
+collision_layer = 4
+collision_mask = 0
 
 [node name="LeftCollision" type="CollisionShape2D" parent="StaticBody2D" unique_id=257097293]
 position = Vector2(-203, -131)

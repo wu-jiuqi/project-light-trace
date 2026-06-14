@@ -1,0 +1,94 @@
+[gd_scene format=3 uid="uid://kwu3wbpdo4y7"]
+
+[ext_resource type="Texture2D" uid="uid://bun1id4j4qvf7" path="res://assets/papercraft/core/ui/dialogue_box/dialogue_box_main.png" id="1_7dluo"]
+[ext_resource type="Script" uid="uid://brdhl5vdtvl52" path="res://scripts/ui/components/gallery_slot.gd" id="2_6vija"]
+[ext_resource type="Texture2D" uid="uid://cfjbsk3uu5ahs" path="res://assets/papercraft/core/ui/dialogue_box/empty_texture.png" id="3_pxo18"]
+
+[node name="GallerySlot" type="Control" unique_id=462562235]
+custom_minimum_size = Vector2(240, 150)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_6vija")
+
+[node name="TextureButton" type="TextureButton" parent="." unique_id=561638340]
+layout_mode = 0
+offset_right = 240.0
+offset_bottom = 150.0
+ignore_texture_size = true
+
+[node name="FrameTexture" type="TextureRect" parent="TextureButton" unique_id=2063979406]
+custom_minimum_size = Vector2(240, 150)
+layout_mode = 0
+offset_right = 240.0
+offset_bottom = 150.0
+mouse_filter = 2
+texture = ExtResource("1_7dluo")
+expand_mode = 1
+
+[node name="PreviewRoot" type="Control" parent="TextureButton" unique_id=378895657]
+clip_contents = true
+anchors_preset = 0
+offset_left = 20.0
+offset_top = 17.0
+offset_right = 220.0
+offset_bottom = 132.0
+mouse_filter = 2
+
+[node name="Thumbnail" type="TextureRect" parent="TextureButton/PreviewRoot" unique_id=685762944]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LockOverlay" type="ColorRect" parent="TextureButton/PreviewRoot" unique_id=1643277532]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.87200004)
+
+[node name="LockLabel" type="Label" parent="TextureButton/PreviewRoot/LockOverlay" unique_id=1876451709]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -50.0
+offset_top = -13.0
+offset_right = 50.0
+offset_bottom = 13.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.92, 0.84, 0.68, 0.95)
+theme_override_colors/font_outline_color = Color(0.08, 0.05, 0.035, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 18
+text = "未收集"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="EmptyTexture" type="TextureRect" parent="TextureButton" unique_id=136347711]
+visible = false
+self_modulate = Color(0.84313726, 0.6862745, 0.49803922, 1)
+layout_mode = 0
+offset_left = 20.0
+offset_top = 17.0
+offset_right = 220.0
+offset_bottom = 132.0
+mouse_filter = 2
+texture = ExtResource("3_pxo18")
+expand_mode = 1

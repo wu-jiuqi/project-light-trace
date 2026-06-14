@@ -32,6 +32,8 @@ func _connect_button_pressed(button: BaseButton, callback: Callable, node_path: 
 		return false
 	if not button.pressed.is_connected(callback):
 		button.pressed.connect(callback)
+	if not button.pressed.is_connected(UISoundManager.play_click):
+		button.pressed.connect(UISoundManager.play_click)
 	return true
 
 

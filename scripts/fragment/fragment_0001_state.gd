@@ -408,6 +408,7 @@ func _create_angle_panel(ui: CanvasLayer) -> void:
 	minus_btn.size = Vector2(64, 40)
 	minus_btn.text = "-6°"
 	minus_btn.pressed.connect(_on_clock_minus_pressed)
+	minus_btn.pressed.connect(UISoundManager.play_click)
 	angle_panel.add_child(minus_btn)
 
 	var plus_btn = Button.new()
@@ -415,6 +416,7 @@ func _create_angle_panel(ui: CanvasLayer) -> void:
 	plus_btn.size = Vector2(64, 40)
 	plus_btn.text = "+6°"
 	plus_btn.pressed.connect(_on_clock_plus_pressed)
+	plus_btn.pressed.connect(UISoundManager.play_click)
 	angle_panel.add_child(plus_btn)
 
 	var submit_btn = Button.new()
@@ -422,6 +424,7 @@ func _create_angle_panel(ui: CanvasLayer) -> void:
 	submit_btn.size = Vector2(132, 42)
 	submit_btn.text = "验证"
 	submit_btn.pressed.connect(_submit_clock_angle)
+	submit_btn.pressed.connect(UISoundManager.play_click)
 	angle_panel.add_child(submit_btn)
 
 	var close_btn = Button.new()
@@ -429,6 +432,7 @@ func _create_angle_panel(ui: CanvasLayer) -> void:
 	close_btn.size = Vector2(132, 42)
 	close_btn.text = "关闭"
 	close_btn.pressed.connect(_close_angle_panel)
+	close_btn.pressed.connect(UISoundManager.play_click)
 	angle_panel.add_child(close_btn)
 
 

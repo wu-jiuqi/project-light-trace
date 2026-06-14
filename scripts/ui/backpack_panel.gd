@@ -10,6 +10,7 @@ const ItemSlotScene: PackedScene = preload("res://scenes/ui/components/ItemSlot.
 @onready var item_name_label: Label = $"Stage/MainNotebook/ContentArea/DetailPanel/ItemName"
 @onready var item_desc_label: RichTextLabel = $"Stage/MainNotebook/ContentArea/DetailPanel/ItemDesc"
 @onready var item_icon_label: Label = $"Stage/MainNotebook/ContentArea/DetailPanel/ItemIconLabel"
+@onready var item_icon_rect: TextureRect = $"Stage/MainNotebook/ContentArea/DetailPanel/ItemIconRect"
 @onready var item_count_label: Label = $"Stage/MainNotebook/ContentArea/DetailPanel/ItemCount"
 @onready var action_button: Button = $"Stage/MainNotebook/ContentArea/DetailPanel/ActionButton"
 @onready var close_button: Button = $"Stage/MainNotebook/TitleBar/CloseButton"
@@ -27,6 +28,7 @@ func _on_ready() -> void:
 	for child in filter_bar.get_children():
 		if child is Button:
 			child.pressed.connect(_on_filter_changed.bind(child))
+			child.pressed.connect(UISoundManager.play_click)
 	hide_item_detail()
 
 
@@ -52,6 +54,7 @@ func refresh_items() -> void:
 			var slot := ItemSlotScene.instantiate() as ItemSlot
 			slot.set_item(data)
 			slot.pressed.connect(show_item_detail.bind(int(data.get("id", -1))))
+			slot.pressed.connect(UISoundManager.play_click)
 			item_grid.add_child(slot)
 
 	for i in range(filtered.size(), 8):
@@ -70,7 +73,16 @@ func show_item_detail(item_id: int) -> void:
 	detail_panel.visible = true
 	item_name_label.text = str(meta.get("name", "Unknown Item"))
 	item_desc_label.text = str(meta.get("desc", "No description."))
-	item_icon_label.text = str(meta.get("icon", "?"))
+	var icon_texture := _load_item_texture(meta)
+	if icon_texture:
+		item_icon_rect.texture = icon_texture
+		item_icon_rect.visible = true
+		item_icon_label.visible = false
+	else:
+		item_icon_rect.texture = null
+		item_icon_rect.visible = false
+		item_icon_label.visible = true
+		item_icon_label.text = str(meta.get("icon", "?"))
 	item_count_label.text = "Count: 1"
 	action_button.disabled = filter_mode != "give"
 	action_button.text = "Give" if filter_mode == "give" else "View"
@@ -78,6 +90,8 @@ func show_item_detail(item_id: int) -> void:
 
 func hide_item_detail() -> void:
 	selected_item_id = -1
+	if item_icon_rect:
+		item_icon_rect.texture = null
 	detail_panel.visible = false
 
 
@@ -96,14 +110,30 @@ func _get_filtered_items() -> Array[Dictionary]:
 			continue
 		if current_filter == "usable" and not bool(meta.get("usable", true)):
 			continue
+		var icon_texture := _load_item_texture(meta)
 		result.append({
 			"id": item_id,
 			"name": meta.get("name", "Unknown Item"),
-			"icon": meta.get("icon", "?"),
+			"icon": icon_texture if icon_texture else meta.get("icon", "?"),
+			"icon_path": meta.get("icon_path", ""),
 			"count": 1,
 			"color": meta.get("color", Color(0.7, 0.56, 0.32, 1.0)),
 		})
 	return result
+
+
+func _load_item_texture(meta: Dictionary) -> Texture2D:
+	var icon_path := str(meta.get("icon_path", ""))
+	if icon_path == "":
+		return null
+	if ResourceLoader.exists(icon_path):
+		return load(icon_path) as Texture2D
+	if not FileAccess.file_exists(icon_path):
+		return null
+	var image := Image.new()
+	if image.load(icon_path) != OK:
+		return null
+	return ImageTexture.create_from_image(image)
 
 
 func _on_filter_changed(btn: Button) -> void:

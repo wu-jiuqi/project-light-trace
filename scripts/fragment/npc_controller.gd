@@ -1226,6 +1226,8 @@ func _on_stream_completed(full_text: String) -> void:
 	_disconnect_stream_signals()
 	var clean_text := _clean_model_dialogue_text(full_text)
 	ChatDialogue.stream_end(clean_text)
+	while ChatDialogue.has_method("is_streaming_response") and ChatDialogue.is_streaming_response():
+		await get_tree().process_frame
 	# 记录NPC回复到SQLite数据库
 	ChatDatabase.log_message(npc_kb_id, "npc", clean_text, npc_alert_phase, npc_suspicion)
 	print("[NPC] %s 流式完成 (%d chars)" % [npc_name, clean_text.length()])

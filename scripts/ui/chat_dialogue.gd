@@ -42,9 +42,15 @@ var npc_name: String = ""
 var _npc: Node = null
 var _base_text: String = ""
 var _stream_text: String = ""
+var _stream_pending_text: String = ""
+var _stream_final_text: String = ""
+var _stream_finish_requested: bool = false
+var _stream_flush_progress: float = 0.0
 var _focus_retry_count: int = 0
 var _ui_built: bool = false
 const FOCUS_MAX_RETRIES: int = 8
+const STREAM_CHARS_PER_SECOND: float = 46.0
+const STREAM_MAX_CHARS_PER_FRAME: int = 3
 
 
 func _ready() -> void:
@@ -114,6 +120,10 @@ func _reset_scene_ui_refs() -> void:
 	_npc_portrait = null
 	_base_text = ""
 	_stream_text = ""
+	_stream_pending_text = ""
+	_stream_final_text = ""
+	_stream_finish_requested = false
+	_stream_flush_progress = 0.0
 
 
 func _build_ui() -> void:
@@ -244,6 +254,8 @@ func _connect_button_pressed(button: Button, callback: Callable, node_path: Stri
 		return false
 	if not button.pressed.is_connected(callback):
 		button.pressed.connect(callback)
+	if not button.pressed.is_connected(UISoundManager.play_click):
+		button.pressed.connect(UISoundManager.play_click)
 	return true
 
 
@@ -276,14 +288,16 @@ func _build_history_panel(_vs: Vector2) -> void:
 	_history_panel.panel_closed.connect(_on_history_panel_closed)
 	_canvas.add_child(_history_panel)
 
-func _process(_delta: float) -> void:
-	if not is_open or _focus_retry_count <= 0:
+func _process(delta: float) -> void:
+	if not is_open:
 		return
-	_focus_retry_count -= 1
-	if _input_box:
-		_input_box.grab_focus()
-		if _input_box.has_focus():
-			_focus_retry_count = 0
+	_flush_stream_text(delta)
+	if _focus_retry_count > 0:
+		_focus_retry_count -= 1
+		if _input_box:
+			_input_box.grab_focus()
+			if _input_box.has_focus():
+				_focus_retry_count = 0
 
 
 func _input(event: InputEvent) -> void:
@@ -377,6 +391,11 @@ func close() -> void:
 	_npc = null
 	npc_name = ""
 	_chat_display.text = ""
+	_stream_text = ""
+	_stream_pending_text = ""
+	_stream_final_text = ""
+	_stream_finish_requested = false
+	_stream_flush_progress = 0.0
 	print("[Chat] 关闭: %s" % name)
 	if _npc_portrait:
 		_npc_portrait.texture = null
@@ -454,6 +473,10 @@ func stream_begin() -> void:
 	if not _ensure_required_dialogue_nodes("stream_begin"):
 		return
 	_stream_text = ""
+	_stream_pending_text = ""
+	_stream_final_text = ""
+	_stream_finish_requested = false
+	_stream_flush_progress = 0.0
 	_base_text = _chat_display.text
 	_think_label.text = "正在输入..."
 	_input_box.editable = false
@@ -464,16 +487,58 @@ func stream_begin() -> void:
 func stream_add(token: String) -> void:
 	if not _ensure_required_dialogue_nodes("stream_add"):
 		return
-	_stream_text += token
-	_chat_display.text = _base_text + "[outline_size=2][outline_color=black][color=#D4B86A][%s][/color][/outline_color][/outline_size] %s" % [npc_name, _stream_text]
+	_stream_pending_text += token
+	if _stream_text.is_empty():
+		_flush_stream_text(1.0 / STREAM_CHARS_PER_SECOND)
 
 
 func stream_end(full_text: String) -> void:
 	if not _ensure_required_dialogue_nodes("stream_end"):
 		return
+	_stream_final_text = full_text
+	_stream_finish_requested = true
+	if _stream_pending_text.is_empty():
+		_finish_stream_text()
+
+
+func is_streaming_response() -> bool:
+	return _stream_finish_requested or not _stream_pending_text.is_empty()
+
+
+func _flush_stream_text(delta: float) -> void:
+	if _stream_pending_text.is_empty():
+		if _stream_finish_requested:
+			_finish_stream_text()
+		return
+
+	_stream_flush_progress += delta * STREAM_CHARS_PER_SECOND
+	var chars_to_flush := int(_stream_flush_progress)
+	if chars_to_flush <= 0:
+		return
+	chars_to_flush = mini(chars_to_flush, STREAM_MAX_CHARS_PER_FRAME)
+	chars_to_flush = mini(chars_to_flush, _stream_pending_text.length())
+
+	_stream_text += _stream_pending_text.substr(0, chars_to_flush)
+	_stream_pending_text = _stream_pending_text.substr(chars_to_flush)
+	_stream_flush_progress = maxf(0.0, _stream_flush_progress - float(chars_to_flush))
+	if _stream_flush_progress > float(STREAM_MAX_CHARS_PER_FRAME):
+		_stream_flush_progress = float(STREAM_MAX_CHARS_PER_FRAME)
+	_chat_display.text = _base_text + "[outline_size=2][outline_color=black][color=#D4B86A][%s][/color][/outline_color][/outline_size] %s" % [npc_name, _stream_text]
+
+	if _stream_pending_text.is_empty() and _stream_finish_requested:
+		_finish_stream_text()
+
+
+func _finish_stream_text() -> void:
+	if _stream_final_text == "" and _stream_text != "":
+		_stream_final_text = _stream_text
 	_stream_text = ""
-	_chat_display.text = _base_text + "[outline_size=2][outline_color=black][color=#D4B86A][%s][/color][/outline_color][/outline_size] %s\n" % [npc_name, full_text]
+	_stream_pending_text = ""
+	_stream_flush_progress = 0.0
+	_chat_display.text = _base_text + "[outline_size=2][outline_color=black][color=#D4B86A][%s][/color][/outline_color][/outline_size] %s\n" % [npc_name, _stream_final_text]
 	_base_text = _chat_display.text
+	_stream_final_text = ""
+	_stream_finish_requested = false
 	_think_label.text = ""
 	_set_portrait_state(true)
 	_input_restore()
@@ -491,14 +556,16 @@ func stream_local_npc_msg(text: String) -> void:
 		return
 	stream_begin()
 	var index := 0
-	var chunk_size := 2
+	var chunk_size := 1
 	while is_open and index < text.length():
 		var length: int = mini(chunk_size, text.length() - index)
 		stream_add(text.substr(index, length))
 		index += length
-		await get_tree().create_timer(0.02).timeout
+		await get_tree().create_timer(0.018).timeout
 	if is_open:
 		stream_end(text)
+		while is_open and _stream_finish_requested:
+			await get_tree().create_timer(0.02).timeout
 
 
 func add_player_msg(text: String) -> void:

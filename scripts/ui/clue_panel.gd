@@ -51,6 +51,7 @@ func refresh_clues() -> void:
 		clue_list.add_child(card)
 		card.set_clue(data)
 		card.pressed.connect(show_clue_detail)
+		card.pressed.connect(UISoundManager.play_click)
 
 
 func show_clue_detail(clue_id: int) -> void:

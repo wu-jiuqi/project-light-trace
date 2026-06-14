@@ -201,8 +201,14 @@ func _input(event: InputEvent) -> void:
 			_closest_interactable.name if _closest_interactable and is_instance_valid(_closest_interactable) else "无"
 		])
 
-		# 优先 NPC → 可交互物件（日晷等）→ 拾取物品 → 通用
-		if _closest_npc and is_instance_valid(_closest_npc) and not _closest_npc.is_queued_for_deletion():
+		var interactable_first := _should_prioritize_interactable()
+
+		# 默认 NPC 优先；当可交互物件明显更近时，优先响应物件，避免贴近 NPC 的便签被抢交互。
+		if interactable_first:
+			_interact_with_interactable(_closest_interactable)
+		elif _closest_npc and is_instance_valid(_closest_npc) and not _closest_npc.is_queued_for_deletion():
+			if _try_fragment_npc_interaction(_closest_npc):
+				return
 			_interact_with_nearest_npc()
 		elif _closest_interactable and is_instance_valid(_closest_interactable) and not _closest_interactable.is_queued_for_deletion():
 			_interact_with_interactable(_closest_interactable)
@@ -303,6 +309,15 @@ func _is_npc_node(node: Node) -> bool:
 # NPC 交互
 # ============================================================
 
+func _try_fragment_npc_interaction(npc: Node2D) -> bool:
+	var states := get_tree().get_nodes_in_group("fragment_state")
+	for state in states:
+		if state and state.has_method("try_start_lin_intermission_dialogue"):
+			if state.try_start_lin_intermission_dialogue(npc):
+				return true
+	return false
+
+
 func _refresh_interaction_overlaps() -> void:
 	if not _interaction_area:
 		return
@@ -377,6 +392,17 @@ func _interact_with_nearest_npc() -> void:
 ## 获取最近的NPC（供UI/HUD使用，显示"[E] 交谈"提示）
 func get_closest_npc() -> Node2D:
 	return _closest_npc
+
+
+func _should_prioritize_interactable() -> bool:
+	if not _closest_interactable or not is_instance_valid(_closest_interactable) or _closest_interactable.is_queued_for_deletion():
+		return false
+	if not _closest_npc or not is_instance_valid(_closest_npc) or _closest_npc.is_queued_for_deletion():
+		return true
+
+	var interactable_dist := global_position.distance_to(_closest_interactable.global_position)
+	var npc_dist := global_position.distance_to(_closest_npc.global_position)
+	return interactable_dist + 8.0 < npc_dist
 
 
 # ============================================================
@@ -562,8 +588,13 @@ func _cleanup_nearby_lists() -> void:
 
 func _update_interact_hint() -> void:
 	## 根据最近的交互目标更新提示标签，通过信号通知 HUD
-	# 优先级：NPC > 可交互物件 > 物品
-	if _closest_npc and is_instance_valid(_closest_npc) and not _closest_npc.is_queued_for_deletion():
+	# 默认 NPC 优先；当物件明显更近时，提示与实际交互保持一致。
+	if _should_prioritize_interactable():
+		var name_str: String = _closest_interactable.name
+		if "display_name" in _closest_interactable and not str(_closest_interactable.display_name).is_empty():
+			name_str = str(_closest_interactable.display_name)
+		interact_hint_changed.emit(true, "[E] 观察 %s" % name_str)
+	elif _closest_npc and is_instance_valid(_closest_npc) and not _closest_npc.is_queued_for_deletion():
 		# NPC 提示同时更新 NPC 头顶标签和底部中央 InteractHint
 		interact_hint_changed.emit(true, "[E] %s" % _closest_npc.npc_name)
 	elif _closest_interactable and is_instance_valid(_closest_interactable) and not _closest_interactable.is_queued_for_deletion():

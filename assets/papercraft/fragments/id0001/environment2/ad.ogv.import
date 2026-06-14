@@ -1,0 +1,14 @@
+[remap]
+
+importer="theora"
+type="VideoStreamTheora"
+uid="uid://canohv7fbb0to"
+path="res://.godot/imported/ad.ogv-<hash>.ogvstr"
+
+[deps]
+
+source_file="res://assets/papercraft/fragments/id0001/environment2/ad.ogv"
+
+[params]
+
+loop=false

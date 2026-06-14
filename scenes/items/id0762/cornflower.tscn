@@ -12,6 +12,7 @@ script = ExtResource("1_pickup")
 item_id = 1
 item_name = "矢车菊"
 item_color = Color(0.2, 0.4, 0.8, 1)
+item_texture_path = "res://assets/papercraft/fragments/id0762/props/cornflower.png"
 item_pos_x = 0.0
 item_pos_y = 0.0
 

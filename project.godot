@@ -31,6 +31,7 @@ InventoryManager="*res://scripts/systems/inventory_manager.gd"
 BackpackUI="*res://scripts/ui/backpack_ui.gd"
 ChatDatabase="*res://scripts/globals/chat_database.gd"
 PauseMenu="*res://scripts/ui/pause_menu.gd"
+UISoundManager="*res://scripts/globals/ui_sound_manager.gd"
 
 [display]
 

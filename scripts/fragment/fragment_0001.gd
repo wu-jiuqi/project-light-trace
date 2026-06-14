@@ -6,6 +6,12 @@ const PLAYER_SCENE: PackedScene = preload("res://scenes/characters/player/player
 const ClueSystemScript = preload("res://scripts/systems/clue_system.gd")
 const CLUE_PANEL_SCENE: PackedScene = preload("res://scenes/ui/CluePanel.tscn")
 const BGM_FRAGMENT_0001 = preload("res://assets/audio/bgm/bgm_fragment_0001_loop.ogg")
+const LIN_NOTE_TEXTURE: Texture2D = preload("res://assets/papercraft/fragments/id0001/environment2/LinNote.png")
+const LIN_NOTE_SCRIPT: Script = preload("res://scripts/fragment/lin_note_interactable.gd")
+const TV_SCENE: PackedScene = preload("res://scenes/buildings/id0001/TV.tscn")
+const TV_VIDEO_STREAM: VideoStream = preload("res://assets/papercraft/fragments/id0001/environment2/ad.ogv")
+const STONE_TEXTURE: Texture2D = preload("res://assets/papercraft/fragments/id0001/environment2/stone_tablet.png")
+const SFX_SOURCE_MARK_REVEAL := preload("res://assets/audio/ui/ui_source_mark_reveal.wav")
 
 ## DepthLayer Y 范围阈值
 const LAYER_1_Y: float = 450.0
@@ -21,6 +27,14 @@ const SUNDIAL_DATA := {
 }
 const OBSERVATION_ORDER: Array[String] = ["A", "B", "C", "D", "E"]
 const TARGET_CLOCK_ANGLE: int = 66
+const LIN_INTERMISSION_DIALOGUE := "\"17个。这17个月——我在镇子里送了17批人。\"\n" + \
+	"\"只有3个人走到过边界墙。\"\n" + \
+	"\"你知道边界那边是什么吗？我不知道。\"\n" + \
+	"\"但赵安保知道——他从来不说。\"\n" + \
+	"\"别告诉任何人我说了这些。\"\n" + \
+	"\"因为这些话——不在培训脚本里。\"\n" + \
+	"（通讯器发出一声刺耳的杂音。）\n" + \
+	"\"哦。时间到了。\""
 
 ## 玩家引用
 var _player: CharacterBody2D = null
@@ -29,6 +43,9 @@ var _depth_layers: Dictionary = {}
 
 ## BGM 播放
 var _bgm_player: AudioStreamPlayer = null
+
+## SFX 音效播放器（SFX 总线，用于 UI/谜题反馈音效）
+var _sfx_player: AudioStreamPlayer = null
 
 ## 日晷状态
 var observed_sundials: Dictionary = {}
@@ -67,6 +84,21 @@ var _clue_panel: CluePanel = null
 ## 林指导幕间事件追踪
 var _player_idle_time: float = 0.0
 var _intermission_triggered: bool = false
+var _lin_intermission_playing: bool = false
+var _lin_note_unlocked: bool = false
+@export_range(0, 1, 1) var lin_note_collected: int = 0
+var _lin_note_sprite: Sprite2D = null
+var _lin_note_viewer: Control = null
+var _lin_note_close_block_until_msec: int = 0
+@export_range(0, 1, 1) var tv_collected: int = 0
+var _tv_node: Node2D = null
+var _tv_viewer: Control = null
+var _tv_viewer_tv: Node2D = null
+var _tv_close_block_until_msec: int = 0
+@export_range(0, 1, 1) var stone_collected: int = 0
+var _stone_node: Node2D = null
+var _stone_viewer: Control = null
+var _stone_close_block_until_msec: int = 0
 
 ## 边界光墙触碰追踪
 var _boundary_warning_triggered: bool = false
@@ -234,7 +266,6 @@ func _update_layer_transparency() -> void:
 func _process(delta: float) -> void:
 	_update_player_z()
 	_update_player_depth_layer()
-	_check_lin_intermission(delta)
 	_check_boundary(delta)
 	_check_sundial_e_proximity(delta)
 	_update_layer_transparency()
@@ -270,6 +301,8 @@ func _connect_button_pressed(button: Button, callback: Callable, node_path: Stri
 		return false
 	if not button.pressed.is_connected(callback):
 		button.pressed.connect(callback)
+	if not button.pressed.is_connected(UISoundManager.play_click):
+		button.pressed.connect(UISoundManager.play_click)
 	return true
 
 
@@ -538,6 +571,7 @@ func _submit_clock_angle() -> bool:
 		# 正确校准 — 金色光扩散效果
 		var bell_pos: Vector2 = _get_bell_tower_position()
 		_create_light_spread_effect(bell_pos, Color(1.0, 0.72, 0.24, 0.9), 1.5)
+		_play_sfx(SFX_SOURCE_MARK_REVEAL)
 		_close_angle_panel()
 		# 等待光效展现后再解锁
 		await get_tree().create_timer(0.6).timeout
@@ -685,6 +719,10 @@ func save_state() -> void:
 	FragmentManager.set_fragment_state("0001", "discovered_clues", clues_data)
 	FragmentManager.set_fragment_state("0001", "boundary_touch_count", _boundary_touch_count)
 	FragmentManager.set_fragment_state("0001", "intermission_triggered", _intermission_triggered)
+	FragmentManager.set_fragment_state("0001", "lin_note_unlocked", _lin_note_unlocked)
+	FragmentManager.set_fragment_state("0001", "lin_note_collected", lin_note_collected)
+	FragmentManager.set_fragment_state("0001", "tv_collected", tv_collected)
+	FragmentManager.set_fragment_state("0001", "stone_collected", stone_collected)
 	FragmentManager.set_fragment_state("0001", "sundial_e_proximity_triggered", _sundial_e_proximity_triggered)
 	print("[Fragment0001] 探索进度已保存 — 日晷(%d/5) 合规度(%d) 源印(%s)" % [observed_sundials.size(), compliance, source_mark_revealed])
 
@@ -771,6 +809,28 @@ func _try_restore_state() -> void:
 	var saved_intermission = FragmentManager.get_fragment_state("0001", "intermission_triggered")
 	if typeof(saved_intermission) == TYPE_BOOL:
 		_intermission_triggered = saved_intermission
+	var saved_lin_note = FragmentManager.get_fragment_state("0001", "lin_note_unlocked")
+	if typeof(saved_lin_note) == TYPE_BOOL:
+		_lin_note_unlocked = saved_lin_note
+	if _lin_note_unlocked:
+		call_deferred("_spawn_lin_note")
+	var saved_lin_note_collected = FragmentManager.get_fragment_state("0001", "lin_note_collected")
+	if typeof(saved_lin_note_collected) == TYPE_INT:
+		lin_note_collected = clampi(saved_lin_note_collected, 0, 1)
+	elif typeof(saved_lin_note_collected) == TYPE_BOOL:
+		lin_note_collected = 1 if saved_lin_note_collected else 0
+	var saved_tv_collected = FragmentManager.get_fragment_state("0001", "tv_collected")
+	if typeof(saved_tv_collected) == TYPE_INT:
+		tv_collected = clampi(saved_tv_collected, 0, 1)
+	elif typeof(saved_tv_collected) == TYPE_BOOL:
+		tv_collected = 1 if saved_tv_collected else 0
+	call_deferred("_refresh_tv_collection_state")
+	var saved_stone_collected = FragmentManager.get_fragment_state("0001", "stone_collected")
+	if typeof(saved_stone_collected) == TYPE_INT:
+		stone_collected = clampi(saved_stone_collected, 0, 1)
+	elif typeof(saved_stone_collected) == TYPE_BOOL:
+		stone_collected = 1 if saved_stone_collected else 0
+	call_deferred("_refresh_stone_collection_state")
 	var saved_e_proximity = FragmentManager.get_fragment_state("0001", "sundial_e_proximity_triggered")
 	if typeof(saved_e_proximity) == TYPE_BOOL:
 		_sundial_e_proximity_triggered = saved_e_proximity
@@ -954,6 +1014,7 @@ func _complete_fragment() -> void:
 	return_btn.size = Vector2(180, 44)
 	return_btn.add_theme_font_size_override("font_size", 16)
 	return_btn.pressed.connect(_on_return_to_star_map)
+	return_btn.pressed.connect(UISoundManager.play_click)
 	button_row.add_child(return_btn)
 
 	var continue_btn: Button = Button.new()
@@ -962,6 +1023,7 @@ func _complete_fragment() -> void:
 	continue_btn.size = Vector2(180, 44)
 	continue_btn.add_theme_font_size_override("font_size", 16)
 	continue_btn.pressed.connect(_on_continue_playing)
+	continue_btn.pressed.connect(UISoundManager.play_click)
 	button_row.add_child(continue_btn)
 
 	# 4. 面板淡入动画（0 → 1 alpha，Tween 0.4s）
@@ -1298,6 +1360,42 @@ func _resolve_ui_refs() -> void:
 # ============================================================
 
 func _input(event: InputEvent) -> void:
+	if _tv_viewer and _tv_viewer.visible:
+		if event.is_action_pressed("escape") or event.is_action_pressed("ui_cancel"):
+			_hide_tv_viewer()
+			get_viewport().set_input_as_handled()
+		elif event.is_action_pressed("interact") and Time.get_ticks_msec() >= _tv_close_block_until_msec:
+			if tv_collected == 0:
+				_collect_tv()
+			else:
+				_hide_tv_viewer()
+			get_viewport().set_input_as_handled()
+		return
+
+	if _stone_viewer and _stone_viewer.visible:
+		if event.is_action_pressed("escape") or event.is_action_pressed("ui_cancel"):
+			_hide_stone_viewer()
+			get_viewport().set_input_as_handled()
+		elif event.is_action_pressed("interact") and Time.get_ticks_msec() >= _stone_close_block_until_msec:
+			if stone_collected == 0:
+				_collect_stone()
+			else:
+				_hide_stone_viewer()
+			get_viewport().set_input_as_handled()
+		return
+
+	if _lin_note_viewer and _lin_note_viewer.visible:
+		if event.is_action_pressed("escape") or event.is_action_pressed("ui_cancel"):
+			_hide_lin_note_viewer()
+			get_viewport().set_input_as_handled()
+		elif event.is_action_pressed("interact") and Time.get_ticks_msec() >= _lin_note_close_block_until_msec:
+			if lin_note_collected == 0:
+				_collect_lin_note()
+			else:
+				_hide_lin_note_viewer()
+			get_viewport().set_input_as_handled()
+		return
+
 	if event.is_action_pressed("ui_focus_next"):  # Tab 键
 		# 校准面板打开时不响应 Tab
 		if _angle_panel and _angle_panel.visible:
@@ -1374,113 +1472,523 @@ func _find_lin_npc_position() -> Vector2:
 	return Vector2(356, 300)
 
 
-func _check_lin_intermission(delta: float) -> void:
-	"""在 _process 中追踪林指导幕间事件触发条件 — 多阶段视觉效果"""
-	if _intermission_triggered or not _player:
-		return
+func try_start_lin_intermission_dialogue(npc: Node) -> bool:
+	if _intermission_triggered or _lin_intermission_playing:
+		return false
+	if observed_sundials.size() < 5:
+		return false
+	if not _is_linguide_npc(npc):
+		return false
 
-	# 条件1：玩家停留不动（无移动输入 → velocity ≈ 0）
-	var player_velocity: Vector2 = _player.velocity if "velocity" in _player else Vector2.ZERO
-	if player_velocity.length() < 1.0:
-		_player_idle_time += delta
-	else:
-		_player_idle_time = 0.0
+	_lin_intermission_playing = true
+	print("[Fragment0001] 林指导幕间事件触发 — 五个日晷后与林指导对话")
+	_play_lin_intermission_dialogue(npc)
+	return true
 
-	# 需要至少空闲 90 秒
-	if _player_idle_time < 90.0:
-		return
 
-	# 条件2：玩家靠近林指导 NPC（距离 < 200px）
-	var lin_pos: Vector2 = _find_lin_npc_position()
-	var dist_to_lin: float = _player.global_position.distance_to(lin_pos)
-	if dist_to_lin >= 200.0:
-		return
+func _play_lin_intermission_dialogue(npc: Node) -> void:
+	if ChatDialogue.is_open:
+		ChatDialogue.close()
+	ChatDialogue.open(npc, "")
+	if ChatDialogue.is_open and npc.has_method("start_dialogue"):
+		npc.start_dialogue()
 
-	# 两个条件同时满足 — 触发幕间事件（仅一次）
-	_intermission_triggered = true
-	save_state()
-	print("[Fragment0001] 林指导幕间事件触发 — 玩家空闲 %.1fs，距林 %.0fpx" % [_player_idle_time, dist_to_lin])
-
-	# === 阶段1: 世界"卡顿" (1.5s) ===
-	# 降低画面饱和度 10%
-	var scene_root: Node = get_tree().current_scene
-	var original_modulate: Color = scene_root.modulate if scene_root else Color(1, 1, 1, 1)
-	var desat_modulate: Color = Color(0.9, 0.9, 0.9, 1.0)  # 轻微去饱和
-	if scene_root:
-		scene_root.modulate = desat_modulate
-
-	# HUD 隐藏
-	if _ui_root:
-		_ui_root.visible = false
-
-	# 暂停 NPC 巡逻（通过 group 查找所有 NPC Controller，设置 process_mode 为 DISABLED）
-	var npcs: Array[Node] = get_tree().get_nodes_in_group("npc")
-	for npc in npcs:
-		if npc is CharacterBody2D:
-			npc.set_process(false)
-			npc.set_physics_process(false)
-
-	await get_tree().create_timer(1.5).timeout
-
-	# === 阶段2: 林指导独白 (8s) ===
-	# Camera2D 平滑移动到林指导位置
-	var camera_rig: Node2D = _find_camera_rig()
-	var original_cam_pos: Vector2 = Vector2(640, 360)
-	if camera_rig:
-		original_cam_pos = camera_rig.position
-		var cam_tween: Tween = create_tween()
-		cam_tween.tween_property(camera_rig, "position", lin_pos, 1.5).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_CUBIC)
-
-	# 逐行显示林指导幕间台词
-	_show_message(
-		"林指导的低语",
-		"（通讯器里传来一阵微弱的声音。林指导的语调比平时慢了一些，像是在回忆什么。）\n\n" +
-		"\"17个。这17个月——我在镇子里送了17批人。\"\n" +
-		"\"只有3个人走到过边界墙。\"\n" +
-		"\"你知道边界那边是什么吗？我不知道。\"\n" +
-		"\"但赵安保知道——他从来不说。\"\n" +
-		"\"别告诉任何人我说了这些。\"\n" +
-		"\"因为这些话——不在培训脚本里。\"\n\n" +
-		"（通讯器发出一声刺耳的杂音。）\n" +
-		"\"哦。时间到了。\"",
-		8.0
-	)
-
-	# 降低合规度 -3
 	_modify_compliance(-3, "林指导情绪波动——系统判定为异常")
+	await ChatDialogue.stream_local_npc_msg(LIN_INTERMISSION_DIALOGUE)
 
-	await get_tree().create_timer(8.0).timeout
+	_lin_intermission_playing = false
+	_intermission_triggered = true
+	_unlock_lin_note()
+	print("[Fragment0001] 林指导幕间事件结束 — LinNote 已解锁")
 
-	# === 阶段3: 恢复正常 (1.5s) ===
-	# Camera2D 平滑回到玩家位置
-	if camera_rig:
-		var cam_tween: Tween = create_tween()
-		cam_tween.tween_property(camera_rig, "position", original_cam_pos, 1.5).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_CUBIC)
 
-	# 恢复画面饱和度
-	if scene_root:
-		scene_root.modulate = original_modulate
+func _is_linguide_npc(npc: Node) -> bool:
+	if not npc:
+		return false
+	if "npc_kb_id" in npc and str(npc.npc_kb_id) == "linguide":
+		return true
+	if "npc_name" in npc and str(npc.npc_name) == "林指导":
+		return true
+	return npc.name.to_lower().contains("linguide")
 
-	# 恢复 NPC 巡逻
-	for npc in npcs:
-		if npc is CharacterBody2D:
-			npc.set_process(true)
-			npc.set_physics_process(true)
 
-	await get_tree().create_timer(1.5).timeout
+func _unlock_lin_note() -> void:
+	if _lin_note_unlocked:
+		return
+	_lin_note_unlocked = true
+	_spawn_lin_note()
+	save_state()
 
-	# HUD 全面恢复
-	if _ui_root:
-		_ui_root.visible = true
 
-	# 林指导恢复标准对话
-	_show_message(
-		"林指导",
-		"溯光者！观测数据请及时提交到钟楼观测台！",
-		5.0
-	)
+func _spawn_lin_note() -> void:
+	if lin_note_collected == 1:
+		_despawn_lin_note()
+		return
+	if is_instance_valid(_lin_note_sprite):
+		_lin_note_sprite.visible = _lin_note_unlocked and lin_note_collected == 0
+		return
+	var layer := _depth_layers.get(1) as Node2D
+	if layer == null:
+		layer = get_node_or_null("WorldRoot/DepthLayer/DepthLayer_1") as Node2D
+	if layer == null:
+		push_warning("[Fragment0001] 缺少 DepthLayer_1，无法创建 LinNote")
+		return
 
-	print("[Fragment0001] 林指导幕间事件结束")
+	var note := Sprite2D.new()
+	note.name = "LinNote"
+	note.texture = LIN_NOTE_TEXTURE
+	note.scale = Vector2(0.055, 0.055)
+	note.visible = _lin_note_unlocked and lin_note_collected == 0
+	note.z_index = 2
+	note.set_script(LIN_NOTE_SCRIPT)
+	layer.add_child(note)
+	note.global_position = _find_lin_npc_position() + Vector2(42, 8)
+	_lin_note_sprite = note
+
+
+func _despawn_lin_note() -> void:
+	if is_instance_valid(_lin_note_sprite):
+		_lin_note_sprite.remove_from_group("interactable")
+		_lin_note_sprite.queue_free()
+	_lin_note_sprite = null
+
+
+func show_lin_note() -> void:
+	_ensure_lin_note_viewer()
+	if _lin_note_viewer == null:
+		return
+	_update_lin_note_viewer_size()
+	_refresh_lin_note_collect_hint()
+	_lin_note_viewer.visible = true
+	_lin_note_close_block_until_msec = Time.get_ticks_msec() + 250
+	_set_player_controls_locked(true)
+
+
+func _ensure_lin_note_viewer() -> void:
+	if is_instance_valid(_lin_note_viewer):
+		return
+	_resolve_ui_refs()
+	if _ui_root == null:
+		return
+
+	var overlay := Control.new()
+	overlay.name = "LinNoteViewer"
+	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.visible = false
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	overlay.gui_input.connect(_on_lin_note_viewer_gui_input)
+	_ui_root.add_child(overlay)
+
+	var dim := ColorRect.new()
+	dim.name = "Dim"
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dim.color = Color(0.02, 0.015, 0.01, 0.78)
+	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	overlay.add_child(dim)
+
+	var center := CenterContainer.new()
+	center.name = "Center"
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	overlay.add_child(center)
+
+	var image := TextureRect.new()
+	image.name = "LinNoteImage"
+	image.texture = LIN_NOTE_TEXTURE
+	image.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	image.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	center.add_child(image)
+
+	var hint := Label.new()
+	hint.name = "CollectHint"
+	hint.text = ""
+	hint.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	hint.offset_left = 0
+	hint.offset_right = 0
+	hint.offset_top = -54
+	hint.offset_bottom = -22
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hint.add_theme_font_size_override("font_size", 16)
+	hint.add_theme_color_override("font_color", Color(0.92, 0.84, 0.68, 0.92))
+	hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	overlay.add_child(hint)
+
+	_lin_note_viewer = overlay
+	_update_lin_note_viewer_size()
+	_refresh_lin_note_collect_hint()
+
+
+func _on_lin_note_viewer_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed:
+		_hide_lin_note_viewer()
+
+
+func _update_lin_note_viewer_size() -> void:
+	if not is_instance_valid(_lin_note_viewer):
+		return
+	var image := _lin_note_viewer.get_node_or_null("Center/LinNoteImage") as TextureRect
+	if image == null or image.texture == null:
+		return
+	var viewport_size := get_viewport_rect().size
+	var tex_size := image.texture.get_size()
+	var max_size := Vector2(viewport_size.x * 0.86, viewport_size.y * 0.74)
+	var scale: float = minf(1.0, minf(max_size.x / tex_size.x, max_size.y / tex_size.y))
+	var display_size := tex_size * scale
+	image.custom_minimum_size = display_size
+	image.size = display_size
+	image.position = (viewport_size - display_size) * 0.5
+
+
+func _refresh_lin_note_collect_hint() -> void:
+	if not is_instance_valid(_lin_note_viewer):
+		return
+	var hint := _lin_note_viewer.get_node_or_null("CollectHint") as Label
+	if hint == null:
+		return
+	if lin_note_collected == 1:
+		hint.text = "已收集 | 点击、按 E 或按 Esc 关闭"
+	else:
+		hint.text = "[E] 收集便签 | 点击或按 Esc 关闭"
+
+
+func _collect_lin_note() -> void:
+	if lin_note_collected == 1:
+		return
+	lin_note_collected = 1
+	FragmentManager.set_fragment_state("0001", "lin_note_collected", lin_note_collected)
+	_refresh_lin_note_collect_hint()
+	_despawn_lin_note()
+	save_state()
+	if SaveManager.get_current_slot() >= 0:
+		SaveManager.save_game()
+	print("[Fragment0001] LinNote collected")
+
+
+func _hide_lin_note_viewer() -> void:
+	if _lin_note_viewer:
+		_lin_note_viewer.visible = false
+	_set_player_controls_locked(false)
+
+
+func show_tv() -> void:
+	_ensure_tv_viewer()
+	if _tv_viewer == null:
+		return
+	_update_tv_viewer_size()
+	_refresh_tv_collect_hint()
+	_tv_viewer.visible = true
+	_tv_close_block_until_msec = Time.get_ticks_msec() + 250
+	_set_player_controls_locked(true)
+	_play_tv_video_once()
+
+
+func _ensure_tv_viewer() -> void:
+	if is_instance_valid(_tv_viewer):
+		return
+	_resolve_ui_refs()
+	if _ui_root == null:
+		return
+
+	var overlay := Control.new()
+	overlay.name = "TVViewer"
+	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.visible = false
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	overlay.gui_input.connect(_on_tv_viewer_gui_input)
+	_ui_root.add_child(overlay)
+
+	var dim := ColorRect.new()
+	dim.name = "Dim"
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dim.color = Color(0.02, 0.015, 0.01, 0.78)
+	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	overlay.add_child(dim)
+
+	var tv := TV_SCENE.instantiate() as Node2D
+	tv.name = "TVLarge"
+	tv.z_index = 2
+	overlay.add_child(tv)
+	_disable_viewer_tv_interaction(tv)
+	_tv_viewer_tv = tv
+
+	var hint := Label.new()
+	hint.name = "CollectHint"
+	hint.text = ""
+	hint.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	hint.offset_left = 0
+	hint.offset_right = 0
+	hint.offset_top = -54
+	hint.offset_bottom = -22
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hint.add_theme_font_size_override("font_size", 16)
+	hint.add_theme_color_override("font_color", Color(0.92, 0.84, 0.68, 0.92))
+	hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	overlay.add_child(hint)
+
+	_tv_viewer = overlay
+	_update_tv_viewer_size()
+	_refresh_tv_collect_hint()
+
+
+func _disable_viewer_tv_interaction(root: Node) -> void:
+	root.remove_from_group("interactable")
+	if root is Area2D:
+		var area := root as Area2D
+		area.monitoring = false
+		area.monitorable = false
+	if root is CollisionShape2D:
+		(root as CollisionShape2D).disabled = true
+	for child in root.get_children():
+		_disable_viewer_tv_interaction(child)
+
+
+func _on_tv_viewer_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed:
+		_hide_tv_viewer()
+
+
+func _update_tv_viewer_size() -> void:
+	if not is_instance_valid(_tv_viewer_tv):
+		return
+	var viewport_size := get_viewport_rect().size
+	var body := _tv_viewer_tv.get_node_or_null("Visual/Body") as Sprite2D
+	if body == null or body.texture == null:
+		_tv_viewer_tv.position = viewport_size * 0.5
+		_tv_viewer_tv.scale = Vector2(0.45, 0.45)
+		return
+	var texture_size := body.texture.get_size()
+	var body_scale := Vector2(absf(body.scale.x), absf(body.scale.y))
+	var body_size := texture_size * body_scale
+	var max_size := Vector2(viewport_size.x * 0.88, viewport_size.y * 0.78)
+	var fit_scale: float = minf(max_size.x / body_size.x, max_size.y / body_size.y)
+	_tv_viewer_tv.scale = Vector2(fit_scale, fit_scale)
+	_tv_viewer_tv.position = viewport_size * 0.5 - body.position * fit_scale
+
+
+func _refresh_tv_collect_hint() -> void:
+	if not is_instance_valid(_tv_viewer):
+		return
+	var hint := _tv_viewer.get_node_or_null("CollectHint") as Label
+	if hint == null:
+		return
+	if tv_collected == 1:
+		hint.text = "已收集 | 点击、按 E 或按 Esc 关闭"
+	else:
+		hint.text = "[E] 收集电视广告 | 点击或按 Esc 关闭"
+
+
+func _play_tv_video_once() -> void:
+	var video_player := _get_tv_video_player()
+	if video_player == null:
+		return
+	video_player.stream = TV_VIDEO_STREAM
+	video_player.loop = false
+	video_player.stop()
+	video_player.stream_position = 0.0
+	video_player.play()
+
+
+func _stop_tv_video() -> void:
+	var video_player := _get_tv_video_player()
+	if video_player:
+		video_player.stop()
+
+
+func _get_tv_video_player() -> VideoStreamPlayer:
+	if not is_instance_valid(_tv_viewer_tv):
+		return null
+	return _tv_viewer_tv.get_node_or_null("ScreenClip/VideoPlayer") as VideoStreamPlayer
+
+
+func _collect_tv() -> void:
+	if tv_collected == 1:
+		return
+	tv_collected = 1
+	FragmentManager.set_fragment_state("0001", "tv_collected", tv_collected)
+	_refresh_tv_collect_hint()
+	_refresh_tv_collection_state()
+	save_state()
+	if SaveManager.get_current_slot() >= 0:
+		SaveManager.save_game()
+	print("[Fragment0001] TV collected")
+
+
+func _hide_tv_viewer() -> void:
+	if _tv_viewer:
+		_tv_viewer.visible = false
+	_stop_tv_video()
+	_set_player_controls_locked(false)
+
+
+func _refresh_tv_collection_state() -> void:
+	_tv_node = get_node_or_null("WorldRoot/DepthLayer/DepthLayer_3/Tv") as Node2D
+	if not is_instance_valid(_tv_node):
+		var world_root := get_node_or_null("WorldRoot")
+		if world_root:
+			var nodes := world_root.find_children("Tv", "Node2D", true, false)
+			if nodes.size() > 0:
+				_tv_node = nodes[0] as Node2D
+	if not is_instance_valid(_tv_node):
+		return
+	var collected := tv_collected == 1
+	_tv_node.visible = not collected
+	if collected:
+		_tv_node.remove_from_group("interactable")
+	else:
+		_tv_node.add_to_group("interactable")
+	var area := _tv_node.get_node_or_null("InteractableArea") as Area2D
+	if area:
+		area.monitoring = not collected
+		area.monitorable = not collected
+	var body := _tv_node.get_node_or_null("StaticBody2D") as StaticBody2D
+	if body:
+		for child in body.get_children():
+			if child is CollisionShape2D:
+				var collision_shape := child as CollisionShape2D
+				collision_shape.disabled = collected
+
+
+func show_stone() -> void:
+	if stone_collected == 1:
+		return
+	_ensure_stone_viewer()
+	if _stone_viewer == null:
+		return
+	_update_stone_viewer_size()
+	_refresh_stone_collect_hint()
+	_stone_viewer.visible = true
+	_stone_close_block_until_msec = Time.get_ticks_msec() + 250
+	_set_player_controls_locked(true)
+
+
+func _ensure_stone_viewer() -> void:
+	if is_instance_valid(_stone_viewer):
+		return
+	_resolve_ui_refs()
+	if _ui_root == null:
+		return
+
+	var overlay := Control.new()
+	overlay.name = "StoneViewer"
+	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.visible = false
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	overlay.gui_input.connect(_on_stone_viewer_gui_input)
+	_ui_root.add_child(overlay)
+
+	var dim := ColorRect.new()
+	dim.name = "Dim"
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dim.color = Color(0.02, 0.015, 0.01, 0.78)
+	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	overlay.add_child(dim)
+
+	var center := CenterContainer.new()
+	center.name = "Center"
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	overlay.add_child(center)
+
+	var image := TextureRect.new()
+	image.name = "StoneImage"
+	image.texture = STONE_TEXTURE
+	image.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	image.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	center.add_child(image)
+
+	var hint := Label.new()
+	hint.name = "CollectHint"
+	hint.text = ""
+	hint.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	hint.offset_left = 0
+	hint.offset_right = 0
+	hint.offset_top = -54
+	hint.offset_bottom = -22
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hint.add_theme_font_size_override("font_size", 16)
+	hint.add_theme_color_override("font_color", Color(0.92, 0.84, 0.68, 0.92))
+	hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	overlay.add_child(hint)
+
+	_stone_viewer = overlay
+	_update_stone_viewer_size()
+	_refresh_stone_collect_hint()
+
+
+func _on_stone_viewer_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed:
+		_hide_stone_viewer()
+
+
+func _update_stone_viewer_size() -> void:
+	if not is_instance_valid(_stone_viewer):
+		return
+	var image := _stone_viewer.get_node_or_null("Center/StoneImage") as TextureRect
+	if image == null or image.texture == null:
+		return
+	var viewport_size := get_viewport_rect().size
+	var tex_size := image.texture.get_size()
+	var max_size := Vector2(viewport_size.x * 0.92, viewport_size.y * 0.82)
+	var scale: float = minf(1.0, minf(max_size.x / tex_size.x, max_size.y / tex_size.y))
+	var display_size := tex_size * scale
+	image.custom_minimum_size = display_size
+	image.size = display_size
+	image.position = (viewport_size - display_size) * 0.5
+
+
+func _refresh_stone_collect_hint() -> void:
+	if not is_instance_valid(_stone_viewer):
+		return
+	var hint := _stone_viewer.get_node_or_null("CollectHint") as Label
+	if hint == null:
+		return
+	if stone_collected == 1:
+		hint.text = "已收集 | 点击、按 E 或按 Esc 关闭"
+	else:
+		hint.text = "[E] 收集石碑 | 点击或按 Esc 关闭"
+
+
+func _collect_stone() -> void:
+	if stone_collected == 1:
+		return
+	stone_collected = 1
+	FragmentManager.set_fragment_state("0001", "stone_collected", stone_collected)
+	_refresh_stone_collect_hint()
+	_refresh_stone_collection_state()
+	save_state()
+	if SaveManager.get_current_slot() >= 0:
+		SaveManager.save_game()
+	print("[Fragment0001] 石碑已收集")
+
+
+func _hide_stone_viewer() -> void:
+	if _stone_viewer:
+		_stone_viewer.visible = false
+	_set_player_controls_locked(false)
+
+
+func _refresh_stone_collection_state() -> void:
+	_stone_node = get_node_or_null("WorldRoot/DepthLayer/DepthLayer_3/Stone") as Node2D
+	if not is_instance_valid(_stone_node):
+		return
+	var collected := stone_collected == 1
+	_stone_node.visible = not collected
+	if collected:
+		_stone_node.remove_from_group("interactable")
+	else:
+		_stone_node.add_to_group("interactable")
+	var area := _stone_node.get_node_or_null("InteractableArea") as Area2D
+	if area:
+		area.monitoring = not collected
+		area.monitorable = not collected
+	var body := _stone_node.get_node_or_null("StaticBody2D") as StaticBody2D
+	if body:
+		for child in body.get_children():
+			if child is CollisionShape2D:
+				var collision_shape := child as CollisionShape2D
+				collision_shape.disabled = collected
 
 
 func _find_camera_rig() -> Node2D:
@@ -1634,6 +2142,30 @@ func _create_boundary_ripple_effect(at_position: Vector2) -> void:
 		if is_instance_valid(transparency_glimpse):
 			transparency_glimpse.queue_free()
 	)
+
+
+# ============================================================
+# SFX 音效播放
+# ============================================================
+
+func _ensure_sfx_player() -> void:
+	"""确保 SFX 播放器已创建（使用 SFX 总线，受音量设置控制）"""
+	if _sfx_player == null:
+		_sfx_player = AudioStreamPlayer.new()
+		_sfx_player.name = "SFXPlayer_Fragment0001"
+		_sfx_player.bus = "SFX"
+		_sfx_player.volume_db = 0.0
+		add_child(_sfx_player)
+
+
+func _play_sfx(stream: AudioStream) -> void:
+	"""播放指定音效流（使用 SFX 总线）"""
+	if stream == null:
+		printerr("[Fragment0001] _play_sfx: stream is null")
+		return
+	_ensure_sfx_player()
+	_sfx_player.stream = stream
+	_sfx_player.play()
 
 
 # ============================================================

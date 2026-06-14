@@ -25,7 +25,9 @@
 [ext_resource type="PackedScene" uid="uid://c588n0cfi2xt4" path="res://scenes/buildings/id0001/SundialE.tscn" id="23_8bhro"]
 [ext_resource type="PackedScene" uid="uid://b56xdqjckxwvu" path="res://scenes/characters/id0001/npc_wangdirector.tscn" id="23_cnh1t"]
 [ext_resource type="Texture2D" uid="uid://cpoy6oau4rk76" path="res://assets/papercraft/fragments/id0001/environment2/fog.png" id="24_dbv8g"]
+[ext_resource type="PackedScene" uid="uid://co0276fhkr64o" path="res://scenes/buildings/id0001/TV.tscn" id="24_pbonl"]
 [ext_resource type="PackedScene" uid="uid://c2j5leta63e2" path="res://scenes/characters/id0001/npc_zhaosecurity.tscn" id="26_pbonl"]
+[ext_resource type="PackedScene" uid="uid://cvr7x2k6mvhm3" path="res://scenes/buildings/id0001/Stone.tscn" id="27_cnh1t"]
 [ext_resource type="Script" uid="uid://cpookq7xs8qki" path="res://scripts/stage/camera_rig.gd" id="28_camrig"]
 [ext_resource type="Script" uid="uid://bwsd4vqlvwgk8" path="res://scripts/fragment/fragment_0001.gd" id="29_frag001"]
 [ext_resource type="PackedScene" uid="uid://duiql0mgjrtjc" path="res://scenes/ui/DialogueBox.tscn" id="29_oco2y"]
@@ -271,6 +273,10 @@ position = Vector2(1172, 333)
 [node name="DepthLayer_3" type="Node2D" parent="WorldRoot/DepthLayer" unique_id=1846010377]
 y_sort_enabled = true
 
+[node name="Tv" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=1203746174 instance=ExtResource("24_pbonl")]
+position = Vector2(1227, 336)
+scale = Vector2(0.045, 0.04)
+
 [node name="forest1" type="Node2D" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=903466131]
 modulate = Color(1, 1, 1, 0.6392157)
 position = Vector2(968.0001, 88.4)
@@ -322,6 +328,10 @@ scale = Vector2(0.06, 0.06)
 
 [node name="NPC_ZhaoSecurity" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=481594507 instance=ExtResource("26_pbonl")]
 position = Vector2(465, 130)
+
+[node name="Stone" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=347068440 instance=ExtResource("27_cnh1t")]
+position = Vector2(53, 125)
+scale = Vector2(0.055, 0.075)
 
 [node name="CameraRig" type="Node2D" parent="WorldRoot" unique_id=2136539517]
 position = Vector2(640, 360)

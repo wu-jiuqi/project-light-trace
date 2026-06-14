@@ -17,6 +17,9 @@ func set_item(data: Dictionary) -> void:
 	count = int(data.get("count", 1))
 	disabled = false
 	var icon = data.get("icon", "?")
+	var icon_path := str(data.get("icon_path", ""))
+	if not (icon is Texture2D) and icon_path != "":
+		icon = _load_texture(icon_path)
 	if icon is Texture2D:
 		icon_rect.texture = icon
 		icon_rect.visible = true
@@ -47,3 +50,14 @@ func clear() -> void:
 
 func highlight(on: bool) -> void:
 	modulate = Color(1.16, 1.08, 0.86, 1.0) if on else Color.WHITE
+
+
+func _load_texture(path: String) -> Texture2D:
+	if ResourceLoader.exists(path):
+		return load(path) as Texture2D
+	if not FileAccess.file_exists(path):
+		return null
+	var image := Image.new()
+	if image.load(path) != OK:
+		return null
+	return ImageTexture.create_from_image(image)

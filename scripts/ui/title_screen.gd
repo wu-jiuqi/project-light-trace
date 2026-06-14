@@ -23,6 +23,7 @@ const PAPER_BUTTON_NORMAL = preload("res://assets/papercraft/core/ui/dialogue_bo
 const PAPER_BUTTON_HOVER = preload("res://assets/papercraft/core/ui/extracted_buttons/hover_blank.png")
 const PAPER_BUTTON_PRESSED = preload("res://assets/papercraft/core/ui/extracted_buttons/pressed_blank.png")
 const PAPER_BUTTON_DISABLED = preload("res://assets/papercraft/core/ui/dialogue_box/button_plate.png")
+const STORY_GALLERY_SCENE: PackedScene = preload("res://scenes/ui/StoryGallery.tscn")
 
 # ============================================================
 # 颜色常量
@@ -305,6 +306,8 @@ func _connect_button_pressed(button: BaseButton, callback: Callable, node_path: 
 		return false
 	if not button.pressed.is_connected(callback):
 		button.pressed.connect(callback)
+	if not button.pressed.is_connected(UISoundManager.play_click):
+		button.pressed.connect(UISoundManager.play_click)
 	return true
 
 
@@ -852,7 +855,15 @@ func _on_achievements() -> void:
 # ============================================================
 
 func _on_story_review() -> void:
-	_show_hint_dialog("剧情回顾", "剧情回顾功能即将开放，敬请期待。")
+	if is_instance_valid(_active_dialog):
+		return
+	var gallery := STORY_GALLERY_SCENE.instantiate() as Control
+	add_child(gallery)
+	_active_dialog = gallery
+	gallery.tree_exiting.connect(func() -> void:
+		if _active_dialog == gallery:
+			_active_dialog = null
+	)
 
 
 # ============================================================

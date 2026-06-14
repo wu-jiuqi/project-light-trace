@@ -4,6 +4,8 @@ extends Node2D
 
 const EXIT_SCENE: String = "res://scenes/fragments/fragment_0001.tscn"
 
+@export_range(0, 1, 1) var darkroom_note_collected: int = 0
+
 # 节点引用（在 tscn 中手动调整）
 @onready var _camera: Camera2D = $StaticCamera
 @onready var _note_area: Area2D = $Note
@@ -15,7 +17,10 @@ const EXIT_SCENE: String = "res://scenes/fragments/fragment_0001.tscn"
 @onready var _entry_guide: Label = $HintLayer/EntryGuide
 @onready var _note_overlay: CanvasLayer = $NoteOverlay
 @onready var _note_bg: ColorRect = $NoteOverlay/NoteBg
+@onready var _note_hint: Label = $NoteOverlay/CloseHint
 @onready var _note_image: TextureRect = $NoteOverlay/NoteImage
+
+var _note_hovered: bool = false
 
 
 func _ready() -> void:
@@ -24,6 +29,8 @@ func _ready() -> void:
 	SceneFader.ensure_black()
 
 	_camera.make_current()
+	_prepare_note_hint_layout()
+	_restore_note_collection_state()
 	_connect_signals()
 	_animate_entry_guide()
 	_animate_exit_hint()
@@ -37,8 +44,8 @@ func _ready() -> void:
 
 func _connect_signals() -> void:
 	_note_area.input_event.connect(_on_note_clicked)
-	_note_area.mouse_entered.connect(func(): _on_mouse_enter("查看石台上的便笺"))
-	_note_area.mouse_exited.connect(_on_mouse_exit)
+	_note_area.mouse_entered.connect(_on_note_mouse_entered)
+	_note_area.mouse_exited.connect(_on_note_mouse_exited)
 
 	_emblem_area.input_event.connect(_on_emblem_clicked)
 	_emblem_area.mouse_entered.connect(func(): _on_mouse_enter("触碰晨曦之印"))
@@ -57,18 +64,39 @@ func _connect_signals() -> void:
 func _adjust_note_image_size() -> void:
 	if not _note_image.texture:
 		return
+	_note_image.scale = Vector2.ONE
 	var tex_size = _note_image.texture.get_size()
-	var max_width = 1280 * 0.60
-	var max_height = 720 * 0.67
+	var viewport_size := get_viewport_rect().size
+	var max_width = viewport_size.x * 0.60
+	var max_height = viewport_size.y * 0.67
 	var scale_x = min(1.0, max_width / tex_size.x)
 	var scale_y = min(1.0, max_height / tex_size.y)
 	var scale = min(scale_x, scale_y)
 	var display_size = tex_size * scale
 	_note_image.size = display_size
 	_note_image.position = Vector2(
-		(1280 - display_size.x) / 2,
-		80
+		(viewport_size.x - display_size.x) / 2,
+		max(64.0, (viewport_size.y - display_size.y) * 0.45)
 	)
+	_prepare_note_hint_layout()
+
+
+func _prepare_note_hint_layout() -> void:
+	if _note_hint == null or _note_overlay == null:
+		return
+	_note_overlay.move_child(_note_hint, _note_overlay.get_child_count() - 1)
+	_note_hint.z_index = 20
+	_note_hint.anchor_left = 0.0
+	_note_hint.anchor_right = 1.0
+	_note_hint.anchor_top = 1.0
+	_note_hint.anchor_bottom = 1.0
+	_note_hint.offset_left = 0.0
+	_note_hint.offset_right = 0.0
+	_note_hint.offset_top = -72.0
+	_note_hint.offset_bottom = -32.0
+	_note_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_note_hint.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_note_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 
 # ============================================================
@@ -114,12 +142,68 @@ func _on_mouse_exit() -> void:
 
 func _on_note_clicked(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		_note_overlay.visible = true
+		_show_note_overlay()
 
 
 func _on_note_bg_clicked(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		_note_overlay.visible = false
+
+
+func _on_note_mouse_entered() -> void:
+	_note_hovered = true
+	_on_mouse_enter(_get_note_hover_hint())
+
+
+func _on_note_mouse_exited() -> void:
+	_note_hovered = false
+	_on_mouse_exit()
+
+
+func _show_note_overlay() -> void:
+	if darkroom_note_collected == 1:
+		_on_mouse_enter("你已经收集过了")
+		return
+	_refresh_note_collect_hint()
+	_note_overlay.visible = true
+
+
+func _restore_note_collection_state() -> void:
+	var saved_note_collected = FragmentManager.get_fragment_state("0001", "darkroom_note_collected")
+	if typeof(saved_note_collected) == TYPE_INT:
+		darkroom_note_collected = clampi(saved_note_collected, 0, 1)
+	elif typeof(saved_note_collected) == TYPE_BOOL:
+		darkroom_note_collected = 1 if saved_note_collected else 0
+	_refresh_note_collect_hint()
+
+
+func _get_note_hover_hint() -> String:
+	if darkroom_note_collected == 1:
+		return "你已经收集过了"
+	return "[E] 查看便签 | 打开后按 E 收集"
+
+
+func _refresh_note_collect_hint() -> void:
+	if _note_hint == null:
+		return
+	_note_hint.add_theme_font_size_override("font_size", 16)
+	if darkroom_note_collected == 1:
+		_note_hint.add_theme_color_override("font_color", Color(0.72, 0.72, 0.72, 0.9))
+		_note_hint.text = "你已经收集过了 | 点击或按 Esc 关闭"
+	else:
+		_note_hint.add_theme_color_override("font_color", Color(0.92, 0.84, 0.68, 0.95))
+		_note_hint.text = "[E] 收集暗室便签 | 点击任意位置或按 Esc 关闭"
+
+
+func _collect_darkroom_note() -> void:
+	if darkroom_note_collected == 1:
+		return
+	darkroom_note_collected = 1
+	FragmentManager.set_fragment_state("0001", "darkroom_note_collected", darkroom_note_collected)
+	_refresh_note_collect_hint()
+	if SaveManager.get_current_slot() >= 0:
+		SaveManager.save_game()
+	print("[Darkroom] Note collected")
 
 
 # ============================================================
@@ -283,6 +367,7 @@ func _show_completion_overlay() -> void:
 	return_btn.pressed.connect(func() -> void:
 		get_tree().change_scene_to_file("res://scenes/star_map.tscn")
 	)
+	return_btn.pressed.connect(UISoundManager.play_click)
 	button_row.add_child(return_btn)
 
 	var continue_btn := Button.new()
@@ -294,6 +379,7 @@ func _show_completion_overlay() -> void:
 		print("[Darkroom] 玩家选择继续游玩 — 返回启程之镇 (OutDoor)")
 		SceneManager.change_scene(EXIT_SCENE, "OutDoor")
 	)
+	continue_btn.pressed.connect(UISoundManager.play_click)
 	button_row.add_child(continue_btn)
 
 	# 面板淡入动画
@@ -321,6 +407,17 @@ func _go_back() -> void:
 # ============================================================
 
 func _input(event: InputEvent) -> void:
+	if _note_overlay.visible and event.is_action_pressed("interact"):
+		if darkroom_note_collected == 0:
+			_collect_darkroom_note()
+		else:
+			_note_overlay.visible = false
+		get_viewport().set_input_as_handled()
+		return
+	if _note_hovered and event.is_action_pressed("interact"):
+		_show_note_overlay()
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed("escape"):
 		if _note_overlay.visible:
 			_note_overlay.visible = false

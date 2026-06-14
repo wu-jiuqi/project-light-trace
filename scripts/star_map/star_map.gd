@@ -4,6 +4,7 @@ extends CanvasLayer
 const DETAIL_CARD_SIZE := Vector2(470, 628)
 const DETAIL_HIGHLIGHT_COLOR := Color(0.63, 0.42, 0.15, 0.18)
 const BGM_STAR_MAP = preload("res://assets/audio/bgm/bgm_star_map_loop.ogg")
+const FRAGMENT_0001_TRANSITION_SCENE := "res://scenes/cinematic/fragment_0001_transition.tscn"
 
 @onready var shard_canvas: StarShardCanvas = $FragmentContainer/ShardCanvas
 @onready var detail_card: Control = $UI/DetailCard
@@ -25,7 +26,9 @@ func _ready() -> void:
 	shard_canvas.fragment_selected.connect(_on_fragment_selected)
 	shard_canvas.empty_clicked.connect(_close_detail_card)
 	enter_btn.pressed.connect(_on_enter_btn_pressed)
+	enter_btn.pressed.connect(UISoundManager.play_click)
 	close_btn.pressed.connect(_close_detail_card)
+	close_btn.pressed.connect(UISoundManager.play_click)
 	get_viewport().size_changed.connect(_layout_detail_card)
 	var animate_id = FragmentManager.consume_completion_animation_id()
 	shard_canvas.configure(FragmentManager.fragments, animate_id)
@@ -231,6 +234,10 @@ func _on_enter_btn_pressed() -> void:
 	if selected_fragment == null:
 		return
 	if not FragmentManager.enter_fragment(selected_fragment):
+		return
+	if selected_fragment.id == "0001" and ResourceLoader.exists(FRAGMENT_0001_TRANSITION_SCENE):
+		_stop_bgm()
+		get_tree().change_scene_to_file(FRAGMENT_0001_TRANSITION_SCENE)
 		return
 	if selected_fragment.scene_path and ResourceLoader.exists(selected_fragment.scene_path):
 		_stop_bgm()

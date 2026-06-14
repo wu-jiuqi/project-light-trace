@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://diw2fyqa5ueba"]
+
+[ext_resource type="Texture2D" uid="uid://dt1grhcgwv8na" path="res://assets/papercraft/fragments/id0002/environment/ChatGPT Image 2026年6月9日 22_03_33.png" id="1_2s1to"]
+
+[node name="FragmentId0002" type="Node2D" unique_id=1114181759]
+
+[node name="inside" type="Sprite2D" parent="." unique_id=672202516]
+position = Vector2(644, 382.5)
+scale = Vector2(1.064, 0.9320477)
+texture = ExtResource("1_2s1to")
