@@ -17,6 +17,7 @@ script = ExtResource("2_npc_script")
 npc_name = "老教师"
 npc_role = "退休语文教师"
 npc_kb_id = "oldteacher"
+use_rag = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=620498560]
 position = Vector2(-0.5, -13.5)

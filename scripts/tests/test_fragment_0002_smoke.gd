@@ -26,6 +26,7 @@ func _run() -> void:
 	await _check_scene("res://scenes/fragments/fragment_0002.tscn", "WorldRoot/Interaction", "res://scenes/rooms/id0002/ticket_check.tscn")
 	await _check_scene("res://scenes/rooms/id0002/ticket_check.tscn", "WorldRoot/StationExit", "res://scenes/fragments/fragment_0002.tscn")
 	_check_npcs()
+	await _check_ticket_check_flow_scene()
 	_check_rag()
 
 	if _failures == 0:
@@ -81,8 +82,48 @@ func _check_npcs() -> void:
 		var npc: Node = load(NPC_SCENES[npc_id]).instantiate()
 		_check(npc.get_script() != null and npc.get_script().resource_path == NPC_SCRIPT_PATH, "%s uses npc_controller" % npc_id)
 		_check("npc_kb_id" in npc and str(npc.npc_kb_id) == npc_id, "%s has expected kb id" % npc_id)
-		_check("use_rag" in npc and bool(npc.use_rag), "%s has RAG enabled" % npc_id)
+		if npc_id == "conductor":
+			_check("use_rag" in npc and bool(npc.use_rag), "%s keeps RAG enabled" % npc_id)
+		else:
+			_check("use_rag" in npc and not bool(npc.use_rag), "%s uses monologue instead of RAG" % npc_id)
 		npc.queue_free()
+
+
+func _check_ticket_check_flow_scene() -> void:
+	var scene: Node = load("res://scenes/rooms/id0002/ticket_check.tscn").instantiate()
+	root.add_child(scene)
+	current_scene = scene
+	await process_frame
+	await process_frame
+
+	_check(scene.has_method("uses_alert_system") and not scene.uses_alert_system(), "0002 disables alert system")
+	_check(scene.has_method("handle_npc_interaction"), "0002 provides NPC interaction router")
+	_check(scene.has_method("handle_npc_player_message"), "0002 provides conductor message interceptor")
+	_check(scene.has_node("UIRoot/Monologue"), "ticket check scene has Monologue UI")
+	_check(scene.has_node("UIRoot/SeatTable"), "ticket check scene has SeatTable UI")
+	_check(scene.has_node("UIRoot/SourceMarkTicketOverlay"), "ticket check scene has source mark ticket overlay")
+
+	var oldteacher := scene.get_node_or_null("WorldRoot/NpcOldteacher")
+	_check(oldteacher != null and scene.handle_npc_interaction(oldteacher), "oldteacher interaction is handled by fragment route")
+	var monologue := scene.get_node_or_null("UIRoot/Monologue")
+	_check(monologue != null and monologue.visible, "oldteacher opens monologue UI")
+	if monologue != null and monologue.has_method("close_monologue"):
+		monologue.close_monologue()
+	await process_frame
+
+	scene.queue_free()
+	await process_frame
+
+	var conductor_scene: Node = load("res://scenes/fragments/fragment_0002.tscn").instantiate()
+	root.add_child(conductor_scene)
+	current_scene = conductor_scene
+	await process_frame
+	await process_frame
+	var conductor := conductor_scene.get_node_or_null("WorldRoot/NpcConductor")
+	_check(conductor != null, "fragment 0002 scene has conductor")
+	_check(conductor != null and conductor_scene.handle_npc_interaction(conductor), "conductor interaction is handled by fragment route")
+	conductor_scene.queue_free()
+	await process_frame
 
 
 func _check_rag() -> void:
@@ -96,7 +137,7 @@ func _check_rag() -> void:
 		"awakened_colors": [],
 		"awakened_count": 0,
 	}
-	for npc_id in NPC_IDS:
+	for npc_id in ["conductor"]:
 		var prompt: String = rag.assemble_prompt(npc_id, "车票在哪里？", state)
 		_check(prompt.length() > 0, "%s RAG prompt is non-empty" % npc_id)
 		_check(not prompt.contains("## 角色身份\n你是一个NPC。"), "%s RAG prompt uses 0002 identity" % npc_id)

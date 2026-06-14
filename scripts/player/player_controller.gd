@@ -312,6 +312,9 @@ func _is_npc_node(node: Node) -> bool:
 func _try_fragment_npc_interaction(npc: Node2D) -> bool:
 	var states := get_tree().get_nodes_in_group("fragment_state")
 	for state in states:
+		if state and state.has_method("handle_npc_interaction"):
+			if state.handle_npc_interaction(npc):
+				return true
 		if state and state.has_method("try_start_lin_intermission_dialogue"):
 			if state.try_start_lin_intermission_dialogue(npc):
 				return true

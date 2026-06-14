@@ -1,0 +1,113 @@
+[gd_scene load_steps=5 format=3 uid="uid://dhfye7rmtjwow"]
+
+[ext_resource type="Texture2D" uid="uid://dt0hd2ti4bmi4" path="res://assets/papercraft/core/ui/dialogue_box/large_page.png" id="1_5mm4j"]
+[ext_resource type="Texture2D" uid="uid://be3sc7cjwntkv" path="res://assets/papercraft/core/ui/dialogue_box/corner_compass.png" id="2_0vfl0"]
+[ext_resource type="Texture2D" uid="uid://cahdx48g8a4wa" path="res://assets/papercraft/core/ui/dialogue_box/right_mountains.png" id="3_p4mck"]
+[ext_resource type="Script" path="res://scripts/ui/monologue.gd" id="4_script"]
+
+[node name="Monologue" type="Control" unique_id=1748067013]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+script = ExtResource("4_script")
+
+[node name="Vignette" type="ColorRect" parent="." unique_id=758025987]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.03529412, 0.03137255, 0.02745098, 0.82)
+
+[node name="Stage" type="Control" parent="." unique_id=1888744574]
+anchors_preset = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+mouse_filter = 2
+
+[node name="LargePage" type="TextureRect" parent="Stage" unique_id=414041539]
+layout_mode = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+texture = ExtResource("1_5mm4j")
+expand_mode = 1
+
+[node name="LeftCorner" type="TextureRect" parent="Stage" unique_id=711724978]
+layout_mode = 0
+offset_right = 172.0
+offset_bottom = 128.0
+texture = ExtResource("2_0vfl0")
+expand_mode = 1
+
+[node name="RightCorner" type="TextureRect" parent="Stage" unique_id=1047075181]
+layout_mode = 0
+offset_left = 1086.0
+offset_top = 487.0
+offset_right = 1280.0
+offset_bottom = 717.0
+texture = ExtResource("3_p4mck")
+
+[node name="Monologue" type="Control" parent="Stage" unique_id=1195746994]
+anchors_preset = 0
+offset_left = 64.0
+offset_top = 36.0
+offset_right = 1344.0
+offset_bottom = 756.0
+scale = Vector2(0.9, 0.9)
+
+[node name="Monologue" type="RichTextLabel" parent="Stage/Monologue" unique_id=1844437241]
+z_index = 3
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 92.0
+offset_top = 88.0
+offset_right = -92.0
+offset_bottom = -88.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/default_color = Color(0.91, 0.82, 0.63, 1)
+theme_override_font_sizes/normal_font_size = 28
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+
+[node name="Cover" type="ColorRect" parent="Stage/Monologue" unique_id=2103745737]
+z_index = 1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.03876, 0.025840001, 0.025840001, 0.82000005)
+
+[node name="MonologueTexture" type="TextureRect" parent="Stage/Monologue" unique_id=1148065975]
+z_index = 0
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="InteractiveHost" type="Control" parent="Stage/Monologue"]
+z_index = 2
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2

@@ -224,6 +224,16 @@ func _uses_fragment_compliance_mode() -> bool:
 		and _fragment_state.uses_compliance_mode()
 
 
+func _uses_alert_system() -> bool:
+	if _fragment_state == null:
+		var states = get_tree().get_nodes_in_group("fragment_state")
+		if states.size() > 0:
+			_fragment_state = states[0]
+	if _fragment_state != null and _fragment_state.has_method("uses_alert_system"):
+		return _fragment_state.uses_alert_system()
+	return true
+
+
 func _ready() -> void:
 	add_to_group("npc")
 	target_position = global_position
@@ -238,11 +248,16 @@ func _ready() -> void:
 	var profile = _get_alert_profile()
 	var base_trust = profile.get("trust_modifier", 0.0)
 	var compliance_mode := _uses_fragment_compliance_mode()
+	var alert_enabled := _uses_alert_system()
 	
 	# 尝试从持久化缓存恢复状态（重进房间不重置位置和警觉）
 	var scene_name = get_parent().name if get_parent() else ""
 	var saved = GameManager.load_npc_state(scene_name, npc_kb_id)
-	if compliance_mode:
+	if not alert_enabled:
+		npc_suspicion = 0.0
+		npc_alert_phase = NPCAlertPhase.TRUSTING
+		doubts_player_identity = false
+	elif compliance_mode:
 		npc_suspicion = 0.0
 		npc_alert_phase = NPCAlertPhase.TRUSTING
 		doubts_player_identity = false
@@ -304,6 +319,8 @@ func _setup_shadow() -> void:
 func _on_tree_exiting() -> void:
 	## 节点从场景树移除前保存状态
 	if npc_kb_id == "": return
+	if not _uses_alert_system():
+		return
 	if _uses_fragment_compliance_mode():
 		return
 	var scene_name = get_parent().name if get_parent() else ""
@@ -313,7 +330,8 @@ func _on_tree_exiting() -> void:
 
 func _process(delta: float) -> void:
 	# 警觉衰减（不说话时缓慢下降）
-	_process_alert_decay(delta)
+	if _uses_alert_system():
+		_process_alert_decay(delta)
 	
 	match current_state:
 		NPCState.IDLE:
@@ -445,6 +463,8 @@ func _process_alert_decay(delta: float) -> void:
 
 func modify_alert(amount: float, reason: String = "") -> void:
 	## 修改NPC警觉值
+	if not _uses_alert_system():
+		return
 	if _uses_fragment_compliance_mode():
 		_modify_fragment_compliance_from_alert(amount, reason)
 		return
@@ -523,6 +543,8 @@ func _update_behavior_from_alert() -> void:
 
 func check_player_input_for_alert(player_input: String) -> void:
 	## 分析玩家输入，如果触及敏感话题则增加警觉
+	if not _uses_alert_system():
+		return
 	var profile = _get_alert_profile()
 	if npc_kb_id == "oldpainter":
 		return  # 老画家完全信任玩家
@@ -565,6 +587,8 @@ func check_player_input_for_alert(player_input: String) -> void:
 
 func check_safe_action(player_input: String) -> void:
 	## 检查玩家的行为是否能降低警觉
+	if not _uses_alert_system():
+		return
 	if _uses_fragment_compliance_mode():
 		return
 	var profile = _get_alert_profile()
@@ -598,6 +622,8 @@ func get_alert_phase_text() -> String:
 
 func get_alert_context_for_rag() -> String:
 	## 为RAG检索生成警觉上下文 — 指导LLM以不同警觉等级回应
+	if not _uses_alert_system():
+		return ""
 	if npc_alert_phase <= NPCAlertPhase.TRUSTING:
 		return ""
 
@@ -696,6 +722,8 @@ func _analyze_llm_response_for_alert(response: String, player_input: String) -> 
 	## 分析LLM的回复内容来判断NPC是否变得警觉
 	## 不是关键词匹配——是观察NPC的自然反应
 	## 如果NPC回复变得简短、抗拒、回避，说明玩家的问题让他不安
+	if not _uses_alert_system():
+		return
 	var compliance_mode := _uses_fragment_compliance_mode()
 	if response == "" or npc_kb_id == "oldpainter":
 		return
@@ -1053,6 +1081,9 @@ func send_player_message(message: String) -> void:
 	## 玩家输入 → RAG → LLM流式 → 聊天UI逐字显示
 	## 先用本地规则更新警觉/合规度，再让LLM按最新状态自然表现态度
 	print("[NPC] %s 收到: \"%s\"" % [npc_name, message])
+	if _fragment_state and _fragment_state.has_method("handle_npc_player_message"):
+		if _fragment_state.handle_npc_player_message(self, message):
+			return
 	_llm_last_input = message  # 记下玩家输入，等LLM回复后分析
 	check_safe_action(message)
 	check_player_input_for_alert(message)
@@ -1269,7 +1300,8 @@ func _on_stream_completed(full_text: String) -> void:
 	print("[NPC] %s 流式完成 (%d chars)" % [npc_name, clean_text.length()])
 	
 	# === LLM判断警觉：分析LLM的回复内容，而不是做关键词匹配 ===
-	_analyze_llm_response_for_alert(clean_text, _llm_last_input)
+	if _uses_alert_system():
+		_analyze_llm_response_for_alert(clean_text, _llm_last_input)
 	
 	# 对话完成后检查颜色触发
 	_check_color_trigger()

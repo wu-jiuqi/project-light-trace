@@ -17,6 +17,7 @@ script = ExtResource("2_npc_script")
 npc_name = "年轻士兵"
 npc_role = "士兵"
 npc_kb_id = "youngsoldier"
+use_rag = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1226513448]
 position = Vector2(0.5, -15)

@@ -83,6 +83,13 @@ func _initialize_fragments() -> void:
 
 func _ensure_default_fragment_states() -> void:
 	## 初始化所有已知碎片的默认专属状态
+	if not _fragment_states.has("0002"):
+		_fragment_states["0002"] = {
+			"seat_selection": {},
+			"left_npc_id": "",
+			"source_mark_ticket_collected": false,
+			"completed": false,
+		}
 	_fragment_states["0762"] = {
 		"awakened_colors": [false, false, false, false, false, false],
 		"melody_triggered": false,
@@ -177,6 +184,14 @@ func reset_all_fragments() -> void:
 func reset_fragment_states(fragment_id: String) -> void:
 	## 重置指定碎片的专属状态为默认值
 	match fragment_id:
+		"0002":
+			_fragment_states["0002"] = {
+				"seat_selection": {},
+				"left_npc_id": "",
+				"source_mark_ticket_collected": false,
+				"completed": false,
+			}
+			print("[FragmentManager] 碎片 %s 的专属状态已重置" % fragment_id)
 		"0762":
 			_fragment_states["0762"] = {
 				"awakened_colors": [false, false, false, false, false, false],
