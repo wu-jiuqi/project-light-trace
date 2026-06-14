@@ -1,4 +1,6 @@
 extends CharacterBody2D
+
+const SoftShadow = preload("res://scripts/fragment/soft_shadow.gd")
 ## AI子体NPC控制器
 ## 驱动碎片世界中NPC的移动、对话、警觉行为
 ## 每个NPC维护独立的警觉值和个人档案
@@ -194,7 +196,7 @@ var patrol_points: Array[Vector2] = []
 var patrol_index: int = 0
 var target_position: Vector2 = Vector2.ZERO
 var idle_timer: float = 0.0
-@onready var _shadow_sprite: Sprite2D = get_node_or_null("Visual Node2D/Shadow Sprite2D") as Sprite2D
+var _shadow_sprite: Sprite2D = null  # 在 _ready() 中通过 _setup_shadow() 赋值
 
 ## RAG状态引用
 var _fragment_state: Node = null
@@ -294,26 +296,19 @@ func _ready() -> void:
 
 
 func _setup_shadow() -> void:
+	# 诊断：@onready 可能返回 null，这里做 fallback 重新查找
 	if not _shadow_sprite:
-		return
+		var fallback := get_node_or_null("Visual Node2D/Shadow Sprite2D") as Sprite2D
+		if fallback:
+			_shadow_sprite = fallback
+			print("[NPC %s] Shadow Sprite2D fallback 查找成功" % npc_name)
+		else:
+			printerr("[NPC %s] Shadow Sprite2D 未找到！请检查节点树路径 Visual Node2D/Shadow Sprite2D" % npc_name)
+			return
 
-	var size: int = 64
-	var image = Image.create(size, size, false, Image.FORMAT_RGBA8)
-	var center: float = size / 2.0
-	var radius: float = center - 2
-
-	for y in size:
-		for x in size:
-			var dist = Vector2(x - center, y - center).length()
-			var alpha: float = 0.0
-			if dist < radius:
-				alpha = max(0.0, 1.0 - dist / radius) * 0.5
-			image.set_pixel(x, y, Color(0, 0, 0, alpha))
-
-	_shadow_sprite.texture = ImageTexture.create_from_image(image)
-	_shadow_sprite.z_index = -1
-	_shadow_sprite.scale = Vector2(0.7, 0.7)
-	_shadow_sprite.position = Vector2(0, -4)
+	var visual_sprite := get_node_or_null("Visual Node2D/Visual") as Sprite2D
+	SoftShadow.apply_to(_shadow_sprite, visual_sprite)
+	print("[NPC %s] Shader 阴影已生成 (scale=%.2f, pos=(%.0f,%.0f))" % [npc_name, _shadow_sprite.scale.x, _shadow_sprite.position.x, _shadow_sprite.position.y])
 
 
 func _on_tree_exiting() -> void:

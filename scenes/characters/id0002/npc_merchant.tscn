@@ -11,6 +11,8 @@ radius = 24.0
 height = 128.0
 
 [node name="NpcMerchant" type="CharacterBody2D" unique_id=1198139631]
+z_as_relative = false
+y_sort_enabled = true
 collision_layer = 8
 collision_mask = 0
 script = ExtResource("2_npc_script")

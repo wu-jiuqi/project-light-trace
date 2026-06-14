@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://diw2fyqa5ueba"]
 
-[ext_resource type="Texture2D" uid="uid://dt1grhcgwv8na" path="res://assets/papercraft/fragments/id0002/environment/ChatGPT Image 2026年6月9日 22_03_33.png" id="1_2s1to"]
+[ext_resource type="Texture2D" uid="uid://dt1grhcgwv8na" path="res://assets/papercraft/fragments/id0002/environment/ticket_check.png" id="1_2s1to"]
 [ext_resource type="PackedScene" uid="uid://ger8bebklxf5" path="res://scenes/characters/id0002/npc_merchant.tscn" id="2_vk06p"]
 [ext_resource type="PackedScene" uid="uid://brdyw6u1suwxg" path="res://scenes/characters/id0002/npc_flowergirl.tscn" id="3_iudsr"]
 [ext_resource type="PackedScene" uid="uid://d3xefr4vk715b" path="res://scenes/characters/id0002/npc_youngsoldier.tscn" id="4_7g5ld"]
@@ -24,11 +24,14 @@ distance = -461.0
 size = Vector2(1088, 26.125)
 
 [node name="TicketCheck" type="Node2D" unique_id=1114181759]
+y_sort_enabled = true
 script = ExtResource("7_scene_script")
 
 [node name="WorldRoot" type="Node2D" parent="." unique_id=573178069]
+y_sort_enabled = true
 
 [node name="Background" type="Node2D" parent="WorldRoot" unique_id=1255186320]
+z_index = -1
 
 [node name="inside" type="Sprite2D" parent="WorldRoot/Background" unique_id=672202516]
 position = Vector2(644.00006, 340)

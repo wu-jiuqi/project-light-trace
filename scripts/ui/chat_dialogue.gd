@@ -13,6 +13,7 @@ const PORTRAIT_FULL: float = 1.0
 signal dialogue_opened(npc_name: String)
 signal dialogue_closed()
 signal player_message_sent(message: String)
+signal continue_requested()
 
 # UI
 var _canvas: CanvasLayer
@@ -46,11 +47,13 @@ var _stream_pending_text: String = ""
 var _stream_final_text: String = ""
 var _stream_finish_requested: bool = false
 var _stream_flush_progress: float = 0.0
+var _continue_prompt_active: bool = false
 var _focus_retry_count: int = 0
 var _ui_built: bool = false
 const FOCUS_MAX_RETRIES: int = 8
 const STREAM_CHARS_PER_SECOND: float = 46.0
 const STREAM_MAX_CHARS_PER_FRAME: int = 3
+const CONTINUE_PROMPT_TEXT_COLOR := Color(0.03, 0.025, 0.018, 1.0)
 
 
 func _ready() -> void:
@@ -124,6 +127,8 @@ func _reset_scene_ui_refs() -> void:
 	_stream_final_text = ""
 	_stream_finish_requested = false
 	_stream_flush_progress = 0.0
+	_continue_prompt_active = false
+	_clear_continue_prompt_style()
 
 
 func _build_ui() -> void:
@@ -303,6 +308,10 @@ func _process(delta: float) -> void:
 func _input(event: InputEvent) -> void:
 	if not is_open:
 		return
+	if _continue_prompt_active and _is_continue_prompt_event(event):
+		_finish_continue_prompt()
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed("ui_cancel") or event.is_action_pressed("escape"):
 		if _history_mode:
 			_close_history()
@@ -313,6 +322,10 @@ func _input(event: InputEvent) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_open:
+		return
+	if _continue_prompt_active and _is_continue_prompt_event(event):
+		_finish_continue_prompt()
+		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed("ui_cancel") or event.is_action_pressed("escape"):
 		if _history_mode:
@@ -335,6 +348,8 @@ func open(npc_ctrl: Node, greeting: String = "") -> void:
 	_chat_display.text = ""
 	_base_text = ""
 	_stream_text = ""
+	_continue_prompt_active = false
+	_clear_continue_prompt_style()
 	
 	_name_label.text = npc_name
 	_think_label.text = ""
@@ -396,6 +411,8 @@ func close() -> void:
 	_stream_final_text = ""
 	_stream_finish_requested = false
 	_stream_flush_progress = 0.0
+	_continue_prompt_active = false
+	_clear_continue_prompt_style()
 	print("[Chat] 关闭: %s" % name)
 	if _npc_portrait:
 		_npc_portrait.texture = null
@@ -477,6 +494,8 @@ func stream_begin() -> void:
 	_stream_final_text = ""
 	_stream_finish_requested = false
 	_stream_flush_progress = 0.0
+	_continue_prompt_active = false
+	_clear_continue_prompt_style()
 	_base_text = _chat_display.text
 	_think_label.text = "正在输入..."
 	_input_box.editable = false
@@ -566,6 +585,50 @@ func stream_local_npc_msg(text: String) -> void:
 		stream_end(text)
 		while is_open and _stream_finish_requested:
 			await get_tree().create_timer(0.02).timeout
+
+
+func wait_for_continue(prompt_text: String = "点击任意位置继续") -> void:
+	if not is_open:
+		return
+	if not _ensure_required_dialogue_nodes("wait_for_continue"):
+		return
+	_show_continue_prompt(prompt_text)
+	await continue_requested
+
+
+func _show_continue_prompt(prompt_text: String) -> void:
+	_continue_prompt_active = true
+	_focus_retry_count = 0
+	_think_label.text = ""
+	_input_box.text = prompt_text
+	_input_box.add_theme_color_override("font_uneditable_color", CONTINUE_PROMPT_TEXT_COLOR)
+	_input_box.editable = false
+	_input_box.release_focus()
+	_send_btn.disabled = true
+	_give_btn.disabled = true
+
+
+func _is_continue_prompt_event(event: InputEvent) -> bool:
+	if event is InputEventMouseButton:
+		return event.button_index == MOUSE_BUTTON_LEFT and event.pressed
+	if event is InputEventScreenTouch:
+		return event.pressed
+	return event.is_action_pressed("ui_accept") or event.is_action_pressed("interact")
+
+
+func _finish_continue_prompt() -> void:
+	if not _continue_prompt_active:
+		return
+	_continue_prompt_active = false
+	if _input_box != null:
+		_input_box.text = ""
+	_clear_continue_prompt_style()
+	continue_requested.emit()
+
+
+func _clear_continue_prompt_style() -> void:
+	if _input_box != null:
+		_input_box.remove_theme_color_override("font_uneditable_color")
 
 
 func add_player_msg(text: String) -> void:

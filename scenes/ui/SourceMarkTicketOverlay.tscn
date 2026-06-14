@@ -1,18 +1,18 @@
 [gd_scene format=3 uid="uid://be8sjxich2t0f"]
 
-[ext_resource type="Script" path="res://scripts/ui/source_mark_ticket_overlay.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://ymk8spngd2jk" path="res://scripts/ui/source_mark_ticket_overlay.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://dl1r5w4h0xux4" path="res://assets/papercraft/fragments/id0002/seat_ticket/t6.png" id="2_rh8mw"]
 
-[node name="SourceMarkTicketOverlay" type="Control"]
+[node name="SourceMarkTicketOverlay" type="Control" unique_id=556198075]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 0
 script = ExtResource("1_script")
 
-[node name="Dim" type="ColorRect" parent="."]
+[node name="Dim" type="ColorRect" parent="." unique_id=13848269]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -20,35 +20,33 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.015, 0.012, 0.01, 0.9)
+color = Color(0.012920001, 0.012920001, 0.012920001, 0.6)
 
-[node name="Stage" type="Control" parent="."]
+[node name="Stage" type="Control" parent="." unique_id=2008226689]
 layout_mode = 1
+anchors_preset = 0
 offset_right = 1280.0
 offset_bottom = 720.0
 mouse_filter = 2
 
-[node name="TicketTexture" type="TextureRect" parent="Stage"]
-layout_mode = 0
-offset_left = 360.0
-offset_top = 92.0
-offset_right = 920.0
-offset_bottom = 592.0
-mouse_filter = 2
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Placeholder" type="ColorRect" parent="Stage/TicketTexture"]
+[node name="TicketTexture" type="TextureRect" parent="Stage" unique_id=1402591074]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -458.75
+offset_top = -278.5
+offset_right = 458.75
+offset_bottom = 278.5
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.75, 0.62, 0.38, 0.74)
+texture = ExtResource("2_rh8mw")
+expand_mode = 1
 
-[node name="HintLabel" type="Label" parent="Stage"]
+[node name="HintLabel" type="Label" parent="Stage" unique_id=1178505506]
 layout_mode = 0
 offset_left = 260.0
 offset_top = 626.0
@@ -56,6 +54,6 @@ offset_right = 1020.0
 offset_bottom = 672.0
 theme_override_colors/font_color = Color(0.95, 0.82, 0.58, 1)
 theme_override_font_sizes/font_size = 24
-text = "按 E 收集源印"
+text = "点击车票或按 E 收集源印"
 horizontal_alignment = 1
 vertical_alignment = 1

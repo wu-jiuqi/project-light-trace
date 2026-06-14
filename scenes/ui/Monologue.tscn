@@ -53,6 +53,36 @@ offset_right = 1280.0
 offset_bottom = 717.0
 texture = ExtResource("3_p4mck")
 
+[node name="SkipHint" type="Label" parent="Stage"]
+z_index = 5
+visible = false
+layout_mode = 0
+offset_left = 948.0
+offset_top = 30.0
+offset_right = 1170.0
+offset_bottom = 56.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.91, 0.82, 0.63, 0.82)
+theme_override_font_sizes/font_size = 18
+text = "长按2秒跳过"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="ContinueHint" type="Label" parent="Stage"]
+z_index = 5
+visible = false
+layout_mode = 0
+offset_left = 500.0
+offset_top = 656.0
+offset_right = 780.0
+offset_bottom = 684.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.91, 0.82, 0.63, 0.82)
+theme_override_font_sizes/font_size = 20
+text = "点击以继续"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="Monologue" type="Control" parent="Stage" unique_id=1195746994]
 anchors_preset = 0
 offset_left = 64.0

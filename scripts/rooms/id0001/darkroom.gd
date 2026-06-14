@@ -216,6 +216,7 @@ func _on_emblem_clicked(_viewport: Node, event: InputEvent, _shape_idx: int) -> 
 
 
 func _complete_fragment() -> void:
+	_collect_darkroom_emblem()
 	for entry in GameManager.source_mark_log:
 		if entry.get("fragment_id", "") == "0001":
 			print("[Darkroom] 碎片 #0001 已记录源印，跳过")
@@ -232,6 +233,14 @@ func _complete_fragment() -> void:
 
 	print("[Darkroom] 源印归位！晨曦之印 — 碎片 #0001 完成")
 	_show_completion_overlay()
+
+
+func _collect_darkroom_emblem() -> void:
+	if FragmentManager.get_fragment_state("0001", "darkroom_emblem_collected") == true:
+		return
+	FragmentManager.set_fragment_state("0001", "darkroom_emblem_collected", true)
+	if SaveManager.get_current_slot() >= 0:
+		SaveManager.save_game()
 
 
 func _show_completion_overlay() -> void:

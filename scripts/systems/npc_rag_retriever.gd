@@ -28,7 +28,7 @@ var _fragment_0002_shared_chunks: Array = []
 var _fragment_0002_l1_compact: String = ""
 
 const FRAGMENT_0001_NPCS: Array[String] = ["linguide", "chentechnology", "wangdirector", "zhaosecurity"]
-const FRAGMENT_0002_NPCS: Array[String] = ["oldteacher", "youngsoldier", "flowergirl", "merchant", "littlegirl", "conductor"]
+const FRAGMENT_0002_NPCS: Array[String] = ["conductor"]
 
 # 加载状态
 var _is_loaded: bool = false
@@ -148,7 +148,7 @@ func _collect_fragment_0001_shared_chunks(chunks: Array) -> void:
 
 
 func _load_fragment_0002_knowledge() -> void:
-	## 加载碎片0002黄昏驿站的6个NPC知识库
+	## 加载碎片0002黄昏驿站的检票员知识库（仅conductor，其知识包含全部6个NPC信息）
 	var f0002_path = "res://LLM/0002/"
 
 	var shared_data = _load_json(f0002_path + "l0_shared_identity.json")
@@ -230,31 +230,10 @@ func _load_json(path: String) -> Dictionary:
 	var json = JSON.new()
 	var error = json.parse(text)
 	if error != OK:
-		var relaxed_data := _try_parse_relaxed_fragment_0002_json(path, text)
-		if not relaxed_data.is_empty():
-			return relaxed_data
 		_load_error = "JSON解析错误: %s (line %d)" % [json.get_error_message(), json.get_error_line()]
 		print("[NPCRagRetriever] 错误: %s" % _load_error)
 		return {}
 	
-	return json.get_data()
-
-
-func _try_parse_relaxed_fragment_0002_json(path: String, text: String) -> Dictionary:
-	## 0002 老教师知识文件里有一处中文内容引号未转义；运行时兼容解析，不改原始JSON内容。
-	if not path.ends_with("oldteacher_knowledge.json"):
-		return {}
-
-	var fixed_text := text.replace("最擅长讲的是\"离别\"——", "最擅长讲的是\\\"离别\\\"——")
-	if fixed_text == text:
-		return {}
-
-	var json := JSON.new()
-	var error := json.parse(fixed_text)
-	if error != OK:
-		return {}
-
-	print("[NPCRagRetriever] 兼容加载非标准JSON: %s" % path)
 	return json.get_data()
 
 
@@ -333,11 +312,11 @@ func extract_keywords(player_input: String) -> Dictionary:
 		"陈技术": "chentechnology", "实验室": "chentechnology", "技术员": "chentechnology",
 		"王主管": "wangdirector", "行政中心": "wangdirector", "宣讲": "wangdirector",
 		"赵安保": "zhaosecurity", "安保": "zhaosecurity", "光墙": "zhaosecurity",
-		"老教师": "oldteacher", "教师": "oldteacher", "老师": "oldteacher", "语文老师": "oldteacher",
-		"年轻士兵": "youngsoldier", "士兵": "youngsoldier", "军人": "youngsoldier",
-		"卖花女": "flowergirl", "卖花": "flowergirl", "矢车菊": "flowergirl",
-		"商人": "merchant", "公文包": "merchant", "备用票": "merchant",
-		"小女孩": "littlegirl", "女孩": "littlegirl", "糖果": "littlegirl",
+		"老教师": "conductor", "教师": "conductor", "老师": "conductor", "语文老师": "conductor",
+		"年轻士兵": "conductor", "士兵": "conductor", "军人": "conductor",
+		"卖花女": "conductor", "卖花": "conductor", "矢车菊": "conductor",
+		"商人": "conductor", "公文包": "conductor", "备用票": "conductor",
+		"小女孩": "conductor", "女孩": "conductor", "糖果": "conductor",
 		"检票员": "conductor", "检票": "conductor", "站务员": "conductor", "车票": "conductor"
 	}
 	for name in npc_names:
@@ -996,31 +975,6 @@ const FALLBACK_TEMPLATES: Dictionary = {
 		"反正空房多得是——要续住的话说一声。",
 		"楼梯第三级咯吱得特别响——你踩左边就不会。",
 		"……嗯？（打了个哈欠）"
-	],
-	"oldteacher": [
-		"车还没来。你可以先坐一会儿。",
-		"我好像在等一个词，可它总是差一点回来。",
-		"不是所有人都该上车，这句话我记得很清楚。"
-	],
-	"youngsoldier": [
-		"站线安全。暂时。",
-		"我的目的地……不在票面上。",
-		"别问章。章已经被划掉了。"
-	],
-	"flowergirl": [
-		"要买一朵矢车菊吗？它们今天还醒着。",
-		"花不属于这里，可总得有人照看它们。",
-		"车没来，所以花还可以再等一会儿。"
-	],
-	"merchant": [
-		"合同可以晚点再谈，反正车也晚点。",
-		"备用票只是备用票，别把它想得太复杂。",
-		"停下来会让人想起不该想的事。"
-	],
-	"littlegirl": [
-		"妈妈说站黄线后面才安全。",
-		"轨道那边有光，它好像在问我是谁。",
-		"糖果还有颜色，所以今天不算太坏。"
 	],
 	"conductor": [
 		"票可以等一等，车还没进站。",

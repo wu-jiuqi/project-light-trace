@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3 uid="uid://q0yg6ueuatwb"]
+
+[ext_resource type="Texture2D" uid="uid://b762p5dyfxnse" path="res://assets/papercraft/fragments/id0002/monologue/npc_1/c1_14.png" id="1_7bivk"]
+[ext_resource type="Script" path="res://scripts/ui/click_collectible_scene.gd" id="2_collect"]
+
+[node name="Book" type="Node2D" unique_id=395130690]
+script = ExtResource("2_collect")
+
+[node name="Visual" type="Node2D" parent="." unique_id=1738156975]
+
+[node name="Visual" type="Sprite2D" parent="Visual" unique_id=2031786284]
+position = Vector2(640, 360)
+scale = Vector2(0.7655502, 0.76514333)
+texture = ExtResource("1_7bivk")
+
+[node name="Book" type="Area2D" parent="." unique_id=490902083]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Book" unique_id=1379957650]
+polygon = PackedVector2Array(549, 304, 709, 301, 715, 525, 535, 526)

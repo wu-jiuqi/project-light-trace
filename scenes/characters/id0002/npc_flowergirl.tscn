@@ -11,6 +11,8 @@ radius = 43.0
 height = 130.0
 
 [node name="NpcFlowergirl" type="CharacterBody2D" unique_id=1875047972]
+z_as_relative = false
+y_sort_enabled = true
 collision_layer = 8
 collision_mask = 0
 script = ExtResource("2_npc_script")

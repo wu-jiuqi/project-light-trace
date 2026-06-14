@@ -11,6 +11,8 @@ radius = 29.0
 height = 126.0
 
 [node name="NpcYoungsoldier" type="CharacterBody2D" unique_id=175132681]
+z_as_relative = false
+y_sort_enabled = true
 collision_layer = 8
 collision_mask = 0
 script = ExtResource("2_npc_script")

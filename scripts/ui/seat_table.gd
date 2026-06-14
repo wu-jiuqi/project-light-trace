@@ -3,6 +3,13 @@ class_name SeatTablePanel
 
 const Content = preload("res://scripts/fragment/fragment_0002_content.gd")
 const DESIGN_SIZE := Vector2(1280.0, 720.0)
+const TICKET_COLLECTION_KEYS: Dictionary = {
+	"oldteacher": "ticket_oldteacher_collected",
+	"youngsoldier": "ticket_youngsoldier_collected",
+	"flowergirl": "ticket_flowergirl_collected",
+	"merchant": "ticket_merchant_collected",
+	"littlegirl": "ticket_littlegirl_collected",
+}
 
 signal seating_saved(selection: Dictionary, left_npc_id: String)
 
@@ -10,7 +17,7 @@ signal seating_saved(selection: Dictionary, left_npc_id: String)
 @onready var _board_texture: TextureRect = $Stage/BoardTexture
 @onready var _ticket_layer: Control = $Stage/TicketLayer
 @onready var _seat_slots: Control = $Stage/SeatSlots
-@onready var _save_button: Button = $Stage/SaveButton
+@onready var _save_button: BaseButton = $Stage/SaveButton
 @onready var _hint_label: Label = $Stage/HintLabel
 
 var _dragging_ticket: Control = null
@@ -32,12 +39,14 @@ func _ready() -> void:
 
 func open_table() -> void:
 	visible = true
+	_collect_ticket_gallery_items()
 	_reset_layout()
 	_update_save_state()
 
 
 func close_table() -> void:
 	visible = false
+	_dragging_ticket = null
 
 
 func assign_for_test(seated_ids: Array) -> void:
@@ -59,32 +68,48 @@ func can_save_for_test() -> bool:
 	return not _save_button.disabled
 
 
+func _input(event: InputEvent) -> void:
+	if _handle_drag_input(event):
+		get_viewport().set_input_as_handled()
+
+
 func _gui_input(event: InputEvent) -> void:
+	if _handle_drag_input(event):
+		get_viewport().set_input_as_handled()
+
+
+func _handle_drag_input(event: InputEvent) -> bool:
 	if not visible:
-		return
+		return false
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		var stage_pos := _to_stage_position(event.position)
 		if event.pressed:
-			_begin_drag(stage_pos)
-		else:
+			return _begin_drag(stage_pos)
+		if _dragging_ticket != null:
 			_end_drag(stage_pos)
-		get_viewport().set_input_as_handled()
-	elif event is InputEventMouseMotion and _dragging_ticket != null:
+			return true
+		return false
+	if event is InputEventMouseMotion and _dragging_ticket != null:
 		_dragging_ticket.position = _to_stage_position(event.position) - _drag_offset
-		get_viewport().set_input_as_handled()
+		return true
+	return false
 
 
-func _begin_drag(mouse_pos: Vector2) -> void:
+func _begin_drag(mouse_pos: Vector2) -> bool:
 	_dragging_ticket = null
-	for ticket in _ticket_layer.get_children():
+	for index in range(_ticket_layer.get_child_count() - 1, -1, -1):
+		var ticket := _ticket_layer.get_child(index)
 		if not (ticket is Control):
 			continue
 		var control := ticket as Control
+		if not control.visible:
+			continue
 		if control.get_rect().has_point(mouse_pos):
 			_dragging_ticket = control
 			_drag_offset = mouse_pos - control.position
 			_ticket_layer.move_child(control, _ticket_layer.get_child_count() - 1)
-			break
+			return true
+	return false
 
 
 func _end_drag(mouse_pos: Vector2) -> void:
@@ -180,11 +205,14 @@ func _update_save_state() -> void:
 
 
 func _setup_static_assets() -> void:
-	_apply_texture(_board_texture, Content.SEAT_TABLE_IMAGE_PATH)
+	# 座位表和车票图片在编辑器中手动设置，运行时无需从路径加载。
+	# 如需运行时加载：取消注释并在 fragment_0002_content.gd 中填写路径。
+	# _apply_texture(_board_texture, Content.SEAT_TABLE_IMAGE_PATH)
 	for npc_id in Content.NPC_IDS:
 		var ticket := _ticket_layer.get_node_or_null("Ticket_%s/Texture" % npc_id) as TextureRect
 		if ticket != null:
-			_apply_texture(ticket, str(Content.TICKET_IMAGE_PATHS.get(npc_id, "")))
+			pass
+			# _apply_texture(ticket, str(Content.TICKET_IMAGE_PATHS.get(npc_id, "")))
 
 
 func _apply_texture(texture_rect: TextureRect, path: String) -> void:
@@ -197,6 +225,20 @@ func _apply_texture(texture_rect: TextureRect, path: String) -> void:
 			placeholder = texture_rect.get_node_or_null("BoardPlaceholder")
 		if placeholder is CanvasItem:
 			(placeholder as CanvasItem).visible = false
+
+
+func _collect_ticket_gallery_items() -> void:
+	var changed := false
+	for npc_id in Content.NPC_IDS:
+		var state_key := str(TICKET_COLLECTION_KEYS.get(npc_id, ""))
+		if state_key.is_empty():
+			continue
+		if FragmentManager.get_fragment_state("0002", state_key) == true:
+			continue
+		FragmentManager.set_fragment_state("0002", state_key, true)
+		changed = true
+	if changed and SaveManager.get_current_slot() >= 0:
+		SaveManager.save_game()
 
 
 func _cache_ticket_homes() -> void:

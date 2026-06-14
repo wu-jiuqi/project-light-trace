@@ -6,6 +6,9 @@ const COVER_TARGET_ALPHA := 0.82
 const COVER_FADE_SECONDS := 1.0
 const STREAM_CHARS_PER_SECOND := 18.0
 const HOLD_SKIP_SECONDS := 2.0
+const DEFAULT_CONTINUE_HINT := "点击以继续"
+const DEFAULT_COLLECT_HINT := "点击物品收集"
+const DEFAULT_COLLECTED_HINT := "已收集，点击以继续"
 
 signal monologue_finished(npc_id: String)
 
@@ -14,6 +17,8 @@ signal monologue_finished(npc_id: String)
 @onready var _text_label: RichTextLabel = $Stage/Monologue/Monologue
 @onready var _cover: ColorRect = $Stage/Monologue/Cover
 @onready var _texture_rect: TextureRect = $Stage/Monologue/MonologueTexture
+@onready var _continue_hint: Label = $Stage/ContinueHint
+@onready var _skip_hint: Label = $Stage/SkipHint
 
 var _interactive_host: Control = null
 var _pages: Array = []
@@ -26,6 +31,8 @@ var _streaming := false
 var _page_ready := false
 var _hold_time := 0.0
 var _holding := false
+var _interactive_collect_pending := false
+var _suppress_release_after_collect := false
 
 
 func _ready() -> void:
@@ -48,6 +55,9 @@ func open_for_npc(npc_id: String, pages: Array) -> void:
 	_pages = pages.duplicate(true)
 	_page_index = -1
 	visible = true
+	_continue_hint.visible = true
+	_skip_hint.visible = true
+	_continue_hint.text = DEFAULT_CONTINUE_HINT
 	set_process(true)
 	_layout_to_viewport()
 	_show_next_page()
@@ -64,6 +74,10 @@ func close_monologue() -> void:
 	_hold_time = 0.0
 	_text_label.text = ""
 	_texture_rect.texture = null
+	_continue_hint.visible = false
+	_skip_hint.visible = false
+	_interactive_collect_pending = false
+	_suppress_release_after_collect = false
 	_npc_id = ""
 	_pages.clear()
 	monologue_finished.emit(closing_id)
@@ -79,6 +93,10 @@ func get_page_index_for_test() -> int:
 
 func finish_current_page_for_test() -> void:
 	_finish_stream()
+
+
+func is_waiting_for_interactive_collect_for_test() -> bool:
+	return _interactive_collect_pending
 
 
 func _process(delta: float) -> void:
@@ -104,6 +122,12 @@ func _input(event: InputEvent) -> void:
 	if not visible:
 		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if _suppress_release_after_collect and not event.pressed:
+			_suppress_release_after_collect = false
+			get_viewport().set_input_as_handled()
+			return
+		if _interactive_collect_pending:
+			return
 		if event.pressed:
 			_holding = true
 			_hold_time = 0.0
@@ -136,6 +160,9 @@ func _show_next_page() -> void:
 	_streaming = false
 	_stream_progress = 0.0
 	_visible_chars = 0
+	_interactive_collect_pending = false
+	_suppress_release_after_collect = false
+	_continue_hint.text = DEFAULT_CONTINUE_HINT
 
 	var page: Dictionary = _pages[_page_index]
 	_full_text = str(page.get("text", ""))
@@ -201,15 +228,27 @@ func _apply_interactive_scene(page: Dictionary) -> void:
 
 	var state_key := str(page.get("state_key", "")).strip_edges()
 	var state_value = page.get("state_value", true)
+	var current_value = FragmentManager.get_fragment_state("0002", state_key) if state_key != "" else null
+	_interactive_collect_pending = state_key != "" and current_value != state_value
+	_continue_hint.text = str(page.get("collect_hint", DEFAULT_COLLECT_HINT)) if _interactive_collect_pending else DEFAULT_CONTINUE_HINT
 	if state_key != "":
 		if scene.has_signal("state_triggered"):
 			scene.state_triggered.connect(func() -> void:
-				FragmentManager.set_fragment_state("0002", state_key, state_value)
+				_mark_interactive_collected(state_key, state_value)
 			)
 		elif scene.has_signal("collected"):
 			scene.collected.connect(func() -> void:
-				FragmentManager.set_fragment_state("0002", state_key, state_value)
+				_mark_interactive_collected(state_key, state_value)
 			)
+
+
+func _mark_interactive_collected(state_key: String, state_value) -> void:
+	FragmentManager.set_fragment_state("0002", state_key, state_value)
+	if SaveManager.get_current_slot() >= 0:
+		SaveManager.save_game()
+	_interactive_collect_pending = false
+	_suppress_release_after_collect = true
+	_continue_hint.text = DEFAULT_COLLECTED_HINT
 
 
 func _clear_interactive() -> void:

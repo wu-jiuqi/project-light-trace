@@ -2,6 +2,8 @@ extends CharacterBody2D
 class_name PlayerController
 ## 玩家移动控制器 + 跨场景出生点自定位 + NPC/物品交互
 
+const SoftShadow = preload("res://scripts/fragment/soft_shadow.gd")
+
 ## 交互提示变更信号，供 HUD/UI 层监听显示提示文字
 signal interact_hint_changed(show: bool, hint_text: String)
 
@@ -621,24 +623,8 @@ func _setup_shadow() -> void:
 	if not _shadow_sprite:
 		return
 
-	var size: int = 64
-	var image = Image.create(size, size, false, Image.FORMAT_RGBA8)
-	var center: float = size / 2.0
-	var radius: float = center - 2
-
-	for y in size:
-		for x in size:
-			var dist = Vector2(x - center, y - center).length()
-			var alpha: float = 0.0
-			if dist < radius:
-				# 中心 50% 不透明，边缘渐变到透明
-				alpha = max(0.0, 1.0 - dist / radius) * 0.5
-			image.set_pixel(x, y, Color(0, 0, 0, alpha))
-
-	_shadow_sprite.texture = ImageTexture.create_from_image(image)
-	_shadow_sprite.scale = Vector2(0.7, 0.7)
-	_shadow_sprite.position = Vector2(0, -4)
-	print("[PlayerController] 圆形阴影已生成")
+	SoftShadow.apply_to(_shadow_sprite, _visual_sprite)
+	print("[PlayerController] Shader 阴影已生成 (scale=%.2f)" % _shadow_sprite.scale.x)
 
 
 ## 检测水平输入方向变化（A↔D），触发镜像翻转动画

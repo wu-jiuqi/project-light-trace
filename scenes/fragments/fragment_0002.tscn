@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dms3ug8cadavj"]
 
-[ext_resource type="Texture2D" uid="uid://cj3wa5bsltr45" path="res://assets/papercraft/fragments/id0002/environment/ChatGPT Image 2026年6月9日 23_03_01.png" id="1_2s1to"]
+[ext_resource type="Texture2D" uid="uid://cj3wa5bsltr45" path="res://assets/papercraft/fragments/id0002/environment/station.png" id="1_2s1to"]
 [ext_resource type="Script" uid="uid://bj2psj8fy4a6w" path="res://scripts/fragment/fragment_0002_scene.gd" id="2_scene_script"]
 [ext_resource type="PackedScene" uid="uid://cpo246hiirr62" path="res://scenes/characters/id0002/npc_conductor.tscn" id="3_17nwr"]
 [ext_resource type="Script" uid="uid://cs7k1e7vjafop" path="res://scripts/fragment/interaction_scene_exit.gd" id="4_exit_script"]
@@ -23,11 +23,14 @@ distance = -382.0
 size = Vector2(245, 23.5)
 
 [node name="Fragment0002" type="Node2D" unique_id=622204988]
+y_sort_enabled = true
 script = ExtResource("2_scene_script")
 
 [node name="WorldRoot" type="Node2D" parent="." unique_id=619629794]
+y_sort_enabled = true
 
 [node name="Background" type="Node2D" parent="WorldRoot" unique_id=664009192]
+z_index = -1
 
 [node name="station" type="Sprite2D" parent="WorldRoot/Background" unique_id=781888959]
 position = Vector2(639.50006, 361.5)

@@ -1,7 +1,6 @@
 extends Control
 class_name SourceMarkTicketOverlay
 
-const Content = preload("res://scripts/fragment/fragment_0002_content.gd")
 const DESIGN_SIZE := Vector2(1280.0, 720.0)
 
 signal collected()
@@ -15,6 +14,8 @@ var _active := false
 func _ready() -> void:
 	visible = false
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	_ticket_texture.mouse_filter = Control.MOUSE_FILTER_STOP
+	_ticket_texture.gui_input.connect(_on_ticket_texture_gui_input)
 	set_process_input(true)
 	get_viewport().size_changed.connect(_layout_to_viewport)
 	_layout_to_viewport()
@@ -35,22 +36,31 @@ func _input(event: InputEvent) -> void:
 	if not _active:
 		return
 	if event.is_action_pressed("interact"):
-		FragmentManager.set_fragment_state("0002", "source_mark_ticket_collected", true)
-		close_overlay()
-		collected.emit()
+		_collect_ticket()
 		get_viewport().set_input_as_handled()
 
 
+func _on_ticket_texture_gui_input(event: InputEvent) -> void:
+	if not _active:
+		return
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		_collect_ticket()
+		get_viewport().set_input_as_handled()
+
+
+func _collect_ticket() -> void:
+	FragmentManager.set_fragment_state("0002", "source_mark_ticket_collected", true)
+	close_overlay()
+	collected.emit()
+
+
 func _apply_texture() -> void:
-	var path := str(Content.TICKET_IMAGE_PATHS.get("player", "")).strip_edges()
-	_ticket_texture.texture = null
-	var placeholder := _ticket_texture.get_node_or_null("Placeholder")
-	if placeholder is CanvasItem:
-		(placeholder as CanvasItem).visible = true
-	if path != "" and ResourceLoader.exists(path):
-		_ticket_texture.texture = load(path) as Texture2D
-		if placeholder is CanvasItem:
-			(placeholder as CanvasItem).visible = false
+	# 车票图片在编辑器中手动设置，无需运行时操作
+	# 如需运行时加载：取消注释并在 fragment_0002_content.gd 中填写路径
+	# var path := str(Content.TICKET_IMAGE_PATHS.get("player", "")).strip_edges()
+	# if path != "" and ResourceLoader.exists(path):
+	# 	_ticket_texture.texture = load(path) as Texture2D
+	pass
 
 
 func _layout_to_viewport() -> void:

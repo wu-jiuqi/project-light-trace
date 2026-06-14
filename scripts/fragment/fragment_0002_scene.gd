@@ -5,8 +5,10 @@ const Content = preload("res://scripts/fragment/fragment_0002_content.gd")
 const MONOLOGUE_SCENE: PackedScene = preload("res://scenes/ui/Monologue.tscn")
 const SEAT_TABLE_SCENE: PackedScene = preload("res://scenes/buildings/id0002/seat_table.tscn")
 const SOURCE_MARK_TICKET_SCENE: PackedScene = preload("res://scenes/ui/SourceMarkTicketOverlay.tscn")
+const BGM_FRAGMENT_0002 = preload("res://assets/audio/0002.mp3")
 const DESIGN_SIZE := Vector2(1280.0, 720.0)
 const PLAYER_VISUAL_SCALE := Vector2(2.2, 2.2)
+const CONTINUE_PROMPT := "点击任意位置继续"
 
 enum FlowState {
 	WAITING_FOR_DECISION,
@@ -26,6 +28,8 @@ var _source_mark_overlay: SourceMarkTicketOverlay = null
 var _completion_label: Label = null
 var _active_monologue_npc: Node = null
 var _flow_state: int = FlowState.WAITING_FOR_DECISION
+var _bgm_player: AudioStreamPlayer = null
+var _final_words_playing := false
 
 
 func _enter_tree() -> void:
@@ -40,6 +44,7 @@ func _ready() -> void:
 	_spawn_player()
 	_connect_player_ui()
 	_fit_world_to_viewport()
+	_start_bgm()
 	if not get_viewport().size_changed.is_connected(_fit_world_to_viewport):
 		get_viewport().size_changed.connect(_fit_world_to_viewport)
 	SceneFader.fade_in()
@@ -205,6 +210,9 @@ func handle_npc_interaction(npc: Node2D) -> bool:
 
 	var npc_id := str(npc.npc_kb_id)
 	if npc_id == "conductor":
+		if _flow_state == FlowState.FINAL_WORDS:
+			_play_conductor_final()
+			return true
 		_open_conductor_dialogue(npc)
 		return true
 	if npc_id in Content.NPC_IDS:
@@ -290,6 +298,8 @@ func _on_seating_saved(_selection: Dictionary, _left_npc_id: String) -> void:
 
 func _play_conductor_reveal() -> void:
 	await ChatDialogue.stream_local_npc_msg(Content.CONDUCTOR_REVEAL)
+	if ChatDialogue.is_open:
+		await ChatDialogue.wait_for_continue(CONTINUE_PROMPT)
 	ChatDialogue.close()
 	_open_source_mark_ticket()
 
@@ -307,13 +317,20 @@ func _on_source_mark_ticket_collected() -> void:
 
 
 func _play_conductor_final() -> void:
+	if _final_words_playing:
+		return
+	_final_words_playing = true
 	var conductor := _find_npc_by_id("conductor")
 	if conductor == null:
+		_final_words_playing = false
 		_complete_fragment_0002()
 		return
 	_open_conductor_dialogue(conductor)
 	await ChatDialogue.stream_local_npc_msg(Content.CONDUCTOR_FINAL)
+	if ChatDialogue.is_open:
+		await ChatDialogue.wait_for_continue(CONTINUE_PROMPT)
 	ChatDialogue.close()
+	_final_words_playing = false
 	_complete_fragment_0002()
 
 
@@ -337,6 +354,7 @@ func _show_completion_and_return() -> void:
 	if _completion_label != null:
 		_completion_label.visible = true
 	await get_tree().create_timer(1.2).timeout
+	_stop_bgm()
 	get_tree().change_scene_to_file("res://scenes/star_map.tscn")
 
 
@@ -345,6 +363,25 @@ func _find_npc_by_id(npc_id: String) -> Node:
 		if "npc_kb_id" in node and str(node.npc_kb_id) == npc_id:
 			return node
 	return null
+
+
+func _start_bgm() -> void:
+	if _bgm_player == null:
+		_bgm_player = AudioStreamPlayer.new()
+		_bgm_player.name = "BGMPlayer_Fragment0002"
+		_bgm_player.bus = "Master"
+		_bgm_player.volume_db = -10.0
+		add_child(_bgm_player)
+	_bgm_player.stream = BGM_FRAGMENT_0002
+	_bgm_player.stream.loop = true
+	_bgm_player.play()
+	print("[Fragment0002] BGM 已开始循环播放")
+
+
+func _stop_bgm() -> void:
+	if _bgm_player != null and _bgm_player.playing:
+		_bgm_player.stop()
+		print("[Fragment0002] BGM 已停止")
 
 
 func _on_interact_hint_changed(show: bool, hint_text: String) -> void:

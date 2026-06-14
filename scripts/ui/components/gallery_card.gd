@@ -7,6 +7,7 @@ signal slot_selected(item: Dictionary, unlocked: bool)
 @onready var _detail_label: Label = $VBoxContainer/DetailPanel/Detail
 @onready var _preview_overlay: Control = $PreviewOverlay
 @onready var _large_preview: TextureRect = $PreviewOverlay/LargePreview
+@onready var _preview_hint: Label = $PreviewOverlay/PreviewHint
 
 var _slots: Array[Control] = []
 
@@ -17,6 +18,9 @@ func _ready() -> void:
 			var slot := child as Control
 			_slots.append(slot)
 			slot.selected.connect(_on_slot_selected)
+	_preview_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	if not _preview_overlay.gui_input.is_connected(_on_preview_overlay_gui_input):
+		_preview_overlay.gui_input.connect(_on_preview_overlay_gui_input)
 	_clear_detail()
 
 
@@ -54,8 +58,21 @@ func _show_preview(item: Dictionary) -> void:
 	var texture := load(image_path) as Texture2D if not image_path.is_empty() else null
 	_large_preview.texture = texture
 	_preview_overlay.visible = texture != null
+	_preview_hint.visible = texture != null
 
 
 func _clear_preview(_placeholder_text: String) -> void:
 	_large_preview.texture = null
 	_preview_overlay.visible = false
+	_preview_hint.visible = false
+
+
+func _on_preview_overlay_gui_input(event: InputEvent) -> void:
+	if not _preview_overlay.visible:
+		return
+	if event is InputEventMouseButton \
+		and event.button_index == MOUSE_BUTTON_LEFT \
+		and not event.pressed:
+		if not _large_preview.get_rect().has_point(event.position):
+			_clear_preview("未选择")
+		get_viewport().set_input_as_handled()

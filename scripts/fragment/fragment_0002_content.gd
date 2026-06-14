@@ -19,18 +19,6 @@ const NPC_DISPLAY_NAMES: Dictionary = {
 	"player": "源印",
 }
 
-# 美术资源接口：把你的六张车票图片路径填在这里。
-const TICKET_IMAGE_PATHS: Dictionary = {
-	"oldteacher": "",
-	"youngsoldier": "",
-	"flowergirl": "",
-	"merchant": "",
-	"littlegirl": "",
-	"player": "",
-}
-
-# 美术资源接口：把你的座位表图片路径填在这里。
-const SEAT_TABLE_IMAGE_PATH := ""
 
 # 独白资源接口：
 # 每页可填 text / image_path。
@@ -89,6 +77,13 @@ const MONOLOGUE_PAGES: Dictionary = {
 			"text": "（她闭上眼睛。手指停在书封上，没有再翻页。）",
 			"image_path": "res://assets/papercraft/fragments/id0002/monologue/npc_1/c1_13.png",
 		},
+		{
+			"text": "",
+			"image_path": "",
+			"interactive_scene_path": "res://scenes/buildings/id0002/book.tscn",
+			"state_key": "book_collected",
+			"state_value": true,
+		},
 	],
 	"youngsoldier": [
 		{
@@ -134,6 +129,13 @@ const MONOLOGUE_PAGES: Dictionary = {
 		{
 			"text": "也许以后会有人站在那里。\n他闻到风里的沙子味，\n就会知道：\n有人在这里站过六年。\n六年里什么都没发生。\n但站过了，就是站过了。\n（他把手放回膝盖，掌心朝下。\n弹夹留在你们中间。）",
 			"image_path": "res://assets/papercraft/fragments/id0002/monologue/npc_2/c2_11.png",
+		},
+		{
+			"text": "",
+			"image_path": "",
+			"interactive_scene_path": "res://scenes/buildings/id0002/box.tscn",
+			"state_key": "box_collected",
+			"state_value": true,
 		},
 	],
 	"flowergirl": [
@@ -184,6 +186,13 @@ const MONOLOGUE_PAGES: Dictionary = {
 		{
 			"text": "哪怕没有下一站，\n我也知道。\n可花不知道。\n花以为我只是站累了，蹲一会儿。\n所以别告诉花。\n（她没有笑。\n但她的眼睛比刚才亮了一点。）",
 			"image_path": "res://assets/papercraft/fragments/id0002/monologue/npc_3/c3_12.png",
+		},
+		{
+			"text": "",
+			"image_path": "",
+			"interactive_scene_path": "res://scenes/buildings/id0002/flower.tscn",
+			"state_key": "flower_collected",
+			"state_value": true,
 		},
 	],
 	"merchant": [
@@ -247,6 +256,13 @@ const MONOLOGUE_PAGES: Dictionary = {
 			"text": "（他转回头，看着铁轨方向。\n公文包还在长椅上，他没有拿回来。）\n反正车还没来。\n等车的时候，不怕说实话。\n车一来，我就又要变成商人。\n……不了，今天不了。\n今天就在这里坐一会儿。\n不用装，也不用看表。\n17:47，挺好的。",
 			"image_path": "res://assets/papercraft/fragments/id0002/monologue/npc_4/c4_15.png",
 		},
+		{
+			"text": "",
+			"image_path": "",
+			"interactive_scene_path": "res://scenes/buildings/id0002/briefcase.tscn",
+			"state_key": "briefcase_collected",
+			"state_value": true,
+		},
 	],
 	"littlegirl": [
 		{
@@ -304,6 +320,13 @@ const MONOLOGUE_PAGES: Dictionary = {
 		{
 			"text": "（她转过身，面朝铁轨尽头，背对着你。\n双马尾在夕阳下垂着。\n她抬起脚后跟，稳稳停住。\n这一次，\n她没有再放下来。）",
 			"image_path": "res://assets/papercraft/fragments/id0002/monologue/npc_5/c5_14.png",
+		},
+		{
+			"text": "",
+			"image_path": "",
+			"interactive_scene_path": "res://scenes/buildings/id0002/candy.tscn",
+			"state_key": "candy_collected",
+			"state_value": true,
 		},
 	],
 }
