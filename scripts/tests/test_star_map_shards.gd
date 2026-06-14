@@ -23,6 +23,12 @@ func _run() -> void:
 	_check(not star_map.has_node("UI/ProgressBar"), "repair progress bar is removed")
 	_check(not star_map.has_node("UI/DecryptBtn"), "decrypt button is removed")
 
+	canvas.select_fragment(1)
+	await process_frame
+	_check(card.visible, "clicking the 0002 shard reveals its detail card")
+	_check(star_map.get_node("UI/DetailCard/TitleLabel").text.contains("#0002"), "0002 detail card is selected")
+	_check(star_map.get_node("UI/DetailCard/EnterBtn").visible, "0002 implemented fragment exposes enter button")
+
 	canvas.select_fragment(5)
 	await process_frame
 	_check(card.visible, "clicking a shard reveals its detail card")

@@ -194,6 +194,7 @@ var patrol_points: Array[Vector2] = []
 var patrol_index: int = 0
 var target_position: Vector2 = Vector2.ZERO
 var idle_timer: float = 0.0
+@onready var _shadow_sprite: Sprite2D = get_node_or_null("Visual Node2D/Shadow Sprite2D") as Sprite2D
 
 ## RAG状态引用
 var _fragment_state: Node = null
@@ -208,6 +209,7 @@ var _greeting_phase: int = 0              # 开场白阶段
 var _own_color_was_awakened: bool = false # 是否刚觉醒
 var _llm_last_input: String = ""          # 上一轮玩家的输入（用于LLM回复后分析警觉）
 var _stream_suppress_asterisk_action: bool = false
+var _stream_suppress_paren_action: bool = false
 
 signal npc_state_changed(new_state: int)
 
@@ -225,6 +227,7 @@ func _uses_fragment_compliance_mode() -> bool:
 func _ready() -> void:
 	add_to_group("npc")
 	target_position = global_position
+	_setup_shadow()
 	
 	# 查找碎片状态管理器
 	var states = get_tree().get_nodes_in_group("fragment_state")
@@ -273,6 +276,29 @@ func _ready() -> void:
 	
 	# 退出场景时保存状态到 GameManager
 	tree_exiting.connect(_on_tree_exiting)
+
+
+func _setup_shadow() -> void:
+	if not _shadow_sprite:
+		return
+
+	var size: int = 64
+	var image = Image.create(size, size, false, Image.FORMAT_RGBA8)
+	var center: float = size / 2.0
+	var radius: float = center - 2
+
+	for y in size:
+		for x in size:
+			var dist = Vector2(x - center, y - center).length()
+			var alpha: float = 0.0
+			if dist < radius:
+				alpha = max(0.0, 1.0 - dist / radius) * 0.5
+			image.set_pixel(x, y, Color(0, 0, 0, alpha))
+
+	_shadow_sprite.texture = ImageTexture.create_from_image(image)
+	_shadow_sprite.z_index = -1
+	_shadow_sprite.scale = Vector2(0.7, 0.7)
+	_shadow_sprite.position = Vector2(0, -4)
 
 
 func _on_tree_exiting() -> void:
@@ -447,10 +473,7 @@ func _modify_fragment_compliance_from_alert(amount: float, reason: String = "") 
 		return
 	if not _fragment_state or not _fragment_state.has_method("_modify_compliance"):
 		return
-	var divisor := 6.0
-	if reason.begins_with("LLM判断"):
-		divisor = 12.0
-	var compliance_delta := -maxi(1, ceili(amount / divisor))
+	var compliance_delta := -5
 	_fragment_state.call("_modify_compliance", compliance_delta, "NPC对话触发: %s" % reason)
 
 func _update_alert_phase() -> void:
@@ -868,6 +891,18 @@ func _get_initial_greeting() -> String:
 			return "溯光者，欢迎来到启程之镇。天枢公司为您的训练体验提供了完善的公共信息服务。如有疑问，请查阅培训手册。"
 		"zhaosecurity":
 			return "（他站在侧后方，没有看你的眼睛。）训练区域安全。请保持在指定边界内。"
+		"oldteacher":
+			return "车还没来。你如果不急，可以先把站台上的字读一遍。"
+		"youngsoldier":
+			return "站台安全。至少现在安全。你也是等特快47的人吗？"
+		"flowergirl":
+			return "要买一朵矢车菊吗？车还没来，花也还没谢。"
+		"merchant":
+			return "如果你是来谈生意的，恐怕得等车先到。"
+		"littlegirl":
+			return "你也在等人吗？妈妈说，等人的时候不能越过黄线。"
+		"conductor":
+			return "票先收好。车还没进站，检票口暂时不关。"
 	return "……"
 
 
@@ -1066,6 +1101,7 @@ func _send_to_llm(message: String, game_state: Dictionary) -> void:
 	
 	# 开始流式输出
 	_stream_suppress_asterisk_action = false
+	_stream_suppress_paren_action = false
 	ChatDialogue.stream_begin()
 	
 	# 连接流式信号（先断开旧的）
@@ -1278,6 +1314,13 @@ func _filter_stream_action_markup(token: String) -> String:
 	for ch in token:
 		if ch == "*":
 			_stream_suppress_asterisk_action = not _stream_suppress_asterisk_action
+			continue
+		if ch == "（" or ch == "(":
+			_stream_suppress_paren_action = true
+			continue
+		if _stream_suppress_paren_action:
+			if ch == "）" or ch == ")":
+				_stream_suppress_paren_action = false
 			continue
 		if _stream_suppress_asterisk_action:
 			continue

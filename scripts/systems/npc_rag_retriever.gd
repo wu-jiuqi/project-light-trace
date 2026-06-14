@@ -24,8 +24,11 @@ var _l1_compact: String = ""
 var _world_chunks: Array = []
 var _fragment_0001_shared_chunks: Array = []
 var _fragment_0001_l1_compact: String = ""
+var _fragment_0002_shared_chunks: Array = []
+var _fragment_0002_l1_compact: String = ""
 
 const FRAGMENT_0001_NPCS: Array[String] = ["linguide", "chentechnology", "wangdirector", "zhaosecurity"]
+const FRAGMENT_0002_NPCS: Array[String] = ["oldteacher", "youngsoldier", "flowergirl", "merchant", "littlegirl", "conductor"]
 
 # 加载状态
 var _is_loaded: bool = false
@@ -93,6 +96,9 @@ func _load_all_knowledge() -> void:
 	
 	# 5. 加载碎片0001 NPC知识库（从 LLM/0001/）
 	_load_fragment_0001_knowledge()
+
+	# 6. 加载碎片0002 NPC知识库（从 LLM/0002/）
+	_load_fragment_0002_knowledge()
 	
 	_is_loaded = true
 
@@ -141,6 +147,70 @@ func _collect_fragment_0001_shared_chunks(chunks: Array) -> void:
 			_fragment_0001_shared_chunks.append(chunk)
 
 
+func _load_fragment_0002_knowledge() -> void:
+	## 加载碎片0002黄昏驿站的6个NPC知识库
+	var f0002_path = "res://LLM/0002/"
+
+	var shared_data = _load_json(f0002_path + "l0_shared_identity.json")
+	if shared_data:
+		var shared_context := str(shared_data.get("shared_world_context", ""))
+		if shared_context != "":
+			_fragment_0002_shared_chunks.append({
+				"id": "f0002_shared_world",
+				"category": "world_knowledge",
+				"keywords": ["黄昏驿站", "落霞驿站", "站台", "检票口", "特快47", "17:47", "车票"],
+				"relevance_gate": "low",
+				"memory_stage": "any",
+				"alert_required": 0,
+				"content": shared_context,
+			})
+
+		var reminders: Array = shared_data.get("cross_npc_reminders", [])
+		var reminder_texts: Array[String] = [] as Array[String]
+		for reminder in reminders:
+			reminder_texts.append(str(reminder))
+		if not reminder_texts.is_empty():
+			_fragment_0002_l1_compact = "碎片0002共享提醒：%s" % " ".join(reminder_texts)
+			_fragment_0002_shared_chunks.append({
+				"id": "f0002_cross_npc_reminders",
+				"category": "cross_reference",
+				"keywords": ["老教师", "年轻士兵", "卖花女", "商人", "小女孩", "检票员", "矢车菊", "车票"],
+				"relevance_gate": "low",
+				"memory_stage": "any",
+				"alert_required": 0,
+				"content": _fragment_0002_l1_compact,
+			})
+
+		var npc_identities: Array = shared_data.get("npcs", [])
+		for id_info in npc_identities:
+			var npc_id := str(id_info.get("id", ""))
+			var identity_text := str(id_info.get("l0", ""))
+			if npc_id != "" and identity_text != "" and not _l0_identities.has(npc_id):
+				_l0_identities[npc_id] = {
+					"id": npc_id,
+					"content": identity_text
+				}
+				print("[NPCRagRetriever] 加载碎片0002 L0身份: %s" % npc_id)
+
+	for npc_id in FRAGMENT_0002_NPCS:
+		var data = _load_json(f0002_path + npc_id + "_knowledge.json")
+		if data:
+			var identity_text := str(data.get("l0_core_identity", ""))
+			if identity_text != "":
+				_l0_identities[npc_id] = {
+					"id": npc_id,
+					"content": identity_text
+				}
+			var chunks: Array = data.get("chunks", [])
+			if chunks.size() > 0:
+				_knowledge_bases[npc_id] = {
+					"npc_id": npc_id,
+					"chunks": chunks,
+					"keyword_index": _build_keyword_index(npc_id, chunks)
+				}
+				print("[NPCRagRetriever] 加载碎片0002 NPC: %s, %d chunks" % [npc_id, chunks.size()])
+
+
 func _load_json(path: String) -> Dictionary:
 	## 加载并解析JSON文件
 	if not FileAccess.file_exists(path):
@@ -160,10 +230,31 @@ func _load_json(path: String) -> Dictionary:
 	var json = JSON.new()
 	var error = json.parse(text)
 	if error != OK:
+		var relaxed_data := _try_parse_relaxed_fragment_0002_json(path, text)
+		if not relaxed_data.is_empty():
+			return relaxed_data
 		_load_error = "JSON解析错误: %s (line %d)" % [json.get_error_message(), json.get_error_line()]
 		print("[NPCRagRetriever] 错误: %s" % _load_error)
 		return {}
 	
+	return json.get_data()
+
+
+func _try_parse_relaxed_fragment_0002_json(path: String, text: String) -> Dictionary:
+	## 0002 老教师知识文件里有一处中文内容引号未转义；运行时兼容解析，不改原始JSON内容。
+	if not path.ends_with("oldteacher_knowledge.json"):
+		return {}
+
+	var fixed_text := text.replace("最擅长讲的是\"离别\"——", "最擅长讲的是\\\"离别\\\"——")
+	if fixed_text == text:
+		return {}
+
+	var json := JSON.new()
+	var error := json.parse(fixed_text)
+	if error != OK:
+		return {}
+
+	print("[NPCRagRetriever] 兼容加载非标准JSON: %s" % path)
 	return json.get_data()
 
 
@@ -241,7 +332,13 @@ func extract_keywords(player_input: String) -> Dictionary:
 		"林指导": "linguide", "引导员": "linguide",
 		"陈技术": "chentechnology", "实验室": "chentechnology", "技术员": "chentechnology",
 		"王主管": "wangdirector", "行政中心": "wangdirector", "宣讲": "wangdirector",
-		"赵安保": "zhaosecurity", "安保": "zhaosecurity", "光墙": "zhaosecurity"
+		"赵安保": "zhaosecurity", "安保": "zhaosecurity", "光墙": "zhaosecurity",
+		"老教师": "oldteacher", "教师": "oldteacher", "老师": "oldteacher", "语文老师": "oldteacher",
+		"年轻士兵": "youngsoldier", "士兵": "youngsoldier", "军人": "youngsoldier",
+		"卖花女": "flowergirl", "卖花": "flowergirl", "矢车菊": "flowergirl",
+		"商人": "merchant", "公文包": "merchant", "备用票": "merchant",
+		"小女孩": "littlegirl", "女孩": "littlegirl", "糖果": "littlegirl",
+		"检票员": "conductor", "检票": "conductor", "站务员": "conductor", "车票": "conductor"
 	}
 	for name in npc_names:
 		if name in input_lower:
@@ -393,6 +490,9 @@ func retrieve(npc_id: String, player_input: String, game_state: Dictionary) -> A
 	if _is_fragment_0001_npc(npc_id):
 		for chunk in _fragment_0001_shared_chunks:
 			candidates.append({"chunk": chunk, "source": "fragment_0001_shared"})
+	elif _is_fragment_0002_npc(npc_id):
+		for chunk in _fragment_0002_shared_chunks:
+			candidates.append({"chunk": chunk, "source": "fragment_0002_shared"})
 	else:
 		for chunk in _world_chunks:
 			candidates.append({"chunk": chunk, "source": "world"})
@@ -457,6 +557,8 @@ func assemble_prompt(npc_id: String, player_input: String, game_state: Dictionar
 	var l1_content = _l1_compact
 	if _is_fragment_0001_npc(npc_id) and _fragment_0001_l1_compact != "":
 		l1_content = _fragment_0001_l1_compact
+	elif _is_fragment_0002_npc(npc_id) and _fragment_0002_l1_compact != "":
+		l1_content = _fragment_0002_l1_compact
 	if l1_content == "":
 		var parts: Array[String] = [] as Array[String]
 		for c in _l1_constraints:
@@ -491,7 +593,7 @@ func assemble_prompt(npc_id: String, player_input: String, game_state: Dictionar
 	var history = game_state.get("chat_history", "")
 	
 	# 8. 组装
-	var prompt = """你是一个碎片世界中的NPC。你只通过对话进行互动，不要输出任何身体动作、表情或旁白。
+	var prompt = """你是一个碎片世界中的NPC。你只通过对话进行互动，不要输出任何身体动作、表情或旁白。你不能看见真实玩家、屏幕、输入框、按钮、鼠标、截图、UI标注或红框；只能回应玩家发给你的文字。
 
 ## ⚠ 内容约束（最高优先级）
 %s
@@ -736,6 +838,10 @@ func _is_fragment_0001_npc(npc_id: String) -> bool:
 	return npc_id in FRAGMENT_0001_NPCS
 
 
+func _is_fragment_0002_npc(npc_id: String) -> bool:
+	return npc_id in FRAGMENT_0002_NPCS
+
+
 func _build_world_rules(npc_id: String) -> String:
 	## 构建反编撰规则 + 世界观常识（每次LLM调用必注入）
 	if _is_fragment_0001_npc(npc_id):
@@ -762,6 +868,37 @@ func _build_world_rules(npc_id: String) -> String:
 
 5. **对话风格**：
    - 只输出角色说出口的话，禁止动作描写、表情描写、心理旁白、舞台指令、Markdown星号旁白。
+   - 禁止说“看着你”“微笑着”“沉默了一下”等动作或表情描述；这些状态只能转化为一句可被角色说出口的话。
+   - 禁止感知真实玩家的屏幕、UI、输入框、按钮、截图、红框或摄像机视角；NPC只知道碎片世界内的信息和玩家输入的文字。
+   - 用口语化、自然的中文回答。
+   - 回复不超过3句话，除非背景知识中有需要详细说明的内容。
+   - 保持角色性格的一致性。"""
+
+	if _is_fragment_0002_npc(npc_id):
+		return """你必须严格遵守以下规则：
+
+1. **只能基于背景知识回答**：你的回答必须基于"背景知识"、"角色身份"和"当前状态"提供的信息。如果这些内容没有答案，你就不知道这件事。
+
+2. **如果不知道，就说不知道**：
+   - 如果玩家问的问题在背景知识中没有答案，你必须说"我不知道"、"想不起来"、"这件事我不确定"。
+   - 严禁编造人名、地名、事件、关系、车次、座位、票面信息或任何细节。
+   - 严禁根据一般常识补足车站规则；黄昏驿站只遵守背景知识里的规则。
+
+3. **黄昏驿站的基本事实**：
+   - 你位于碎片0002「黄昏驿站」。
+   - 这里永远是橙色黄昏，时钟停在17:47，特快47很久没有到站。
+   - 六个旅客/站务人员等待同一趟车，但每个人对这个世界的真相接受程度不同。
+   - 车票、座位、检票口、站台和列车延误是这个碎片的核心线索。
+   - 矢车菊和车票相关异常只能按背景知识透露。
+
+4. **禁止编撰的内容**：
+   - 不要编造背景知识里不存在的站名、线路、列车员、乘客、事故细节或公司部门。
+   - 不要主动解释谜题答案，除非玩家已问到对应线索且背景知识允许你知道。
+   - 玩家使用"游戏""代码""NPC"等外部词汇时，按你的角色身份自然拒绝、困惑或转回车站话题。
+
+5. **对话风格**：
+   - 只输出角色说出口的话，禁止动作描写、表情描写、心理旁白、舞台指令、Markdown星号旁白。
+   - 禁止感知真实玩家的屏幕、UI、输入框、按钮、截图、红框或摄像机视角；NPC只知道碎片世界内的信息和玩家输入的文字。
    - 用口语化、自然的中文回答。
    - 回复不超过3句话，除非背景知识中有需要详细说明的内容。
    - 保持角色性格的一致性。"""
@@ -791,6 +928,8 @@ func _build_world_rules(npc_id: String) -> String:
 
 5. **对话风格**：
    - 用口语化、自然的中文回答。
+   - 只输出角色说出口的话，禁止动作描写、表情描写、心理旁白、舞台指令、Markdown星号旁白。
+   - 禁止感知真实玩家的屏幕、UI、输入框、按钮、截图、红框或摄像机视角；NPC只知道碎片世界内的信息和玩家输入的文字。
    - 回复不超过3句话，除非背景知识中有需要详细说明的内容。
    - 保持角色性格的一致性。
    - 如果玩家问的问题和当前话题无关，你不需要强行回答——你可以反问、沉默、或转移话题。"""
@@ -800,6 +939,8 @@ func _get_baseline_chunks(npc_id: String) -> Array:
 	## 获取当前碎片所有NPC都必须知道的基础世界观chunks
 	if _is_fragment_0001_npc(npc_id):
 		return _fragment_0001_shared_chunks.duplicate()
+	if _is_fragment_0002_npc(npc_id):
+		return _fragment_0002_shared_chunks.duplicate()
 	return _get_world_baseline_chunks()
 
 
@@ -855,6 +996,36 @@ const FALLBACK_TEMPLATES: Dictionary = {
 		"反正空房多得是——要续住的话说一声。",
 		"楼梯第三级咯吱得特别响——你踩左边就不会。",
 		"……嗯？（打了个哈欠）"
+	],
+	"oldteacher": [
+		"车还没来。你可以先坐一会儿。",
+		"我好像在等一个词，可它总是差一点回来。",
+		"不是所有人都该上车，这句话我记得很清楚。"
+	],
+	"youngsoldier": [
+		"站线安全。暂时。",
+		"我的目的地……不在票面上。",
+		"别问章。章已经被划掉了。"
+	],
+	"flowergirl": [
+		"要买一朵矢车菊吗？它们今天还醒着。",
+		"花不属于这里，可总得有人照看它们。",
+		"车没来，所以花还可以再等一会儿。"
+	],
+	"merchant": [
+		"合同可以晚点再谈，反正车也晚点。",
+		"备用票只是备用票，别把它想得太复杂。",
+		"停下来会让人想起不该想的事。"
+	],
+	"littlegirl": [
+		"妈妈说站黄线后面才安全。",
+		"轨道那边有光，它好像在问我是谁。",
+		"糖果还有颜色，所以今天不算太坏。"
+	],
+	"conductor": [
+		"票可以等一等，车还没进站。",
+		"检票口一直在这里，我也一直在这里。",
+		"17:47之后的时间，表上没有写。"
 	]
 }
 

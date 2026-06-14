@@ -1,0 +1,43 @@
+[gd_scene format=3 uid="uid://bvlqikp8u827g"]
+
+[ext_resource type="Texture2D" path="res://assets/papercraft/fragments/id0002/characters/npc_05_littlegirl_s.png" id="1_lww0r"]
+[ext_resource type="Script" path="res://scripts/fragment/npc_controller.gd" id="2_npc_script"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vdos0"]
+size = Vector2(49, 35)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_0dxqh"]
+radius = 34.0
+height = 108.0
+
+[node name="NpcLittlegirl" type="CharacterBody2D" unique_id=1372973123]
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("2_npc_script")
+npc_name = "小女孩"
+npc_role = "小女孩"
+npc_kb_id = "littlegirl"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=239483377]
+position = Vector2(-0.5, -16.5)
+shape = SubResource("RectangleShape2D_vdos0")
+
+[node name="Visual Node2D" type="Node2D" parent="." unique_id=721599730]
+
+[node name="Visual" type="Sprite2D" parent="Visual Node2D" unique_id=112893608]
+position = Vector2(0, -89)
+texture = ExtResource("1_lww0r")
+
+[node name="Shadow Sprite2D" type="Sprite2D" parent="Visual Node2D" unique_id=2108413728]
+
+[node name="FeetMarker Marker2D" type="Marker2D" parent="." unique_id=2106431134]
+
+[node name="InteractionArea Area2D" type="Area2D" parent="." unique_id=1453918147]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea Area2D" unique_id=11185089]
+position = Vector2(0, -57)
+shape = SubResource("CapsuleShape2D_0dxqh")
+debug_color = Color(0.6578352, 0.51621777, 0, 0.41960785)

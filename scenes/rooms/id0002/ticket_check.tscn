@@ -1,10 +1,123 @@
 [gd_scene format=3 uid="uid://diw2fyqa5ueba"]
 
 [ext_resource type="Texture2D" uid="uid://dt1grhcgwv8na" path="res://assets/papercraft/fragments/id0002/environment/ChatGPT Image 2026年6月9日 22_03_33.png" id="1_2s1to"]
+[ext_resource type="PackedScene" uid="uid://ger8bebklxf5" path="res://scenes/characters/id0002/npc_merchant.tscn" id="2_vk06p"]
+[ext_resource type="PackedScene" uid="uid://brdyw6u1suwxg" path="res://scenes/characters/id0002/npc_flowergirl.tscn" id="3_iudsr"]
+[ext_resource type="PackedScene" uid="uid://d3xefr4vk715b" path="res://scenes/characters/id0002/npc_youngsoldier.tscn" id="4_7g5ld"]
+[ext_resource type="PackedScene" uid="uid://bo6qq5rnm87e5" path="res://scenes/characters/id0002/npc_oldteacher.tscn" id="5_psfge"]
+[ext_resource type="PackedScene" uid="uid://bvlqikp8u827g" path="res://scenes/characters/id0002/npc_littlegirl.tscn" id="6_8plat"]
+[ext_resource type="Script" uid="uid://bj2psj8fy4a6w" path="res://scripts/fragment/fragment_0002_scene.gd" id="7_scene_script"]
+[ext_resource type="Script" uid="uid://cs7k1e7vjafop" path="res://scripts/fragment/interaction_scene_exit.gd" id="8_exit_script"]
+[ext_resource type="PackedScene" uid="uid://duiql0mgjrtjc" path="res://scenes/ui/DialogueBox.tscn" id="9_dialogue"]
 
-[node name="FragmentId0002" type="Node2D" unique_id=1114181759]
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_rbvlk"]
+distance = -276.0
 
-[node name="inside" type="Sprite2D" parent="." unique_id=672202516]
-position = Vector2(644, 382.5)
-scale = Vector2(1.064, 0.9320477)
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_a84uo"]
+distance = -461.0
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_vb2pm"]
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_vmcxw"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ilyn5"]
+size = Vector2(1088, 26.125)
+
+[node name="TicketCheck" type="Node2D" unique_id=1114181759]
+script = ExtResource("7_scene_script")
+
+[node name="WorldRoot" type="Node2D" parent="." unique_id=573178069]
+
+[node name="Background" type="Node2D" parent="WorldRoot" unique_id=1255186320]
+
+[node name="inside" type="Sprite2D" parent="WorldRoot/Background" unique_id=672202516]
+position = Vector2(644.00006, 340)
+scale = Vector2(1.064, 0.9421488)
 texture = ExtResource("1_2s1to")
+
+[node name="SpawnPoints" type="Node2D" parent="WorldRoot" unique_id=2083962127]
+
+[node name="Default" type="Marker2D" parent="WorldRoot/SpawnPoints" unique_id=194855283]
+position = Vector2(1030, 681)
+
+[node name="AirWall" type="Node2D" parent="WorldRoot" unique_id=879700721]
+
+[node name="AirWall_Up" type="StaticBody2D" parent="WorldRoot/AirWall" unique_id=1577483405]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/AirWall/AirWall_Up" unique_id=2118654501]
+position = Vector2(632, 858)
+rotation = 3.1415927
+shape = SubResource("WorldBoundaryShape2D_rbvlk")
+
+[node name="AirWall_Left" type="StaticBody2D" parent="WorldRoot/AirWall" unique_id=204441810]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/AirWall/AirWall_Left" unique_id=1582114254]
+position = Vector2(453, 1058)
+rotation = 2.5743606
+shape = SubResource("WorldBoundaryShape2D_a84uo")
+
+[node name="AirWall_Down" type="StaticBody2D" parent="WorldRoot/AirWall" unique_id=991910933]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/AirWall/AirWall_Down" unique_id=980634159]
+position = Vector2(572, 753)
+shape = SubResource("WorldBoundaryShape2D_vb2pm")
+
+[node name="AirWall_Right" type="StaticBody2D" parent="WorldRoot/AirWall" unique_id=134711194]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/AirWall/AirWall_Right" unique_id=158387292]
+position = Vector2(1112, 667)
+rotation = 3.604105
+shape = SubResource("WorldBoundaryShape2D_vmcxw")
+
+[node name="StationExit" type="Node2D" parent="WorldRoot" unique_id=344270738]
+script = ExtResource("8_exit_script")
+target_scene = "res://scenes/fragments/fragment_0002.tscn"
+display_name = "站台出口"
+
+[node name="InteractionArea" type="Area2D" parent="WorldRoot/StationExit" unique_id=1993032592]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/StationExit/InteractionArea" unique_id=180113645]
+position = Vector2(658, 733.0625)
+shape = SubResource("RectangleShape2D_ilyn5")
+debug_color = Color(0.64213985, 0.5242243, 0, 0.41960785)
+
+[node name="NpcMerchant" parent="WorldRoot" unique_id=1198139631 instance=ExtResource("2_vk06p")]
+position = Vector2(499, 615.99994)
+scale = Vector2(1.245, 1.245)
+
+[node name="NpcFlowergirl" parent="WorldRoot" unique_id=1875047972 instance=ExtResource("3_iudsr")]
+position = Vector2(360, 614.00006)
+scale = Vector2(1.105, 1.105)
+
+[node name="NpcYoungsoldier" parent="WorldRoot" unique_id=175132681 instance=ExtResource("4_7g5ld")]
+position = Vector2(639, 620)
+scale = Vector2(1.215, 1.215)
+
+[node name="NpcOldteacher" parent="WorldRoot" unique_id=1736460616 instance=ExtResource("5_psfge")]
+position = Vector2(784, 617.99994)
+scale = Vector2(1.06, 1.06)
+
+[node name="NpcLittlegirl" parent="WorldRoot" unique_id=1372973123 instance=ExtResource("6_8plat")]
+position = Vector2(939, 617.99994)
+
+[node name="UIRoot" type="CanvasLayer" parent="." unique_id=1018238160]
+
+[node name="InteractHint" type="Label" parent="UIRoot" unique_id=19282491]
+visible = false
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -64.0
+offset_bottom = -28.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.95, 0.86, 0.62, 0.95)
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+
+[node name="DialogueBox" parent="UIRoot" unique_id=640978466 instance=ExtResource("9_dialogue")]
+visible = false

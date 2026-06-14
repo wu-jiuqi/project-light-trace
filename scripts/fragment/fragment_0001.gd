@@ -1063,6 +1063,8 @@ func _modify_compliance(delta: int, reason: String) -> void:
 
 	# 更新合规度条UI
 	_update_compliance_bar()
+	if delta < 0:
+		_show_compliance_penalty(delta, reason)
 	save_state()
 
 	# L6 强制回归：合规度 < 25%（仅触发一次）
@@ -1102,6 +1104,75 @@ func _modify_compliance(delta: int, reason: String) -> void:
 			_stop_bgm()
 			get_tree().change_scene_to_file("res://scenes/star_map.tscn")
 		)
+
+
+func _show_compliance_penalty(delta: int, reason: String) -> void:
+	_resolve_ui_refs()
+	if _ui_root == null:
+		return
+
+	for child in _ui_root.get_children():
+		if child is Control and child.has_meta("compliance_penalty_popup"):
+			child.queue_free()
+
+	var viewport_size := get_viewport_rect().size
+	if viewport_size.x <= 0.0:
+		viewport_size = Vector2(1280, 720)
+
+	var popup := Panel.new()
+	popup.name = "CompliancePenaltyPopup"
+	popup.set_meta("compliance_penalty_popup", true)
+	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	popup.size = Vector2(340, 86)
+	popup.position = Vector2(viewport_size.x - 370, 86)
+	popup.modulate.a = 0.0
+
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.55, 0.07, 0.06, 0.92)
+	style.border_color = Color(1.0, 0.78, 0.35, 0.95)
+	style.border_width_left = 2
+	style.border_width_right = 2
+	style.border_width_top = 2
+	style.border_width_bottom = 2
+	style.set_corner_radius_all(6)
+	popup.add_theme_stylebox_override("panel", style)
+	_ui_root.add_child(popup)
+
+	var title := Label.new()
+	title.position = Vector2(14, 10)
+	title.size = Vector2(312, 26)
+	title.text = "合规度扣除 %d%%" % abs(delta)
+	title.add_theme_font_size_override("font_size", 20)
+	title.add_theme_color_override("font_color", Color(1.0, 0.92, 0.72, 1.0))
+	popup.add_child(title)
+
+	var detail := Label.new()
+	detail.position = Vector2(14, 42)
+	detail.size = Vector2(312, 34)
+	detail.text = "%s\n当前合规度：%d%%" % [reason, compliance]
+	detail.add_theme_font_size_override("font_size", 13)
+	detail.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 0.86))
+	detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	popup.add_child(detail)
+
+	if _compliance_bar_fill:
+		var original_color := _compliance_bar_fill.color
+		var flash_tween := create_tween()
+		flash_tween.tween_property(_compliance_bar_fill, "color", Color(1.0, 0.2, 0.12, 1.0), 0.08)
+		flash_tween.tween_property(_compliance_bar_fill, "color", original_color, 0.22)
+
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(popup, "position:x", viewport_size.x - 360, 0.18).from(viewport_size.x + 20)
+	tween.tween_property(popup, "modulate:a", 1.0, 0.12)
+
+	var exit_tween := create_tween()
+	exit_tween.tween_interval(2.8)
+	exit_tween.tween_property(popup, "modulate:a", 0.0, 0.35)
+	exit_tween.tween_callback(func() -> void:
+		if is_instance_valid(popup):
+			popup.queue_free()
+	)
 
 
 # ============================================================

@@ -1,0 +1,43 @@
+[gd_scene format=3 uid="uid://cpo246hiirr62"]
+
+[ext_resource type="Texture2D" path="res://assets/papercraft/fragments/id0002/characters/npc_06_conductor_s.png" id="1_sl7rc"]
+[ext_resource type="Script" path="res://scripts/fragment/npc_controller.gd" id="2_npc_script"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_q8nmb"]
+size = Vector2(49, 42)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ncn04"]
+radius = 25.0
+height = 122.0
+
+[node name="NpcConductor" type="CharacterBody2D" unique_id=163516348]
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("2_npc_script")
+npc_name = "检票员"
+npc_role = "检票员"
+npc_kb_id = "conductor"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=999988810]
+position = Vector2(0.5, -21)
+shape = SubResource("RectangleShape2D_q8nmb")
+
+[node name="Visual Node2D" type="Node2D" parent="." unique_id=792848091]
+
+[node name="Visual" type="Sprite2D" parent="Visual Node2D" unique_id=318185516]
+position = Vector2(0, -90)
+texture = ExtResource("1_sl7rc")
+
+[node name="Shadow Sprite2D" type="Sprite2D" parent="Visual Node2D" unique_id=1147234092]
+
+[node name="FeetMarker Marker2D" type="Marker2D" parent="." unique_id=933304663]
+
+[node name="InteractionArea Area2D" type="Area2D" parent="." unique_id=214957654]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea Area2D" unique_id=1326672510]
+position = Vector2(0, -61)
+shape = SubResource("CapsuleShape2D_ncn04")
+debug_color = Color(0.664578, 0.5126563, 0, 0.41960785)
