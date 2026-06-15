@@ -3,6 +3,11 @@ extends CanvasLayer
 
 const DETAIL_CARD_SIZE := Vector2(470, 628)
 const DETAIL_HIGHLIGHT_COLOR := Color(0.63, 0.42, 0.15, 0.18)
+const BGM_STAR_MAP = preload("res://assets/audio/bgm/bgm_star_map_loop.ogg")
+const FRAGMENT_TRANSITION_SCENES := {
+	"0001": "res://scenes/cinematic/fragment_0001_transition.tscn",
+	"0002": "res://scenes/cinematic/fragment_0002_transition.tscn",
+}
 
 @onready var shard_canvas: StarShardCanvas = $FragmentContainer/ShardCanvas
 @onready var detail_card: Control = $UI/DetailCard
@@ -15,6 +20,7 @@ var _detail_selected: int = 0
 var _detail_highlight: ColorRect
 var enter_btn: Button
 var close_btn: Button
+var _bgm_player: AudioStreamPlayer = null
 
 
 func _ready() -> void:
@@ -23,7 +29,9 @@ func _ready() -> void:
 	shard_canvas.fragment_selected.connect(_on_fragment_selected)
 	shard_canvas.empty_clicked.connect(_close_detail_card)
 	enter_btn.pressed.connect(_on_enter_btn_pressed)
+	enter_btn.pressed.connect(UISoundManager.play_click)
 	close_btn.pressed.connect(_close_detail_card)
+	close_btn.pressed.connect(UISoundManager.play_click)
 	get_viewport().size_changed.connect(_layout_detail_card)
 	var animate_id = FragmentManager.consume_completion_animation_id()
 	shard_canvas.configure(FragmentManager.fragments, animate_id)
@@ -36,6 +44,8 @@ func _ready() -> void:
 		await get_tree().create_timer(0.5).timeout
 		shard_canvas.flash_fragment("0001", 3, 0.35)
 	print("[StarMap] 玻璃星图界面加载完成")
+	# 播放星图界面循环 BGM
+	_start_bgm()
 
 
 func _apply_skin() -> void:
@@ -228,7 +238,35 @@ func _on_enter_btn_pressed() -> void:
 		return
 	if not FragmentManager.enter_fragment(selected_fragment):
 		return
+	var transition_scene_path := String(FRAGMENT_TRANSITION_SCENES.get(selected_fragment.id, ""))
+	if not transition_scene_path.is_empty() and ResourceLoader.exists(transition_scene_path):
+		_stop_bgm()
+		get_tree().change_scene_to_file(transition_scene_path)
+		return
 	if selected_fragment.scene_path and ResourceLoader.exists(selected_fragment.scene_path):
+		_stop_bgm()
 		get_tree().change_scene_to_file(selected_fragment.scene_path)
 	else:
 		printerr("[StarMap] 碎片场景不存在: %s" % selected_fragment.scene_path)
+
+
+# ============================================================
+# BGM 播放
+# ============================================================
+
+func _start_bgm() -> void:
+	if _bgm_player == null:
+		_bgm_player = AudioStreamPlayer.new()
+		_bgm_player.name = "BGMPlayer"
+		_bgm_player.bus = "Master"
+		_bgm_player.volume_db = -8.0
+		add_child(_bgm_player)
+	_bgm_player.stream = BGM_STAR_MAP
+	var ogg_stream := _bgm_player.stream as AudioStreamOggVorbis
+	if ogg_stream != null:
+		ogg_stream.loop = true
+	_bgm_player.play()
+
+func _stop_bgm() -> void:
+	if _bgm_player != null and _bgm_player.playing:
+		_bgm_player.stop()

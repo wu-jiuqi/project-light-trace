@@ -1,0 +1,123 @@
+[gd_scene format=3 uid="uid://37ikefmoka22"]
+
+[ext_resource type="Texture2D" uid="uid://orhlwe8ppsef" path="res://assets/papercraft/core/ui/dialogue_box/dialogue_box_bottom.png" id="1_auyxk"]
+[ext_resource type="PackedScene" uid="uid://kwu3wbpdo4y7" path="res://scenes/ui/components/GallerySlot.tscn" id="1_l4ex0"]
+[ext_resource type="Script" uid="uid://bhkv27osdwn4p" path="res://scripts/ui/components/gallery_card.gd" id="2_2tp7f"]
+
+[node name="GalleryCard" type="Control" unique_id=397163090]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_2tp7f")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1696146753]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="GalleryGrid" type="GridContainer" parent="VBoxContainer" unique_id=305818414]
+custom_minimum_size = Vector2(1080, 340)
+layout_mode = 2
+theme_override_constants/h_separation = 40
+theme_override_constants/v_separation = 40
+columns = 4
+
+[node name="GallerySlot" parent="VBoxContainer/GalleryGrid" unique_id=462562235 instance=ExtResource("1_l4ex0")]
+layout_mode = 2
+
+[node name="GallerySlot2" parent="VBoxContainer/GalleryGrid" unique_id=1523131003 instance=ExtResource("1_l4ex0")]
+layout_mode = 2
+
+[node name="GallerySlot3" parent="VBoxContainer/GalleryGrid" unique_id=1795132990 instance=ExtResource("1_l4ex0")]
+layout_mode = 2
+
+[node name="GallerySlot4" parent="VBoxContainer/GalleryGrid" unique_id=1723617923 instance=ExtResource("1_l4ex0")]
+layout_mode = 2
+
+[node name="GallerySlot5" parent="VBoxContainer/GalleryGrid" unique_id=1200507826 instance=ExtResource("1_l4ex0")]
+layout_mode = 2
+
+[node name="GallerySlot6" parent="VBoxContainer/GalleryGrid" unique_id=1839772188 instance=ExtResource("1_l4ex0")]
+layout_mode = 2
+
+[node name="GallerySlot7" parent="VBoxContainer/GalleryGrid" unique_id=1744340924 instance=ExtResource("1_l4ex0")]
+layout_mode = 2
+
+[node name="GallerySlot8" parent="VBoxContainer/GalleryGrid" unique_id=173700870 instance=ExtResource("1_l4ex0")]
+layout_mode = 2
+
+[node name="DetailPanel" type="TextureRect" parent="VBoxContainer" unique_id=824344590]
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+texture = ExtResource("1_auyxk")
+expand_mode = 1
+
+[node name="Detail" type="Label" parent="VBoxContainer/DetailPanel" unique_id=2063417561]
+layout_mode = 0
+offset_left = 77.0
+offset_top = 12.0
+offset_right = 1027.0
+offset_bottom = 85.0
+theme_override_colors/font_color = Color(0.18, 0.12, 0.075, 1)
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="PreviewOverlay" type="Control" parent="." unique_id=487554577]
+visible = false
+layout_mode = 0
+offset_right = 1080.0
+offset_bottom = 492.0
+mouse_filter = 2
+
+[node name="Scrim" type="ColorRect" parent="PreviewOverlay" unique_id=2101182059]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.72)
+
+[node name="LargePreview" type="TextureRect" parent="PreviewOverlay" unique_id=1750484877]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -150.0
+offset_right = 260.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PreviewHint" type="Label" parent="PreviewOverlay"]
+z_index = 2
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -140.0
+offset_top = -38.0
+offset_right = 140.0
+offset_bottom = -14.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.91, 0.82, 0.63, 0.82)
+theme_override_font_sizes/font_size = 18
+text = "点击空白处返回"
+horizontal_alignment = 1

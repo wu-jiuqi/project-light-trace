@@ -1,20 +1,46 @@
 [gd_scene format=3 uid="uid://b56xdqjckxwvu"]
 
-[ext_resource type="Texture2D" uid="uid://osvjldp020bg" path="res://assets/papercraft/fragments/id0001/characters/npc_03_wangdirector.png" id="1_texture"]
+[ext_resource type="Texture2D" uid="uid://c802flyumwyv7" path="res://assets/papercraft/fragments/id0001/characters/npc_03_wangdirector_s.png" id="1_etm7q"]
+[ext_resource type="Script" uid="uid://ldw7x5fltxna" path="res://scripts/fragment/npc_controller.gd" id="2_script"]
 
 [sub_resource type="RectangleShape2D" id="Rect_body"]
-size = Vector2(36, 48)
+size = Vector2(36, 26)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_b7des"]
+radius = 19.0
+height = 90.0
 
 [node name="NPC_WangDirector" type="CharacterBody2D" unique_id=129539188]
 z_as_relative = false
 y_sort_enabled = true
-collision_layer = 4
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("2_script")
+npc_name = "王主管"
+npc_role = "主管"
+npc_kb_id = "wangdirector"
 
 [node name="BodyCollision" type="CollisionShape2D" parent="." unique_id=1724243868]
-position = Vector2(0, -24)
+position = Vector2(0, -13)
 shape = SubResource("Rect_body")
 
-[node name="Visual" type="Sprite2D" parent="." unique_id=1817731729]
-position = Vector2(0, -48)
+[node name="Visual Node2D" type="Node2D" parent="." unique_id=87569370]
+
+[node name="Visual" type="Sprite2D" parent="Visual Node2D" unique_id=1817731729]
+position = Vector2(0, -45)
 scale = Vector2(0.5, 0.5)
-texture = ExtResource("1_texture")
+texture = ExtResource("1_etm7q")
+
+[node name="Shadow Sprite2D" type="Sprite2D" parent="Visual Node2D" unique_id=1082317689]
+
+[node name="FeetMarker Marker2D" type="Marker2D" parent="." unique_id=500105793]
+
+[node name="InteractionArea Area2D" type="Area2D" parent="." unique_id=1823321302]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea Area2D" unique_id=2035685966]
+position = Vector2(0, -45)
+shape = SubResource("CapsuleShape2D_b7des")
+debug_color = Color(0.6555211, 0.51742303, 0, 0.41960785)

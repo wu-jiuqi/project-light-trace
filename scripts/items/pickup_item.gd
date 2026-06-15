@@ -5,6 +5,8 @@ extends Area2D
 @export var item_id: int = 0
 @export var item_name: String = "物品"
 @export var item_color: Color = Color(1, 0.5, 0.5, 1)
+@export var item_texture: Texture2D
+@export var item_texture_path: String = ""
 @export var item_pos_x: float = 0.0
 @export var item_pos_y: float = 0.0
 
@@ -34,13 +36,23 @@ func _create_visual() -> void:
 	shape.position = Vector2.ZERO
 	add_child(shape)
 	
-	# 圆形占位块
-	var sprite = ColorRect.new()
-	sprite.name = "ItemSprite"
-	sprite.offset_left = -12; sprite.offset_top = -12
-	sprite.offset_right = 12; sprite.offset_bottom = 12
-	sprite.color = item_color
-	add_child(sprite)
+	var texture := item_texture if item_texture else _load_texture(item_texture_path)
+	if texture:
+		var sprite := Sprite2D.new()
+		sprite.name = "ItemSprite"
+		sprite.texture = texture
+		var size := texture.get_size()
+		var max_side = maxf(size.x, size.y)
+		if max_side > 0.0:
+			sprite.scale = Vector2.ONE * (34.0 / max_side)
+		add_child(sprite)
+	else:
+		var sprite := ColorRect.new()
+		sprite.name = "ItemSprite"
+		sprite.offset_left = -12; sprite.offset_top = -12
+		sprite.offset_right = 12; sprite.offset_bottom = 12
+		sprite.color = item_color
+		add_child(sprite)
 	
 	# 标签
 	_label = Label.new()
@@ -84,3 +96,16 @@ func _pickup() -> void:
 	if InventoryManager.add_item(item_id):
 		print("[PickupItem] 拾取: %s" % item_name)
 		queue_free()
+
+
+func _load_texture(path: String) -> Texture2D:
+	if path == "":
+		return null
+	if ResourceLoader.exists(path):
+		return load(path) as Texture2D
+	if not FileAccess.file_exists(path):
+		return null
+	var image := Image.new()
+	if image.load(path) != OK:
+		return null
+	return ImageTexture.create_from_image(image)

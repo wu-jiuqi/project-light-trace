@@ -31,6 +31,7 @@ InventoryManager="*res://scripts/systems/inventory_manager.gd"
 BackpackUI="*res://scripts/ui/backpack_ui.gd"
 ChatDatabase="*res://scripts/globals/chat_database.gd"
 PauseMenu="*res://scripts/ui/pause_menu.gd"
+UISoundManager="*res://scripts/globals/ui_sound_manager.gd"
 
 [display]
 
@@ -112,13 +113,13 @@ ui_save={
 
 [layer_names]
 
-2d_physics/layer_1="character"
+2d_physics/layer_1="player"
 2d_physics/layer_2="interactable"
 2d_physics/layer_3="building"
+2d_physics/layer_4="npc"
 
 [rendering]
 
-textures/canvas_textures/default_texture_filter=0
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 environment/defaults/default_clear_color=Color(0.05, 0.05, 0.12, 1)

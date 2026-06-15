@@ -132,7 +132,6 @@ function checkProjectConfiguration() {
         'scripts/ui/pause_menu.gd',
         'scripts/ui/backpack_ui.gd',
         'scripts/ui/chat_dialogue.gd',
-        'scripts/ui/dialogue.gd',
         'scripts/systems/inventory_manager.gd',
         'scripts/fragment/fragment_0762_state.gd',
     ];

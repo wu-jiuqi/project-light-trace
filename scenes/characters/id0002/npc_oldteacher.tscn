@@ -1,0 +1,46 @@
+[gd_scene format=3 uid="uid://bo6qq5rnm87e5"]
+
+[ext_resource type="Texture2D" path="res://assets/papercraft/fragments/id0002/characters/npc_01_oldteacher_s.png" id="1_x0y8m"]
+[ext_resource type="Script" path="res://scripts/fragment/npc_controller.gd" id="2_npc_script"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_tekmk"]
+size = Vector2(37, 27)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_h7ynf"]
+radius = 28.0
+height = 132.0
+
+[node name="NpcOldteacher" type="CharacterBody2D" unique_id=1736460616]
+z_as_relative = false
+y_sort_enabled = true
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("2_npc_script")
+npc_name = "老教师"
+npc_role = "退休语文教师"
+npc_kb_id = "oldteacher"
+use_rag = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=620498560]
+position = Vector2(-0.5, -13.5)
+shape = SubResource("RectangleShape2D_tekmk")
+
+[node name="Visual Node2D" type="Node2D" parent="." unique_id=1332059506]
+
+[node name="Visual" type="Sprite2D" parent="Visual Node2D" unique_id=344910475]
+position = Vector2(0, -88)
+texture = ExtResource("1_x0y8m")
+
+[node name="Shadow Sprite2D" type="Sprite2D" parent="Visual Node2D" unique_id=568916392]
+
+[node name="FeetMarker Marker2D" type="Marker2D" parent="." unique_id=689934167]
+
+[node name="InteractionArea Area2D" type="Area2D" parent="." unique_id=1771924395]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea Area2D" unique_id=1884633555]
+position = Vector2(0, -69)
+shape = SubResource("CapsuleShape2D_h7ynf")
+debug_color = Color(0.64264345, 0.5239735, 0, 0.41960785)

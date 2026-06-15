@@ -2,11 +2,15 @@
 
 [ext_resource type="Script" uid="uid://j5lnc3gxvp0b" path="res://scripts/ui/title_screen.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://dy7bgstarthv1" path="res://assets/ui/title_start_bg.jpg" id="2_bg"]
+[ext_resource type="Texture2D" uid="uid://b68mbpj8x14r7" path="res://assets/papercraft/core/ui/default_buttons/default_settings.png" id="3_lddph"]
 [ext_resource type="Texture2D" uid="uid://fppe3j2cxxqj" path="res://assets/ui/start_save_dialog_bg.png" id="3_start_dialog_bg"]
+[ext_resource type="Texture2D" uid="uid://kbfeg1yu75ts" path="res://assets/papercraft/core/ui/extracted_buttons/pressed_settings.png" id="4_g5qcc"]
 [ext_resource type="Texture2D" uid="uid://cvay8itj4puhp" path="res://assets/ui/start_no_save_dialog_bg.png" id="4_no_save_dialog_bg"]
+[ext_resource type="Texture2D" uid="uid://4oiio3lv65yt" path="res://assets/papercraft/core/ui/extracted_buttons/hover_settings.png" id="5_1oiph"]
 [ext_resource type="Texture2D" uid="uid://d2uidu7u7nwy2" path="res://assets/ui/save_slots_bg.png" id="5_save_slots_bg"]
 [ext_resource type="Texture2D" uid="uid://bx4o541neqkc7" path="res://assets/ui/save_not_found_dialog_bg.png" id="6_save_not_found_bg"]
 [ext_resource type="Texture2D" uid="uid://catj4odugir4v" path="res://assets/ui/save_overwrite_dialog_bg.png" id="7_save_overwrite_bg"]
+[ext_resource type="PackedScene" uid="uid://yw0t7erbhlwi" path="res://scenes/ui/SettingsPanel.tscn" id="8_settings_panel"]
 
 [node name="TitleScreen" type="Control" unique_id=922980833]
 layout_mode = 3
@@ -118,6 +122,23 @@ layout_mode = 1
 theme_override_colors/font_color = Color(0.32, 0.25, 0.17, 0.72)
 theme_override_font_sizes/font_size = 12
 text = "溯光计划 v0.2.0"
+
+[node name="SettingsGearButton" type="TextureButton" parent="." unique_id=1473053015]
+layout_mode = 1
+offset_left = 32.0
+offset_top = 33.0
+offset_right = 143.0
+offset_bottom = 84.0
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("3_lddph")
+texture_pressed = ExtResource("4_g5qcc")
+texture_hover = ExtResource("5_1oiph")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="SettingsPanel" parent="." unique_id=2138100823 instance=ExtResource("8_settings_panel")]
+visible = false
+layout_mode = 1
 
 [node name="StartSaveDialog" type="Control" parent="." unique_id=795521632]
 visible = false

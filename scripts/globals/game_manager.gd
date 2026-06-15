@@ -138,6 +138,7 @@ signal decryption_complete(fragment_id: String)
 signal clue_collected(clue: String)
 
 func _ready() -> void:
+	SettingsManager.load_and_apply()
 	print("[GameManager] 溯光计划 V0.1.0")
 
 
@@ -185,8 +186,10 @@ func reset_fragment() -> void:
 	## 不会在重新进入关卡时清除——玩家可以通过加载存档找回之前的对话记录。
 	items_used.clear()
 	
-	# 重置碎片 #0762 专属状态（委托 FragmentManager）
-	FragmentManager.reset_fragment_states("0762")
+	if FragmentManager.current_fragment != null and FragmentManager.current_fragment.id in ["0002", "0762"]:
+		FragmentManager.reset_fragment_states(FragmentManager.current_fragment.id)
+	else:
+		FragmentManager.reset_fragment_states("0762")
 	
 	print("[GameManager] 碎片关卡内进度已重置（对话历史与NPC信任状态已保留）")
 

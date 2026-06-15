@@ -24,6 +24,7 @@ var panel_page_idx: Array[int] = []
 ## 当前已显示的最新面板索引（-1 表示尚未显示任何面板）
 var current_panel: int = -1
 var is_transitioning: bool = false
+var is_exiting: bool = false
 
 # ============================================
 # 面板动画参数
@@ -32,6 +33,15 @@ var is_transitioning: bool = false
 const PANEL_FADE_DURATION: float = 0.4
 const PANEL_SCALE_START: float = 0.95
 const PANEL_SCALE_END: float = 1.0
+const HINT_TEXT_PAGE: String = "点击或按任意键翻页"
+const HINT_TEXT_CONTINUE: String = "点击或按任意键继续"
+
+# ============================================
+# BGM
+# ============================================
+
+var _bgm_player: AudioStreamPlayer = null
+const BGM_CINEMATIC = preload("res://assets/audio/bgm/bgm_opening_cinematic.ogg")
 
 # ============================================
 # 旁白文本（13段，按面板顺序）
@@ -62,7 +72,13 @@ func _ready() -> void:
 	if SaveManager.get_current_slot() >= 0:
 		SaveManager._stop_auto_save()
 	_gather_panels()
+	# 右上角"按ESC跳过"提示样式
+	page_indicator.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 0.55))
+	page_indicator.add_theme_font_size_override("font_size", 16)
+	click_hint.text = HINT_TEXT_PAGE
 	_show_first_panel()
+	# 播放入场动画 BGM（55秒版本，结尾自动淡出）
+	_start_bgm()
 
 
 func _gather_panels() -> void:
@@ -119,6 +135,8 @@ func _advance_to_panel(idx: int) -> void:
 	tween.tween_property(panel, "scale", Vector2(PANEL_SCALE_END, PANEL_SCALE_END), PANEL_FADE_DURATION).set_ease(Tween.EASE_OUT)
 
 	tween.chain().tween_callback(func() -> void:
+		if is_exiting:
+			return
 		current_panel = idx
 		_update_narration(idx)
 		_update_page_indicator()
@@ -135,7 +153,7 @@ func _update_narration(idx: int) -> void:
 
 
 func _update_page_indicator() -> void:
-	page_indicator.text = "页 %d / %d" % [panel_page_idx[current_panel] + 1, pages.size()]
+	page_indicator.text = "按ESC跳过"
 
 
 # ============================================
@@ -143,6 +161,14 @@ func _update_page_indicator() -> void:
 # ============================================
 
 func _input(event: InputEvent) -> void:
+	if is_exiting:
+		return
+
+	if _is_skip_event(event):
+		get_viewport().set_input_as_handled()
+		_skip_cinematic()
+		return
+
 	if is_transitioning:
 		return
 
@@ -163,6 +189,21 @@ func _input(event: InputEvent) -> void:
 		_next_panel()
 
 
+func _is_skip_event(event: InputEvent) -> bool:
+	if not event is InputEventKey:
+		return false
+
+	var key_event := event as InputEventKey
+	return key_event.pressed \
+		and not key_event.echo \
+		and (
+			key_event.is_action_pressed("escape")
+			or key_event.is_action_pressed("ui_cancel")
+			or key_event.keycode == KEY_ESCAPE
+			or key_event.physical_keycode == KEY_ESCAPE
+		)
+
+
 # ============================================
 # 面板推进
 # ============================================
@@ -178,9 +219,37 @@ func _next_panel() -> void:
 	_advance_to_panel(current_panel + 1)
 
 
+func _skip_cinematic() -> void:
+	_go_to_star_map()
+
+
 func _go_to_star_map() -> void:
+	if is_exiting:
+		return
+	is_exiting = true
 	is_transitioning = true
+	_hide_hint()
+	_stop_bgm()
 	SceneManager.change_scene("res://scenes/star_map.tscn", "from_cutscene")
+
+
+# ============================================
+# BGM 播放
+# ============================================
+
+func _start_bgm() -> void:
+	if _bgm_player == null:
+		_bgm_player = AudioStreamPlayer.new()
+		_bgm_player.name = "BGMPlayer"
+		_bgm_player.bus = "Master"
+		_bgm_player.volume_db = -6.0
+		add_child(_bgm_player)
+	_bgm_player.stream = BGM_CINEMATIC
+	_bgm_player.play()
+
+func _stop_bgm() -> void:
+	if _bgm_player != null and _bgm_player.playing:
+		_bgm_player.stop()
 
 
 # ============================================
@@ -193,7 +262,8 @@ func _hide_hint() -> void:
 
 
 func _show_hint() -> void:
-	if current_panel >= panels.size() - 1:
+	if is_exiting:
 		return
+	click_hint.text = HINT_TEXT_CONTINUE if current_panel >= panels.size() - 1 else HINT_TEXT_PAGE
 	var t := create_tween()
 	t.tween_property(click_hint, "modulate:a", 0.5, 0.3)

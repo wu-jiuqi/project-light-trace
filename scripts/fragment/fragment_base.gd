@@ -17,7 +17,6 @@ const ALERT_LOCKDOWN = 5
 @onready var player: CharacterBody2D = $Player
 @onready var npc_container: Node2D = $NPCs
 @onready var ui_layer: CanvasLayer = $UILayer
-@onready var dialogue_ui: Control = $UILayer/DialogueUI
 @onready var wanted_indicator: Control = $UILayer/WantedIndicator
 @onready var clue_notification: Control = $UILayer/ClueNotification
 
@@ -144,7 +143,8 @@ func _input(event: InputEvent) -> void:
 
 func _try_interact() -> void:
 	## 检测玩家附近是否有NPC，有则触发对话
-	if not player or not dialogue_ui:
+
+	if not player:
 		return
 	
 	var npcs = get_tree().get_nodes_in_group("npc")
@@ -166,9 +166,8 @@ func _try_interact() -> void:
 		elif closest.has_method("get_fallback_response"):
 			greeting = closest.get_fallback_response()
 		
+		ChatDialogue.open(closest, greeting)
 		closest.start_dialogue()
-		if closest.has_method("get_dialogue_options"):
-			dialogue_ui.start_dialogue(closest.npc_name, closest.get_dialogue_options())
 
 func _confirm_exit() -> void:
 	# 确认退出碎片

@@ -1,4 +1,4 @@
-﻿{
+{
   "npc_id": "oldpainter",
   "npc_name": "老顾",
   "_description": "老画家（老顾）RAG知识库。他不是情感碎片——是AI「织女·太一」在崩溃前留下的最后完整自我意识残片。使用信任度(trust_required)而非警觉度。trust_required表示触发此chunk所需的最低信任值(-100到+100，默认0)。",

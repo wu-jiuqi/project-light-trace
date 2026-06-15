@@ -1,0 +1,354 @@
+[gd_scene format=3 uid="uid://duiql0mgjrtjc"]
+
+[ext_resource type="Texture2D" path="res://assets/ui/large_page.png" id="1_large"]
+[ext_resource type="Texture2D" path="res://assets/ui/corner_compass.png" id="2_compass"]
+[ext_resource type="Texture2D" path="res://assets/ui/right_banner.png" id="3_banner"]
+[ext_resource type="Texture2D" path="res://assets/ui/left_mountains.png" id="4_left_mountains"]
+[ext_resource type="Texture2D" path="res://assets/ui/right_mountains.png" id="5_right_mountains"]
+[ext_resource type="Texture2D" path="res://assets/ui/dialogue_panel.png" id="6_panel"]
+[ext_resource type="Texture2D" path="res://assets/ui/input_strip.png" id="9_input"]
+[ext_resource type="Texture2D" path="res://assets/ui/button_plate.png" id="10_button_normal"]
+[ext_resource type="Texture2D" path="res://assets/ui/button_plate_alt.png" id="11_button_hover"]
+[ext_resource type="Texture2D" uid="uid://dgtrvhrqx7ohx" path="res://assets/papercraft/player/player_l.png" id="12_player_portrait"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_dialogue_panel"]
+content_margin_left = 72.0
+content_margin_top = 42.0
+content_margin_right = 52.0
+content_margin_bottom = 26.0
+texture = ExtResource("6_panel")
+texture_margin_left = 72.0
+texture_margin_top = 54.0
+texture_margin_right = 72.0
+texture_margin_bottom = 48.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_input"]
+content_margin_left = 32.0
+content_margin_top = 10.0
+content_margin_right = 32.0
+content_margin_bottom = 10.0
+texture = ExtResource("9_input")
+texture_margin_left = 42.0
+texture_margin_top = 34.0
+texture_margin_right = 42.0
+texture_margin_bottom = 34.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_button_normal"]
+content_margin_left = 30.0
+content_margin_top = 6.0
+content_margin_right = 10.0
+content_margin_bottom = 6.0
+texture = ExtResource("10_button_normal")
+texture_margin_left = 18.0
+texture_margin_top = 18.0
+texture_margin_right = 18.0
+texture_margin_bottom = 18.0
+modulate_color = Color(0.78, 0.58, 0.27, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_button_pressed"]
+content_margin_left = 30.0
+content_margin_top = 6.0
+content_margin_right = 10.0
+content_margin_bottom = 6.0
+texture = ExtResource("11_button_hover")
+texture_margin_left = 18.0
+texture_margin_top = 18.0
+texture_margin_right = 18.0
+texture_margin_bottom = 18.0
+modulate_color = Color(0.62, 0.43, 0.18, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_button_hover"]
+content_margin_left = 30.0
+content_margin_top = 6.0
+content_margin_right = 10.0
+content_margin_bottom = 6.0
+texture = ExtResource("11_button_hover")
+texture_margin_left = 18.0
+texture_margin_top = 18.0
+texture_margin_right = 18.0
+texture_margin_bottom = 18.0
+modulate_color = Color(0.92, 0.72, 0.36, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBox_button_disabled"]
+content_margin_left = 30.0
+content_margin_top = 6.0
+content_margin_right = 10.0
+content_margin_bottom = 6.0
+texture = ExtResource("10_button_normal")
+texture_margin_left = 18.0
+texture_margin_top = 18.0
+texture_margin_right = 18.0
+texture_margin_bottom = 18.0
+modulate_color = Color(0.46, 0.39, 0.28, 0.82)
+
+[node name="DialogueBox" type="Control" unique_id=1256299883]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Vignette" type="ColorRect" parent="." unique_id=950634276]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.03529412, 0.03137255, 0.02745098, 0.82)
+
+[node name="Stage" type="Control" parent="."]
+layout_mode = 1
+offset_right = 1280.0
+offset_bottom = 720.0
+mouse_filter = 2
+
+[node name="LargePage" type="TextureRect" parent="Stage" unique_id=1001]
+modulate = Color(1, 1, 1, 0.5882353)
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 18.0
+offset_top = 14.0
+offset_right = -18.0
+offset_bottom = 864.0
+grow_horizontal = 2
+mouse_filter = 2
+texture = ExtResource("1_large")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CornerCompass" type="TextureRect" parent="Stage" unique_id=1002]
+modulate = Color(1, 1, 1, 0.5882353)
+z_index = 1
+layout_mode = 1
+offset_left = 8.0
+offset_top = 175.0
+offset_right = 205.0
+offset_bottom = 327.0
+mouse_filter = 2
+texture = ExtResource("2_compass")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RightBanner" type="TextureRect" parent="Stage" unique_id=1003]
+modulate = Color(1, 1, 1, 0.5882353)
+z_index = 1
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -144.0
+offset_top = 179.0
+offset_right = -28.0
+offset_bottom = 349.0
+grow_horizontal = 0
+mouse_filter = 2
+texture = ExtResource("3_banner")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PlayerPortrait" type="TextureRect" parent="Stage" unique_id=1303654013]
+layout_mode = 1
+offset_left = 741.0
+offset_top = 180.0
+offset_right = 1214.0
+offset_bottom = 680.0
+mouse_filter = 2
+texture = ExtResource("12_player_portrait")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NpcPortrait" type="TextureRect" parent="Stage" unique_id=2051693918]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -1182.0
+offset_top = 180.0
+offset_right = -709.0
+offset_bottom = 680.0
+grow_horizontal = 0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LeftMountains" type="TextureRect" parent="Stage" unique_id=1004]
+modulate = Color(1, 1, 1, 0.78431374)
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -306.0
+offset_right = 196.0
+offset_bottom = -30.0
+grow_vertical = 0
+mouse_filter = 2
+texture = ExtResource("4_left_mountains")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RightMountains" type="TextureRect" parent="Stage" unique_id=1005]
+modulate = Color(1, 1, 1, 0.78431374)
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -188.0
+offset_top = -240.0
+offset_right = -18.0
+offset_bottom = -52.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+texture = ExtResource("5_right_mountains")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DialoguePanel" type="Panel" parent="Stage" unique_id=285489330]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 84.0
+offset_top = -220.0
+offset_right = -54.0
+offset_bottom = -34.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBox_dialogue_panel")
+
+[node name="ChatDisplay" type="RichTextLabel" parent="Stage/DialoguePanel" unique_id=487452998]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 72.0
+offset_top = 42.0
+offset_right = -69.0
+offset_bottom = -58.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 2
+mouse_filter = 1
+theme_override_colors/default_color = Color(0.17254902, 0.12156863, 0.07843138, 1)
+theme_override_font_sizes/normal_font_size = 21
+bbcode_enabled = true
+scroll_following = true
+selection_enabled = true
+
+[node name="InputBar" type="Panel" parent="Stage/DialoguePanel" unique_id=2001]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 92.0
+offset_top = -58.0
+offset_right = -368.0
+offset_bottom = -14.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBox_input")
+
+[node name="InputBox" type="LineEdit" parent="Stage/DialoguePanel/InputBar" unique_id=2002]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 25.0
+offset_top = 7.5
+offset_right = -46.0
+offset_bottom = -1.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.17254902, 0.12156863, 0.07843138, 1)
+theme_override_colors/font_placeholder_color = Color(0.2627451, 0.20392157, 0.14901961, 0.62)
+theme_override_font_sizes/font_size = 18
+placeholder_text = "输入回应..."
+flat = true
+
+[node name="ButtonRow" type="HBoxContainer" parent="Stage/DialoguePanel" unique_id=2003]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -364.0
+offset_top = -58.0
+offset_right = -28.0
+offset_bottom = -10.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_constants/separation = 10
+
+[node name="SendButton" type="Button" parent="Stage/DialoguePanel/ButtonRow" unique_id=2004]
+custom_minimum_size = Vector2(104, 42)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.22, 0.13, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.06, 0.035, 0.015, 1)
+theme_override_colors/font_hover_color = Color(0.09, 0.05, 0.02, 1)
+theme_override_colors/font_disabled_color = Color(0.25, 0.22, 0.18, 0.55)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleBox_button_normal")
+theme_override_styles/pressed = SubResource("StyleBox_button_pressed")
+theme_override_styles/hover = SubResource("StyleBox_button_hover")
+theme_override_styles/disabled = SubResource("StyleBox_button_disabled")
+theme_override_styles/focus = SubResource("StyleBox_button_hover")
+text = "发送"
+
+[node name="GiveButton" type="Button" parent="Stage/DialoguePanel/ButtonRow" unique_id=2005]
+custom_minimum_size = Vector2(104, 42)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.31, 0.18, 0.04, 1)
+theme_override_colors/font_pressed_color = Color(0.06, 0.035, 0.015, 1)
+theme_override_colors/font_hover_color = Color(0.09, 0.05, 0.02, 1)
+theme_override_colors/font_disabled_color = Color(0.25, 0.22, 0.18, 0.55)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleBox_button_normal")
+theme_override_styles/pressed = SubResource("StyleBox_button_pressed")
+theme_override_styles/hover = SubResource("StyleBox_button_hover")
+theme_override_styles/disabled = SubResource("StyleBox_button_disabled")
+theme_override_styles/focus = SubResource("StyleBox_button_hover")
+text = "给予"
+
+[node name="HistoryButton" type="Button" parent="Stage/DialoguePanel/ButtonRow" unique_id=2006]
+custom_minimum_size = Vector2(104, 42)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.22, 0.13, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.06, 0.035, 0.015, 1)
+theme_override_colors/font_hover_color = Color(0.09, 0.05, 0.02, 1)
+theme_override_colors/font_disabled_color = Color(0.25, 0.22, 0.18, 0.55)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleBox_button_normal")
+theme_override_styles/pressed = SubResource("StyleBox_button_pressed")
+theme_override_styles/hover = SubResource("StyleBox_button_hover")
+theme_override_styles/disabled = SubResource("StyleBox_button_disabled")
+theme_override_styles/focus = SubResource("StyleBox_button_hover")
+text = "历史"
+
+[node name="NameLabel" type="Label" parent="Stage/DialoguePanel" unique_id=292948960]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -376.0
+offset_top = -51.0
+offset_right = -456.0
+offset_bottom = -89.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.69803923, 0.5568628, 0.31764707, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 25
+text = "档案守望者"
+horizontal_alignment = 1
+vertical_alignment = 1

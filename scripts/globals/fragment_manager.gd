@@ -67,7 +67,7 @@ func _ready() -> void:
 func _initialize_fragments() -> void:
 	fragments = [
 		FragmentData.new("0001", "启程之镇", "晨曦镇", "「白日依山尽」", "晨曦之印", 1, false, "res://scenes/fragments/fragment_0001.tscn", true),
-		FragmentData.new("0002", "黄昏驿站", "落霞驿站", "「黄河入海流」", "归途之印", 1, false, "res://scenes/fragments/fragment_0002.tscn"),
+		FragmentData.new("0002", "黄昏驿站", "落霞驿站", "「黄河入海流」", "归途之印", 1, false, "res://scenes/fragments/fragment_0002.tscn", true),
 		FragmentData.new("0003", "月下神社", "玉兔神社", "「举头望明月」", "月光之印", 1, false, "res://scenes/fragments/fragment_0003.tscn"),
 		FragmentData.new("0004", "工坊物语", "齿轮工坊", "「匠心」", "匠魂之印", 2, false, "res://scenes/fragments/fragment_0004.tscn"),
 		FragmentData.new("0047", "倒悬图书馆", "知识之塔", "「知识就是力量」", "真理之印", 3, true, "res://scenes/fragments/fragment_0047.tscn"),
@@ -83,6 +83,13 @@ func _initialize_fragments() -> void:
 
 func _ensure_default_fragment_states() -> void:
 	## 初始化所有已知碎片的默认专属状态
+	if not _fragment_states.has("0002"):
+		_fragment_states["0002"] = {
+			"seat_selection": {},
+			"left_npc_id": "",
+			"source_mark_ticket_collected": false,
+			"completed": false,
+		}
 	_fragment_states["0762"] = {
 		"awakened_colors": [false, false, false, false, false, false],
 		"melody_triggered": false,
@@ -163,17 +170,28 @@ func consume_completion_animation_id() -> String:
 # ============================================================
 
 func reset_all_fragments() -> void:
-	## 重置所有碎片的 completed 标记为 false
+	## 重置所有碎片的 completed 标记为 false，并清除所有碎片专属状态
 	for fragment in fragments:
 		fragment.completed = false
 	pending_completion_animation_id = ""
 	is_replay_mode = false
+	# 清除碎片专属状态，防止跨存档泄露（如线索数据）
+	_fragment_states.clear()
+	_ensure_default_fragment_states()
 	print("[FragmentManager] 所有 %d 个碎片已重置为未修复状态" % fragments.size())
 
 
 func reset_fragment_states(fragment_id: String) -> void:
 	## 重置指定碎片的专属状态为默认值
 	match fragment_id:
+		"0002":
+			_fragment_states["0002"] = {
+				"seat_selection": {},
+				"left_npc_id": "",
+				"source_mark_ticket_collected": false,
+				"completed": false,
+			}
+			print("[FragmentManager] 碎片 %s 的专属状态已重置" % fragment_id)
 		"0762":
 			_fragment_states["0762"] = {
 				"awakened_colors": [false, false, false, false, false, false],
@@ -252,6 +270,10 @@ func get_fragment_states_dict() -> Dictionary:
 
 func apply_fragment_states(states: Dictionary) -> void:
 	## 将 fragment_states 字典应用到对应碎片的专属状态
+	## 先清除旧状态再应用，防止跨存档状态泄露
+	_fragment_states.clear()
+	_ensure_default_fragment_states()
+	
 	if states.is_empty():
 		return
 	

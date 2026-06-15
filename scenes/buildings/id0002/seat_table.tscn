@@ -1,0 +1,358 @@
+[gd_scene format=3 uid="uid://dwj2adk4fjn1x"]
+
+[ext_resource type="Script" uid="uid://dlvdplpbj3dt7" path="res://scripts/ui/seat_table.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://bw1tm4t5dea6k" path="res://assets/papercraft/fragments/id0002/seat_ticket/seat_table.png" id="2_nfqc4"]
+[ext_resource type="Texture2D" uid="uid://be3sc7cjwntkv" path="res://assets/papercraft/core/ui/dialogue_box/corner_compass.png" id="2_oervt"]
+[ext_resource type="Texture2D" uid="uid://bulsjvcstsvsp" path="res://assets/papercraft/fragments/id0002/seat_ticket/t1.png" id="2_s4y2g"]
+[ext_resource type="Texture2D" uid="uid://dt0hd2ti4bmi4" path="res://assets/papercraft/core/ui/dialogue_box/large_page.png" id="3_ay6l8"]
+[ext_resource type="Texture2D" uid="uid://cs0aimvu5fo6p" path="res://assets/papercraft/fragments/id0002/seat_ticket/t2.png" id="3_gfvxu"]
+[ext_resource type="Texture2D" uid="uid://yate21ixh6mc" path="res://assets/papercraft/fragments/id0002/seat_ticket/t4.png" id="4_u00ul"]
+[ext_resource type="Texture2D" uid="uid://cyqd3vhw4sb7i" path="res://assets/papercraft/fragments/id0002/seat_ticket/t3.png" id="5_678kb"]
+[ext_resource type="Texture2D" uid="uid://dgyfs4a0usxgd" path="res://assets/papercraft/fragments/id0002/seat_ticket/t5.png" id="7_juo4p"]
+[ext_resource type="Texture2D" uid="uid://cel5mcyy4fna1" path="res://assets/papercraft/core/ui/default_buttons/button_save.png" id="10_n5ptn"]
+[ext_resource type="Texture2D" uid="uid://buivakopqm5kt" path="res://assets/papercraft/core/ui/extracted_buttons/pressed_save.png" id="11_nbldx"]
+[ext_resource type="Texture2D" uid="uid://ciixb3gvovmrh" path="res://assets/papercraft/core/ui/extracted_buttons/hover_save.png" id="12_brhjk"]
+
+[node name="SeatTable" type="Control" unique_id=1435972791]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="LeftCorner" type="TextureRect" parent="." unique_id=161723417]
+z_index = 2
+layout_mode = 0
+offset_right = 160.0
+offset_bottom = 130.0
+texture = ExtResource("2_oervt")
+expand_mode = 1
+
+[node name="Dim" type="TextureRect" parent="." unique_id=2020092342]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_ay6l8")
+expand_mode = 1
+
+[node name="Stage" type="Control" parent="." unique_id=254798947]
+layout_mode = 1
+anchors_preset = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+mouse_filter = 2
+
+[node name="BoardTexture" type="TextureRect" parent="Stage" unique_id=1842952373]
+layout_mode = 0
+offset_left = 380.0
+offset_top = 78.0
+offset_right = 1128.0
+offset_bottom = 552.0
+mouse_filter = 2
+texture = ExtResource("2_nfqc4")
+expand_mode = 1
+
+[node name="BoardPlaceholder" type="ColorRect" parent="Stage/BoardTexture" unique_id=194610627]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.58, 0.47, 0.31, 0.28)
+
+[node name="SeatSlots" type="Control" parent="Stage" unique_id=1659674454]
+anchors_preset = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+mouse_filter = 2
+
+[node name="SeatSlot1" type="ColorRect" parent="Stage/SeatSlots" unique_id=1412404805]
+layout_mode = 0
+offset_left = 507.0
+offset_top = 257.0
+offset_right = 711.0
+offset_bottom = 350.0
+color = Color(0.9018106, 0.7490225, 0.4195712, 0.5)
+
+[node name="SeatSlot2" type="ColorRect" parent="Stage/SeatSlots" unique_id=706160904]
+layout_mode = 0
+offset_left = 798.0
+offset_top = 257.0
+offset_right = 1004.0
+offset_bottom = 350.0
+color = Color(0.9018106, 0.7490225, 0.4195712, 0.5)
+
+[node name="SeatSlot3" type="ColorRect" parent="Stage/SeatSlots" unique_id=686746575]
+layout_mode = 0
+offset_left = 507.0
+offset_top = 361.0
+offset_right = 711.0
+offset_bottom = 457.0
+color = Color(0.9018106, 0.7490225, 0.4195712, 0.5)
+
+[node name="SeatSlot4" type="ColorRect" parent="Stage/SeatSlots" unique_id=1205560208]
+layout_mode = 0
+offset_left = 798.0
+offset_top = 361.0
+offset_right = 1004.0
+offset_bottom = 457.0
+color = Color(0.9018106, 0.7490225, 0.4195712, 0.5)
+
+[node name="TicketLayer" type="Control" parent="Stage" unique_id=1115500002]
+anchors_preset = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+mouse_filter = 2
+
+[node name="Ticket_oldteacher" type="Control" parent="Stage/TicketLayer" unique_id=366771955]
+anchors_preset = 0
+offset_left = 80.0
+offset_top = 40.0
+offset_right = 280.0
+offset_bottom = 146.0
+metadata/npc_id = "oldteacher"
+
+[node name="Bg" type="ColorRect" parent="Stage/TicketLayer/Ticket_oldteacher" unique_id=1100589443]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.78, 0.64, 0.38, 0.85)
+
+[node name="Texture" type="TextureRect" parent="Stage/TicketLayer/Ticket_oldteacher" unique_id=627481346]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_s4y2g")
+expand_mode = 1
+
+[node name="Label" type="Label" parent="Stage/TicketLayer/Ticket_oldteacher" unique_id=1763312322]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 141.0
+offset_right = 141.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.7640215, 0.60790855, 0.22628069, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 20
+text = "老教师"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Ticket_youngsoldier" type="Control" parent="Stage/TicketLayer" unique_id=176081576]
+anchors_preset = 0
+offset_left = 80.0
+offset_top = 166.0
+offset_right = 280.0
+offset_bottom = 272.0
+metadata/npc_id = "youngsoldier"
+
+[node name="Bg" type="ColorRect" parent="Stage/TicketLayer/Ticket_youngsoldier" unique_id=90716170]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.78, 0.64, 0.38, 0.85)
+
+[node name="Texture" type="TextureRect" parent="Stage/TicketLayer/Ticket_youngsoldier" unique_id=1355061158]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_gfvxu")
+expand_mode = 1
+
+[node name="Label" type="Label" parent="Stage/TicketLayer/Ticket_youngsoldier" unique_id=1655729015]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 149.0
+offset_right = 149.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.76487833, 0.6080301, 0.22658296, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 20
+text = "年轻士兵"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Ticket_flowergirl" type="Control" parent="Stage/TicketLayer" unique_id=1527098447]
+anchors_preset = 0
+offset_left = 80.0
+offset_top = 292.0
+offset_right = 280.0
+offset_bottom = 398.0
+metadata/npc_id = "flowergirl"
+
+[node name="Bg" type="ColorRect" parent="Stage/TicketLayer/Ticket_flowergirl" unique_id=474910293]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.78, 0.64, 0.38, 0.85)
+
+[node name="Texture" type="TextureRect" parent="Stage/TicketLayer/Ticket_flowergirl" unique_id=518029004]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("4_u00ul")
+expand_mode = 1
+
+[node name="Label" type="Label" parent="Stage/TicketLayer/Ticket_flowergirl" unique_id=1020371359]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 141.0
+offset_right = 141.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.7642523, 0.6080301, 0.22658296, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 20
+text = "卖花女"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Ticket_merchant" type="Control" parent="Stage/TicketLayer" unique_id=1828168669]
+anchors_preset = 0
+offset_left = 80.0
+offset_top = 418.0
+offset_right = 280.0
+offset_bottom = 524.0
+metadata/npc_id = "merchant"
+
+[node name="Bg" type="ColorRect" parent="Stage/TicketLayer/Ticket_merchant" unique_id=853715366]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.78, 0.64, 0.38, 0.85)
+
+[node name="Texture" type="TextureRect" parent="Stage/TicketLayer/Ticket_merchant" unique_id=172089037]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("5_678kb")
+expand_mode = 1
+
+[node name="Label" type="Label" parent="Stage/TicketLayer/Ticket_merchant" unique_id=593460098]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 134.0
+offset_right = 134.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.76487833, 0.6080301, 0.22658296, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 20
+text = "商人"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Ticket_littlegirl" type="Control" parent="Stage/TicketLayer" unique_id=581290416]
+anchors_preset = 0
+offset_left = 80.0
+offset_top = 544.0
+offset_right = 280.0
+offset_bottom = 650.0
+metadata/npc_id = "littlegirl"
+
+[node name="Bg" type="ColorRect" parent="Stage/TicketLayer/Ticket_littlegirl" unique_id=666019817]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.78, 0.64, 0.38, 0.85)
+
+[node name="Texture" type="TextureRect" parent="Stage/TicketLayer/Ticket_littlegirl" unique_id=1048730669]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("7_juo4p")
+expand_mode = 1
+
+[node name="Label" type="Label" parent="Stage/TicketLayer/Ticket_littlegirl" unique_id=2132959398]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 140.0
+offset_right = 140.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.7642523, 0.6080301, 0.22658296, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 20
+text = "小女孩"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HintLabel" type="Label" parent="Stage" unique_id=1566446283]
+layout_mode = 0
+offset_left = 380.0
+offset_top = 586.0
+offset_right = 1128.0
+offset_bottom = 626.0
+theme_override_colors/font_color = Color(0.94, 0.82, 0.58, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 22
+text = "将四张车票拖到座位上，剩下的人会被留下。"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SaveButton" type="TextureButton" parent="Stage" unique_id=1083353327]
+layout_mode = 0
+offset_left = 1098.0
+offset_top = 650.0
+offset_right = 1222.0
+offset_bottom = 692.0
+texture_normal = ExtResource("10_n5ptn")
+texture_pressed = ExtResource("11_nbldx")
+texture_hover = ExtResource("12_brhjk")
+ignore_texture_size = true
+stretch_mode = 0

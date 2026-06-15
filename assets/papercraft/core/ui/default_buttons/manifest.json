@@ -1,0 +1,38 @@
+[
+  {
+    "state": "default",
+    "name": "back_to_game",
+    "file": "D:\\WorkBuddy WorkSpace\\project_light_trace\\assets\\papercraft\\core\\ui\\default_buttons\\default_back_to_game.png",
+    "canvas": [
+      620,
+      220
+    ]
+  },
+  {
+    "state": "default",
+    "name": "settings",
+    "file": "D:\\WorkBuddy WorkSpace\\project_light_trace\\assets\\papercraft\\core\\ui\\default_buttons\\default_settings.png",
+    "canvas": [
+      620,
+      220
+    ]
+  },
+  {
+    "state": "default",
+    "name": "return_star_map",
+    "file": "D:\\WorkBuddy WorkSpace\\project_light_trace\\assets\\papercraft\\core\\ui\\default_buttons\\default_return_star_map.png",
+    "canvas": [
+      620,
+      220
+    ]
+  },
+  {
+    "state": "default",
+    "name": "return_title",
+    "file": "D:\\WorkBuddy WorkSpace\\project_light_trace\\assets\\papercraft\\core\\ui\\default_buttons\\default_return_title.png",
+    "canvas": [
+      620,
+      220
+    ]
+  }
+]

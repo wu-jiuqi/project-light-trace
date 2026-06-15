@@ -1,0 +1,218 @@
+[gd_scene format=3 uid="uid://dt8e1tgrbsyjr"]
+
+[ext_resource type="Script" uid="uid://cnhbdywao8crw" path="res://scripts/ui/dialogue_history_panel.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://clfcuckupjq85" path="res://assets/ui/large_page.png" id="2_large"]
+[ext_resource type="Texture2D" uid="uid://b4m603ykww1pj" path="res://assets/ui/corner_compass.png" id="3_compass"]
+[ext_resource type="Texture2D" uid="uid://cpd21am68weh8" path="res://assets/ui/left_mountains.png" id="4_left_mountains"]
+[ext_resource type="Texture2D" uid="uid://fpc1e12tqf1q" path="res://assets/ui/right_mountains.png" id="5_right_mountains"]
+[ext_resource type="Texture2D" uid="uid://ci2nn4aead8ld" path="res://assets/papercraft/core/ui/default_buttons/button_close.png" id="6_n0rug"]
+[ext_resource type="Texture2D" uid="uid://bj7o22j3bpbw0" path="res://assets/papercraft/core/ui/banner/dialog_history_banner.png" id="8_5bp2t"]
+[ext_resource type="Texture2D" uid="uid://ce2sbt6gafi0i" path="res://assets/papercraft/core/ui/default_buttons/button_prev_page.png" id="9_vs2cf"]
+[ext_resource type="Texture2D" uid="uid://fk5f48tk5iij" path="res://assets/papercraft/core/ui/default_buttons/button_next_page.png" id="11_xio5o"]
+
+[node name="DialogueHistory" type="Control" unique_id=218020723]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Vignette" type="ColorRect" parent="." unique_id=1632738783]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.035, 0.031, 0.027, 0.82)
+
+[node name="Stage" type="Control" parent="." unique_id=1462051837]
+layout_mode = 1
+anchors_preset = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+mouse_filter = 2
+
+[node name="LargePage" type="TextureRect" parent="Stage" unique_id=735866835]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 18.0
+offset_top = -101.0
+offset_right = -18.0
+offset_bottom = -146.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(1, 1.355)
+mouse_filter = 2
+texture = ExtResource("2_large")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CornerCompass" type="TextureRect" parent="Stage" unique_id=932150292]
+modulate = Color(1, 1, 1, 0.58)
+layout_mode = 1
+offset_left = 18.0
+offset_top = 5.0
+offset_right = 196.0
+offset_bottom = 143.0
+mouse_filter = 2
+texture = ExtResource("3_compass")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LeftMountains" type="TextureRect" parent="Stage" unique_id=2001685664]
+modulate = Color(1, 1, 1, 0.72)
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -15.0
+offset_top = -232.0
+offset_right = 177.0
+offset_bottom = -20.0
+grow_vertical = 0
+mouse_filter = 2
+texture = ExtResource("4_left_mountains")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RightMountains" type="TextureRect" parent="Stage" unique_id=18946047]
+modulate = Color(1, 1, 1, 0.72)
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -188.0
+offset_top = -194.0
+offset_right = -4.0
+offset_bottom = -18.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+texture = ExtResource("5_right_mountains")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DialogPanel" type="Panel" parent="Stage" unique_id=1623599346]
+layout_mode = 0
+offset_right = 1281.0
+offset_bottom = 721.0
+
+[node name="TitleBar" type="Control" parent="Stage/DialogPanel" unique_id=1971349102]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 188.0
+offset_top = 39.0
+offset_right = -37.0
+offset_bottom = 89.0
+grow_horizontal = 2
+
+[node name="PageInfo" type="Label" parent="Stage/DialogPanel/TitleBar" unique_id=1819221585]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = 291.0
+offset_top = 53.0
+offset_right = 531.0
+offset_bottom = 81.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.26, 0.2, 0.15, 0.76)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 15
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BackButton" type="TextureButton" parent="Stage/DialogPanel/TitleBar" unique_id=20194551]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -130.0
+offset_top = -7.0
+offset_right = -20.0
+offset_bottom = 38.0
+grow_horizontal = 0
+texture_normal = ExtResource("6_n0rug")
+texture_pressed = ExtResource("6_n0rug")
+texture_hover = ExtResource("6_n0rug")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Title" type="TextureRect" parent="Stage/DialogPanel/TitleBar" unique_id=148891854]
+modulate = Color(1, 1, 1, 0.78431374)
+layout_mode = 0
+offset_left = 143.0
+offset_top = -7.0
+offset_right = 760.0
+offset_bottom = 93.0
+texture = ExtResource("8_5bp2t")
+expand_mode = 1
+
+[node name="HistoryScroll" type="ScrollContainer" parent="Stage/DialogPanel" unique_id=1038000174]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 52.0
+offset_top = 143.0
+offset_right = -47.0
+offset_bottom = -105.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HistoryDisplay" type="RichTextLabel" parent="Stage/DialogPanel/HistoryScroll" unique_id=1807931259]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+focus_mode = 2
+theme_override_colors/default_color = Color(0.17, 0.12, 0.08, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/normal_font_size = 18
+bbcode_enabled = true
+fit_content = true
+selection_enabled = true
+
+[node name="ButtonRow" type="HBoxContainer" parent="Stage/DialogPanel" unique_id=942401680]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -79.0
+offset_right = 200.0
+offset_bottom = -37.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/separation = 14
+
+[node name="PrevButton" type="TextureButton" parent="Stage/DialogPanel/ButtonRow" unique_id=1535574378]
+custom_minimum_size = Vector2(132, 42)
+layout_mode = 2
+texture_normal = ExtResource("9_vs2cf")
+texture_pressed = ExtResource("9_vs2cf")
+texture_hover = ExtResource("9_vs2cf")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Control" type="Control" parent="Stage/DialogPanel/ButtonRow" unique_id=184890786]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="NextButton" type="TextureButton" parent="Stage/DialogPanel/ButtonRow" unique_id=757546849]
+custom_minimum_size = Vector2(132, 42)
+layout_mode = 2
+texture_normal = ExtResource("11_xio5o")
+texture_pressed = ExtResource("11_xio5o")
+texture_hover = ExtResource("11_xio5o")
+ignore_texture_size = true
+stretch_mode = 0

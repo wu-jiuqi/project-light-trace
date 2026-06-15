@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://n3p3u2xsv8d" path="res://scenes/buildings/id0001/SundialB.tscn" id="12_1c074"]
 [ext_resource type="Texture2D" uid="uid://lxs56palto81" path="res://assets/papercraft/fragments/id0001/environment2/building_27.png" id="13_bhmjt"]
 [ext_resource type="PackedScene" uid="uid://bt48wpxxbxd7s" path="res://scenes/buildings/id0001/SimpleBuilding.tscn" id="14_ff6ei"]
+[ext_resource type="PackedScene" uid="uid://y4777t1y31qf" path="res://scenes/characters/id0001/npc_linguide.tscn" id="14_h2wgi"]
 [ext_resource type="Texture2D" uid="uid://chm4fqnsp6itt" path="res://assets/papercraft/fragments/id0001/environment2/building_17.png" id="14_j6apd"]
 [ext_resource type="Texture2D" uid="uid://205wpk1064tu" path="res://assets/papercraft/fragments/id0001/environment2/church_no_bg.png" id="15_nucfm"]
 [ext_resource type="PackedScene" uid="uid://p3iqtywixfbx" path="res://scenes/buildings/id0001/SundialC.tscn" id="19_dbv8g"]
@@ -20,10 +21,16 @@
 [ext_resource type="PackedScene" uid="uid://dp3o2ng12kyco" path="res://scenes/buildings/id0001/BellTower.tscn" id="20_oco2y"]
 [ext_resource type="PackedScene" uid="uid://dp7c47xcuv5tx" path="res://scenes/buildings/id0001/SundialD.tscn" id="20_yssys"]
 [ext_resource type="Texture2D" uid="uid://but3tqwombydj" path="res://assets/papercraft/fragments/id0001/environment2/fantasy_ground_16.png" id="21_oco2y"]
+[ext_resource type="PackedScene" uid="uid://wbeu05wrv640" path="res://scenes/characters/id0001/npc_chentechnology.tscn" id="22_oco2y"]
 [ext_resource type="PackedScene" uid="uid://c588n0cfi2xt4" path="res://scenes/buildings/id0001/SundialE.tscn" id="23_8bhro"]
+[ext_resource type="PackedScene" uid="uid://b56xdqjckxwvu" path="res://scenes/characters/id0001/npc_wangdirector.tscn" id="23_cnh1t"]
 [ext_resource type="Texture2D" uid="uid://cpoy6oau4rk76" path="res://assets/papercraft/fragments/id0001/environment2/fog.png" id="24_dbv8g"]
+[ext_resource type="PackedScene" uid="uid://co0276fhkr64o" path="res://scenes/buildings/id0001/TV.tscn" id="24_pbonl"]
+[ext_resource type="PackedScene" uid="uid://c2j5leta63e2" path="res://scenes/characters/id0001/npc_zhaosecurity.tscn" id="26_pbonl"]
+[ext_resource type="PackedScene" uid="uid://cvr7x2k6mvhm3" path="res://scenes/buildings/id0001/Stone.tscn" id="27_cnh1t"]
 [ext_resource type="Script" uid="uid://cpookq7xs8qki" path="res://scripts/stage/camera_rig.gd" id="28_camrig"]
 [ext_resource type="Script" uid="uid://bwsd4vqlvwgk8" path="res://scripts/fragment/fragment_0001.gd" id="29_frag001"]
+[ext_resource type="PackedScene" uid="uid://duiql0mgjrtjc" path="res://scenes/ui/DialogueBox.tscn" id="29_oco2y"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_dbv8g"]
 distance = -725.0
@@ -36,7 +43,7 @@ normal = Vector2(-1, 0)
 distance = 34.0
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_3i7db"]
-distance = 183.0
+distance = 140.0
 
 [node name="Fragment0001" type="Node2D" unique_id=1371060065]
 script = ExtResource("29_frag001")
@@ -44,6 +51,7 @@ script = ExtResource("29_frag001")
 [node name="WorldRoot" type="Node2D" parent="." unique_id=1807008893]
 
 [node name="Background" type="Node2D" parent="WorldRoot" unique_id=1506054736]
+modulate = Color(1, 1, 1, 0.6313726)
 z_index = -5
 
 [node name="LightWall" parent="WorldRoot/Background" unique_id=1723296003 instance=ExtResource("2_pbonl")]
@@ -159,7 +167,7 @@ collision_size = Vector2(967, 259.69)
 collision_position = Vector2(0, -130.25)
 
 [node name="SundialA" parent="WorldRoot/DepthLayer/DepthLayer_1" unique_id=1051923950 instance=ExtResource("10_ff6ei")]
-position = Vector2(1226, 616)
+position = Vector2(573, 615)
 scale = Vector2(0.095, 0.095)
 
 [node name="BD" parent="WorldRoot/DepthLayer/DepthLayer_1" unique_id=2006739076 instance=ExtResource("14_ff6ei")]
@@ -170,17 +178,20 @@ body_position = Vector2(0, -606.645)
 collision_size = Vector2(967, 249.035)
 collision_position = Vector2(0, -147.525)
 
-[node name="SundialB" parent="WorldRoot/DepthLayer/DepthLayer_1" unique_id=871932599 instance=ExtResource("12_1c074")]
-position = Vector2(548, 586)
-scale = Vector2(0.09, 0.09)
-
 [node name="BE" parent="WorldRoot/DepthLayer/DepthLayer_1" unique_id=1555593114 instance=ExtResource("14_ff6ei")]
-position = Vector2(636, 577.00006)
+position = Vector2(637, 591)
 scale = Vector2(0.205, 0.205)
 building_texture = ExtResource("8_3mr5v")
 body_position = Vector2(0, -485.09)
 collision_size = Vector2(1121.22, 366.805)
 collision_position = Vector2(0, -202.98)
+
+[node name="SundialC" parent="WorldRoot/DepthLayer/DepthLayer_1" unique_id=1006328281 instance=ExtResource("19_dbv8g")]
+position = Vector2(1213, 617.00006)
+scale = Vector2(0.078, 0.077)
+
+[node name="NPC_Linguide" parent="WorldRoot/DepthLayer/DepthLayer_1" unique_id=1960642850 instance=ExtResource("14_h2wgi")]
+position = Vector2(716, 607)
 
 [node name="DepthLayer_2" type="Node2D" parent="WorldRoot/DepthLayer" unique_id=1438067706]
 y_sort_enabled = true
@@ -205,12 +216,8 @@ body_position = Vector2(0, -400.21)
 collision_size = Vector2(1302.02, 270)
 collision_position = Vector2(0, -135)
 
-[node name="SundialC" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=1006328281 instance=ExtResource("19_dbv8g")]
-position = Vector2(205, 357)
-scale = Vector2(0.078, 0.077)
-
 [node name="SundialD" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=554321324 instance=ExtResource("20_yssys")]
-position = Vector2(1002, 363)
+position = Vector2(409, 355.00003)
 scale = Vector2(0.084, 0.083)
 
 [node name="2BC" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=2026980195 instance=ExtResource("14_ff6ei")]
@@ -253,11 +260,26 @@ body_position = Vector2(0, -576.555)
 collision_size = Vector2(217.795, 270)
 collision_position = Vector2(0, -135)
 
+[node name="SundialB" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=871932599 instance=ExtResource("12_1c074")]
+position = Vector2(999, 361)
+scale = Vector2(0.09, 0.09)
+
+[node name="NPC_ChenTechnology" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=409151335 instance=ExtResource("22_oco2y")]
+position = Vector2(200, 336)
+
+[node name="NPC_WangDirector" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=129539188 instance=ExtResource("23_cnh1t")]
+position = Vector2(1172, 333)
+
 [node name="DepthLayer_3" type="Node2D" parent="WorldRoot/DepthLayer" unique_id=1846010377]
 y_sort_enabled = true
 
+[node name="Tv" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=1203746174 instance=ExtResource("24_pbonl")]
+position = Vector2(1227, 336)
+scale = Vector2(0.045, 0.04)
+
 [node name="forest1" type="Node2D" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=903466131]
-position = Vector2(968.00006, 113.4)
+modulate = Color(1, 1, 1, 0.6392157)
+position = Vector2(968.0001, 88.4)
 
 [node name="Sprite2D" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_3/forest1" unique_id=1387949768]
 position = Vector2(-82, -49)
@@ -265,7 +287,8 @@ scale = Vector2(0.19053365, 0.15608278)
 texture = ExtResource("19_j6apd")
 
 [node name="forest2" type="Node2D" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=574083128]
-position = Vector2(1168, 113.4)
+modulate = Color(1, 1, 1, 0.6392157)
+position = Vector2(1168, 88.4)
 
 [node name="Sprite2D" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_3/forest2" unique_id=1214030568]
 position = Vector2(-2, -48)
@@ -273,7 +296,8 @@ scale = Vector2(0.19053365, 0.15608278)
 texture = ExtResource("19_j6apd")
 
 [node name="forest3" type="Node2D" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=1896820049]
-position = Vector2(162.00002, 121.4)
+modulate = Color(1, 1, 1, 0.6392157)
+position = Vector2(162.00002, 96.4)
 
 [node name="Sprite2D" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_3/forest3" unique_id=1965497902]
 position = Vector2(-7, -55)
@@ -281,7 +305,8 @@ scale = Vector2(0.19053365, 0.15608278)
 texture = ExtResource("19_j6apd")
 
 [node name="forest4" type="Node2D" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=456239378]
-position = Vector2(352.00003, 121.4)
+modulate = Color(1, 1, 1, 0.6392157)
+position = Vector2(352.00006, 96.4)
 
 [node name="Sprite2D" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_3/forest4" unique_id=81114933]
 position = Vector2(63, -55)
@@ -289,7 +314,8 @@ scale = Vector2(0.19053365, 0.15608278)
 texture = ExtResource("19_j6apd")
 
 [node name="forest5" type="Node2D" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=1014361420]
-position = Vector2(582, 121.4)
+modulate = Color(1, 1, 1, 0.6392157)
+position = Vector2(582, 96.4)
 
 [node name="Sprite2D" type="Sprite2D" parent="WorldRoot/DepthLayer/DepthLayer_3/forest5" unique_id=1704886792]
 position = Vector2(63, -55)
@@ -299,6 +325,13 @@ texture = ExtResource("19_j6apd")
 [node name="SundialE" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=1131946531 instance=ExtResource("23_8bhro")]
 position = Vector2(975, 186)
 scale = Vector2(0.06, 0.06)
+
+[node name="NPC_ZhaoSecurity" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=481594507 instance=ExtResource("26_pbonl")]
+position = Vector2(465, 130)
+
+[node name="Stone" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=347068440 instance=ExtResource("27_cnh1t")]
+position = Vector2(53, 125)
+scale = Vector2(0.055, 0.075)
 
 [node name="CameraRig" type="Node2D" parent="WorldRoot" unique_id=2136539517]
 position = Vector2(640, 360)
@@ -316,6 +349,9 @@ limit_smoothed = true
 
 [node name="Default" type="Marker2D" parent="WorldRoot/SpawnPoints" unique_id=1697172492]
 position = Vector2(637, 672)
+
+[node name="OutDoor" type="Marker2D" parent="WorldRoot/SpawnPoints" unique_id=626399177]
+position = Vector2(821, 351)
 
 [node name="AirWall" type="Node2D" parent="WorldRoot" unique_id=684608751]
 
@@ -345,9 +381,260 @@ rotation = 3.1415927
 shape = SubResource("WorldBoundaryShape2D_3i7db")
 
 [node name="Fog" type="Node2D" parent="WorldRoot" unique_id=471879485]
+metadata/_edit_lock_ = true
 
 [node name="Sprite2D" type="Sprite2D" parent="WorldRoot/Fog" unique_id=2060264604]
 modulate = Color(1, 1, 1, 0.6431373)
 position = Vector2(637.99994, 359.12503)
 scale = Vector2(0.92822963, 0.9545695)
 texture = ExtResource("24_dbv8g")
+metadata/_edit_lock_ = true
+
+[node name="LayerMarker" type="Node2D" parent="WorldRoot" unique_id=1995170976]
+
+[node name="Layer1_2" type="Marker2D" parent="WorldRoot/LayerMarker" unique_id=63275387]
+position = Vector2(476, 540)
+
+[node name="Layer2_3" type="Marker2D" parent="WorldRoot/LayerMarker" unique_id=1992009709]
+position = Vector2(527, 260)
+
+[node name="UIRoot" type="CanvasLayer" parent="." unique_id=705032705]
+layer = 70
+
+[node name="InteractHint" type="Label" parent="UIRoot" unique_id=705032714]
+offset_left = 480.0
+offset_top = 664.92
+offset_right = 800.0
+offset_bottom = 701.92
+theme_override_colors/font_color = Color(1, 0.9, 0.5, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 25
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MessagePanelBg" type="ColorRect" parent="UIRoot" unique_id=705032724]
+visible = false
+mouse_filter = 2
+color = Color(0, 0, 0, 0.45)
+
+[node name="MessagePanel" type="Panel" parent="UIRoot" unique_id=705032725]
+visible = false
+offset_left = 300.0
+offset_top = 546.0
+offset_right = 980.0
+offset_bottom = 694.0
+mouse_filter = 2
+
+[node name="MessageTitle" type="Label" parent="UIRoot/MessagePanel" unique_id=705032726]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 14.0
+offset_right = 658.0
+offset_bottom = 38.0
+theme_override_colors/font_color = Color(0.831, 0.722, 0.416, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 16
+
+[node name="MessageBody" type="Label" parent="UIRoot/MessagePanel" unique_id=705032727]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 44.0
+offset_right = 658.0
+offset_bottom = 132.0
+theme_override_font_sizes/font_size = 14
+autowrap_mode = 3
+
+[node name="CalibrationBg" type="ColorRect" parent="UIRoot" unique_id=705032734]
+visible = false
+mouse_filter = 2
+color = Color(0, 0, 0, 0.55)
+
+[node name="CalibrationPanel" type="Panel" parent="UIRoot" unique_id=705032735]
+visible = false
+offset_left = 438.0
+offset_top = 178.0
+offset_right = 842.0
+offset_bottom = 458.0
+mouse_filter = 2
+
+[node name="CalibrationTitle" type="Label" parent="UIRoot/CalibrationPanel" unique_id=705032736]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 18.0
+offset_right = 380.0
+offset_bottom = 44.0
+theme_override_font_sizes/font_size = 18
+text = "钟楼日晷校准"
+horizontal_alignment = 1
+
+[node name="CalibrationHint" type="Label" parent="UIRoot/CalibrationPanel" unique_id=705032737]
+layout_mode = 0
+offset_left = 30.0
+offset_top = 58.0
+offset_right = 374.0
+offset_bottom = 110.0
+theme_override_font_sizes/font_size = 13
+text = "用已记录的角度推断第五项。每次调整 6°。"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="AngleValue" type="Label" parent="UIRoot/CalibrationPanel" unique_id=705032738]
+layout_mode = 0
+offset_left = 138.0
+offset_top = 116.0
+offset_right = 266.0
+offset_bottom = 160.0
+theme_override_font_sizes/font_size = 26
+text = "12°"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MinusBtn" type="Button" parent="UIRoot/CalibrationPanel" unique_id=705032739]
+layout_mode = 0
+offset_left = 56.0
+offset_top = 120.0
+offset_right = 120.0
+offset_bottom = 160.0
+theme_override_font_sizes/font_size = 14
+text = "-6°"
+
+[node name="PlusBtn" type="Button" parent="UIRoot/CalibrationPanel" unique_id=705032740]
+layout_mode = 0
+offset_left = 284.0
+offset_top = 120.0
+offset_right = 348.0
+offset_bottom = 160.0
+theme_override_font_sizes/font_size = 14
+text = "+6°"
+
+[node name="SubmitBtn" type="Button" parent="UIRoot/CalibrationPanel" unique_id=705032741]
+layout_mode = 0
+offset_left = 56.0
+offset_top = 196.0
+offset_right = 188.0
+offset_bottom = 238.0
+theme_override_font_sizes/font_size = 14
+text = "验证"
+
+[node name="CloseBtn" type="Button" parent="UIRoot/CalibrationPanel" unique_id=705032742]
+layout_mode = 0
+offset_left = 216.0
+offset_top = 196.0
+offset_right = 348.0
+offset_bottom = 238.0
+theme_override_font_sizes/font_size = 14
+text = "关闭"
+
+[node name="CollectionPanelBg" type="ColorRect" parent="UIRoot" unique_id=705032744]
+visible = false
+mouse_filter = 2
+color = Color(0, 0, 0, 0.7)
+
+[node name="CollectionPanel" type="ColorRect" parent="UIRoot" unique_id=705032745]
+visible = false
+offset_left = 320.0
+offset_top = 140.0
+offset_right = 960.0
+offset_bottom = 580.0
+mouse_filter = 2
+color = Color(0.08, 0.08, 0.12, 0.95)
+
+[node name="CollectionTitle" type="Label" parent="UIRoot/CollectionPanel" unique_id=705032746]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 12.0
+offset_right = 630.0
+offset_bottom = 48.0
+theme_override_colors/font_color = Color(0.9, 0.85, 0.7, 1)
+theme_override_font_sizes/font_size = 22
+text = "收集信息 — 碎片 #0001 启程之镇"
+horizontal_alignment = 1
+
+[node name="ProgressLabel" type="Label" parent="UIRoot/CollectionPanel" unique_id=705032747]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 50.0
+offset_right = 630.0
+offset_bottom = 74.0
+theme_override_colors/font_color = Color(0.6, 0.7, 0.8, 1)
+theme_override_font_sizes/font_size = 15
+text = "日晷观测：0/5"
+horizontal_alignment = 1
+
+[node name="ClueScroll" type="ScrollContainer" parent="UIRoot/CollectionPanel" unique_id=705032748]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 84.0
+offset_right = 624.0
+offset_bottom = 384.0
+horizontal_scroll_mode = 0
+
+[node name="ClueList" type="VBoxContainer" parent="UIRoot/CollectionPanel/ClueScroll" unique_id=705032749]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TabHint" type="Label" parent="UIRoot/CollectionPanel" unique_id=705032750]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 398.0
+offset_right = 630.0
+offset_bottom = 428.0
+theme_override_colors/font_color = Color(0.5, 0.5, 0.55, 1)
+theme_override_font_sizes/font_size = 13
+text = "按 Tab 关闭  |  靠近日晷按 E 观测  |  收集全部后前往钟楼校准"
+horizontal_alignment = 1
+
+[node name="ComplianceBarContainer" type="Control" parent="UIRoot" unique_id=705032754]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 860.0
+offset_top = 20.0
+offset_right = 1140.0
+offset_bottom = 56.0
+mouse_filter = 2
+
+[node name="ComplianceWarningIcon" type="Label" parent="UIRoot/ComplianceBarContainer" unique_id=705032755]
+layout_mode = 0
+offset_top = 4.0
+offset_right = 24.0
+offset_bottom = 32.0
+theme_override_font_sizes/font_size = 18
+
+[node name="ComplianceLabel" type="Label" parent="UIRoot/ComplianceBarContainer" unique_id=705032756]
+layout_mode = 0
+offset_left = 28.0
+offset_right = 88.0
+offset_bottom = 24.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 20
+text = "合规度:"
+
+[node name="ComplianceValueLabel" type="Label" parent="UIRoot/ComplianceBarContainer" unique_id=705032757]
+layout_mode = 0
+offset_left = 111.0
+offset_right = 173.0
+offset_bottom = 37.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 20
+text = "100%"
+
+[node name="ComplianceBarBg" type="ColorRect" parent="UIRoot/ComplianceBarContainer" unique_id=705032758]
+layout_mode = 0
+offset_left = 15.0
+offset_top = 37.0
+offset_right = 255.0
+offset_bottom = 49.0
+color = Color(0.2, 0.2, 0.2, 1)
+
+[node name="ComplianceBarFill" type="ColorRect" parent="UIRoot/ComplianceBarContainer/ComplianceBarBg" unique_id=705032759]
+layout_mode = 0
+offset_right = 240.0
+offset_bottom = 12.0
+color = Color(0.29, 0.565, 0.851, 1)
+
+[node name="DialogueBox" parent="UIRoot" unique_id=1256299883 instance=ExtResource("29_oco2y")]
+visible = false

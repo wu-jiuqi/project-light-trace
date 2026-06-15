@@ -16,7 +16,11 @@ func _run() -> void:
 	_check(not fragment.completed, "0762 starts unrepaired")
 	_check(manager.enter_fragment(fragment), "implemented fragment enters directly")
 
-	var placeholder = manager.get_fragment_by_id("0001")
+	var fragment_0002 = manager.get_fragment_by_id("0002")
+	_check(fragment_0002 != null and fragment_0002.implemented, "0002 is now playable from the star map")
+	_check(manager.enter_fragment(fragment_0002), "0002 implemented fragment enters directly")
+
+	var placeholder = manager.get_fragment_by_id("0003")
 	_check(placeholder != null and not placeholder.implemented, "placeholder fragment is marked unimplemented")
 	_check(not manager.enter_fragment(placeholder), "placeholder fragment cannot be entered")
 

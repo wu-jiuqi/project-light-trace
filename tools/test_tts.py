@@ -3,7 +3,7 @@ import asyncio
 import edge_tts
 
 VOICE = "zh-CN-XiaoxiaoNeural"
-OUT = "D:/WorkBuddy WorkSpace/shuoguang_project/assets/audio/test_simple.mp3"
+OUT = "D:/WorkBuddy WorkSpace/project_light_trace/assets/audio/test_simple.mp3"
 
 async def test_plain():
     """纯文本测试"""

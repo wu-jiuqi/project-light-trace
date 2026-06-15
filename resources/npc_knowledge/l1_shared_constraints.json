@@ -1,4 +1,4 @@
-﻿{
+{
   "_description": "L1层：所有NPC共享的输出硬约束，每次对话必带。约60 tokens。",
   "_usage": "始终注入system prompt末尾",
 

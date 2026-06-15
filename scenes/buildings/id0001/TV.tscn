@@ -1,0 +1,58 @@
+[gd_scene format=3 uid="uid://co0276fhkr64o"]
+
+[ext_resource type="Texture2D" uid="uid://dvdh56tn2i8k" path="res://assets/papercraft/fragments/id0001/environment2/tianshu_monitor.png" id="1_03fqu"]
+[ext_resource type="Script" uid="uid://c4r728pab4rhf" path="res://scripts/fragment/tv_interactable.gd" id="2_tvscript"]
+[ext_resource type="VideoStream" uid="uid://canohv7fbb0to" path="res://assets/papercraft/fragments/id0001/environment2/ad.ogv" id="3_ad"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4ando"]
+size = Vector2(1095, 287)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_gxn4y"]
+radius = 521.0
+height = 1042.0
+
+[node name="Tv" type="Node2D" unique_id=1203746174]
+script = ExtResource("2_tvscript")
+
+[node name="Visual" type="Node2D" parent="." unique_id=1476392407]
+
+[node name="Body" type="Sprite2D" parent="Visual" unique_id=1453066133]
+position = Vector2(0, -537)
+texture = ExtResource("1_03fqu")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=1636239593]
+collision_layer = 4
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=1772889111]
+position = Vector2(4.5, -148)
+shape = SubResource("RectangleShape2D_4ando")
+
+[node name="InteractableArea" type="Area2D" parent="." unique_id=1885097519 groups=["interactable"]]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractableArea" unique_id=462894860]
+position = Vector2(0, -476)
+shape = SubResource("CapsuleShape2D_gxn4y")
+debug_color = Color(0.65645635, 0.5169369, 3.85046e-07, 0.41960785)
+
+[node name="BaseMarker" type="Marker2D" parent="." unique_id=1621657042]
+
+[node name="ScreenClip" type="Control" parent="." unique_id=1581218289]
+clip_contents = true
+layout_mode = 3
+anchors_preset = 0
+offset_left = -448.0
+offset_top = -928.0
+offset_right = 452.0
+offset_bottom = -347.0
+
+[node name="VideoPlayer" type="VideoStreamPlayer" parent="ScreenClip" unique_id=2097720673]
+layout_mode = 0
+offset_top = 37.0
+offset_right = 1280.0
+offset_bottom = 757.0
+scale = Vector2(0.705, 0.705)
+stream = ExtResource("3_ad")

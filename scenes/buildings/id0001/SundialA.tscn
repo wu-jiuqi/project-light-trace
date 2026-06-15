@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://ds2mxs64qsydu"]
 
-[ext_resource type="Texture2D" uid="uid://cymqqlm5yxpne" path="res://assets/papercraft/fragments/id0001/environment2/fantasy_shop_15.png" id="1_unhck"]
+[ext_resource type="Script" uid="uid://0001sundialscript" path="res://scripts/buildings/sundial.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://cymqqlm5yxpne" path="res://assets/papercraft/fragments/id0001/environment2/fantasy_shop_15.png" id="2_unhck"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_m6hey"]
 size = Vector2(866, 238.5)
@@ -10,12 +11,18 @@ radius = 446.0
 height = 1148.0
 
 [node name="SundialA" type="Node2D" unique_id=1051923950 groups=["interactable"]]
+script = ExtResource("1_script")
+sundial_id = "A"
+angle = 12
+place_name = "广场中央喷泉旁"
+description = "白石日晷投下 12° 阴影。底座编号 TP-2077-03-A。"
+display_name = "观测点A · 广场日晷"
 
 [node name="Visual" type="Node2D" parent="." unique_id=949273628]
 
 [node name="Body" type="Sprite2D" parent="Visual" unique_id=2025831884]
 position = Vector2(0, -572.7)
-texture = ExtResource("1_unhck")
+texture = ExtResource("2_unhck")
 
 [node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=825878723]
 
@@ -24,6 +31,7 @@ position = Vector2(6, -189.25)
 shape = SubResource("RectangleShape2D_m6hey")
 
 [node name="InteractableArea" type="Area2D" parent="." unique_id=1463534900]
+collision_layer = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="InteractableArea" unique_id=2091389133]
 position = Vector2(8, -550)

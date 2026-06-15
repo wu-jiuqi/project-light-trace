@@ -1,4 +1,8 @@
 ﻿extends Node2D
+## ⚠️ DEPRECATED — 原型版，已由 fragment_0001.gd 正式版完全取代。
+## 此文件仅保留用于设计参考和测试钩子接口对照。
+## 请勿在此修改游戏逻辑。所有逻辑变更应在 fragment_0001.gd 中进行。
+##
 ## 碎片 #0001「启程之镇」核心玩法原型。
 ## 仅实现日晷观测、合规度、钟楼校准、源印显现与通关状态流转。
 
@@ -344,7 +348,9 @@ func _create_hud() -> void:
 	message_title.position = Vector2(18, 14)
 	message_title.size = Vector2(640, 24)
 	message_title.add_theme_font_size_override("font_size", 16)
-	message_title.add_theme_color_override("font_color", Color(0.22, 0.50, 0.78, 1.0))
+	message_title.add_theme_color_override("font_color", Color(0.831, 0.722, 0.416, 1.0))
+	message_title.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1.0))
+	message_title.add_theme_constant_override("outline_size", 2)
 	message_panel.add_child(message_title)
 
 	message_body = Label.new()
@@ -402,6 +408,7 @@ func _create_angle_panel(ui: CanvasLayer) -> void:
 	minus_btn.size = Vector2(64, 40)
 	minus_btn.text = "-6°"
 	minus_btn.pressed.connect(_on_clock_minus_pressed)
+	minus_btn.pressed.connect(UISoundManager.play_click)
 	angle_panel.add_child(minus_btn)
 
 	var plus_btn = Button.new()
@@ -409,6 +416,7 @@ func _create_angle_panel(ui: CanvasLayer) -> void:
 	plus_btn.size = Vector2(64, 40)
 	plus_btn.text = "+6°"
 	plus_btn.pressed.connect(_on_clock_plus_pressed)
+	plus_btn.pressed.connect(UISoundManager.play_click)
 	angle_panel.add_child(plus_btn)
 
 	var submit_btn = Button.new()
@@ -416,6 +424,7 @@ func _create_angle_panel(ui: CanvasLayer) -> void:
 	submit_btn.size = Vector2(132, 42)
 	submit_btn.text = "验证"
 	submit_btn.pressed.connect(_submit_clock_angle)
+	submit_btn.pressed.connect(UISoundManager.play_click)
 	angle_panel.add_child(submit_btn)
 
 	var close_btn = Button.new()
@@ -423,6 +432,7 @@ func _create_angle_panel(ui: CanvasLayer) -> void:
 	close_btn.size = Vector2(132, 42)
 	close_btn.text = "关闭"
 	close_btn.pressed.connect(_close_angle_panel)
+	close_btn.pressed.connect(UISoundManager.play_click)
 	angle_panel.add_child(close_btn)
 
 

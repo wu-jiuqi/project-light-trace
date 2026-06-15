@@ -73,6 +73,8 @@ func _load() -> void:
 	var parsed = json.get_data()
 	if parsed is Dictionary:
 		_data = parsed
+		if _sanitize_loaded_data():
+			_save()
 		_rebuild_cache()
 
 
@@ -104,12 +106,13 @@ func _save() -> void:
 # ============================================================
 
 func log_message(npc_id: String, role: String, content: String, alert_phase: int = 0, suspicion: float = 0.0) -> void:
-	if content.is_empty() or npc_id.is_empty():
+	var clean_content := _sanitize_content(content)
+	if clean_content.is_empty() or npc_id.is_empty():
 		return
 	
 	var entry = {
 		"role": role,
-		"content": content,
+		"content": clean_content,
 		"timestamp": Time.get_unix_time_from_system(),
 		"alert_phase": alert_phase,
 		"suspicion": snapped(suspicion, 0.01)
@@ -145,8 +148,12 @@ func get_history_as_text(npc_id: String, max_messages: int = 10) -> String:
 	var lines: Array[String] = ["## 最近对话"]
 	for i in range(start, cache_arr.size()):
 		var row = cache_arr[i]
-		var role = row["role"]
-		var content = row["content"]
+		if row is not Dictionary:
+			continue
+		var role := str(row.get("role", ""))
+		var content := _sanitize_content(_value_to_string(row.get("content", "")))
+		if content.is_empty():
+			continue
 		if role == "player":
 			lines.append("玩家: %s" % content)
 		else:
@@ -160,15 +167,15 @@ func get_history_as_text(npc_id: String, max_messages: int = 10) -> String:
 # ============================================================
 
 func get_page(npc_id: String, page: int = 0, page_size: int = 20) -> Dictionary:
-	## 分页查询历史对话（翻"记事本"用）
+	## 分页查询历史对话（page 0 为最新一页；页内保持从旧到新的阅读顺序）
 	## 返回 { "messages": [...], "total": int, "page": int, "total_pages": int }
 	var all: Array = _data.get(npc_id, [])
 	var total = all.size()
 	var total_pages = max(1, ceili(float(total) / page_size))
 	page = clamp(page, 0, total_pages - 1)
 	
-	var start_idx = page * page_size
-	var end_idx = min(start_idx + page_size, total)
+	var end_idx = total - page * page_size
+	var start_idx = max(0, end_idx - page_size)
 	var page_messages: Array = []
 	for i in range(start_idx, end_idx):
 		page_messages.append(all[i])
@@ -253,3 +260,40 @@ func _display_name(npc_id: String) -> String:
 		"oldpainter": return "老顾"
 		"innkeeper": return "冯婶"
 	return npc_id
+
+
+func _sanitize_loaded_data() -> bool:
+	var changed := false
+	for npc_id in _data.keys():
+		var entries = _data[npc_id]
+		if entries is not Array:
+			_data[npc_id] = []
+			changed = true
+			continue
+		var cleaned_entries: Array = []
+		for entry in entries:
+			if entry is not Dictionary:
+				changed = true
+				continue
+			var clean_content := _sanitize_content(_value_to_string(entry.get("content", "")))
+			if clean_content.is_empty():
+				changed = true
+				continue
+			if clean_content != entry.get("content", ""):
+				entry["content"] = clean_content
+				changed = true
+			cleaned_entries.append(entry)
+		if cleaned_entries.size() != entries.size():
+			changed = true
+		_data[npc_id] = cleaned_entries
+	return changed
+
+
+func _value_to_string(value: Variant) -> String:
+	if value == null:
+		return ""
+	return str(value)
+
+
+func _sanitize_content(content: String) -> String:
+	return content.replace("<null>", "").strip_edges()

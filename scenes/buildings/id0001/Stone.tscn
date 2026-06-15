@@ -1,0 +1,39 @@
+[gd_scene format=3 uid="uid://cvr7x2k6mvhm3"]
+
+[ext_resource type="Texture2D" uid="uid://da038f40a7d60" path="res://assets/papercraft/fragments/id0001/environment2/stone_tablet.png" id="1_pd28q"]
+[ext_resource type="Script" uid="uid://cera73sionct6" path="res://scripts/fragment/stone_interactable.gd" id="2_stone"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_v6ipm"]
+size = Vector2(1061.5, 265)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_0j1i5"]
+radius = 532.0
+height = 1064.0
+
+[node name="Stone" type="Node2D" unique_id=347068440 groups=["interactable"]]
+script = ExtResource("2_stone")
+
+[node name="Visual" type="Node2D" parent="." unique_id=526636564]
+
+[node name="Body" type="Sprite2D" parent="Visual" unique_id=154406003]
+position = Vector2(0, -550)
+texture = ExtResource("1_pd28q")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=1228995809]
+collision_layer = 4
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=998397781]
+position = Vector2(-3.25, -159)
+shape = SubResource("RectangleShape2D_v6ipm")
+
+[node name="InteractableArea" type="Area2D" parent="." unique_id=559117594 groups=["interactable"]]
+collision_layer = 2
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractableArea" unique_id=518562556]
+position = Vector2(-3, -527)
+shape = SubResource("CapsuleShape2D_0j1i5")
+debug_color = Color(0.65682125, 0.5167469, 3.85046e-07, 0.41960785)
+
+[node name="BaseMarker" type="Marker2D" parent="." unique_id=1360723467]

@@ -95,9 +95,9 @@
 - `lg_self_02`：描述"17 批人，记忆被清"→ 应改为 `script_reset`
 - `wd_memory_04`：描述"电子屏第 47 秒的照片"→ 这虽然也在 crack_showing，但本质是重置威胁
 
-**影响**：如果 `fragment_0001_state.gd` 中定义了 `script_reset` 为独立阶段，当前不会有任何 chunk 在该阶段被检索注入——导致系统拉回后 NPC 的行为看起来"缺少重置相关记忆"。
+**影响**：如果 `fragment_0001.gd` 中定义了 `script_reset` 为独立阶段，当前不会有任何 chunk 在该阶段被检索注入——导致系统拉回后 NPC 的行为看起来"缺少重置相关记忆"。
 
-**建议**：在 `fragment_0001_state.gd` 实现前，将上述 3 个 chunk 的 memory_stage 改为 `script_reset`（或新增 `script_reset` 专用 chunk）。或者——如果 design 上认为 0001 只有两个阶段——在 state.gd 中将 `script_reset` 合并到 `crack_showing`。
+**建议**：在 `fragment_0001.gd` 实现前，将上述 3 个 chunk 的 memory_stage 改为 `script_reset`（或新增 `script_reset` 专用 chunk）。或者——如果 design 上认为 0001 只有两个阶段——在 state.gd 中将 `script_reset` 合并到 `crack_showing`。
 
 ### 4.6 交叉引用一致性
 
@@ -265,7 +265,7 @@
 
 | 优先级 | # | 问题 | 影响维度 | 修复建议 |
 |--------|---|------|---------|---------|
-| P2 | 1 | 所有 NPC 的 `script_reset` memory_stage 无 chunk 引用 | 维度4 | 将 `lg_memory_03`、`lg_self_02`、`wd_memory_04` 的 memory_stage 改为 `script_reset`，或在 `fragment_0001_state.gd` 中将 `script_reset` 合并到 `crack_showing` |
+| P2 | 1 | 所有 NPC 的 `script_reset` memory_stage 无 chunk 引用 | 维度4 | 将 `lg_memory_03`、`lg_self_02`、`wd_memory_04` 的 memory_stage 改为 `script_reset`，或在 `fragment_0001.gd` 中将 `script_reset` 合并到 `crack_showing` |
 | P2 | 2 | 陈技术/王主管核心视觉锚点在 32×48px 下辨识度不足 | 维度5 | 陈技术：补充操作台 3 亮屏为场景锚点；王主管：补充金色领针 `#C8A860` 与深蓝西装 `#2A3A5A` 的对比锚点 |
 | P2 | 3 | 王主管 `#2A3A5A` = 赵安保 `#2A3A5A`（上衣色值相同） | 维度6 | 将王主管上衣加深为 `#1E2E4E`（更深更正式），或确认靠其他视觉差异（金色领针 vs 侧后方+LED）已足够区分 |
 
@@ -296,7 +296,7 @@ RAG 层和美术层双双通过审查。58 个 chunk 的质量检查显示：四
 
 建议开发顺序：
 1. 将 RAG JSON 迁移至 `resources/npc_knowledge/` 并在 `npc_rag_retriever.gd` 注册
-2. 修复 P2#1（memory_stage 挂空）在 `fragment_0001_state.gd` 实现前
+2. 修复 P2#1（memory_stage 挂空）在 `fragment_0001.gd` 实现前
 3. 美术制作按 P0→P1→P2 三阶段推进
 4. Godot 场景和脚本在美术 P0 完成后启动
 

@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3 uid="uid://bhj6qgb8b3d6l"]
+
+[ext_resource type="Texture2D" uid="uid://bayymg8tpk184" path="res://assets/papercraft/fragments/id0002/monologue/npc_2/c2_10.png" id="1_sx8ve"]
+[ext_resource type="Script" path="res://scripts/ui/click_collectible_scene.gd" id="2_collect"]
+
+[node name="Box" type="Node2D" unique_id=1402459310]
+script = ExtResource("2_collect")
+
+[node name="Visual" type="Node2D" parent="." unique_id=2065565986]
+
+[node name="Body" type="Sprite2D" parent="Visual" unique_id=132484383]
+position = Vector2(640, 360)
+scale = Vector2(0.76555014, 0.76514345)
+texture = ExtResource("1_sx8ve")
+
+[node name="Box" type="Area2D" parent="." unique_id=499439162]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Box" unique_id=57630088]
+polygon = PackedVector2Array(382, 414, 381, 489, 605, 632, 822, 580, 822, 505, 560, 376)

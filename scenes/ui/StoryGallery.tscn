@@ -1,0 +1,162 @@
+[gd_scene format=3 uid="uid://cj4th1kktvgw6"]
+
+[ext_resource type="Texture2D" uid="uid://dt0hd2ti4bmi4" path="res://assets/papercraft/core/ui/dialogue_box/large_page.png" id="1_pr3fx"]
+[ext_resource type="Script" uid="uid://dxtn2oiw0ofq1" path="res://scripts/ui/story_gallery.gd" id="1_w8y0i"]
+[ext_resource type="Texture2D" uid="uid://be3sc7cjwntkv" path="res://assets/papercraft/core/ui/dialogue_box/corner_compass.png" id="2_8qjk8"]
+[ext_resource type="Texture2D" uid="uid://cahdx48g8a4wa" path="res://assets/papercraft/core/ui/dialogue_box/right_mountains.png" id="3_lwhpt"]
+[ext_resource type="Texture2D" uid="uid://bgigvxiij73dv" path="res://assets/papercraft/core/ui/banner/banner_story_recap.png" id="4_vhw25"]
+[ext_resource type="Texture2D" uid="uid://ci2nn4aead8ld" path="res://assets/papercraft/core/ui/default_buttons/button_close.png" id="5_bfsnr"]
+[ext_resource type="Texture2D" uid="uid://bqmnbh6l6tcdm" path="res://assets/papercraft/core/ui/extracted_buttons/pressed_close.png" id="6_kde66"]
+[ext_resource type="Texture2D" uid="uid://cjyllvkpm5xns" path="res://assets/papercraft/core/ui/extracted_buttons/hover_close.png" id="7_x0lw0"]
+[ext_resource type="Texture2D" uid="uid://ce2sbt6gafi0i" path="res://assets/papercraft/core/ui/default_buttons/button_prev_page.png" id="8_7scgi"]
+[ext_resource type="PackedScene" uid="uid://37ikefmoka22" path="res://scenes/ui/components/GalleryCard.tscn" id="8_8qjk8"]
+[ext_resource type="Texture2D" uid="uid://db6rngvbb4nqi" path="res://assets/papercraft/core/ui/extracted_buttons/pressed_prev.png" id="9_kptrk"]
+[ext_resource type="Texture2D" uid="uid://cjfspfr1paeri" path="res://assets/papercraft/core/ui/extracted_buttons/hover_prev.png" id="10_wgale"]
+[ext_resource type="Texture2D" uid="uid://fk5f48tk5iij" path="res://assets/papercraft/core/ui/default_buttons/button_next_page.png" id="11_wv6c4"]
+[ext_resource type="Texture2D" uid="uid://dm2q5tccy75j1" path="res://assets/papercraft/core/ui/extracted_buttons/pressed_next.png" id="12_osq23"]
+[ext_resource type="Texture2D" uid="uid://cm280lp8ogcga" path="res://assets/papercraft/core/ui/extracted_buttons/hover_next.png" id="13_og3vf"]
+
+[node name="StoryGallery" type="Control" unique_id=2036394327]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_w8y0i")
+
+[node name="Vignette" type="ColorRect" parent="." unique_id=265301947]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.03876, 0.025840001, 0.025840001, 0.82000005)
+
+[node name="Stage" type="Control" parent="." unique_id=302393100]
+anchors_preset = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+
+[node name="LargePage" type="TextureRect" parent="Stage" unique_id=10633349]
+layout_mode = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+texture = ExtResource("1_pr3fx")
+expand_mode = 1
+
+[node name="LeftCorner" type="TextureRect" parent="Stage" unique_id=752691222]
+layout_mode = 0
+offset_right = 199.0
+offset_bottom = 139.0
+texture = ExtResource("2_8qjk8")
+expand_mode = 1
+
+[node name="RightCorner" type="TextureRect" parent="Stage" unique_id=1569776905]
+layout_mode = 0
+offset_left = 1106.0
+offset_top = 492.0
+offset_right = 1277.0
+offset_bottom = 720.0
+texture = ExtResource("3_lwhpt")
+expand_mode = 1
+
+[node name="GalleryPanel" type="Panel" parent="Stage" unique_id=252829889]
+layout_mode = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+
+[node name="TitleBar" type="Control" parent="Stage/GalleryPanel" unique_id=1443324839]
+anchors_preset = 0
+offset_right = 1280.0
+offset_bottom = 125.0
+
+[node name="Title" type="TextureRect" parent="Stage/GalleryPanel/TitleBar" unique_id=26514631]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -331.0
+offset_right = 331.0
+offset_bottom = 125.0
+grow_horizontal = 2
+texture = ExtResource("4_vhw25")
+expand_mode = 1
+
+[node name="CloseButton" type="TextureButton" parent="Stage/GalleryPanel/TitleBar" unique_id=1801586633]
+layout_mode = 0
+offset_left = 1131.0
+offset_top = 25.0
+offset_right = 1247.0
+offset_bottom = 75.0
+texture_normal = ExtResource("5_bfsnr")
+texture_pressed = ExtResource("6_kde66")
+texture_hover = ExtResource("7_x0lw0")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Gallery" type="Control" parent="Stage/GalleryPanel" unique_id=2016209200]
+anchors_preset = 0
+offset_top = 140.0
+offset_right = 1280.0
+offset_bottom = 640.0
+
+[node name="GalleryCard" parent="Stage/GalleryPanel/Gallery" unique_id=397163090 instance=ExtResource("8_8qjk8")]
+layout_mode = 0
+anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 100.0
+offset_right = 1180.0
+offset_bottom = 492.0
+grow_horizontal = 1
+grow_vertical = 1
+
+[node name="ButtonBar" type="HBoxContainer" parent="Stage/GalleryPanel" unique_id=315266167]
+layout_mode = 0
+offset_top = 652.0
+offset_right = 1280.0
+offset_bottom = 702.0
+alignment = 1
+
+[node name="UpButton" type="TextureButton" parent="Stage/GalleryPanel/ButtonBar" unique_id=836969633]
+custom_minimum_size = Vector2(130, 50)
+layout_mode = 2
+texture_normal = ExtResource("8_7scgi")
+texture_pressed = ExtResource("9_kptrk")
+texture_hover = ExtResource("10_wgale")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Spacer" type="Control" parent="Stage/GalleryPanel/ButtonBar" unique_id=1404995025]
+custom_minimum_size = Vector2(260, 0)
+layout_mode = 2
+
+[node name="PageLabel" type="Label" parent="Stage/GalleryPanel/ButtonBar/Spacer" unique_id=643859101]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -12.0
+offset_right = 20.0
+offset_bottom = 12.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.23633423, 0.23633423, 0.2363342, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 25
+horizontal_alignment = 1
+
+[node name="NextButton" type="TextureButton" parent="Stage/GalleryPanel/ButtonBar" unique_id=920971378]
+custom_minimum_size = Vector2(130, 50)
+layout_mode = 2
+texture_normal = ExtResource("11_wv6c4")
+texture_pressed = ExtResource("12_osq23")
+texture_hover = ExtResource("13_og3vf")
+ignore_texture_size = true
+stretch_mode = 0

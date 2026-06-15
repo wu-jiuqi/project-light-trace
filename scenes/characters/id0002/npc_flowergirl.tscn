@@ -1,0 +1,46 @@
+[gd_scene format=3 uid="uid://brdyw6u1suwxg"]
+
+[ext_resource type="Texture2D" path="res://assets/papercraft/fragments/id0002/characters/npc_03_flowergirl_s.png" id="1_uu4l5"]
+[ext_resource type="Script" path="res://scripts/fragment/npc_controller.gd" id="2_npc_script"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wfmlh"]
+size = Vector2(78, 43)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_d7f6h"]
+radius = 43.0
+height = 130.0
+
+[node name="NpcFlowergirl" type="CharacterBody2D" unique_id=1875047972]
+z_as_relative = false
+y_sort_enabled = true
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("2_npc_script")
+npc_name = "卖花女"
+npc_role = "卖花女"
+npc_kb_id = "flowergirl"
+use_rag = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1255434571]
+position = Vector2(4, -21.5)
+shape = SubResource("RectangleShape2D_wfmlh")
+
+[node name="Visual Node2D" type="Node2D" parent="." unique_id=1177880617]
+
+[node name="Visual" type="Sprite2D" parent="Visual Node2D" unique_id=1623485692]
+position = Vector2(0, -86)
+texture = ExtResource("1_uu4l5")
+
+[node name="Shadow Sprite2D" type="Sprite2D" parent="Visual Node2D" unique_id=1045883205]
+
+[node name="FeetMarker Marker2D" type="Marker2D" parent="." unique_id=1614143799]
+
+[node name="InteractionArea Area2D" type="Area2D" parent="." unique_id=1276358624]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea Area2D" unique_id=1771154472]
+position = Vector2(1, -63)
+shape = SubResource("CapsuleShape2D_d7f6h")
+debug_color = Color(0.6525995, 0.518932, 9.62615e-07, 0.41960785)

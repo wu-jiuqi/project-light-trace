@@ -44,6 +44,6 @@ def process_tear_overlay(input_path: str, output_path: str, target_size: tuple =
 
 if __name__ == "__main__":
     input_path = r"C:\Users\30114\.workbuddy\clipboard-images\clipboard-2026-06-08T17-02-56-928Z-0bbb5201.jpg"
-    output_path = r"D:\WorkBuddy WorkSpace\shuoguang_project\assets\papercraft\cinematic\opening_tear_overlay.png"
+    output_path = r"D:\WorkBuddy WorkSpace\project_light_trace\assets\papercraft\cinematic\opening_tear_overlay.png"
     
     process_tear_overlay(input_path, output_path, (3840, 2160))

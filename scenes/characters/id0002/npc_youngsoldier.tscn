@@ -1,0 +1,46 @@
+[gd_scene format=3 uid="uid://d3xefr4vk715b"]
+
+[ext_resource type="Texture2D" path="res://assets/papercraft/fragments/id0002/characters/npc_02_youngsoldier_s.png" id="1_rot0d"]
+[ext_resource type="Script" path="res://scripts/fragment/npc_controller.gd" id="2_npc_script"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_44tdk"]
+size = Vector2(43, 30)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_rot0d"]
+radius = 29.0
+height = 126.0
+
+[node name="NpcYoungsoldier" type="CharacterBody2D" unique_id=175132681]
+z_as_relative = false
+y_sort_enabled = true
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("2_npc_script")
+npc_name = "年轻士兵"
+npc_role = "士兵"
+npc_kb_id = "youngsoldier"
+use_rag = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1226513448]
+position = Vector2(0.5, -15)
+shape = SubResource("RectangleShape2D_44tdk")
+
+[node name="Visual Node2D" type="Node2D" parent="." unique_id=858957578]
+
+[node name="Visual" type="Sprite2D" parent="Visual Node2D" unique_id=1814972293]
+position = Vector2(0, -91)
+texture = ExtResource("1_rot0d")
+
+[node name="Shadow Sprite2D" type="Sprite2D" parent="Visual Node2D" unique_id=1785494456]
+
+[node name="FeetMarker Marker2D" type="Marker2D" parent="." unique_id=1585868401]
+
+[node name="InteractionArea Area2D" type="Area2D" parent="." unique_id=872876883]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea Area2D" unique_id=556091780]
+position = Vector2(0, -62)
+shape = SubResource("CapsuleShape2D_rot0d")
+debug_color = Color(0.6632596, 0.51335865, 0, 0.41960785)

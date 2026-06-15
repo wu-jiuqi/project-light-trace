@@ -1,20 +1,46 @@
 [gd_scene format=3 uid="uid://y4777t1y31qf"]
 
-[ext_resource type="Texture2D" uid="uid://b54imjpa5udur" path="res://assets/papercraft/fragments/id0001/characters/npc_01_linguide.png" id="1_texture"]
+[ext_resource type="Texture2D" uid="uid://c7q5tcur13dhq" path="res://assets/papercraft/fragments/id0001/characters/npc_01_linguide_s.png" id="1_dl61i"]
+[ext_resource type="Script" uid="uid://ldw7x5fltxna" path="res://scripts/fragment/npc_controller.gd" id="2_script"]
 
 [sub_resource type="RectangleShape2D" id="Rect_body"]
-size = Vector2(36, 48)
+size = Vector2(40, 27)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_hejnd"]
+radius = 22.0
+height = 90.0
 
 [node name="NPC_Linguide" type="CharacterBody2D" unique_id=1960642850]
 z_as_relative = false
 y_sort_enabled = true
-collision_layer = 4
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("2_script")
+npc_name = "林指导"
+npc_role = "引导员"
+npc_kb_id = "linguide"
 
 [node name="BodyCollision" type="CollisionShape2D" parent="." unique_id=1156247154]
-position = Vector2(0, -24)
+position = Vector2(0, -13.5)
 shape = SubResource("Rect_body")
 
-[node name="Visual" type="Sprite2D" parent="." unique_id=1760914923]
-position = Vector2(0, -48)
+[node name="Visual Node2D" type="Node2D" parent="." unique_id=1070104420]
+
+[node name="Visual" type="Sprite2D" parent="Visual Node2D" unique_id=1760914923]
+position = Vector2(0, -44)
 scale = Vector2(0.5, 0.5)
-texture = ExtResource("1_texture")
+texture = ExtResource("1_dl61i")
+
+[node name="Shadow Sprite2D" type="Sprite2D" parent="Visual Node2D" unique_id=1082231733]
+
+[node name="FeetMarker Marker2D" type="Marker2D" parent="." unique_id=803609168]
+
+[node name="InteractionArea Area2D" type="Area2D" parent="." unique_id=599909112]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea Area2D" unique_id=259800252]
+position = Vector2(0, -46)
+shape = SubResource("CapsuleShape2D_hejnd")
+debug_color = Color(0.65457684, 0.5179122, 0, 0.41960785)

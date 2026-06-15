@@ -1,4 +1,6 @@
 extends CharacterBody2D
+
+const SoftShadow = preload("res://scripts/fragment/soft_shadow.gd")
 ## AI子体NPC控制器
 ## 驱动碎片世界中NPC的移动、对话、警觉行为
 ## 每个NPC维护独立的警觉值和个人档案
@@ -126,6 +128,39 @@ func _get_alert_profile() -> Dictionary:
 				"safe_actions": ["付房钱", "天气", "饿了", "累了", "老唐"],
 				"trust_modifier": -10.0
 			}
+		# --- 碎片0001 NPC（MONITORED合规度模式） ---
+		"linguide":
+			return {
+				"thresholds": {0:0, 1:15, 2:35, 3:55, 4:75, 5:92},
+				"hot_topics": ["脚本之外", "幕间", "记忆清除", "边界那边", "赵安保看到", "为什么骗"],
+				"personality": "林指导——微笑的提线木偶。她知道自己在读脚本但无法停止。在脚本缝隙里说真话。用句尾音调和沉默表达真实态度。",
+				"safe_actions": ["汇报进度", "日晷数据", "校准完成", "观测完毕"],
+				"trust_modifier": 0.0
+			}
+		"chentechnology":
+			return {
+				"thresholds": {0:0, 1:12, 2:30, 3:50, 4:72, 5:90},
+				"hot_topics": ["删除的信息", "碎片的便利贴", "0047", "为什么不让我看", "你在怕什么"],
+				"personality": "陈技术——被命令删除信息的人。技术术语快/非脚本慢的双速切换，手指会发抖。每句以'没问题吧？'确认安全边界。",
+				"safe_actions": ["观测数据", "角度规律", "等差数列", "调试设备"],
+				"trust_modifier": 0.0
+			}
+		"wangdirector":
+			return {
+				"thresholds": {0:0, 1:20, 2:42, 3:62, 4:80, 5:94},
+				"hot_topics": ["审查", "公关稿", "电子屏闪", "家人", "真相", "公司隐瞒"],
+				"personality": "王主管——说公司的版本但知道真相不是这样。宣讲流畅如公关稿，摄像头死角压低声音。第47秒电子屏会闪家人照片。",
+				"safe_actions": ["公共信息", "官方通告", "培训手册", "合规操作"],
+				"trust_modifier": 0.0
+			}
+		"zhaosecurity":
+			return {
+				"thresholds": {0:0, 1:8, 2:22, 3:40, 4:60, 5:82},
+				"hot_topics": ["光墙", "边界", "外面", "你看见了什么", "为什么不记录"],
+				"personality": "赵安保——越过一次光墙看到了外面。话极少（≤8字），安保术语精准。以不记录代替反抗。站在侧后方不挡路。",
+				"safe_actions": ["通过", "安全", "训练中", "无需协助"],
+				"trust_modifier": 0.0
+			}
 	return {
 		"thresholds": {0:0, 1:20, 2:40, 3:60, 4:80, 5:95},
 		"hot_topics": ["为什么没有颜色", "源印", "天枢", "不对劲", "奇怪"],
@@ -161,6 +196,7 @@ var patrol_points: Array[Vector2] = []
 var patrol_index: int = 0
 var target_position: Vector2 = Vector2.ZERO
 var idle_timer: float = 0.0
+var _shadow_sprite: Sprite2D = null  # 在 _ready() 中通过 _setup_shadow() 赋值
 
 ## RAG状态引用
 var _fragment_state: Node = null
@@ -174,15 +210,36 @@ var _last_greeting: String = ""           # 上次使用的开场白（避免连
 var _greeting_phase: int = 0              # 开场白阶段
 var _own_color_was_awakened: bool = false # 是否刚觉醒
 var _llm_last_input: String = ""          # 上一轮玩家的输入（用于LLM回复后分析警觉）
+var _stream_suppress_asterisk_action: bool = false
+var _stream_suppress_paren_action: bool = false
 
 signal npc_state_changed(new_state: int)
+
+
+func _uses_fragment_compliance_mode() -> bool:
+	if _fragment_state == null:
+		var states = get_tree().get_nodes_in_group("fragment_state")
+		if states.size() > 0:
+			_fragment_state = states[0]
+	return _fragment_state != null \
+		and _fragment_state.has_method("uses_compliance_mode") \
+		and _fragment_state.uses_compliance_mode()
+
+
+func _uses_alert_system() -> bool:
+	if _fragment_state == null:
+		var states = get_tree().get_nodes_in_group("fragment_state")
+		if states.size() > 0:
+			_fragment_state = states[0]
+	if _fragment_state != null and _fragment_state.has_method("uses_alert_system"):
+		return _fragment_state.uses_alert_system()
+	return true
+
 
 func _ready() -> void:
 	add_to_group("npc")
 	target_position = global_position
-	
-	# 创建交互提示标签（显示在NPC头顶）
-	_create_interact_label()
+	_setup_shadow()
 	
 	# 查找碎片状态管理器
 	var states = get_tree().get_nodes_in_group("fragment_state")
@@ -192,11 +249,21 @@ func _ready() -> void:
 	# 初始化警觉系统
 	var profile = _get_alert_profile()
 	var base_trust = profile.get("trust_modifier", 0.0)
+	var compliance_mode := _uses_fragment_compliance_mode()
+	var alert_enabled := _uses_alert_system()
 	
 	# 尝试从持久化缓存恢复状态（重进房间不重置位置和警觉）
 	var scene_name = get_parent().name if get_parent() else ""
 	var saved = GameManager.load_npc_state(scene_name, npc_kb_id)
-	if not saved.is_empty():
+	if not alert_enabled:
+		npc_suspicion = 0.0
+		npc_alert_phase = NPCAlertPhase.TRUSTING
+		doubts_player_identity = false
+	elif compliance_mode:
+		npc_suspicion = 0.0
+		npc_alert_phase = NPCAlertPhase.TRUSTING
+		doubts_player_identity = false
+	elif not saved.is_empty():
 		global_position = Vector2(saved.get("position_x", global_position.x), saved.get("position_y", global_position.y))
 		npc_suspicion = saved.get("suspicion", 0.0)
 		npc_alert_phase = saved.get("alert_phase", NPCAlertPhase.TRUSTING)
@@ -228,9 +295,29 @@ func _ready() -> void:
 	tree_exiting.connect(_on_tree_exiting)
 
 
+func _setup_shadow() -> void:
+	# 诊断：@onready 可能返回 null，这里做 fallback 重新查找
+	if not _shadow_sprite:
+		var fallback := get_node_or_null("Visual Node2D/Shadow Sprite2D") as Sprite2D
+		if fallback:
+			_shadow_sprite = fallback
+			print("[NPC %s] Shadow Sprite2D fallback 查找成功" % npc_name)
+		else:
+			printerr("[NPC %s] Shadow Sprite2D 未找到！请检查节点树路径 Visual Node2D/Shadow Sprite2D" % npc_name)
+			return
+
+	var visual_sprite := get_node_or_null("Visual Node2D/Visual") as Sprite2D
+	SoftShadow.apply_to(_shadow_sprite, visual_sprite)
+	print("[NPC %s] Shader 阴影已生成 (scale=%.2f, pos=(%.0f,%.0f))" % [npc_name, _shadow_sprite.scale.x, _shadow_sprite.position.x, _shadow_sprite.position.y])
+
+
 func _on_tree_exiting() -> void:
 	## 节点从场景树移除前保存状态
 	if npc_kb_id == "": return
+	if not _uses_alert_system():
+		return
+	if _uses_fragment_compliance_mode():
+		return
 	var scene_name = get_parent().name if get_parent() else ""
 	GameManager.save_npc_state(scene_name, npc_kb_id, global_position, npc_suspicion, npc_alert_phase, doubts_player_identity)
 	print("[NPC] %s 状态已缓存: sus=%.0f phase=%d pos=(%.0f,%.0f)" % 
@@ -238,7 +325,8 @@ func _on_tree_exiting() -> void:
 
 func _process(delta: float) -> void:
 	# 警觉衰减（不说话时缓慢下降）
-	_process_alert_decay(delta)
+	if _uses_alert_system():
+		_process_alert_decay(delta)
 	
 	match current_state:
 		NPCState.IDLE:
@@ -354,6 +442,8 @@ func end_dialogue() -> void:
 
 func _process_alert_decay(delta: float) -> void:
 	## 警觉自然衰减（不对话时缓慢降低）
+	if _uses_fragment_compliance_mode():
+		return
 	if current_state == NPCState.TALKING:
 		return  # 对话中不衰减
 	if npc_suspicion <= 0:
@@ -368,6 +458,11 @@ func _process_alert_decay(delta: float) -> void:
 
 func modify_alert(amount: float, reason: String = "") -> void:
 	## 修改NPC警觉值
+	if not _uses_alert_system():
+		return
+	if _uses_fragment_compliance_mode():
+		_modify_fragment_compliance_from_alert(amount, reason)
+		return
 	var old_phase = npc_alert_phase
 	npc_suspicion = clampf(npc_suspicion + amount, 0.0, 100.0)
 	_last_alert_change_time = Time.get_unix_time_from_system()
@@ -386,6 +481,15 @@ func modify_alert(amount: float, reason: String = "") -> void:
 		if npc_alert_phase >= NPCAlertPhase.ALARMED and not doubts_player_identity:
 			doubts_player_identity = true
 			print("[NPC:%s] 开始怀疑玩家身份" % npc_name)
+
+func _modify_fragment_compliance_from_alert(amount: float, reason: String = "") -> void:
+	## MONITORED 模式把 NPC 警觉事件映射为碎片 #0001 的共享合规度扣减。
+	if amount <= 0.0:
+		return
+	if not _fragment_state or not _fragment_state.has_method("_modify_compliance"):
+		return
+	var compliance_delta := -5
+	_fragment_state.call("_modify_compliance", compliance_delta, "NPC对话触发: %s" % reason)
 
 func _update_alert_phase() -> void:
 	## 根据当前警觉值更新警觉阶段
@@ -434,6 +538,8 @@ func _update_behavior_from_alert() -> void:
 
 func check_player_input_for_alert(player_input: String) -> void:
 	## 分析玩家输入，如果触及敏感话题则增加警觉
+	if not _uses_alert_system():
+		return
 	var profile = _get_alert_profile()
 	if npc_kb_id == "oldpainter":
 		return  # 老画家完全信任玩家
@@ -476,6 +582,10 @@ func check_player_input_for_alert(player_input: String) -> void:
 
 func check_safe_action(player_input: String) -> void:
 	## 检查玩家的行为是否能降低警觉
+	if not _uses_alert_system():
+		return
+	if _uses_fragment_compliance_mode():
+		return
 	var profile = _get_alert_profile()
 	if npc_suspicion <= 0:
 		return
@@ -507,6 +617,8 @@ func get_alert_phase_text() -> String:
 
 func get_alert_context_for_rag() -> String:
 	## 为RAG检索生成警觉上下文 — 指导LLM以不同警觉等级回应
+	if not _uses_alert_system():
+		return ""
 	if npc_alert_phase <= NPCAlertPhase.TRUSTING:
 		return ""
 
@@ -605,6 +717,9 @@ func _analyze_llm_response_for_alert(response: String, player_input: String) -> 
 	## 分析LLM的回复内容来判断NPC是否变得警觉
 	## 不是关键词匹配——是观察NPC的自然反应
 	## 如果NPC回复变得简短、抗拒、回避，说明玩家的问题让他不安
+	if not _uses_alert_system():
+		return
+	var compliance_mode := _uses_fragment_compliance_mode()
 	if response == "" or npc_kb_id == "oldpainter":
 		return
 	
@@ -613,7 +728,7 @@ func _analyze_llm_response_for_alert(response: String, player_input: String) -> 
 	var reasons: Array[String] = [] as Array[String]
 	
 	# === 信号1: 极度简短的回复（<20字符）—— NPC不想说话 ===
-	if response.length() < 20:
+	if response.length() < 20 and not compliance_mode:
 		delta += 15.0
 		reasons.append("回复极短——NPC不想多谈")
 	
@@ -791,6 +906,26 @@ func _get_initial_greeting() -> String:
 			return "你来了。坐。先去看那些颜色——不是我的颜色，是他们的。"
 		"innkeeper":
 			return "（冯婶托着腮帮子，头一点一点地在打瞌睡。听到脚步声，她迷迷糊糊地抬起眼皮。）……哦——醒了啊。没事吧现在？饿不饿？"
+		"linguide":
+			return "溯光者，编号确认通过。欢迎来到溯光计划第一阶段训练场。请先观察五个日晷，记录阴影角度。"
+		"chentechnology":
+			return "（终端屏幕闪了一下。）观测数据接口已开放。有任何技术问题——我可以协助。没问题吧？"
+		"wangdirector":
+			return "溯光者，欢迎来到启程之镇。天枢公司为您的训练体验提供了完善的公共信息服务。如有疑问，请查阅培训手册。"
+		"zhaosecurity":
+			return "（他站在侧后方，没有看你的眼睛。）训练区域安全。请保持在指定边界内。"
+		"oldteacher":
+			return "车还没来。你如果不急，可以先把站台上的字读一遍。"
+		"youngsoldier":
+			return "站台安全。至少现在安全。你也是等特快47的人吗？"
+		"flowergirl":
+			return "要买一朵矢车菊吗？车还没来，花也还没谢。"
+		"merchant":
+			return "如果你是来谈生意的，恐怕得等车先到。"
+		"littlegirl":
+			return "你也在等人吗？妈妈说，等人的时候不能越过黄线。"
+		"conductor":
+			return "票先收好。车还没进站，检票口暂时不关。"
 	return "……"
 
 
@@ -818,6 +953,8 @@ func _get_partial_awake_greeting(count: int) -> String:
 		"innkeeper":
 			if count <= 2: return "（冯婶多翻了一页登记簿——虽然还是空的。）今天镇上好像不太一样——我说不上来。你也感觉到了？"
 			return "登记簿有字的那页——墨好像深了一点。你说奇怪不奇怪。算了——管它呢。"
+		"linguide", "chentechnology", "wangdirector", "zhaosecurity":
+			return _get_initial_greeting()
 	return "镇上有些不对劲——你感觉到了吗？"
 
 
@@ -842,6 +979,8 @@ func _get_post_awakening_greeting(count: int) -> String:
 		"violinist":
 			if count <= 3: return "（她拉了一个音。只有一个——但它没有消失。）……你想听吗？"
 			return "我在等第五个人——一个画画的。他知道一段旋律。不是琴声——但琴能听懂。"
+		"linguide", "chentechnology", "wangdirector", "zhaosecurity":
+			return _get_initial_greeting()
 	return "你回来了。世界不一样了——你也感觉到了吧？"
 
 
@@ -862,6 +1001,8 @@ func _get_world_changed_greeting() -> String:
 			return "六色齐全了。画布上的裂痕合上了——不是被我补的。是被她们拼好的。"
 		"innkeeper":
 			return "今早我打开旅店大门——街上的颜色多得晃眼。我活了六十多年，第一次知道这条街长什么样。登记簿上——多了一行字。不是我的笔迹。但我认识它。"
+		"linguide", "chentechnology", "wangdirector", "zhaosecurity":
+			return _get_initial_greeting()
 	return "世界完整了——你做到了。"
 
 
@@ -875,6 +1016,10 @@ func _get_alt_greeting(count: int) -> String:
 		"violinist":  return "（她点了点头，没有说话。）"
 		"oldpainter": return "颜色们在等你。进来吧。"
 		"innkeeper":  return "（冯婶翻了一页登记簿。）嗯？——哦，是你。饿了没？"
+		"linguide":   return "溯光者。你的观测进度还需要加速。需要教学提示吗？"
+		"chentechnology": return "（手指在终端上停了一下。）……需要技术支持吗？没问题。"
+		"wangdirector": return "关于启程之镇，天枢公司还有一些补充信息——你愿意听吗？"
+		"zhaosecurity": return "（他没有说话。只是往后退了一步，让出路来。）"
 	return "嗯？"
 
 
@@ -903,15 +1048,17 @@ func _collect_game_state() -> Dictionary:
 	## 从碎片状态管理器收集当前游戏状态
 	if _fragment_state and _fragment_state.has_method("get_game_state"):
 		var state = _fragment_state.get_game_state(npc_kb_id)
-		# 使用 NPC 实际警觉值；该值已由 GameManager.npc_state_cache 跨房间持久化。
-		state["alert_level"] = int(npc_suspicion)
+		if not _uses_fragment_compliance_mode():
+			# 使用 NPC 实际警觉值；该值已由 GameManager.npc_state_cache 跨房间持久化。
+			state["alert_level"] = int(npc_suspicion)
 		# 注入 NPC 情绪状态
 		if _npc_mood != "":
 			state["npc_mood"] = _npc_mood
 		# 注入 警觉上下文
-		var alert_context = get_alert_context_for_rag()
-		if alert_context != "":
-			state["alert_context"] = alert_context
+		if not _uses_fragment_compliance_mode():
+			var alert_context = get_alert_context_for_rag()
+			if alert_context != "":
+				state["alert_context"] = alert_context
 		return state
 	
 	# 降级：返回默认状态
@@ -921,15 +1068,20 @@ func _collect_game_state() -> Dictionary:
 		"trust_level": 0,
 		"awakened_colors": [],
 		"npc_mood": _npc_mood,
-		"alert_context": get_alert_context_for_rag()
+		"alert_context": "" if _uses_fragment_compliance_mode() else get_alert_context_for_rag()
 	}
 
 
 func send_player_message(message: String) -> void:
 	## 玩家输入 → RAG → LLM流式 → 聊天UI逐字显示
-	## 警觉由LLM的回复内容自然体现，不在输入层做关键词过滤
+	## 先用本地规则更新警觉/合规度，再让LLM按最新状态自然表现态度
 	print("[NPC] %s 收到: \"%s\"" % [npc_name, message])
+	if _fragment_state and _fragment_state.has_method("handle_npc_player_message"):
+		if _fragment_state.handle_npc_player_message(self, message):
+			return
 	_llm_last_input = message  # 记下玩家输入，等LLM回复后分析
+	check_safe_action(message)
+	check_player_input_for_alert(message)
 	
 	# 记录对话历史到SQLite数据库
 	ChatDatabase.log_message(npc_kb_id, "player", message, npc_alert_phase, npc_suspicion)
@@ -974,6 +1126,8 @@ func _send_to_llm(message: String, game_state: Dictionary) -> void:
 		  [npc_name, system_prompt.length(), npc_kb_id, npc_suspicion, npc_alert_phase])
 	
 	# 开始流式输出
+	_stream_suppress_asterisk_action = false
+	_stream_suppress_paren_action = false
 	ChatDialogue.stream_begin()
 	
 	# 连接流式信号（先断开旧的）
@@ -1125,21 +1279,80 @@ func _disconnect_stream_signals() -> void:
 
 
 func _on_stream_token(token: String) -> void:
-	ChatDialogue.stream_add(token)
+	var visible_token := _filter_stream_action_markup(token)
+	if visible_token != "":
+		ChatDialogue.stream_add(visible_token)
 
 
 func _on_stream_completed(full_text: String) -> void:
 	_disconnect_stream_signals()
-	ChatDialogue.stream_end(full_text)
+	var clean_text := _clean_model_dialogue_text(full_text)
+	ChatDialogue.stream_end(clean_text)
+	while ChatDialogue.has_method("is_streaming_response") and ChatDialogue.is_streaming_response():
+		await get_tree().process_frame
 	# 记录NPC回复到SQLite数据库
-	ChatDatabase.log_message(npc_kb_id, "npc", full_text, npc_alert_phase, npc_suspicion)
-	print("[NPC] %s 流式完成 (%d chars)" % [npc_name, full_text.length()])
+	ChatDatabase.log_message(npc_kb_id, "npc", clean_text, npc_alert_phase, npc_suspicion)
+	print("[NPC] %s 流式完成 (%d chars)" % [npc_name, clean_text.length()])
 	
 	# === LLM判断警觉：分析LLM的回复内容，而不是做关键词匹配 ===
-	_analyze_llm_response_for_alert(full_text, _llm_last_input)
+	if _uses_alert_system():
+		_analyze_llm_response_for_alert(clean_text, _llm_last_input)
 	
 	# 对话完成后检查颜色触发
 	_check_color_trigger()
+
+
+func _clean_model_dialogue_text(raw_text: String) -> String:
+	var text := raw_text.strip_edges()
+	if text.is_empty():
+		return text
+
+	var speaker_prefixes := [
+		"[%s]" % npc_name,
+		"【%s】" % npc_name,
+		"%s：" % npc_name,
+		"%s:" % npc_name,
+		"[NPC]",
+		"【NPC】"
+	]
+	for prefix in speaker_prefixes:
+		if text.begins_with(prefix):
+			text = text.substr(prefix.length()).strip_edges()
+
+	var paren_regex := RegEx.new()
+	if paren_regex.compile("\\s*[（(][^）)]*[）)]\\s*") == OK:
+		text = paren_regex.sub(text, "", true).strip_edges()
+
+	var asterisk_regex := RegEx.new()
+	if asterisk_regex.compile("\\s*\\*[^*\\n]{1,120}\\*\\s*") == OK:
+		text = asterisk_regex.sub(text, "", true).strip_edges()
+
+	var bracket_narration_regex := RegEx.new()
+	if bracket_narration_regex.compile("\\s*[【\\[]?(旁白|动作|表情|心理|内心|舞台指令)[：:][^】\\]\\n]*[】\\]]?\\s*") == OK:
+		text = bracket_narration_regex.sub(text, "", true).strip_edges()
+
+	text = text.replace("*", "").strip_edges()
+	return text
+
+
+func _filter_stream_action_markup(token: String) -> String:
+	## 流式阶段先隐藏 *动作/旁白* 内容，最终文本仍由 _clean_model_dialogue_text 兜底清理。
+	var visible := ""
+	for ch in token:
+		if ch == "*":
+			_stream_suppress_asterisk_action = not _stream_suppress_asterisk_action
+			continue
+		if ch == "（" or ch == "(":
+			_stream_suppress_paren_action = true
+			continue
+		if _stream_suppress_paren_action:
+			if ch == "）" or ch == ")":
+				_stream_suppress_paren_action = false
+			continue
+		if _stream_suppress_asterisk_action:
+			continue
+		visible += ch
+	return visible
 
 
 func _on_stream_failed(error: String) -> void:
@@ -1202,32 +1415,3 @@ func _get_awakening_reaction() -> String:
 		"violinist":
 			return "（琴弓停在半空。她听到了什么——不是琴声，是记忆里的旋律。）\n\n“……紫色的。你听过这个词吗？”\n\n弦没声音，不是因为弦坏了——是因为她等的那个听琴的人还没来。"
 	return "世界发生了一些变化——颜色恢复了。(%d/6)" % c
-
-
-# ============================================================
-# 交互提示标签（Task 9 — 提示显示在NPC头上）
-# ============================================================
-
-func _create_interact_label() -> void:
-	var label = Label.new()
-	label.name = "InteractHint"
-	label.text = "[E] %s" % npc_name
-	label.position = Vector2(-30, -36)
-	label.add_theme_color_override("font_color", Color(1, 1, 0.85, 0.9))
-	label.add_theme_font_size_override("font_size", 11)
-	label.hide()
-	add_child(label)
-
-func show_interact_hint() -> void:
-	var label = get_node_or_null("InteractHint")
-	if label:
-		label.show()
-
-func hide_interact_hint() -> void:
-	var label = get_node_or_null("InteractHint")
-	if label:
-		label.hide()
-
-
-# ============================================================
-# 交互提示标签（Task 9 — 提示显示在NPC头上）
