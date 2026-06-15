@@ -57,7 +57,7 @@
 
 ## 用户下一步建议
 
-1. **在 Godot 中打开项目运行**：`"D:/Godot/Godot_v4.6.2-stable_win64.exe" --path "D:/WorkBuddy WorkSpace/shuoguang_project"` → 按F5运行
+1. **在 Godot 中打开项目运行**：`"D:/Godot/Godot_v4.6.2-stable_win64.exe" --path "D:/WorkBuddy WorkSpace/project_light_trace"` → 按F5运行
 2. **验证碎片流程**：确保 #0762 碎片场景能在 Godot 中正确加载 (tscn可能有UID冲突需要重新导入)
 3. **调整游戏参数**：玩家速度/解密时间/NPC位置可在编辑器中直接调
 4. **添加更多颜色**：在 fragment_0762.gd 中扩展 colors_found 字典和触发条件

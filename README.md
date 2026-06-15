@@ -11,7 +11,7 @@
 ## 📂 项目结构
 
 ```
-shuoguang_project/
+project_light_trace/
 ├── project.godot          # Godot 项目配置文件
 ├── export_presets.cfg     # Web 导出预设
 ├── icon.svg               # 项目图标
@@ -91,10 +91,10 @@ shuoguang_project/
 ### 步骤二：本地开发
 
 ```bash
-cd shuoguang_project
+cd project_light_trace
 
 # 在 Godot 编辑器中打开项目
-start godot://"D:/Godot/Godot_v4.6.2-stable_win64.exe" --path "D:/WorkBuddy WorkSpace/shuoguang_project"
+start godot://"D:/Godot/Godot_v4.6.2-stable_win64.exe" --path "D:/WorkBuddy WorkSpace/project_light_trace"
 
 # 或者在编辑器中直接 F5 运行
 ```

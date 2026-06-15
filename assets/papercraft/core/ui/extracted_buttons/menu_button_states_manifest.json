@@ -2,7 +2,7 @@
   {
     "state": "hover",
     "name": "back_to_game",
-    "file": "D:\\WorkBuddy WorkSpace\\shuoguang_project\\assets\\papercraft\\core\\ui\\extracted_buttons\\hover_back_to_game.png",
+    "file": "D:\\WorkBuddy WorkSpace\\project_light_trace\\assets\\papercraft\\core\\ui\\extracted_buttons\\hover_back_to_game.png",
     "canvas": [
       620,
       220
@@ -11,7 +11,7 @@
   {
     "state": "hover",
     "name": "settings",
-    "file": "D:\\WorkBuddy WorkSpace\\shuoguang_project\\assets\\papercraft\\core\\ui\\extracted_buttons\\hover_settings.png",
+    "file": "D:\\WorkBuddy WorkSpace\\project_light_trace\\assets\\papercraft\\core\\ui\\extracted_buttons\\hover_settings.png",
     "canvas": [
       620,
       220
@@ -20,7 +20,7 @@
   {
     "state": "hover",
     "name": "return_star_map",
-    "file": "D:\\WorkBuddy WorkSpace\\shuoguang_project\\assets\\papercraft\\core\\ui\\extracted_buttons\\hover_return_star_map.png",
+    "file": "D:\\WorkBuddy WorkSpace\\project_light_trace\\assets\\papercraft\\core\\ui\\extracted_buttons\\hover_return_star_map.png",
     "canvas": [
       620,
       220
@@ -29,7 +29,7 @@
   {
     "state": "hover",
     "name": "return_title",
-    "file": "D:\\WorkBuddy WorkSpace\\shuoguang_project\\assets\\papercraft\\core\\ui\\extracted_buttons\\hover_return_title.png",
+    "file": "D:\\WorkBuddy WorkSpace\\project_light_trace\\assets\\papercraft\\core\\ui\\extracted_buttons\\hover_return_title.png",
     "canvas": [
       620,
       220
@@ -38,7 +38,7 @@
   {
     "state": "pressed",
     "name": "back_to_game",
-    "file": "D:\\WorkBuddy WorkSpace\\shuoguang_project\\assets\\papercraft\\core\\ui\\extracted_buttons\\pressed_back_to_game.png",
+    "file": "D:\\WorkBuddy WorkSpace\\project_light_trace\\assets\\papercraft\\core\\ui\\extracted_buttons\\pressed_back_to_game.png",
     "canvas": [
       620,
       220
@@ -47,7 +47,7 @@
   {
     "state": "pressed",
     "name": "settings",
-    "file": "D:\\WorkBuddy WorkSpace\\shuoguang_project\\assets\\papercraft\\core\\ui\\extracted_buttons\\pressed_settings.png",
+    "file": "D:\\WorkBuddy WorkSpace\\project_light_trace\\assets\\papercraft\\core\\ui\\extracted_buttons\\pressed_settings.png",
     "canvas": [
       620,
       220
@@ -56,7 +56,7 @@
   {
     "state": "pressed",
     "name": "return_star_map",
-    "file": "D:\\WorkBuddy WorkSpace\\shuoguang_project\\assets\\papercraft\\core\\ui\\extracted_buttons\\pressed_return_star_map.png",
+    "file": "D:\\WorkBuddy WorkSpace\\project_light_trace\\assets\\papercraft\\core\\ui\\extracted_buttons\\pressed_return_star_map.png",
     "canvas": [
       620,
       220
@@ -65,7 +65,7 @@
   {
     "state": "pressed",
     "name": "return_title",
-    "file": "D:\\WorkBuddy WorkSpace\\shuoguang_project\\assets\\papercraft\\core\\ui\\extracted_buttons\\pressed_return_title.png",
+    "file": "D:\\WorkBuddy WorkSpace\\project_light_trace\\assets\\papercraft\\core\\ui\\extracted_buttons\\pressed_return_title.png",
     "canvas": [
       620,
       220

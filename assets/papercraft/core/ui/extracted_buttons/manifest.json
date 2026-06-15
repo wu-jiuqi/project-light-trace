@@ -2,7 +2,7 @@
   {
     "state": "pressed",
     "name": "cancel",
-    "file": "D:\\WorkBuddy WorkSpace\\shuoguang_project\\assets\\papercraft\\core\\ui\\extracted_buttons\\pressed_cancel.png",
+    "file": "D:\\WorkBuddy WorkSpace\\project_light_trace\\assets\\papercraft\\core\\ui\\extracted_buttons\\pressed_cancel.png",
     "source": "D:\\Chrome\\ChromeDownloads\\ChatGPT Image 2026年6月12日 16_22_57.png",
     "source_box": [
       136,
@@ -24,7 +24,7 @@
   {
     "state": "pressed",
     "name": "save",
-    "file": "D:\\WorkBuddy WorkSpace\\shuoguang_project\\assets\\papercraft\\core\\ui\\extracted_buttons\\pressed_save.png",
+    "file": "D:\\WorkBuddy WorkSpace\\project_light_trace\\assets\\papercraft\\core\\ui\\extracted_buttons\\pressed_save.png",
     "source": "D:\\Chrome\\ChromeDownloads\\ChatGPT Image 2026年6月12日 16_22_57.png",
     "source_box": [
       627,
@@ -46,7 +46,7 @@
   {
     "state": "pressed",
     "name": "close",
-    "file": "D:\\WorkBuddy WorkSpace\\shuoguang_project\\assets\\papercraft\\core\\ui\\extracted_buttons\\pressed_close.png",
+    "file": "D:\\WorkBuddy WorkSpace\\project_light_trace\\assets\\papercraft\\core\\ui\\extracted_buttons\\pressed_close.png",
     "source": "D:\\Chrome\\ChromeDownloads\\ChatGPT Image 2026年6月12日 16_22_57.png",
     "source_box": [
       1117,
@@ -68,7 +68,7 @@
   {
     "state": "pressed",
     "name": "prev",
-    "file": "D:\\WorkBuddy WorkSpace\\shuoguang_project\\assets\\papercraft\\core\\ui\\extracted_buttons\\pressed_prev.png",
+    "file": "D:\\WorkBuddy WorkSpace\\project_light_trace\\assets\\papercraft\\core\\ui\\extracted_buttons\\pressed_prev.png",
     "source": "D:\\Chrome\\ChromeDownloads\\ChatGPT Image 2026年6月12日 16_22_57.png",
     "source_box": [
       135,
@@ -90,7 +90,7 @@
   {
     "state": "pressed",
     "name": "next",
-    "file": "D:\\WorkBuddy WorkSpace\\shuoguang_project\\assets\\papercraft\\core\\ui\\extracted_buttons\\pressed_next.png",
+    "file": "D:\\WorkBuddy WorkSpace\\project_light_trace\\assets\\papercraft\\core\\ui\\extracted_buttons\\pressed_next.png",
     "source": "D:\\Chrome\\ChromeDownloads\\ChatGPT Image 2026年6月12日 16_22_57.png",
     "source_box": [
       627,
@@ -112,7 +112,7 @@
   {
     "state": "pressed",
     "name": "blank",
-    "file": "D:\\WorkBuddy WorkSpace\\shuoguang_project\\assets\\papercraft\\core\\ui\\extracted_buttons\\pressed_blank.png",
+    "file": "D:\\WorkBuddy WorkSpace\\project_light_trace\\assets\\papercraft\\core\\ui\\extracted_buttons\\pressed_blank.png",
     "source": "D:\\Chrome\\ChromeDownloads\\ChatGPT Image 2026年6月12日 16_22_57.png",
     "source_box": [
       1117,
@@ -134,7 +134,7 @@
   {
     "state": "hover",
     "name": "cancel",
-    "file": "D:\\WorkBuddy WorkSpace\\shuoguang_project\\assets\\papercraft\\core\\ui\\extracted_buttons\\hover_cancel.png",
+    "file": "D:\\WorkBuddy WorkSpace\\project_light_trace\\assets\\papercraft\\core\\ui\\extracted_buttons\\hover_cancel.png",
     "source": "D:\\Chrome\\ChromeDownloads\\ChatGPT Image 2026年6月12日 16_23_39.png",
     "source_box": [
       131,
@@ -156,7 +156,7 @@
   {
     "state": "hover",
     "name": "save",
-    "file": "D:\\WorkBuddy WorkSpace\\shuoguang_project\\assets\\papercraft\\core\\ui\\extracted_buttons\\hover_save.png",
+    "file": "D:\\WorkBuddy WorkSpace\\project_light_trace\\assets\\papercraft\\core\\ui\\extracted_buttons\\hover_save.png",
     "source": "D:\\Chrome\\ChromeDownloads\\ChatGPT Image 2026年6月12日 16_23_39.png",
     "source_box": [
       629,
@@ -178,7 +178,7 @@
   {
     "state": "hover",
     "name": "close",
-    "file": "D:\\WorkBuddy WorkSpace\\shuoguang_project\\assets\\papercraft\\core\\ui\\extracted_buttons\\hover_close.png",
+    "file": "D:\\WorkBuddy WorkSpace\\project_light_trace\\assets\\papercraft\\core\\ui\\extracted_buttons\\hover_close.png",
     "source": "D:\\Chrome\\ChromeDownloads\\ChatGPT Image 2026年6月12日 16_23_39.png",
     "source_box": [
       1121,
@@ -200,7 +200,7 @@
   {
     "state": "hover",
     "name": "prev",
-    "file": "D:\\WorkBuddy WorkSpace\\shuoguang_project\\assets\\papercraft\\core\\ui\\extracted_buttons\\hover_prev.png",
+    "file": "D:\\WorkBuddy WorkSpace\\project_light_trace\\assets\\papercraft\\core\\ui\\extracted_buttons\\hover_prev.png",
     "source": "D:\\Chrome\\ChromeDownloads\\ChatGPT Image 2026年6月12日 16_23_39.png",
     "source_box": [
       131,
@@ -222,7 +222,7 @@
   {
     "state": "hover",
     "name": "next",
-    "file": "D:\\WorkBuddy WorkSpace\\shuoguang_project\\assets\\papercraft\\core\\ui\\extracted_buttons\\hover_next.png",
+    "file": "D:\\WorkBuddy WorkSpace\\project_light_trace\\assets\\papercraft\\core\\ui\\extracted_buttons\\hover_next.png",
     "source": "D:\\Chrome\\ChromeDownloads\\ChatGPT Image 2026年6月12日 16_23_39.png",
     "source_box": [
       628,
@@ -244,7 +244,7 @@
   {
     "state": "hover",
     "name": "blank",
-    "file": "D:\\WorkBuddy WorkSpace\\shuoguang_project\\assets\\papercraft\\core\\ui\\extracted_buttons\\hover_blank.png",
+    "file": "D:\\WorkBuddy WorkSpace\\project_light_trace\\assets\\papercraft\\core\\ui\\extracted_buttons\\hover_blank.png",
     "source": "D:\\Chrome\\ChromeDownloads\\ChatGPT Image 2026年6月12日 16_23_39.png",
     "source_box": [
       1121,
