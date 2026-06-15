@@ -1,0 +1,41 @@
+[gd_scene format=3 uid="uid://du80r2yo811nx"]
+
+[ext_resource type="Texture2D" uid="uid://bd4hg6ebhp4q4" path="res://assets/papercraft/fragments/id0003/environment/dragon_fountain_44.png" id="1_a413r"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_a413r"]
+radius = 186.0
+height = 1060.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_t570p"]
+radius = 174.0
+height = 1048.0
+
+[node name="WashHands" type="Node2D" unique_id=1103522973]
+
+[node name="Visual" type="Node2D" parent="." unique_id=953921929]
+
+[node name="Body" type="Sprite2D" parent="Visual" unique_id=1574782685]
+position = Vector2(0, -458)
+texture = ExtResource("1_a413r")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=923968983]
+collision_layer = 4
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=842163024 groups=["interactable"]]
+position = Vector2(-5, -186)
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_a413r")
+
+[node name="BaseMarker" type="Marker2D" parent="." unique_id=623889484]
+
+[node name="Interaction" type="Area2D" parent="." unique_id=1832601463]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Interaction" unique_id=1019448891]
+position = Vector2(-5, -181)
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_t570p")
+debug_color = Color(0.6554857, 0.5174414, 0, 0.41960785)

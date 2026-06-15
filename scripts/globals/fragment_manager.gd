@@ -68,7 +68,7 @@ func _initialize_fragments() -> void:
 	fragments = [
 		FragmentData.new("0001", "启程之镇", "晨曦镇", "「白日依山尽」", "晨曦之印", 1, false, "res://scenes/fragments/fragment_0001.tscn", true),
 		FragmentData.new("0002", "黄昏驿站", "落霞驿站", "「黄河入海流」", "归途之印", 1, false, "res://scenes/fragments/fragment_0002.tscn", true),
-		FragmentData.new("0003", "月下神社", "玉兔神社", "「举头望明月」", "月光之印", 1, false, "res://scenes/fragments/fragment_0003.tscn"),
+		FragmentData.new("0003", "月下神社", "玉兔神社", "「举头望明月」", "月光之印", 1, false, "res://scenes/fragments/fragment_0003.tscn", true),
 		FragmentData.new("0004", "工坊物语", "齿轮工坊", "「匠心」", "匠魂之印", 2, false, "res://scenes/fragments/fragment_0004.tscn"),
 		FragmentData.new("0047", "倒悬图书馆", "知识之塔", "「知识就是力量」", "真理之印", 3, true, "res://scenes/fragments/fragment_0047.tscn"),
 		FragmentData.new("0762", "颜色的葬礼", "灰白小镇", "「蓝是悲，红是怒，黄是望，绿是惧，紫是念，白是忘」", "情感之印", 3, true, "res://scenes/fragments/fragment_0762.tscn", true),
@@ -88,6 +88,21 @@ func _ensure_default_fragment_states() -> void:
 			"seat_selection": {},
 			"left_npc_id": "",
 			"source_mark_ticket_collected": false,
+			"completed": false,
+		}
+	if not _fragment_states.has("0003"):
+		_fragment_states["0003"] = {
+			"jade_collected": 0,
+			"jade_gallery_collected": 0,
+			"wash_hands": 0,
+			"lantern_lit": 0,
+			"jade_offered": 0,
+			"clapped": 0,
+			"moon_viewed": 0,
+			"mirror_opened": 0,
+			"ritual_sequence": [],
+			"ritual_sequence_invalid": false,
+			"inscription_order": [],
 			"completed": false,
 		}
 	_fragment_states["0762"] = {
@@ -192,6 +207,22 @@ func reset_fragment_states(fragment_id: String) -> void:
 				"completed": false,
 			}
 			print("[FragmentManager] 碎片 %s 的专属状态已重置" % fragment_id)
+		"0003":
+			_fragment_states["0003"] = {
+				"jade_collected": 0,
+				"jade_gallery_collected": 0,
+				"wash_hands": 0,
+				"lantern_lit": 0,
+				"jade_offered": 0,
+				"clapped": 0,
+				"moon_viewed": 0,
+				"mirror_opened": 0,
+				"ritual_sequence": [],
+				"ritual_sequence_invalid": false,
+				"inscription_order": [],
+				"completed": false,
+			}
+			print("[FragmentManager] Fragment %s state reset" % fragment_id)
 		"0762":
 			_fragment_states["0762"] = {
 				"awakened_colors": [false, false, false, false, false, false],

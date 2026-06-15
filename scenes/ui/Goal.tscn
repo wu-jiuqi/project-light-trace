@@ -1,0 +1,112 @@
+[gd_scene format=3 uid="uid://ypd7h3ut5wua"]
+
+[ext_resource type="Texture2D" uid="uid://dt0hd2ti4bmi4" path="res://assets/papercraft/core/ui/dialogue_box/large_page.png" id="1_2k53s"]
+[ext_resource type="Texture2D" uid="uid://be3sc7cjwntkv" path="res://assets/papercraft/core/ui/dialogue_box/corner_compass.png" id="2_wdvsp"]
+[ext_resource type="Texture2D" uid="uid://cahdx48g8a4wa" path="res://assets/papercraft/core/ui/dialogue_box/right_mountains.png" id="3_p53l6"]
+[ext_resource type="Texture2D" uid="uid://buasnqtt5s6sm" path="res://assets/papercraft/core/ui/banner/微信图片_20260615171535_21_30_l.png" id="4_m2ubh"]
+[ext_resource type="Texture2D" uid="uid://ci2nn4aead8ld" path="res://assets/papercraft/core/ui/default_buttons/button_close.png" id="5_oyopw"]
+[ext_resource type="Texture2D" uid="uid://bqmnbh6l6tcdm" path="res://assets/papercraft/core/ui/extracted_buttons/pressed_close.png" id="6_gxban"]
+[ext_resource type="Texture2D" uid="uid://cjyllvkpm5xns" path="res://assets/papercraft/core/ui/extracted_buttons/hover_close.png" id="7_b3vo6"]
+
+[sub_resource type="FontVariation" id="FontVariation_tpjb0"]
+
+[node name="Goal" type="Control" unique_id=1185069932]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Vignette" type="ColorRect" parent="." unique_id=828298978]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.03876, 0.025840001, 0.025840001, 0.82000005)
+
+[node name="Stage" type="Control" parent="." unique_id=552287407]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="LargePage" type="TextureRect" parent="Stage" unique_id=757619069]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 1240.0
+offset_bottom = 680.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_2k53s")
+expand_mode = 1
+
+[node name="LeftCorner" type="TextureRect" parent="Stage" unique_id=765296183]
+layout_mode = 0
+offset_right = 184.0
+offset_bottom = 133.0
+texture = ExtResource("2_wdvsp")
+expand_mode = 1
+
+[node name="RightCorner" type="TextureRect" parent="Stage" unique_id=1984063895]
+layout_mode = 0
+offset_left = 1147.0
+offset_top = 547.0
+offset_right = 1280.0
+offset_bottom = 719.0
+texture = ExtResource("3_p53l6")
+expand_mode = 1
+
+[node name="GoalPanel" type="Panel" parent="Stage" unique_id=1665402273]
+layout_mode = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+
+[node name="TitleBar" type="Control" parent="Stage/GoalPanel" unique_id=1865876154]
+anchors_preset = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+
+[node name="Title" type="TextureRect" parent="Stage/GoalPanel/TitleBar" unique_id=2011176767]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -462.5
+offset_top = -213.0
+offset_right = 462.5
+offset_bottom = 373.0
+grow_horizontal = 2
+texture = ExtResource("4_m2ubh")
+expand_mode = 1
+
+[node name="TextureButton" type="TextureButton" parent="Stage/GoalPanel/TitleBar" unique_id=817881629]
+layout_mode = 0
+offset_left = 1120.0
+offset_top = 31.0
+offset_right = 1236.0
+offset_bottom = 81.0
+texture_normal = ExtResource("5_oyopw")
+texture_pressed = ExtResource("6_gxban")
+texture_hover = ExtResource("7_b3vo6")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Goal" type="Control" parent="Stage/GoalPanel" unique_id=411645043]
+anchors_preset = 0
+offset_top = 159.0
+offset_right = 1280.0
+offset_bottom = 677.0
+
+[node name="Label" type="Label" parent="Stage/GoalPanel/Goal" unique_id=1613510902]
+layout_mode = 0
+offset_right = 1280.0
+offset_bottom = 450.0
+theme_override_fonts/font = SubResource("FontVariation_tpjb0")
+theme_override_font_sizes/font_size = 131
+text = "敬请期待"
+horizontal_alignment = 1
+vertical_alignment = 1

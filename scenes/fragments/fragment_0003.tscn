@@ -1,63 +1,196 @@
 [gd_scene format=3 uid="uid://cl66aue4hur52"]
 
 [ext_resource type="Texture2D" uid="uid://bdpuud2t1pxjl" path="res://assets/papercraft/fragments/id0003/environment/stone_path_autumn_45.png" id="1_bn8sc"]
-[ext_resource type="Texture2D" uid="uid://dsekg8cansff5" path="res://assets/papercraft/fragments/id0003/environment/stone_floor_52.png" id="2_8tusk"]
-[ext_resource type="Texture2D" uid="uid://clgbh7fo7vm32" path="res://assets/papercraft/fragments/id0003/environment/wishing_well_42.png" id="2_xx2gr"]
-[ext_resource type="Texture2D" uid="uid://bd4hg6ebhp4q4" path="res://assets/papercraft/fragments/id0003/environment/dragon_fountain_44.png" id="4_16eqh"]
-[ext_resource type="Texture2D" uid="uid://djjw2ns8f7ff" path="res://assets/papercraft/fragments/id0003/environment/stone_gate_39.png" id="4_fv2w5"]
-[ext_resource type="Texture2D" uid="uid://cagjrfdgy46mn" path="res://assets/papercraft/fragments/id0003/environment/stone_lantern_46.png" id="6_nspxu"]
-[ext_resource type="Texture2D" uid="uid://dplag6hh7ws61" path="res://assets/papercraft/fragments/id0003/environment/stone_lantern_47.png" id="7_nwuhw"]
-[ext_resource type="Texture2D" uid="uid://cqcw2t02tpq07" path="res://assets/papercraft/fragments/id0003/environment/stone_lantern_48.png" id="8_rkg0e"]
-[ext_resource type="Texture2D" uid="uid://bm61jw2csn0qy" path="res://assets/papercraft/fragments/id0003/environment/stone_lantern_49.png" id="9_4sfkt"]
+[ext_resource type="Texture2D" uid="uid://d1mccvevacwoe" path="res://assets/papercraft/fragments/id0003/environment/BG.png" id="1_km8ee"]
+[ext_resource type="PackedScene" uid="uid://le2q8wow3kyn" path="res://scenes/buildings/id0003/Door.tscn" id="2_sx0es"]
+[ext_resource type="PackedScene" uid="uid://du80r2yo811nx" path="res://scenes/buildings/id0003/WashHands.tscn" id="4_nkmnp"]
+[ext_resource type="PackedScene" uid="uid://dasdu43xsbk3o" path="res://scenes/buildings/id0003/L3.tscn" id="5_8tusk"]
+[ext_resource type="PackedScene" uid="uid://crykomma6c0ea" path="res://scenes/buildings/id0003/L7.tscn" id="6_16eqh"]
+[ext_resource type="PackedScene" uid="uid://qheyof2seo3t" path="res://scenes/buildings/id0003/L9.tscn" id="7_nspxu"]
+[ext_resource type="PackedScene" uid="uid://dswkjqn0l6asy" path="res://scenes/buildings/id0003/L2.tscn" id="8_nwuhw"]
+[ext_resource type="PackedScene" uid="uid://bpgv3dwyrb0pu" path="res://scenes/buildings/id0003/L1.tscn" id="9_rkg0e"]
+[ext_resource type="PackedScene" uid="uid://tfdxb1klf5ee" path="res://scenes/buildings/id0003/L12.tscn" id="10_4sfkt"]
+[ext_resource type="PackedScene" uid="uid://dvc7altm15ct6" path="res://scenes/buildings/id0003/L11.tscn" id="11_6pfrc"]
+[ext_resource type="PackedScene" uid="uid://bb37nf6y0lg6u" path="res://scenes/buildings/id0003/L4.tscn" id="12_7r8pv"]
+[ext_resource type="PackedScene" uid="uid://t5jce3mil1if" path="res://scenes/buildings/id0003/L8.tscn" id="13_rjm18"]
+[ext_resource type="PackedScene" uid="uid://ba4ueqn2yw4lv" path="res://scenes/buildings/id0003/L5.tscn" id="14_u4uqf"]
+[ext_resource type="PackedScene" uid="uid://cal7vy5pu7gl4" path="res://scenes/buildings/id0003/L10.tscn" id="15_km0xt"]
+[ext_resource type="PackedScene" uid="uid://bo346231nbuqb" path="res://scenes/buildings/id0003/L6.tscn" id="16_7kxq0"]
+[ext_resource type="PackedScene" uid="uid://dio7vpkoutvgm" path="res://scenes/buildings/id0003/AncientWell.tscn" id="17_7r8pv"]
+[ext_resource type="Script" uid="uid://kg430sx0ke1c" path="res://scripts/fragment/fragment_0003_scene.gd" id="18_scene"]
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_km8ee"]
+distance = 0.13787842
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xx2gr"]
+size = Vector2(337, 27)
 
 [node name="Fragment0003" type="Node2D" unique_id=1324488622]
+script = ExtResource("18_scene")
 
-[node name="front" type="Node2D" parent="." unique_id=825319079]
+[node name="WorldRoot" type="Node2D" parent="." unique_id=825319079]
 
-[node name="path" type="Sprite2D" parent="front" unique_id=1364049007]
-position = Vector2(632.00006, 688)
-scale = Vector2(1.0076884, 0.7504028)
+[node name="Background" type="Node2D" parent="WorldRoot" unique_id=1366439855]
+z_index = -5
+
+[node name="BG" type="Sprite2D" parent="WorldRoot/Background" unique_id=1690085732]
+position = Vector2(520, 331)
+scale = Vector2(1.0704932, 1.2109177)
+texture = ExtResource("1_km8ee")
+
+[node name="Ground" type="Node2D" parent="WorldRoot" unique_id=2104561396]
+z_index = -1
+
+[node name="MainRoad" type="Sprite2D" parent="WorldRoot/Ground" unique_id=1364049007]
+z_index = -1
+position = Vector2(636, 631.8828)
+scale = Vector2(1.0076884, 1.401689)
 texture = ExtResource("1_bn8sc")
 
-[node name="path2" type="Sprite2D" parent="front" unique_id=161957229]
-z_index = -1
-position = Vector2(304, 728)
-scale = Vector2(0.70273924, 0.60356236)
-skew = 0.3351032
-texture = ExtResource("2_8tusk")
+[node name="DepthLayer" type="Node2D" parent="WorldRoot" unique_id=375370251]
+y_sort_enabled = true
 
-[node name="well" type="Sprite2D" parent="front" unique_id=1896108144]
-position = Vector2(608, 896.00006)
-scale = Vector2(0.3057235, 0.27461722)
-texture = ExtResource("2_xx2gr")
+[node name="DepthLayer_1" type="Node2D" parent="WorldRoot/DepthLayer" unique_id=548814792]
+y_sort_enabled = true
 
-[node name="fountain" type="Sprite2D" parent="front" unique_id=1230181398]
-position = Vector2(624, 671.99994)
-scale = Vector2(0.23358686, 0.17188436)
-texture = ExtResource("4_16eqh")
+[node name="Door" parent="WorldRoot/DepthLayer/DepthLayer_1" unique_id=1802202746 instance=ExtResource("2_sx0es")]
+position = Vector2(636.00006, 766.00006)
+scale = Vector2(0.7915935, 0.81402427)
 
-[node name="paifang" type="Sprite2D" parent="front" unique_id=1695151510]
-position = Vector2(627.541, 576)
-scale = Vector2(0.67058855, 0.37001595)
-texture = ExtResource("4_fv2w5")
+[node name="DepthLayer_2" type="Node2D" parent="WorldRoot/DepthLayer" unique_id=2081913973]
+y_sort_enabled = true
 
-[node name="lantern" type="Sprite2D" parent="front" unique_id=477294327]
-position = Vector2(28.000006, 776)
-scale = Vector2(0.17957535, 0.19552438)
-texture = ExtResource("6_nspxu")
+[node name="WashHands" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=1103522973 instance=ExtResource("4_nkmnp")]
+position = Vector2(639, 555)
+scale = Vector2(0.22164433, 0.22815457)
 
-[node name="lantern2" type="Sprite2D" parent="front" unique_id=1620356334]
-z_index = -1
-position = Vector2(368, 440)
-scale = Vector2(0.09752541, 0.081576474)
-texture = ExtResource("7_nwuhw")
+[node name="L3" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=724844568 instance=ExtResource("5_8tusk")]
+position = Vector2(252.75502, 585)
+scale = Vector2(0.15, 0.15)
 
-[node name="lantern3" type="Sprite2D" parent="front" unique_id=175760208]
-position = Vector2(184, 608)
-scale = Vector2(0.103904985, 0.120252706)
-texture = ExtResource("8_rkg0e")
+[node name="L7" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=561344537 instance=ExtResource("6_16eqh")]
+position = Vector2(1024.87, 585)
+scale = Vector2(0.15, 0.15)
 
-[node name="lantern4" type="Sprite2D" parent="front" unique_id=448381546]
-position = Vector2(111.99999, 680.00006)
-scale = Vector2(0.121448845, 0.16052389)
-texture = ExtResource("9_4sfkt")
+[node name="L9" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=817394026 instance=ExtResource("7_nspxu")]
+position = Vector2(292.975, 478)
+scale = Vector2(0.14, 0.14)
+
+[node name="L2" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=1786408074 instance=ExtResource("8_nwuhw")]
+position = Vector2(981.095, 478)
+scale = Vector2(0.14, 0.14)
+
+[node name="L1" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=1761138572 instance=ExtResource("9_rkg0e")]
+position = Vector2(333.615, 384)
+scale = Vector2(0.13, 0.13)
+
+[node name="L12" parent="WorldRoot/DepthLayer/DepthLayer_2" unique_id=1084991619 instance=ExtResource("10_4sfkt")]
+position = Vector2(941.88, 384)
+scale = Vector2(0.13, 0.13)
+
+[node name="DepthLayer_3" type="Node2D" parent="WorldRoot/DepthLayer" unique_id=300372033]
+y_sort_enabled = true
+
+[node name="L11" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=766714999 instance=ExtResource("11_6pfrc")]
+position = Vector2(366.00003, 294)
+scale = Vector2(0.12, 0.12)
+
+[node name="L4" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=816053539 instance=ExtResource("12_7r8pv")]
+position = Vector2(904.00006, 294)
+scale = Vector2(0.12, 0.12)
+
+[node name="L8" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=491314504 instance=ExtResource("13_rjm18")]
+position = Vector2(397.55, 210)
+scale = Vector2(0.11, 0.11)
+
+[node name="L5" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=1073260198 instance=ExtResource("14_u4uqf")]
+position = Vector2(870.75, 210)
+scale = Vector2(0.11, 0.11)
+
+[node name="L10" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=105194686 instance=ExtResource("15_km0xt")]
+position = Vector2(428, 124.99999)
+scale = Vector2(0.1, 0.1)
+
+[node name="L6" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=576851344 instance=ExtResource("16_7kxq0")]
+position = Vector2(836.745, 125)
+scale = Vector2(0.1, 0.1)
+
+[node name="AncientWell" parent="WorldRoot/DepthLayer/DepthLayer_3" unique_id=312906599 instance=ExtResource("17_7r8pv")]
+position = Vector2(631, 257)
+scale = Vector2(0.15, 0.15)
+
+[node name="SpawnPoints" type="Node2D" parent="WorldRoot" unique_id=229565676]
+
+[node name="Default" type="Marker2D" parent="WorldRoot/SpawnPoints" unique_id=1244643145]
+position = Vector2(583, 698)
+
+[node name="FromLoft" type="Marker2D" parent="WorldRoot/SpawnPoints" unique_id=1706181358]
+position = Vector2(630, 74)
+
+[node name="AirWall" type="Node2D" parent="WorldRoot" unique_id=1433458530]
+
+[node name="AirWall_Up" type="StaticBody2D" parent="WorldRoot/AirWall" unique_id=823984840]
+position = Vector2(0, 19)
+collision_layer = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/AirWall/AirWall_Up" unique_id=753715046]
+position = Vector2(626, -29)
+rotation = 3.1415927
+shape = SubResource("WorldBoundaryShape2D_km8ee")
+
+[node name="AirWall_Down" type="StaticBody2D" parent="WorldRoot/AirWall" unique_id=1400266119]
+position = Vector2(21, 728)
+collision_layer = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/AirWall/AirWall_Down" unique_id=497238051]
+position = Vector2(623, 2)
+shape = SubResource("WorldBoundaryShape2D_km8ee")
+
+[node name="AirWall_Left" type="StaticBody2D" parent="WorldRoot/AirWall" unique_id=493098885]
+position = Vector2(41.000004, 883)
+rotation = -1.0776383
+collision_layer = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/AirWall/AirWall_Left" unique_id=1961334851]
+position = Vector2(599.8943, 57.90374)
+rotation = 2.9939532
+shape = SubResource("WorldBoundaryShape2D_km8ee")
+
+[node name="AirWall_Right" type="StaticBody2D" parent="WorldRoot/AirWall" unique_id=1264528037]
+position = Vector2(41.000004, 883)
+rotation = -1.0776383
+collision_layer = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/AirWall/AirWall_Right" unique_id=1607694633]
+position = Vector2(854.74396, 506.73734)
+rotation = -0.82776445
+shape = SubResource("WorldBoundaryShape2D_km8ee")
+
+[node name="Interaction" type="Node2D" parent="WorldRoot" unique_id=1767545592]
+
+[node name="MoonInteractionArea" type="Area2D" parent="WorldRoot/Interaction" unique_id=858687461]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="WorldRoot/Interaction/MoonInteractionArea" unique_id=2044367453]
+polygon = PackedVector2Array(-46, -23, -40, -192, 224, -192, 216, 112, -48, 112)
+
+[node name="JumpInteractionArea" type="Area2D" parent="WorldRoot/Interaction" unique_id=2050718065]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/Interaction/JumpInteractionArea" unique_id=294426672]
+position = Vector2(630, -7.5)
+shape = SubResource("RectangleShape2D_xx2gr")
+debug_color = Color(0.6443393, 0.5231255, 5.7756904e-07, 0.41960785)
+
+[node name="LayerMarker" type="Node2D" parent="WorldRoot" unique_id=1799777468]
+
+[node name="Layer1_2" type="Marker2D" parent="WorldRoot/LayerMarker" unique_id=900965938]
+position = Vector2(467, 631)
+
+[node name="CameraRig" type="Node2D" parent="WorldRoot" unique_id=403366039]
+
+[node name="Camera2D" type="Camera2D" parent="WorldRoot/CameraRig" unique_id=910341603]
+position = Vector2(640, 360)
+
+[node name="UIRoot" type="CanvasLayer" parent="." unique_id=53121810]

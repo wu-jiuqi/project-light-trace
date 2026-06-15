@@ -1,0 +1,38 @@
+[gd_scene format=3 uid="uid://b1qix2qixh2mr"]
+
+[ext_resource type="Texture2D" uid="uid://b78y5w42iy0v7" path="res://assets/papercraft/fragments/id0003/environment/stone.png" id="1_6mhm5"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_n2n2w"]
+size = Vector2(742, 219)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_6mhm5"]
+radius = 406.0
+height = 1052.0
+
+[node name="StoneTip" type="Node2D" unique_id=740213767]
+
+[node name="Visual" type="Node2D" parent="." unique_id=430213502]
+
+[node name="Body" type="Sprite2D" parent="Visual" unique_id=428463993]
+position = Vector2(0, -637)
+texture = ExtResource("1_6mhm5")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=1968788327]
+collision_layer = 4
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=148219425]
+position = Vector2(8, -110.5)
+shape = SubResource("RectangleShape2D_n2n2w")
+
+[node name="InteractionArea Area2D" type="Area2D" parent="." unique_id=2016889761]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea Area2D" unique_id=1147865507]
+position = Vector2(0, -524)
+shape = SubResource("CapsuleShape2D_6mhm5")
+debug_color = Color(0.6574386, 0.5164251, 1.92523e-07, 0.41960785)
+
+[node name="BaseMarker" type="Marker2D" parent="." unique_id=1622715230]

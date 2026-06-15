@@ -7,6 +7,7 @@ const BGM_STAR_MAP = preload("res://assets/audio/bgm/bgm_star_map_loop.ogg")
 const FRAGMENT_TRANSITION_SCENES := {
 	"0001": "res://scenes/cinematic/fragment_0001_transition.tscn",
 	"0002": "res://scenes/cinematic/fragment_0002_transition.tscn",
+	"0003": "res://scenes/cinematic/fragment_0003_transition.tscn",
 }
 
 @onready var shard_canvas: StarShardCanvas = $FragmentContainer/ShardCanvas

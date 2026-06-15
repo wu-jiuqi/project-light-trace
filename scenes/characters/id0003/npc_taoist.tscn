@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://r8x8jagq53mc"]
+
+[ext_resource type="Texture2D" uid="uid://dvcy04m1v4lvc" path="res://assets/papercraft/fragments/id0003/characters/npc_01_taoist_s.png" id="1_f8g5a"]
+[ext_resource type="Script" path="res://scripts/fragment/fragment_0003_npc.gd" id="2_npc"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_f8g5a"]
+size = Vector2(59, 27)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_f8g5a"]
+radius = 36.0
+height = 156.0
+
+[node name="NpcTaoist" type="CharacterBody2D" unique_id=749343694]
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("2_npc")
+npc_name = "道士"
+npc_role = "望月道观主持"
+npc_kb_id = "taoist"
+default_greeting = "步骤。顺序。哪里不对。"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1987117103]
+position = Vector2(0.5, -13.5)
+shape = SubResource("RectangleShape2D_f8g5a")
+
+[node name="Visual Node2D" type="Node2D" parent="." unique_id=1835344152]
+
+[node name="Visual" type="Sprite2D" parent="Visual Node2D" unique_id=1671923698]
+position = Vector2(0, -92)
+texture = ExtResource("1_f8g5a")
+
+[node name="Shadow Sprite2D" type="Sprite2D" parent="Visual Node2D" unique_id=557203250]
+
+[node name="FeetMarker Marker2D" type="Marker2D" parent="." unique_id=1374637883]
+
+[node name="InteractionArea Area2D" type="Area2D" parent="." unique_id=1359265348]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea Area2D" unique_id=1367636420]
+position = Vector2(1, -75)
+shape = SubResource("CapsuleShape2D_f8g5a")
+debug_color = Color(0.64220196, 0.52419347, 0, 0.41960785)
