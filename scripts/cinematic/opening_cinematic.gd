@@ -222,12 +222,16 @@ func _next_panel() -> void:
 
 
 func _skip_cinematic() -> void:
+	if TutorialManager and TutorialManager.has_method("mark_intro_finished"):
+		TutorialManager.mark_intro_finished(true)
 	_go_to_star_map()
 
 
 func _go_to_star_map() -> void:
 	if is_exiting:
 		return
+	if TutorialManager and TutorialManager.has_method("mark_intro_finished") and not TutorialManager.intro_watched:
+		TutorialManager.mark_intro_finished(false)
 	is_exiting = true
 	is_transitioning = true
 	_hide_hint()
@@ -240,18 +244,10 @@ func _go_to_star_map() -> void:
 # ============================================
 
 func _start_bgm() -> void:
-	if _bgm_player == null:
-		_bgm_player = AudioStreamPlayer.new()
-		_bgm_player.name = "BGMPlayer"
-		_bgm_player.bus = "Master"
-		_bgm_player.volume_db = -6.0
-		add_child(_bgm_player)
-	_bgm_player.stream = BGM_CINEMATIC
-	_bgm_player.play()
+	AudioManager.play_bgm(BGM_CINEMATIC, "opening_cinematic", 0.4, -6.0, false)
 
 func _stop_bgm() -> void:
-	if _bgm_player != null and _bgm_player.playing:
-		_bgm_player.stop()
+	AudioManager.stop_bgm(0.25)
 
 
 # ============================================

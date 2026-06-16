@@ -27,6 +27,9 @@ func _ready() -> void:
 
 func play_click() -> void:
 	"""播放按钮点击音效（支持复音，防止快速连点时声音被截断）"""
+	if AudioManager and AudioManager.has_method("play_sfx"):
+		AudioManager.play_sfx(CLICK_SOUND, AudioManager.PRIORITY_NORMAL, -4.0)
+		return
 	if _players.is_empty():
 		return
 	var player := _players[_player_index] as AudioStreamPlayer

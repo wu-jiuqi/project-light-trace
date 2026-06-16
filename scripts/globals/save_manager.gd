@@ -214,6 +214,17 @@ func _disassemble_save_dict(data: Dictionary) -> void:
 	FragmentManager.reset_all_fragments()
 	_apply_fragments_list(data.get("fragments", []))
 	FragmentManager.apply_fragment_states(data.get("fragment_states", {}))
+	if FragmentManager.has_method("ensure_linear_unlocks_from_completed"):
+		FragmentManager.ensure_linear_unlocks_from_completed()
+	if TutorialManager and TutorialManager.has_method("infer_from_fragments"):
+		var completed_ids: Array[String] = []
+		var unlocked_ids: Array[String] = []
+		for fragment in FragmentManager.fragments:
+			if fragment.completed:
+				completed_ids.append(fragment.id)
+			if fragment.unlocked:
+				unlocked_ids.append(fragment.id)
+		TutorialManager.infer_from_fragments(completed_ids, unlocked_ids)
 
 	print("[SaveManager] 存档状态恢复完成")
 
@@ -229,6 +240,7 @@ func _apply_fragments_list(saved: Array) -> void:
 		var f = FragmentManager.get_fragment_by_id(fragment_id)
 		if f:
 			f.completed = bool(s.get("completed", false))
+			f.unlocked = bool(s.get("unlocked", f.unlocked))
 
 
 # ============================================================

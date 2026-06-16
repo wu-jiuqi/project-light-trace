@@ -367,22 +367,13 @@ func _find_npc_by_id(npc_id: String) -> Node:
 
 
 func _start_bgm() -> void:
-	if _bgm_player == null:
-		_bgm_player = AudioStreamPlayer.new()
-		_bgm_player.name = "BGMPlayer_Fragment0002"
-		_bgm_player.bus = "Master"
-		_bgm_player.volume_db = -10.0
-		add_child(_bgm_player)
-	_bgm_player.stream = BGM_FRAGMENT_0002
-	_bgm_player.stream.loop = true
-	_bgm_player.play()
+	AudioManager.play_bgm(BGM_FRAGMENT_0002, "fragment_0002", 0.45, -10.0, true)
 	print("[Fragment0002] BGM 已开始循环播放")
 
 
 func _stop_bgm() -> void:
-	if _bgm_player != null and _bgm_player.playing:
-		_bgm_player.stop()
-		print("[Fragment0002] BGM 已停止")
+	AudioManager.stop_bgm(0.25)
+	print("[Fragment0002] BGM 已停止")
 
 
 func _on_interact_hint_changed(show: bool, hint_text: String) -> void:

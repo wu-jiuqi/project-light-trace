@@ -309,21 +309,10 @@ var _bgm_player: AudioStreamPlayer = null
 const BGM_MAIN_THEME = preload("res://assets/audio/bgm/bgm_main_theme.ogg")
 
 func _start_bgm() -> void:
-	if _bgm_player == null:
-		_bgm_player = AudioStreamPlayer.new()
-		_bgm_player.name = "BGMPlayer"
-		_bgm_player.bus = "Master"
-		_bgm_player.volume_db = -6.0
-		add_child(_bgm_player)
-	_bgm_player.stream = BGM_MAIN_THEME
-	var ogg_stream := _bgm_player.stream as AudioStreamOggVorbis
-	if ogg_stream != null:
-		ogg_stream.loop = true
-	_bgm_player.play()
+	AudioManager.play_bgm(BGM_MAIN_THEME, "title_main", 0.4, -6.0, true)
 
 func _stop_bgm() -> void:
-	if _bgm_player != null and _bgm_player.playing:
-		_bgm_player.stop()
+	AudioManager.stop_bgm(0.25)
 
 # ============================================================
 # 响应式布局
@@ -823,7 +812,7 @@ func _continue_game() -> void:
 	print("[TitleScreen] 继续游戏 (slot %d)" % slot)
 	SaveManager.load_game(slot)
 	_stop_bgm()
-	SceneManager.pending_spawn_point = "from_cutscene"
+	SceneManager.pending_spawn_point = ""
 	get_tree().change_scene_to_file("res://scenes/star_map.tscn")
 
 
@@ -997,7 +986,7 @@ func _load_selected_slot() -> void:
 	print("[TitleScreen] 加载存档 slot %d" % slot)
 	SaveManager.load_game(slot)
 	_stop_bgm()
-	SceneManager.pending_spawn_point = "from_cutscene"
+	SceneManager.pending_spawn_point = ""
 	get_tree().change_scene_to_file("res://scenes/star_map.tscn")
 
 

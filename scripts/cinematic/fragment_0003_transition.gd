@@ -29,7 +29,7 @@ func _ready() -> void:
 		_finish_transition()
 		return
 	_show_frame(0)
-	audio_player.play()
+	AudioManager.play_voice("fragment_0003_transition", audio_player.stream, AudioManager.PRIORITY_HIGH, -8.0, 0.0)
 	_fade_in()
 
 
@@ -102,8 +102,7 @@ func _finish_transition() -> void:
 		return
 	is_exiting = true
 	skip_hint.visible = false
-	if audio_player.playing:
-		audio_player.stop()
+	AudioManager.stop_voice(0.1)
 	if _fade_tween != null and _fade_tween.is_valid():
 		_fade_tween.kill()
 

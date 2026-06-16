@@ -16,6 +16,7 @@ class FragmentData:
 	var is_story_critical: bool
 	var scene_path: String
 	var implemented: bool
+	var unlocked: bool = false
 	var completed: bool = false
 
 	func _init(
@@ -44,6 +45,12 @@ class FragmentData:
 var fragments: Array[FragmentData] = []
 var current_fragment: FragmentData = null
 var pending_completion_animation_id: String = ""
+var pending_unlocked_fragment_id: String = ""
+
+const LINEAR_UNLOCK_ORDER: Array[String] = [
+	"0001", "0002", "0003", "0004", "0047", "0762",
+	"0915", "1138", "2049", "3015", "3333", "4096",
+]
 
 # === 碎片专属状态存储 ===
 ## 格式: { "0762": { "awakened_colors": [...], "melody_triggered": false, ... }, ... }
@@ -79,6 +86,12 @@ func _initialize_fragments() -> void:
 		FragmentData.new("3333", "诸神黄昏", "终焉之谷", "「终即是始」", "轮回之印", 5, true, "res://scenes/fragments/fragment_3333.tscn"),
 		FragmentData.new("4096", "万象归源", "万象之心", "「归源」", "归源之印", 5, true, "res://scenes/fragments/fragment_4096.tscn"),
 	]
+	_apply_initial_unlocks()
+
+
+func _apply_initial_unlocks() -> void:
+	for fragment in fragments:
+		fragment.unlocked = fragment.id == LINEAR_UNLOCK_ORDER[0]
 
 
 func _ensure_default_fragment_states() -> void:
@@ -130,7 +143,7 @@ func get_fragment_by_id(id: String) -> FragmentData:
 func get_available_fragments() -> Array[FragmentData]:
 	var available: Array[FragmentData] = []
 	for fragment in fragments:
-		if fragment.implemented:
+		if fragment.implemented and fragment.unlocked:
 			available.append(fragment)
 	return available
 
@@ -140,6 +153,8 @@ func get_available_fragments() -> Array[FragmentData]:
 # ============================================================
 
 func enter_fragment(fragment: FragmentData) -> bool:
+	if not fragment.unlocked:
+		return false
 	if not fragment.implemented:
 		return false
 	
@@ -169,6 +184,7 @@ func complete_fragment(fragment: FragmentData) -> bool:
 		return false
 	fragment.completed = true
 	pending_completion_animation_id = fragment.id
+	unlock_next_fragment(fragment.id)
 	fragment_completed.emit(fragment.id)
 	print("[FragmentManager] 碎片 %s 修复完成" % fragment.id)
 	return true
@@ -180,6 +196,39 @@ func consume_completion_animation_id() -> String:
 	return fragment_id
 
 
+func unlock_next_fragment(completed_id: String) -> String:
+	var index := LINEAR_UNLOCK_ORDER.find(completed_id)
+	if index < 0 or index >= LINEAR_UNLOCK_ORDER.size() - 1:
+		return ""
+	var next_id := LINEAR_UNLOCK_ORDER[index + 1]
+	var next_fragment := get_fragment_by_id(next_id)
+	if next_fragment == null:
+		return ""
+	if not next_fragment.unlocked:
+		next_fragment.unlocked = true
+		pending_unlocked_fragment_id = next_id
+		print("[FragmentManager] Linear unlock: %s -> %s" % [completed_id, next_id])
+	return next_id
+
+
+func consume_pending_unlocked_fragment_id() -> String:
+	var fragment_id := pending_unlocked_fragment_id
+	pending_unlocked_fragment_id = ""
+	return fragment_id
+
+
+func ensure_linear_unlocks_from_completed() -> void:
+	var highest_unlocked_index := 0
+	for i in LINEAR_UNLOCK_ORDER.size():
+		var fragment := get_fragment_by_id(LINEAR_UNLOCK_ORDER[i])
+		if fragment != null and fragment.completed:
+			highest_unlocked_index = mini(i + 1, LINEAR_UNLOCK_ORDER.size() - 1)
+	for i in LINEAR_UNLOCK_ORDER.size():
+		var fragment := get_fragment_by_id(LINEAR_UNLOCK_ORDER[i])
+		if fragment != null:
+			fragment.unlocked = i <= highest_unlocked_index
+
+
 # ============================================================
 # 碎片状态重置
 # ============================================================
@@ -188,8 +237,11 @@ func reset_all_fragments() -> void:
 	## 重置所有碎片的 completed 标记为 false，并清除所有碎片专属状态
 	for fragment in fragments:
 		fragment.completed = false
+		fragment.unlocked = false
 	pending_completion_animation_id = ""
+	pending_unlocked_fragment_id = ""
 	is_replay_mode = false
+	_apply_initial_unlocks()
 	# 清除碎片专属状态，防止跨存档泄露（如线索数据）
 	_fragment_states.clear()
 	_ensure_default_fragment_states()
@@ -287,6 +339,7 @@ func get_fragments_list() -> Array[Dictionary]:
 		result.append({
 			"id": f.id,
 			"completed": f.completed,
+			"unlocked": f.unlocked,
 		})
 	return result
 

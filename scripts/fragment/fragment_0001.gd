@@ -145,6 +145,8 @@ func _ready() -> void:
 	_cache_layer_markers()
 	# 播放碎片探索 BGM（循环版本，淡入淡出处理）
 	_start_bgm()
+	if TutorialManager and TutorialManager.has_method("start_fragment_0001"):
+		TutorialManager.start_fragment_0001()
 	print("[Fragment0001] 启程之镇就绪 — E键观测日晷 | Tab键查看线索")
 
 
@@ -536,6 +538,8 @@ func on_bell_tower_interact(bell_tower: Node2D) -> void:
 
 ## E 键 : 源印交互回调（由 SourceMark.interact() → PlayerController 调用）
 func on_source_mark_interact() -> void:
+	if TutorialManager and TutorialManager.has_method("mark_interaction"):
+		TutorialManager.mark_interaction("source_mark", "0001")
 	_complete_fragment()
 
 
@@ -2237,9 +2241,7 @@ func _play_sfx(stream: AudioStream) -> void:
 	if stream == null:
 		printerr("[Fragment0001] _play_sfx: stream is null")
 		return
-	_ensure_sfx_player()
-	_sfx_player.stream = stream
-	_sfx_player.play()
+	AudioManager.play_sfx(stream, AudioManager.PRIORITY_HIGH, 0.0)
 
 
 # ============================================================
@@ -2247,23 +2249,12 @@ func _play_sfx(stream: AudioStream) -> void:
 # ============================================================
 
 func _start_bgm() -> void:
-	if _bgm_player == null:
-		_bgm_player = AudioStreamPlayer.new()
-		_bgm_player.name = "BGMPlayer_Fragment0001"
-		_bgm_player.bus = "Master"
-		_bgm_player.volume_db = -10.0
-		add_child(_bgm_player)
-	_bgm_player.stream = BGM_FRAGMENT_0001
-	var ogg_stream := _bgm_player.stream as AudioStreamOggVorbis
-	if ogg_stream != null:
-		ogg_stream.loop = true
-	_bgm_player.play()
+	AudioManager.play_bgm(BGM_FRAGMENT_0001, "fragment_0001", 0.45, -10.0, true)
 	print("[Fragment0001] 探索 BGM 已开始播放")
 
 func _stop_bgm() -> void:
-	if _bgm_player != null and _bgm_player.playing:
-		_bgm_player.stop()
-		print("[Fragment0001] 探索 BGM 已停止")
+	AudioManager.stop_bgm(0.25)
+	print("[Fragment0001] 探索 BGM 已停止")
 
 
 # ============================================================

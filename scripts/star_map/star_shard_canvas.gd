@@ -88,6 +88,9 @@ func _draw() -> void:
 func _draw_mask(index: int) -> void:
 	var polygon := _polygon_for(index)
 	var alpha := mask_alphas[index] if index < mask_alphas.size() else MASK_ALPHA
+	var fragment = fragments[index] if index < fragments.size() else null
+	if fragment != null and not fragment.unlocked:
+		alpha = maxf(alpha, 0.72)
 	if alpha > 0.01:
 		draw_colored_polygon(polygon, Color(MASK_COLOR.r, MASK_COLOR.g, MASK_COLOR.b, alpha))
 

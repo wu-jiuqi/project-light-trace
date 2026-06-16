@@ -17,12 +17,12 @@ func _run() -> void:
 	game_manager.repair_progress = 10.0
 	manager.set_current_slot(0)
 	_check(manager.save_game(), "slot 0 saves through the active slot")
+	_check(manager.save_game(0), "save_game with explicit slot works regardless of active slot")
 
 	game_manager.repair_progress = 20.0
 	root.get_node("FragmentManager").set_fragment_state("0762", "oldpainter_trust", 0.75)
 	manager.set_current_slot(1)
 	_check(manager.save_game(), "slot 1 saves through the active slot")
-	_check(manager.save_game(0), "save_game with explicit slot works regardless of active slot")
 
 	game_manager.repair_progress = 30.0
 	game_manager.npc_state_cache = {"oldpainter": {"suspicion": 12.0}}

@@ -19,11 +19,13 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+AudioManager="*res://scripts/globals/audio_manager.gd"
 GameManager="*res://scripts/globals/game_manager.gd"
 FragmentManager="*res://scripts/globals/fragment_manager.gd"
 SaveManager="*res://scripts/globals/save_manager.gd"
 SceneFader="*res://scripts/globals/scene_fader.gd"
 SceneManager="*res://scripts/globals/scene_manager.gd"
+TutorialManager="*res://scripts/globals/tutorial_manager.gd"
 NPCRagRetriever="*res://scripts/systems/npc_rag_retriever.gd"
 LLMClient="*res://scripts/systems/llm_client.gd"
 ChatDialogue="*res://scripts/ui/chat_dialogue.gd"

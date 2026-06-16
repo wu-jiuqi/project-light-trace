@@ -176,6 +176,8 @@ func new_game() -> void:
 	
 	# 重置所有碎片完成状态
 	FragmentManager.reset_all_fragments()
+	if TutorialManager and TutorialManager.has_method("reset_for_new_game"):
+		TutorialManager.reset_for_new_game()
 	
 	print("[GameManager] 状态已重置（新游戏）")
 
@@ -249,6 +251,7 @@ func to_dict() -> Dictionary:
 		"items_used": items_used.duplicate(),
 		"npc_state_cache": npc_state_cache.duplicate(true),
 		"npc_visit_count": npc_visit_count.duplicate(),
+		"tutorial": TutorialManager.to_dict() if TutorialManager and TutorialManager.has_method("to_dict") else {},
 	}
 
 
@@ -292,3 +295,7 @@ func from_dict(data: Dictionary) -> void:
 		npc_visit_count = visits.duplicate()
 	else:
 		npc_visit_count = {"gravekeeper": 0}
+
+	var tutorial_data = data.get("tutorial", {})
+	if tutorial_data is Dictionary and TutorialManager and TutorialManager.has_method("from_dict"):
+		TutorialManager.from_dict(tutorial_data)
