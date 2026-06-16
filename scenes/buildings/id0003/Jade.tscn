@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3 uid="uid://uhbq0i8gmfuc"]
+
+[ext_resource type="Texture2D" uid="uid://btvjh08a851um" path="res://assets/papercraft/fragments/id0003/environment/jade.png" id="1_g527h"]
+[ext_resource type="Script" path="res://scripts/ui/click_collectible_scene.gd" id="2_collect"]
+
+[node name="Jade" type="Node2D" unique_id=436536599]
+script = ExtResource("2_collect")
+
+[node name="Visual" type="Node2D" parent="." unique_id=845974405]
+
+[node name="Body" type="Sprite2D" parent="Visual" unique_id=1044733114]
+position = Vector2(617, 303)
+scale = Vector2(0.81933594, 0.73046875)
+texture = ExtResource("1_g527h")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=791932314]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Area2D" unique_id=2121970058]
+polygon = PackedVector2Array(421, 38, 425, 519, 841, 450, 832, 38)

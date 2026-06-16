@@ -21,6 +21,7 @@ var _current_frame := -1
 func _ready() -> void:
 	fade_overlay.color.a = 1.0
 	skip_hint.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 0.55))
+	skip_hint.add_theme_constant_override("outline_size", 3)
 	skip_hint.add_theme_font_size_override("font_size", 16)
 	_load_frame_paths()
 	if _frame_paths.is_empty():

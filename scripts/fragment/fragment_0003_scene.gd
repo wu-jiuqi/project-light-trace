@@ -7,7 +7,7 @@ const INTERACTABLE_SCRIPT: Script = preload("res://scripts/fragment/fragment_000
 
 const DESIGN_SIZE := Vector2(1280.0, 720.0)
 const PLAYER_VISUAL_SCALE := Vector2(2.2, 2.2)
-const DEPTH_LAYER_FADED_ALPHA := 0.35
+const DEPTH_LAYER_FADED_ALPHA := 0.2
 const DEPTH_LAYER_TRANSITION_SPEED := 4.0
 const FRAGMENT_ID := "0003"
 const MAIN_SCENE := "res://scenes/fragments/fragment_0003.tscn"
@@ -16,6 +16,7 @@ const END_SCENE := "res://scenes/cinematic/fragment_0003_end.tscn"
 const BOX_CLOSED_TEXTURE := "res://assets/papercraft/fragments/id0003/environment/box_02.png"
 const BOX_OPEN_TEXTURE := "res://assets/papercraft/fragments/id0003/environment/box_01.png"
 const JADE_TEXTURE := "res://assets/papercraft/fragments/id0003/environment/jade.png"
+const BGM_FRAGMENT_0003 = preload("res://assets/audio/0003.mp3")
 
 const STEP_ORDER: Array[String] = ["wash", "burn", "offer", "clap", "moon"]
 const STEP_STATE_KEYS := {
@@ -78,6 +79,8 @@ var _viewer_block_until_msec := 0
 var _pending_ritual_reset := false
 var _completion_started := false
 var _lantern_material: ShaderMaterial = null
+var _lantern_glow_material: CanvasItemMaterial = null
+var _bgm_player: AudioStreamPlayer = null
 
 
 func _enter_tree() -> void:
@@ -99,6 +102,7 @@ func _ready() -> void:
 	if not ChatDialogue.dialogue_closed.is_connected(_on_dialogue_closed):
 		ChatDialogue.dialogue_closed.connect(_on_dialogue_closed)
 	SceneFader.fade_in()
+	_start_bgm()
 
 
 func _process(delta: float) -> void:
@@ -171,6 +175,7 @@ func _ensure_ui() -> void:
 		_interact_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		_interact_hint.add_theme_font_size_override("font_size", 18)
 		_interact_hint.add_theme_color_override("font_color", Color(0.95, 0.86, 0.62))
+		_interact_hint.add_theme_constant_override("outline_size", 3)
 		_ui_root.add_child(_interact_hint)
 
 	_clue_panel = _ui_root.get_node_or_null("CluePanel") as CluePanel
@@ -229,6 +234,7 @@ func _ensure_viewer() -> void:
 	_viewer_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_viewer_hint.add_theme_font_size_override("font_size", 22)
 	_viewer_hint.add_theme_color_override("font_color", Color(0.95, 0.82, 0.58))
+	_viewer_hint.add_theme_constant_override("outline_size", 3)
 	_viewer.add_child(_viewer_hint)
 
 
@@ -356,7 +362,7 @@ func _update_camera_zoom() -> void:
 	if _layer_marker != null:
 		var feet := _player.get_node_or_null("FeetMarker Marker2D") as Marker2D
 		var feet_y := feet.global_position.y if feet != null else _player.global_position.y
-		target_zoom = 1.2 if feet_y < _layer_marker.global_position.y else 0.8
+		target_zoom = 1.1 if feet_y < _layer_marker.global_position.y else 0.8
 	_camera.zoom = Vector2(target_zoom, target_zoom)
 
 
@@ -398,7 +404,7 @@ func _open_inscription(lamp_id: String) -> void:
 	var texture_path := str(INSCRIPTION_TEXTURES.get(lamp_id, ""))
 	if texture_path.is_empty():
 		return
-	_open_viewer(texture_path, "inscription", lamp_id, "[E] 收集刻字 | Esc 关闭")
+	_open_viewer(texture_path, "inscription", lamp_id, "按 E 收集刻字 | 按 Esc 关闭")
 
 
 func _open_box() -> void:
@@ -415,7 +421,7 @@ func _reveal_box_contents() -> void:
 	if _viewer == null or not _viewer.visible or _viewer_mode != "box":
 		return
 	_viewer_image.texture = load(BOX_OPEN_TEXTURE) as Texture2D
-	_viewer_hint.text = "[E] 收集玉 | Esc 关闭"
+	_viewer_hint.text = "按 E 收集玉 | 按 Esc 关闭"
 	_viewer_ready_to_collect = true
 
 
@@ -595,6 +601,7 @@ func _run_mirror_completion(npc: Node) -> void:
 		await ChatDialogue.stream_local_npc_msg("你替她走完了无法完成的仪式。镜已醒，月光会记得你的倒影。")
 		await ChatDialogue.wait_for_continue("点击或按 E 启镜")
 	ChatDialogue.close()
+	_stop_bgm()
 	FragmentManager.set_fragment_state(FRAGMENT_ID, "mirror_opened", 1)
 	SceneFader.fade_out_and_switch(END_SCENE)
 
@@ -616,15 +623,21 @@ func _apply_lantern_state() -> void:
 		shader.code = """
 shader_type canvas_item;
 uniform float brightness = 1.0;
+uniform float warmth = 0.0;
 void fragment() {
 	vec4 color = texture(TEXTURE, UV);
-	COLOR = vec4(color.rgb * brightness, color.a) * COLOR;
+	vec3 warmed = mix(color.rgb * brightness, vec3(1.0, 0.75, 0.38), warmth * color.a);
+	COLOR = vec4(warmed, color.a) * COLOR;
 }
 """
 		_lantern_material = ShaderMaterial.new()
 		_lantern_material.shader = shader
+	if _lantern_glow_material == null:
+		_lantern_glow_material = CanvasItemMaterial.new()
+		_lantern_glow_material.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
 	var lit := _state_int("lantern_lit") == 1
-	_lantern_material.set_shader_parameter("brightness", 1.28 if lit else 1.0)
+	_lantern_material.set_shader_parameter("brightness", 1.42 if lit else 1.0)
+	_lantern_material.set_shader_parameter("warmth", 0.34 if lit else 0.0)
 	for lamp_name in INSCRIPTION_CHARS:
 		var lamp := find_child(lamp_name, true, false)
 		if lamp == null:
@@ -632,6 +645,32 @@ void fragment() {
 		var body := lamp.get_node_or_null("Visual/Body") as Sprite2D
 		if body != null:
 			body.material = _lantern_material
+			_update_lantern_glow(body, lit)
+
+
+func _update_lantern_glow(body: Sprite2D, lit: bool) -> void:
+	var visual := body.get_parent()
+	if visual == null:
+		return
+	var glow := visual.get_node_or_null("LanternGlow") as Sprite2D
+	if glow == null:
+		glow = Sprite2D.new()
+		glow.name = "LanternGlow"
+		glow.material = _lantern_glow_material
+		glow.z_index = body.z_index + 1
+		visual.add_child(glow)
+	glow.texture = body.texture
+	glow.centered = body.centered
+	glow.offset = body.offset
+	glow.region_enabled = body.region_enabled
+	glow.region_rect = body.region_rect
+	glow.position = body.position
+	glow.rotation = body.rotation
+	glow.scale = body.scale * 1.04
+	glow.flip_h = body.flip_h
+	glow.flip_v = body.flip_v
+	glow.self_modulate = Color(1.0, 0.72, 0.32, 0.38)
+	glow.visible = lit
 
 
 func _toggle_clue_panel() -> void:
@@ -743,3 +782,22 @@ func get_ritual_progress_for_test() -> int:
 
 func get_cover_scale_for_test(viewport_size: Vector2) -> float:
 	return _get_cover_scale(viewport_size)
+
+
+func _start_bgm() -> void:
+	if _bgm_player == null:
+		_bgm_player = AudioStreamPlayer.new()
+		_bgm_player.name = "BGMPlayer_Fragment0003"
+		_bgm_player.bus = "Master"
+		_bgm_player.volume_db = -10.0
+		add_child(_bgm_player)
+	_bgm_player.stream = BGM_FRAGMENT_0003
+	_bgm_player.stream.loop = true
+	_bgm_player.play()
+	print("[Fragment0003] BGM 已开始循环播放")
+
+
+func _stop_bgm() -> void:
+	if _bgm_player != null and _bgm_player.playing:
+		_bgm_player.stop()
+		print("[Fragment0003] BGM 已停止")

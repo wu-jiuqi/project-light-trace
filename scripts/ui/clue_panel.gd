@@ -2,6 +2,7 @@ class_name CluePanel
 extends BasePanel
 
 const ClueCardScene: PackedScene = preload("res://scenes/ui/components/ClueCard.tscn")
+const ESC_CLOSE_BEFORE_PAUSE_GROUP := "esc_close_before_pause"
 
 @onready var clue_list: VBoxContainer = $"Stage/MainContainer/ClueListScroll/ClueList"
 @onready var detail_overlay: Control = $"DetailOverlay"
@@ -19,10 +20,35 @@ var _clue_image: TextureRect = null
 func _on_ready() -> void:
 	hide()
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	set_process_input(true)
 	_connect_button_pressed(close_button, close, "Stage/MainContainer/TitleBar/CloseButton")
 	_connect_button_pressed(close_detail_btn, hide_clue_detail, "DetailOverlay/DetailContent/CloseDetailBtn")
 	hide_clue_detail()
 	_ensure_clue_image()
+
+
+func _input(event: InputEvent) -> void:
+	if not is_open:
+		return
+	if event.is_action_pressed("ui_cancel") or event.is_action_pressed("escape"):
+		close_from_cancel_action()
+		get_viewport().set_input_as_handled()
+
+
+func close_from_cancel_action() -> void:
+	if is_instance_valid(close_button):
+		close_button.pressed.emit()
+	else:
+		close()
+
+
+func _on_open() -> void:
+	add_to_group(ESC_CLOSE_BEFORE_PAUSE_GROUP)
+
+
+func _on_close() -> void:
+	remove_from_group(ESC_CLOSE_BEFORE_PAUSE_GROUP)
+	hide_clue_detail()
 
 
 func set_clues_from_dictionaries(new_clues: Array[Dictionary]) -> void:

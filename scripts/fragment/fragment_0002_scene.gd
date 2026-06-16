@@ -93,6 +93,7 @@ func _ensure_interact_hint() -> void:
 	_interact_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_interact_hint_label.add_theme_font_size_override("font_size", 18)
 	_interact_hint_label.add_theme_color_override("font_color", Color(0.95, 0.86, 0.62, 0.95))
+	_interact_hint_label.add_theme_constant_override("outline_size", 3)
 	_interact_hint_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui_root.add_child(_interact_hint_label)
 

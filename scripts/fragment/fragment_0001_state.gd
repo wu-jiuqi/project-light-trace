@@ -366,6 +366,7 @@ func _create_hud() -> void:
 	interact_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	interact_hint.add_theme_font_size_override("font_size", 15)
 	interact_hint.add_theme_color_override("font_color", Color(0.98, 0.86, 0.52, 1.0))
+	interact_hint.add_theme_constant_override("outline_size", 3)
 	ui.add_child(interact_hint)
 
 	_create_angle_panel(ui)
@@ -393,6 +394,7 @@ func _create_angle_panel(ui: CanvasLayer) -> void:
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint.text = "用已记录的角度推断第五项。每次调整 6°。"
 	hint.add_theme_font_size_override("font_size", 13)
+	hint.add_theme_constant_override("outline_size", 3)
 	angle_panel.add_child(hint)
 
 	angle_value = Label.new()
@@ -478,7 +480,7 @@ func _update_closest_interactable() -> void:
 	if _closest == null:
 		interact_hint.text = ""
 	else:
-		interact_hint.text = "[E] %s" % String(_closest.get_meta("title", "交互"))
+		interact_hint.text = "按 E %s" % String(_closest.get_meta("title", "交互"))
 
 
 func _interact_with_closest() -> void:

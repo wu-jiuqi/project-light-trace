@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://cuksymvhqy2h1"]
+[gd_scene format=3 uid="uid://cuksymvhqy2h1"]
 
-[ext_resource type="Script" path="res://scripts/cinematic/fragment_0003_end.gd" id="1_end"]
+[ext_resource type="Script" uid="uid://b7j6of6kyvvmg" path="res://scripts/cinematic/fragment_0003_end.gd" id="1_end"]
 
 [node name="Fragment0003End" type="Control" unique_id=835124301]
 layout_mode = 3

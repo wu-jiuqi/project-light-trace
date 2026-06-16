@@ -71,8 +71,8 @@ func show_item_detail(item_id: int) -> void:
 		hide_item_detail()
 		return
 	detail_panel.visible = true
-	item_name_label.text = str(meta.get("name", "Unknown Item"))
-	item_desc_label.text = str(meta.get("desc", "No description."))
+	item_name_label.text = str(meta.get("name", "未知物品"))
+	item_desc_label.text = str(meta.get("desc", "暂无描述。"))
 	var icon_texture := _load_item_texture(meta)
 	if icon_texture:
 		item_icon_rect.texture = icon_texture
@@ -113,7 +113,7 @@ func _get_filtered_items() -> Array[Dictionary]:
 		var icon_texture := _load_item_texture(meta)
 		result.append({
 			"id": item_id,
-			"name": meta.get("name", "Unknown Item"),
+			"name": meta.get("name", "未知物品"),
 			"icon": icon_texture if icon_texture else meta.get("icon", "?"),
 			"icon_path": meta.get("icon_path", ""),
 			"count": 1,

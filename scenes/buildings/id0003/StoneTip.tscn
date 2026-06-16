@@ -7,7 +7,7 @@ size = Vector2(742, 219)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_6mhm5"]
 radius = 406.0
-height = 1052.0
+height = 1274.0
 
 [node name="StoneTip" type="Node2D" unique_id=740213767]
 

@@ -59,6 +59,10 @@ func _check_main_scene(manager: Node) -> void:
 
 	scene.call("_attempt_ritual_step", "wash")
 	scene.call("_attempt_ritual_step", "burn")
+	for lamp_index in range(1, 13):
+		var lamp := scene.find_child("L%d" % lamp_index, true, false)
+		var glow := lamp.get_node_or_null("Visual/LanternGlow") as Sprite2D if lamp != null else null
+		_check(glow != null and glow.visible, "L%d shows the lit lantern glow" % lamp_index)
 	manager.set_fragment_state("0003", "jade_collected", 1)
 	scene.call("_attempt_ritual_step", "offer")
 	scene.call("_attempt_ritual_step", "clap")

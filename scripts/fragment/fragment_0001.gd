@@ -1354,7 +1354,7 @@ func _count_observed() -> int:
 
 
 # ============================================================
-# 交互提示（底部居中 "[E] 观察 xxx"）
+# 交互提示（底部居中“按 E 观察 xxx”）
 # ============================================================
 
 func _on_interact_hint_changed(show: bool, hint_text: String) -> void:
@@ -1682,6 +1682,7 @@ func _ensure_lin_note_viewer() -> void:
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.add_theme_font_size_override("font_size", 16)
 	hint.add_theme_color_override("font_color", Color(0.92, 0.84, 0.68, 0.92))
+	hint.add_theme_constant_override("outline_size", 3)
 	hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	overlay.add_child(hint)
 
@@ -1720,7 +1721,7 @@ func _refresh_lin_note_collect_hint() -> void:
 	if lin_note_collected == 1:
 		hint.text = "已收集 | 点击、按 E 或按 Esc 关闭"
 	else:
-		hint.text = "[E] 收集便签 | 点击或按 Esc 关闭"
+		hint.text = "按 E 收集便签 | 点击或按 Esc 关闭"
 
 
 func _collect_lin_note() -> void:
@@ -1794,6 +1795,7 @@ func _ensure_tv_viewer() -> void:
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.add_theme_font_size_override("font_size", 16)
 	hint.add_theme_color_override("font_color", Color(0.92, 0.84, 0.68, 0.92))
+	hint.add_theme_constant_override("outline_size", 3)
 	hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	overlay.add_child(hint)
 
@@ -1846,7 +1848,7 @@ func _refresh_tv_collect_hint() -> void:
 	if tv_collected == 1:
 		hint.text = "已收集 | 点击、按 E 或按 Esc 关闭"
 	else:
-		hint.text = "[E] 收集电视广告 | 点击或按 Esc 关闭"
+		hint.text = "按 E 收集电视广告 | 点击或按 Esc 关闭"
 
 
 func _play_tv_video_once() -> void:
@@ -1980,6 +1982,7 @@ func _ensure_stone_viewer() -> void:
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.add_theme_font_size_override("font_size", 16)
 	hint.add_theme_color_override("font_color", Color(0.92, 0.84, 0.68, 0.92))
+	hint.add_theme_constant_override("outline_size", 3)
 	hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	overlay.add_child(hint)
 
@@ -2018,7 +2021,7 @@ func _refresh_stone_collect_hint() -> void:
 	if stone_collected == 1:
 		hint.text = "已收集 | 点击、按 E 或按 Esc 关闭"
 	else:
-		hint.text = "[E] 收集石碑 | 点击或按 Esc 关闭"
+		hint.text = "按 E 收集石碑 | 点击或按 Esc 关闭"
 
 
 func _collect_stone() -> void:

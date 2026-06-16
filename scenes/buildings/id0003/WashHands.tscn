@@ -7,8 +7,8 @@ radius = 186.0
 height = 1060.0
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_t570p"]
-radius = 174.0
-height = 1048.0
+radius = 292.0
+height = 1126.0
 
 [node name="WashHands" type="Node2D" unique_id=1103522973]
 
@@ -35,7 +35,7 @@ collision_mask = 0
 monitoring = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Interaction" unique_id=1019448891]
-position = Vector2(-5, -181)
+position = Vector2(0, -274)
 rotation = 1.5707964
 shape = SubResource("CapsuleShape2D_t570p")
 debug_color = Color(0.6554857, 0.5174414, 0, 0.41960785)

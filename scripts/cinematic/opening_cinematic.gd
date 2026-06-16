@@ -72,9 +72,11 @@ func _ready() -> void:
 	if SaveManager.get_current_slot() >= 0:
 		SaveManager._stop_auto_save()
 	_gather_panels()
-	# 右上角"按ESC跳过"提示样式
+	# 右上角跳过提示样式
 	page_indicator.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 0.55))
+	page_indicator.add_theme_constant_override("outline_size", 3)
 	page_indicator.add_theme_font_size_override("font_size", 16)
+	click_hint.add_theme_constant_override("outline_size", 3)
 	click_hint.text = HINT_TEXT_PAGE
 	_show_first_panel()
 	# 播放入场动画 BGM（55秒版本，结尾自动淡出）
@@ -153,7 +155,7 @@ func _update_narration(idx: int) -> void:
 
 
 func _update_page_indicator() -> void:
-	page_indicator.text = "按ESC跳过"
+	page_indicator.text = "按 Esc 跳过"
 
 
 # ============================================

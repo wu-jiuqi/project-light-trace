@@ -7,7 +7,7 @@ radius = 154.0
 height = 1352.0
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_xqntc"]
-radius = 199.0
+radius = 283.0
 height = 1392.0
 
 [node name="AncientWell" type="Node2D" unique_id=312906599]
@@ -33,7 +33,7 @@ collision_mask = 0
 monitoring = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Interaction" unique_id=1953549111]
-position = Vector2(0, -198)
+position = Vector2(0, -265)
 rotation = 1.5707964
 shape = SubResource("CapsuleShape2D_xqntc")
 debug_color = Color(0.65457684, 0.5179122, 0, 0.41960785)

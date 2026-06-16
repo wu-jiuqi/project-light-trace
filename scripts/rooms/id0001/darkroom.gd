@@ -180,19 +180,20 @@ func _restore_note_collection_state() -> void:
 func _get_note_hover_hint() -> String:
 	if darkroom_note_collected == 1:
 		return "你已经收集过了"
-	return "[E] 查看便签 | 打开后按 E 收集"
+	return "按 E 查看便签 | 打开后按 E 收集"
 
 
 func _refresh_note_collect_hint() -> void:
 	if _note_hint == null:
 		return
 	_note_hint.add_theme_font_size_override("font_size", 16)
+	_note_hint.add_theme_constant_override("outline_size", 3)
 	if darkroom_note_collected == 1:
 		_note_hint.add_theme_color_override("font_color", Color(0.72, 0.72, 0.72, 0.9))
 		_note_hint.text = "你已经收集过了 | 点击或按 Esc 关闭"
 	else:
 		_note_hint.add_theme_color_override("font_color", Color(0.92, 0.84, 0.68, 0.95))
-		_note_hint.text = "[E] 收集暗室便签 | 点击任意位置或按 Esc 关闭"
+		_note_hint.text = "按 E 收集暗室便签 | 点击任意位置或按 Esc 关闭"
 
 
 func _collect_darkroom_note() -> void:
