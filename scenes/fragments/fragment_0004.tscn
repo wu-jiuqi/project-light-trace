@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://b0p3jdhxx8kac"]
+
+[ext_resource type="Texture2D" uid="uid://dgnlfac4rjuhv" path="res://assets/papercraft/fragments/id0004/environment/main.png" id="1_ce4h8"]
+[ext_resource type="Texture2D" uid="uid://c8hcr2nvdxywa" path="res://assets/papercraft/fragments/id0004/environment/workbench_54.png" id="2_ee31s"]
+[ext_resource type="Texture2D" path="res://assets/papercraft/fragments/id0004/material/qingtong.png" id="3_ee31s"]
+
+[node name="Fragment0004" type="Node2D" unique_id=533096102]
+
+[node name="front" type="Node2D" parent="." unique_id=439405438]
+
+[node name="main" type="Sprite2D" parent="front" unique_id=750761508]
+position = Vector2(644.5, 360.00003)
+scale = Vector2(0.75897133, 0.7651435)
+texture = ExtResource("1_ce4h8")
+
+[node name="workbench" type="Sprite2D" parent="front" unique_id=1104293088]
+position = Vector2(528, 568.00006)
+scale = Vector2(0.17040467, 0.11857055)
+texture = ExtResource("2_ee31s")
+
+[node name="Sprite2D" type="Sprite2D" parent="front" unique_id=994698151]
+visible = false
+position = Vector2(336.00003, 632)
+scale = Vector2(0.4106858, 0.39154705)
+texture = ExtResource("3_ee31s")
