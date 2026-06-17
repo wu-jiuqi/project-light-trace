@@ -11,18 +11,24 @@ func _run() -> void:
 	var manager = root.get_node("SaveManager")
 	var game_manager = root.get_node("GameManager")
 	var fragment_manager = root.get_node("FragmentManager")
+	manager._stop_auto_save()
+	manager.set("_current_slot", -1)
+	manager.save_data = {}
+	root.get_node("ChatDatabase").clear_memory_only()
+	SaveConstants.set_save_dir("user://test_saves/")
+	manager._ensure_save_dir()
 	for slot in range(SaveConstants.MAX_SLOTS):
 		manager.delete_slot(slot)
 
 	game_manager.repair_progress = 10.0
 	manager.set_current_slot(0)
 	_check(manager.save_game(), "slot 0 saves through the active slot")
+	_check(manager.save_game(0), "save_game with explicit slot works regardless of active slot")
 
 	game_manager.repair_progress = 20.0
 	root.get_node("FragmentManager").set_fragment_state("0762", "oldpainter_trust", 0.75)
 	manager.set_current_slot(1)
 	_check(manager.save_game(), "slot 1 saves through the active slot")
-	_check(manager.save_game(0), "save_game with explicit slot works regardless of active slot")
 
 	game_manager.repair_progress = 30.0
 	game_manager.npc_state_cache = {"oldpainter": {"suspicion": 12.0}}
@@ -63,13 +69,16 @@ func _run() -> void:
 
 	manager.delete_slot(2)
 	_check(manager.get_current_slot() == -1, "deleting the active slot clears active state")
-	_check(not FileAccess.file_exists("user://saves/last_slot.json"), "deleting the active slot clears last slot")
+	_check(not FileAccess.file_exists(SaveConstants.last_slot_path()), "deleting the active slot clears last slot")
 	manager._on_auto_save()
-	_check(not FileAccess.file_exists("user://saves/save_2.json"), "auto save does not recreate a deleted slot")
+	_check(not FileAccess.file_exists(SaveConstants.slot_path(2)), "auto save does not recreate a deleted slot")
 	_check(not manager.save_game(), "saving without an active slot is rejected")
 
 	for slot in range(SaveConstants.MAX_SLOTS):
 		manager.delete_slot(slot)
+	SaveConstants.reset_save_dir()
+	manager._ensure_save_dir()
+	root.get_node("ChatDatabase").clear_memory_only()
 	if _failures == 0:
 		print("[SUMMARY] save slot regression checks passed")
 	quit(_failures)

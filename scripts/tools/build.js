@@ -14,6 +14,8 @@ const PROJECT_DIR = path.resolve(__dirname, '..', '..');
 const BUILD_DIR = path.join(PROJECT_DIR, 'build', 'web');
 const EXPORT_PRESET = 'Web (HTML5)';
 const TEMPLATE_VERSION = process.env.GODOT_TEMPLATE_VERSION || '4.6.2.stable';
+const PCK_WARN_BYTES = 250 * 1024 * 1024;
+const PCK_FAIL_BYTES = 400 * 1024 * 1024;
 const GODOT_CANDIDATES = [
     process.env.GODOT_EXE,
     'D:/Godot/Godot_v4.6.2-stable_win64_console.exe',
@@ -71,6 +73,18 @@ try {
         stdio: 'inherit',
         timeout: 300000,
     });
+    const pckPath = path.join(BUILD_DIR, 'index.pck');
+    if (!fs.existsSync(pckPath)) {
+        throw new Error('index.pck was not generated');
+    }
+    const pckSize = fs.statSync(pckPath).size;
+    const pckSizeMb = (pckSize / 1024 / 1024).toFixed(1);
+    if (pckSize > PCK_FAIL_BYTES) {
+        throw new Error(`index.pck is ${pckSizeMb} MB, over the 400 MB failure threshold`);
+    }
+    if (pckSize > PCK_WARN_BYTES) {
+        console.warn(`[WARN] index.pck is ${pckSizeMb} MB, over the 250 MB warning threshold`);
+    }
     console.log('[SUCCESS] Web 构建完成:', fs.readdirSync(BUILD_DIR).join(', '));
 } catch (error) {
     console.error('[ERROR] Web 构建失败:', error.message);

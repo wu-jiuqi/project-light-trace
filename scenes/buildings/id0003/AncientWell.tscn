@@ -1,0 +1,41 @@
+[gd_scene format=3 uid="uid://dio7vpkoutvgm"]
+
+[ext_resource type="Texture2D" uid="uid://clgbh7fo7vm32" path="res://assets/papercraft/fragments/id0003/environment/wishing_well_42.png" id="1_r5v2p"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_fbsa0"]
+radius = 154.0
+height = 1352.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_xqntc"]
+radius = 283.0
+height = 1392.0
+
+[node name="AncientWell" type="Node2D" unique_id=312906599]
+
+[node name="Visual" type="Node2D" parent="." unique_id=1747808322]
+
+[node name="Body" type="Sprite2D" parent="Visual" unique_id=203237192]
+position = Vector2(0, -500)
+texture = ExtResource("1_r5v2p")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=1152286976]
+collision_layer = 4
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=5660988]
+position = Vector2(0, -186)
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_fbsa0")
+
+[node name="Interaction" type="Area2D" parent="." unique_id=350175991]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Interaction" unique_id=1953549111]
+position = Vector2(0, -265)
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_xqntc")
+debug_color = Color(0.65457684, 0.5179122, 0, 0.41960785)
+
+[node name="BaseMarker" type="Marker2D" parent="." unique_id=406233833]

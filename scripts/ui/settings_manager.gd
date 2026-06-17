@@ -15,7 +15,9 @@ const LOCAL_HTTP_PREFIXES := [
 
 static var master_volume: float = 1.0
 static var bgm_volume: float = 1.0
+static var ambience_volume: float = 1.0
 static var sfx_volume: float = 1.0
+static var voice_volume: float = 1.0
 static var fullscreen: bool = false
 
 static var llm_mode: String = LLM_MODE_BUILTIN
@@ -30,7 +32,9 @@ static func load() -> bool:
 		return false
 	master_volume = clampf(float(cfg.get_value("audio", "master_volume", 1.0)), 0.0, 1.0)
 	bgm_volume = clampf(float(cfg.get_value("audio", "bgm_volume", 1.0)), 0.0, 1.0)
+	ambience_volume = clampf(float(cfg.get_value("audio", "ambience_volume", 1.0)), 0.0, 1.0)
 	sfx_volume = clampf(float(cfg.get_value("audio", "sfx_volume", 1.0)), 0.0, 1.0)
+	voice_volume = clampf(float(cfg.get_value("audio", "voice_volume", 1.0)), 0.0, 1.0)
 	fullscreen = bool(cfg.get_value("display", "fullscreen", false))
 	llm_mode = str(cfg.get_value("llm", "mode", LLM_MODE_BUILTIN))
 	if llm_mode not in [LLM_MODE_BUILTIN, LLM_MODE_CUSTOM]:
@@ -56,7 +60,9 @@ static func save() -> void:
 	var cfg := ConfigFile.new()
 	cfg.set_value("audio", "master_volume", master_volume)
 	cfg.set_value("audio", "bgm_volume", bgm_volume)
+	cfg.set_value("audio", "ambience_volume", ambience_volume)
 	cfg.set_value("audio", "sfx_volume", sfx_volume)
+	cfg.set_value("audio", "voice_volume", voice_volume)
 	cfg.set_value("display", "fullscreen", fullscreen)
 	cfg.set_value("llm", "mode", llm_mode)
 	cfg.set_value("llm", "base_url", llm_base_url)
@@ -66,9 +72,15 @@ static func save() -> void:
 
 
 static func apply() -> void:
-	_set_bus_volume("Master", master_volume)
-	_set_bus_volume("BGM", bgm_volume)
-	_set_bus_volume("SFX", sfx_volume)
+	var audio_manager := _get_audio_manager()
+	if audio_manager != null and audio_manager.has_method("apply_volumes"):
+		audio_manager.call("apply_volumes", master_volume, bgm_volume, sfx_volume, ambience_volume, voice_volume)
+	else:
+		_set_bus_volume("Master", master_volume)
+		_set_bus_volume("BGM", bgm_volume)
+		_set_bus_volume("Ambience", ambience_volume)
+		_set_bus_volume("SFX", sfx_volume)
+		_set_bus_volume("Voice", voice_volume)
 	if fullscreen:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 	else:
@@ -140,3 +152,10 @@ static func _set_bus_volume(bus_name: String, linear: float) -> void:
 		return
 	var db := linear_to_db(maxf(linear, 0.0001))
 	AudioServer.set_bus_volume_db(bus_index, maxf(db, -80.0))
+
+
+static func _get_audio_manager() -> Node:
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree == null or tree.root == null:
+		return null
+	return tree.root.get_node_or_null("AudioManager")

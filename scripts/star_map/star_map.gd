@@ -7,6 +7,7 @@ const BGM_STAR_MAP = preload("res://assets/audio/bgm/bgm_star_map_loop.ogg")
 const FRAGMENT_TRANSITION_SCENES := {
 	"0001": "res://scenes/cinematic/fragment_0001_transition.tscn",
 	"0002": "res://scenes/cinematic/fragment_0002_transition.tscn",
+	"0003": "res://scenes/cinematic/fragment_0003_transition.tscn",
 }
 
 @onready var shard_canvas: StarShardCanvas = $FragmentContainer/ShardCanvas
@@ -34,6 +35,7 @@ func _ready() -> void:
 	close_btn.pressed.connect(UISoundManager.play_click)
 	get_viewport().size_changed.connect(_layout_detail_card)
 	var animate_id = FragmentManager.consume_completion_animation_id()
+	var unlocked_id = FragmentManager.consume_pending_unlocked_fragment_id()
 	shard_canvas.configure(FragmentManager.fragments, animate_id)
 	_close_detail_card(false)
 	# 在 UI 初始化完成后淡入，恢复 SceneFader 切场景时的全黑状态
@@ -43,6 +45,13 @@ func _ready() -> void:
 		SceneManager.pending_spawn_point = ""
 		await get_tree().create_timer(0.5).timeout
 		shard_canvas.flash_fragment("0001", 3, 0.35)
+		if TutorialManager and TutorialManager.has_method("show_star_map_guide"):
+			TutorialManager.show_star_map_guide()
+	elif not unlocked_id.is_empty():
+		await get_tree().create_timer(0.5).timeout
+		shard_canvas.flash_fragment(unlocked_id, 3, 0.35)
+		if TutorialManager and TutorialManager.has_method("show_next_fragment_unlocked"):
+			TutorialManager.show_next_fragment_unlocked(unlocked_id)
 	print("[StarMap] 玻璃星图界面加载完成")
 	# 播放星图界面循环 BGM
 	_start_bgm()
@@ -138,7 +147,11 @@ func _update_detail_card() -> void:
 	]
 	if fragment.completed:
 		detail_body.text += "\n\n源印：%s" % fragment.source_mark_name
-	if fragment.implemented:
+	if not fragment.unlocked:
+		detail_body.text += "\n\n已锁定：完成当前碎片后解锁。"
+		enter_btn.visible = false
+		_detail_selected = 1
+	elif fragment.implemented:
 		enter_btn.visible = true
 		_detail_selected = 0
 	else:
@@ -236,16 +249,20 @@ func _input(event: InputEvent) -> void:
 func _on_enter_btn_pressed() -> void:
 	if selected_fragment == null:
 		return
+	if not selected_fragment.unlocked:
+		if TutorialManager and TutorialManager.has_method("show_tip"):
+			TutorialManager.show_tip("fragment_locked", "这个碎片尚未解锁。先完成当前开放的碎片。", 3.0)
+		return
 	if not FragmentManager.enter_fragment(selected_fragment):
 		return
 	var transition_scene_path := String(FRAGMENT_TRANSITION_SCENES.get(selected_fragment.id, ""))
 	if not transition_scene_path.is_empty() and ResourceLoader.exists(transition_scene_path):
 		_stop_bgm()
-		get_tree().change_scene_to_file(transition_scene_path)
+		SceneManager.change_scene(transition_scene_path)
 		return
 	if selected_fragment.scene_path and ResourceLoader.exists(selected_fragment.scene_path):
 		_stop_bgm()
-		get_tree().change_scene_to_file(selected_fragment.scene_path)
+		SceneManager.change_scene(selected_fragment.scene_path)
 	else:
 		printerr("[StarMap] 碎片场景不存在: %s" % selected_fragment.scene_path)
 
@@ -255,18 +272,7 @@ func _on_enter_btn_pressed() -> void:
 # ============================================================
 
 func _start_bgm() -> void:
-	if _bgm_player == null:
-		_bgm_player = AudioStreamPlayer.new()
-		_bgm_player.name = "BGMPlayer"
-		_bgm_player.bus = "Master"
-		_bgm_player.volume_db = -8.0
-		add_child(_bgm_player)
-	_bgm_player.stream = BGM_STAR_MAP
-	var ogg_stream := _bgm_player.stream as AudioStreamOggVorbis
-	if ogg_stream != null:
-		ogg_stream.loop = true
-	_bgm_player.play()
+	AudioManager.play_bgm(BGM_STAR_MAP, "star_map", 0.45, -8.0, true)
 
 func _stop_bgm() -> void:
-	if _bgm_player != null and _bgm_player.playing:
-		_bgm_player.stop()
+	AudioManager.stop_bgm(0.25)

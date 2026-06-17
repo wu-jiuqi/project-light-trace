@@ -1,7 +1,7 @@
 {
   "name": "shuoguang-project",
   "version": "0.1.0",
-  "description": "溯光计划 - AI虚拟宇宙修复游戏",
+  "description": "溯光计划 - AI 虚拟宇宙修复游戏",
   "scripts": {
     "build": "node scripts/tools/build.js",
     "serve": "node scripts/tools/serve.js",

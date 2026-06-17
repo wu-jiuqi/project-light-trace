@@ -2,6 +2,7 @@ class_name CluePanel
 extends BasePanel
 
 const ClueCardScene: PackedScene = preload("res://scenes/ui/components/ClueCard.tscn")
+const ESC_CLOSE_BEFORE_PAUSE_GROUP := "esc_close_before_pause"
 
 @onready var clue_list: VBoxContainer = $"Stage/MainContainer/ClueListScroll/ClueList"
 @onready var detail_overlay: Control = $"DetailOverlay"
@@ -13,13 +14,40 @@ const ClueCardScene: PackedScene = preload("res://scenes/ui/components/ClueCard.
 @onready var close_detail_btn: BaseButton = $"DetailOverlay/DetailContent/CloseDetailBtn"
 
 var clues: Array[Dictionary] = []
+var _clue_image: TextureRect = null
 
 
 func _on_ready() -> void:
 	hide()
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	set_process_input(true)
 	_connect_button_pressed(close_button, close, "Stage/MainContainer/TitleBar/CloseButton")
 	_connect_button_pressed(close_detail_btn, hide_clue_detail, "DetailOverlay/DetailContent/CloseDetailBtn")
+	hide_clue_detail()
+	_ensure_clue_image()
+
+
+func _input(event: InputEvent) -> void:
+	if not is_open:
+		return
+	if event.is_action_pressed("ui_cancel") or event.is_action_pressed("escape"):
+		close_from_cancel_action()
+		get_viewport().set_input_as_handled()
+
+
+func close_from_cancel_action() -> void:
+	if is_instance_valid(close_button):
+		close_button.pressed.emit()
+	else:
+		close()
+
+
+func _on_open() -> void:
+	add_to_group(ESC_CLOSE_BEFORE_PAUSE_GROUP)
+
+
+func _on_close() -> void:
+	remove_from_group(ESC_CLOSE_BEFORE_PAUSE_GROUP)
 	hide_clue_detail()
 
 
@@ -71,6 +99,7 @@ func show_clue_detail(clue_id: int) -> void:
 	if not collected_at.is_empty():
 		body += "\n记录时间：" + collected_at
 	clue_description.text = body
+	_update_clue_image(str(data.get("image", "")))
 
 	for child in related_list.get_children():
 		child.queue_free()
@@ -84,6 +113,37 @@ func show_clue_detail(clue_id: int) -> void:
 
 func hide_clue_detail() -> void:
 	detail_overlay.visible = false
+	if _clue_image != null:
+		_clue_image.visible = false
+
+
+func _ensure_clue_image() -> void:
+	if _clue_image != null:
+		return
+	var detail_content := get_node_or_null("DetailOverlay/DetailContent") as Control
+	if detail_content == null:
+		return
+	_clue_image = TextureRect.new()
+	_clue_image.name = "ClueImage"
+	_clue_image.position = Vector2(620, 150)
+	_clue_image.size = Vector2(270, 310)
+	_clue_image.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_clue_image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_clue_image.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_clue_image.visible = false
+	detail_content.add_child(_clue_image)
+
+
+func _update_clue_image(image_path: String) -> void:
+	_ensure_clue_image()
+	if _clue_image == null:
+		return
+	if image_path.is_empty() or not ResourceLoader.exists(image_path):
+		_clue_image.texture = null
+		_clue_image.visible = false
+		return
+	_clue_image.texture = load(image_path) as Texture2D
+	_clue_image.visible = _clue_image.texture != null
 
 
 func _find_clue(id: int) -> Dictionary:

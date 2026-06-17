@@ -172,6 +172,8 @@ func _physics_process(delta: float) -> void:
 
 	# 走路时左右小幅度摇晃
 	var is_moving = velocity.length() > 10.0
+	if is_moving and TutorialManager and TutorialManager.has_method("observe_player_motion"):
+		TutorialManager.observe_player_motion(velocity.length() * delta)
 	_update_sway(delta, is_moving)
 
 	# 定期清理已失效的交互引用（每30帧）
@@ -388,13 +390,15 @@ func _interact_with_nearest_npc() -> void:
 
 		print("[Player] 与 %s 对话" % _closest_npc.npc_name)
 		ChatDialogue.open(_closest_npc, greeting)
+		if TutorialManager and TutorialManager.has_method("mark_interaction"):
+			TutorialManager.mark_interaction("npc", str(_closest_npc.name))
 		if ChatDialogue.is_open:
 			_closest_npc.start_dialogue()
 		else:
 			push_warning("[Player] 对话UI未能打开，取消 NPC TALKING 状态切换")
 
 
-## 获取最近的NPC（供UI/HUD使用，显示"[E] 交谈"提示）
+## 获取最近的NPC（供UI/HUD使用，显示“按 E 交谈”提示）
 func get_closest_npc() -> Node2D:
 	return _closest_npc
 
@@ -437,12 +441,16 @@ func _interact_with_interactable(obj: Node2D) -> void:
 	# 优先调用对象的 interact 方法
 	if obj.has_method("interact"):
 		obj.interact()
+		if TutorialManager and TutorialManager.has_method("mark_interaction"):
+			TutorialManager.mark_interaction("interactable", str(obj.name))
 		print("[Player] 与 %s 交互 (interact)" % obj.name)
 		return
 
 	# 其次发送 interacted 信号
 	if obj.has_signal("interacted"):
 		obj.interacted.emit()
+		if TutorialManager and TutorialManager.has_method("mark_interaction"):
+			TutorialManager.mark_interaction("interactable", str(obj.name))
 		print("[Player] 触发 %s 的 interacted 信号" % obj.name)
 		return
 
@@ -598,18 +606,18 @@ func _update_interact_hint() -> void:
 		var name_str: String = _closest_interactable.name
 		if "display_name" in _closest_interactable and not str(_closest_interactable.display_name).is_empty():
 			name_str = str(_closest_interactable.display_name)
-		interact_hint_changed.emit(true, "[E] 观察 %s" % name_str)
+		interact_hint_changed.emit(true, "按 E 观察 %s" % name_str)
 	elif _closest_npc and is_instance_valid(_closest_npc) and not _closest_npc.is_queued_for_deletion():
 		# NPC 提示同时更新 NPC 头顶标签和底部中央 InteractHint
-		interact_hint_changed.emit(true, "[E] %s" % _closest_npc.npc_name)
+		interact_hint_changed.emit(true, "按 E 与 %s 交谈" % _closest_npc.npc_name)
 	elif _closest_interactable and is_instance_valid(_closest_interactable) and not _closest_interactable.is_queued_for_deletion():
 		var name_str: String = _closest_interactable.name
 		if "display_name" in _closest_interactable and not str(_closest_interactable.display_name).is_empty():
 			name_str = str(_closest_interactable.display_name)
-		interact_hint_changed.emit(true, "[E] 观察 %s" % name_str)
+		interact_hint_changed.emit(true, "按 E 观察 %s" % name_str)
 	elif _closest_pickup and is_instance_valid(_closest_pickup) and not _closest_pickup.is_queued_for_deletion():
 		var item_name_str: String = _closest_pickup.item_name if "item_name" in _closest_pickup else "物品"
-		interact_hint_changed.emit(true, "[E] 拾取 %s" % item_name_str)
+		interact_hint_changed.emit(true, "按 E 拾取 %s" % item_name_str)
 	else:
 		interact_hint_changed.emit(false, "")
 

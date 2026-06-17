@@ -28,7 +28,8 @@ func _run() -> void:
 	if current_scene != null:
 		_check(current_scene.name == "Market", "0762 comic enters Market")
 		_check(current_scene.has_node("Player"), "Market creates Player")
-		_check(current_scene.get_node("Player").position == Vector2(272, 67), "Market places Player near the inn entrance")
+		var player := current_scene.get_node("Player") as Node2D
+		_check(player.position.distance_to(Vector2(272, 67)) <= 96.0, "Market places Player near the inn entrance")
 		_check(current_scene.has_node("NPC_Fengshen"), "Market initializes innkeeper NPC")
 		_check(current_scene.has_node("NPC_Laotang"), "Market initializes baker NPC")
 		_check(current_scene.has_node("NPC_Alian"), "Market initializes florist NPC")

@@ -366,6 +366,7 @@ func _create_hud() -> void:
 	interact_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	interact_hint.add_theme_font_size_override("font_size", 15)
 	interact_hint.add_theme_color_override("font_color", Color(0.98, 0.86, 0.52, 1.0))
+	interact_hint.add_theme_constant_override("outline_size", 3)
 	ui.add_child(interact_hint)
 
 	_create_angle_panel(ui)
@@ -393,6 +394,7 @@ func _create_angle_panel(ui: CanvasLayer) -> void:
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint.text = "用已记录的角度推断第五项。每次调整 6°。"
 	hint.add_theme_font_size_override("font_size", 13)
+	hint.add_theme_constant_override("outline_size", 3)
 	angle_panel.add_child(hint)
 
 	angle_value = Label.new()
@@ -446,7 +448,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		if angle_panel.visible:
 			_close_angle_panel()
 		else:
-			get_tree().change_scene_to_file("res://scenes/star_map.tscn")
+			SceneManager.change_scene("res://scenes/star_map.tscn")
 		get_viewport().set_input_as_handled()
 	elif angle_panel.visible:
 		if event.is_action_pressed("ui_left"):
@@ -478,7 +480,7 @@ func _update_closest_interactable() -> void:
 	if _closest == null:
 		interact_hint.text = ""
 	else:
-		interact_hint.text = "[E] %s" % String(_closest.get_meta("title", "交互"))
+		interact_hint.text = "按 E %s" % String(_closest.get_meta("title", "交互"))
 
 
 func _interact_with_closest() -> void:
@@ -725,7 +727,7 @@ func _complete_fragment() -> void:
 	SaveManager.save_game()
 	_show_message("晨曦之印", "源印归位。星图已更新。\n测试原型将在片刻后返回星图。", 4.0)
 	await get_tree().create_timer(1.8).timeout
-	get_tree().change_scene_to_file("res://scenes/star_map.tscn")
+	SceneManager.change_scene("res://scenes/star_map.tscn")
 
 
 func observe_sundial_for_test(id: String) -> void:

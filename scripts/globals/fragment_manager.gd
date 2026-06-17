@@ -16,6 +16,7 @@ class FragmentData:
 	var is_story_critical: bool
 	var scene_path: String
 	var implemented: bool
+	var unlocked: bool = false
 	var completed: bool = false
 
 	func _init(
@@ -44,6 +45,12 @@ class FragmentData:
 var fragments: Array[FragmentData] = []
 var current_fragment: FragmentData = null
 var pending_completion_animation_id: String = ""
+var pending_unlocked_fragment_id: String = ""
+
+const LINEAR_UNLOCK_ORDER: Array[String] = [
+	"0001", "0002", "0003", "0004", "0047", "0762",
+	"0915", "1138", "2049", "3015", "3333", "4096",
+]
 
 # === 碎片专属状态存储 ===
 ## 格式: { "0762": { "awakened_colors": [...], "melody_triggered": false, ... }, ... }
@@ -68,7 +75,7 @@ func _initialize_fragments() -> void:
 	fragments = [
 		FragmentData.new("0001", "启程之镇", "晨曦镇", "「白日依山尽」", "晨曦之印", 1, false, "res://scenes/fragments/fragment_0001.tscn", true),
 		FragmentData.new("0002", "黄昏驿站", "落霞驿站", "「黄河入海流」", "归途之印", 1, false, "res://scenes/fragments/fragment_0002.tscn", true),
-		FragmentData.new("0003", "月下神社", "玉兔神社", "「举头望明月」", "月光之印", 1, false, "res://scenes/fragments/fragment_0003.tscn"),
+		FragmentData.new("0003", "月下神社", "玉兔神社", "「举头望明月」", "月光之印", 1, false, "res://scenes/fragments/fragment_0003.tscn", true),
 		FragmentData.new("0004", "工坊物语", "齿轮工坊", "「匠心」", "匠魂之印", 2, false, "res://scenes/fragments/fragment_0004.tscn"),
 		FragmentData.new("0047", "倒悬图书馆", "知识之塔", "「知识就是力量」", "真理之印", 3, true, "res://scenes/fragments/fragment_0047.tscn"),
 		FragmentData.new("0762", "颜色的葬礼", "灰白小镇", "「蓝是悲，红是怒，黄是望，绿是惧，紫是念，白是忘」", "情感之印", 3, true, "res://scenes/fragments/fragment_0762.tscn", true),
@@ -79,6 +86,12 @@ func _initialize_fragments() -> void:
 		FragmentData.new("3333", "诸神黄昏", "终焉之谷", "「终即是始」", "轮回之印", 5, true, "res://scenes/fragments/fragment_3333.tscn"),
 		FragmentData.new("4096", "万象归源", "万象之心", "「归源」", "归源之印", 5, true, "res://scenes/fragments/fragment_4096.tscn"),
 	]
+	_apply_initial_unlocks()
+
+
+func _apply_initial_unlocks() -> void:
+	for fragment in fragments:
+		fragment.unlocked = fragment.id == LINEAR_UNLOCK_ORDER[0]
 
 
 func _ensure_default_fragment_states() -> void:
@@ -88,6 +101,21 @@ func _ensure_default_fragment_states() -> void:
 			"seat_selection": {},
 			"left_npc_id": "",
 			"source_mark_ticket_collected": false,
+			"completed": false,
+		}
+	if not _fragment_states.has("0003"):
+		_fragment_states["0003"] = {
+			"jade_collected": 0,
+			"jade_gallery_collected": 0,
+			"wash_hands": 0,
+			"lantern_lit": 0,
+			"jade_offered": 0,
+			"clapped": 0,
+			"moon_viewed": 0,
+			"mirror_opened": 0,
+			"ritual_sequence": [],
+			"ritual_sequence_invalid": false,
+			"inscription_order": [],
 			"completed": false,
 		}
 	_fragment_states["0762"] = {
@@ -115,7 +143,7 @@ func get_fragment_by_id(id: String) -> FragmentData:
 func get_available_fragments() -> Array[FragmentData]:
 	var available: Array[FragmentData] = []
 	for fragment in fragments:
-		if fragment.implemented:
+		if fragment.implemented and fragment.unlocked:
 			available.append(fragment)
 	return available
 
@@ -124,7 +152,9 @@ func get_available_fragments() -> Array[FragmentData]:
 # 碎片进入 / 完成
 # ============================================================
 
-func enter_fragment(fragment: FragmentData) -> bool:
+func enter_fragment(fragment: FragmentData, reset_run: bool = false) -> bool:
+	if not fragment.unlocked:
+		return false
 	if not fragment.implemented:
 		return false
 	
@@ -139,7 +169,8 @@ func enter_fragment(fragment: FragmentData) -> bool:
 	var was_completed: bool = fragment.completed
 	
 	current_fragment = fragment
-	GameManager.reset_fragment()
+	if reset_run:
+		reset_fragment_run(fragment.id)
 	
 	# 设置重玩标记（在 reset_fragment 之后，避免被重置）
 	is_replay_mode = was_completed
@@ -149,11 +180,23 @@ func enter_fragment(fragment: FragmentData) -> bool:
 	return true
 
 
+func reset_fragment_run(fragment_id: String = "") -> void:
+	var target_id := fragment_id
+	if target_id.is_empty() and current_fragment != null:
+		target_id = current_fragment.id
+	if target_id.is_empty():
+		return
+	if GameManager:
+		GameManager.items_used.clear()
+	reset_fragment_states(target_id)
+
+
 func complete_fragment(fragment: FragmentData) -> bool:
 	if fragment == null or fragment.completed:
 		return false
 	fragment.completed = true
 	pending_completion_animation_id = fragment.id
+	unlock_next_fragment(fragment.id)
 	fragment_completed.emit(fragment.id)
 	print("[FragmentManager] 碎片 %s 修复完成" % fragment.id)
 	return true
@@ -165,6 +208,39 @@ func consume_completion_animation_id() -> String:
 	return fragment_id
 
 
+func unlock_next_fragment(completed_id: String) -> String:
+	var index := LINEAR_UNLOCK_ORDER.find(completed_id)
+	if index < 0 or index >= LINEAR_UNLOCK_ORDER.size() - 1:
+		return ""
+	var next_id := LINEAR_UNLOCK_ORDER[index + 1]
+	var next_fragment := get_fragment_by_id(next_id)
+	if next_fragment == null:
+		return ""
+	if not next_fragment.unlocked:
+		next_fragment.unlocked = true
+		pending_unlocked_fragment_id = next_id
+		print("[FragmentManager] Linear unlock: %s -> %s" % [completed_id, next_id])
+	return next_id
+
+
+func consume_pending_unlocked_fragment_id() -> String:
+	var fragment_id := pending_unlocked_fragment_id
+	pending_unlocked_fragment_id = ""
+	return fragment_id
+
+
+func ensure_linear_unlocks_from_completed() -> void:
+	var highest_unlocked_index := 0
+	for i in LINEAR_UNLOCK_ORDER.size():
+		var fragment := get_fragment_by_id(LINEAR_UNLOCK_ORDER[i])
+		if fragment != null and fragment.completed:
+			highest_unlocked_index = mini(i + 1, LINEAR_UNLOCK_ORDER.size() - 1)
+	for i in LINEAR_UNLOCK_ORDER.size():
+		var fragment := get_fragment_by_id(LINEAR_UNLOCK_ORDER[i])
+		if fragment != null:
+			fragment.unlocked = i <= highest_unlocked_index
+
+
 # ============================================================
 # 碎片状态重置
 # ============================================================
@@ -173,8 +249,11 @@ func reset_all_fragments() -> void:
 	## 重置所有碎片的 completed 标记为 false，并清除所有碎片专属状态
 	for fragment in fragments:
 		fragment.completed = false
+		fragment.unlocked = false
 	pending_completion_animation_id = ""
+	pending_unlocked_fragment_id = ""
 	is_replay_mode = false
+	_apply_initial_unlocks()
 	# 清除碎片专属状态，防止跨存档泄露（如线索数据）
 	_fragment_states.clear()
 	_ensure_default_fragment_states()
@@ -192,6 +271,22 @@ func reset_fragment_states(fragment_id: String) -> void:
 				"completed": false,
 			}
 			print("[FragmentManager] 碎片 %s 的专属状态已重置" % fragment_id)
+		"0003":
+			_fragment_states["0003"] = {
+				"jade_collected": 0,
+				"jade_gallery_collected": 0,
+				"wash_hands": 0,
+				"lantern_lit": 0,
+				"jade_offered": 0,
+				"clapped": 0,
+				"moon_viewed": 0,
+				"mirror_opened": 0,
+				"ritual_sequence": [],
+				"ritual_sequence_invalid": false,
+				"inscription_order": [],
+				"completed": false,
+			}
+			print("[FragmentManager] Fragment %s state reset" % fragment_id)
 		"0762":
 			_fragment_states["0762"] = {
 				"awakened_colors": [false, false, false, false, false, false],
@@ -204,7 +299,8 @@ func reset_fragment_states(fragment_id: String) -> void:
 			}
 			print("[FragmentManager] 碎片 %s 的专属状态已重置" % fragment_id)
 		_:
-			printerr("[FragmentManager] 未知碎片状态重置请求: %s" % fragment_id)
+			_fragment_states.erase(fragment_id)
+			print("[FragmentManager] 碎片 %s 无专属默认状态，已清除运行态" % fragment_id)
 
 
 # ============================================================
@@ -256,6 +352,7 @@ func get_fragments_list() -> Array[Dictionary]:
 		result.append({
 			"id": f.id,
 			"completed": f.completed,
+			"unlocked": f.unlocked,
 		})
 	return result
 

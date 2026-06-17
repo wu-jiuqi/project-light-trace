@@ -93,6 +93,7 @@ func _ensure_interact_hint() -> void:
 	_interact_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_interact_hint_label.add_theme_font_size_override("font_size", 18)
 	_interact_hint_label.add_theme_color_override("font_color", Color(0.95, 0.86, 0.62, 0.95))
+	_interact_hint_label.add_theme_constant_override("outline_size", 3)
 	_interact_hint_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui_root.add_child(_interact_hint_label)
 
@@ -355,7 +356,7 @@ func _show_completion_and_return() -> void:
 		_completion_label.visible = true
 	await get_tree().create_timer(1.2).timeout
 	_stop_bgm()
-	get_tree().change_scene_to_file("res://scenes/star_map.tscn")
+	SceneManager.change_scene("res://scenes/star_map.tscn")
 
 
 func _find_npc_by_id(npc_id: String) -> Node:
@@ -366,22 +367,13 @@ func _find_npc_by_id(npc_id: String) -> Node:
 
 
 func _start_bgm() -> void:
-	if _bgm_player == null:
-		_bgm_player = AudioStreamPlayer.new()
-		_bgm_player.name = "BGMPlayer_Fragment0002"
-		_bgm_player.bus = "Master"
-		_bgm_player.volume_db = -10.0
-		add_child(_bgm_player)
-	_bgm_player.stream = BGM_FRAGMENT_0002
-	_bgm_player.stream.loop = true
-	_bgm_player.play()
+	AudioManager.play_bgm(BGM_FRAGMENT_0002, "fragment_0002", 0.45, -10.0, true)
 	print("[Fragment0002] BGM 已开始循环播放")
 
 
 func _stop_bgm() -> void:
-	if _bgm_player != null and _bgm_player.playing:
-		_bgm_player.stop()
-		print("[Fragment0002] BGM 已停止")
+	AudioManager.stop_bgm(0.25)
+	print("[Fragment0002] BGM 已停止")
 
 
 func _on_interact_hint_changed(show: bool, hint_text: String) -> void:

@@ -11,26 +11,15 @@ extends Control
 ##   两个操作按钮: 各 200×48 px，水平并排
 ##   标题: "开始游戏"，居中，字号 22
 ## 存档管理弹窗: 620×400 px（实际为全屏覆盖模式）
-## 成就/剧情回顾提示弹窗: 标准 AcceptDialog 尺寸
+## 成就/剧情回顾: 全屏覆盖层
 
 
 # ============================================================
 # 纸雕纹理预加载
 # ============================================================
 const PAPER_TITLE_BG = preload("res://assets/ui/title_start_bg.jpg")
-const PAPER_PANEL = preload("res://assets/papercraft/core/ui/dialogue_box/dialogue_panel.png")
-const PAPER_BUTTON_NORMAL = preload("res://assets/papercraft/core/ui/dialogue_box/button_plate.png")
-const PAPER_BUTTON_HOVER = preload("res://assets/papercraft/core/ui/extracted_buttons/hover_blank.png")
-const PAPER_BUTTON_PRESSED = preload("res://assets/papercraft/core/ui/extracted_buttons/pressed_blank.png")
-const PAPER_BUTTON_DISABLED = preload("res://assets/papercraft/core/ui/dialogue_box/button_plate.png")
 const STORY_GALLERY_SCENE: PackedScene = preload("res://scenes/ui/StoryGallery.tscn")
-
-# ============================================================
-# 颜色常量
-# ============================================================
-const PAPER_INK := Color(0.18, 0.12, 0.075, 1.0)
-const PAPER_INK_MUTED := Color(0.33, 0.25, 0.17, 0.95)
-const PAPER_DIM := Color(0.36, 0.34, 0.30, 0.62)
+const GOAL_SCENE: PackedScene = preload("res://scenes/ui/Goal.tscn")
 
 # ============================================================
 # 布局常量 — 热区坐标与背景图按钮精确对齐
@@ -125,6 +114,7 @@ func _ready() -> void:
 	_setup_settings_panel()
 	_layout_all()
 	get_viewport().size_changed.connect(_layout_all)
+	SceneFader.fade_in()
 
 	_has_saves = _has_occupied_save_slots()
 	_selected = 0  # 默认选中「开始游戏」
@@ -320,21 +310,10 @@ var _bgm_player: AudioStreamPlayer = null
 const BGM_MAIN_THEME = preload("res://assets/audio/bgm/bgm_main_theme.ogg")
 
 func _start_bgm() -> void:
-	if _bgm_player == null:
-		_bgm_player = AudioStreamPlayer.new()
-		_bgm_player.name = "BGMPlayer"
-		_bgm_player.bus = "Master"
-		_bgm_player.volume_db = -6.0
-		add_child(_bgm_player)
-	_bgm_player.stream = BGM_MAIN_THEME
-	var ogg_stream := _bgm_player.stream as AudioStreamOggVorbis
-	if ogg_stream != null:
-		ogg_stream.loop = true
-	_bgm_player.play()
+	AudioManager.play_bgm(BGM_MAIN_THEME, "title_main", 0.4, -6.0, true)
 
 func _stop_bgm() -> void:
-	if _bgm_player != null and _bgm_player.playing:
-		_bgm_player.stop()
+	AudioManager.stop_bgm(0.25)
 
 # ============================================================
 # 响应式布局
@@ -362,8 +341,10 @@ func _layout_hit_areas() -> void:
 		area.position = mapped_rect.position
 		area.size = mapped_rect.size
 
-	_hit_container.position = Vector2.ZERO
-	_hit_container.size = vs
+	_hit_container.offset_left = 0.0
+	_hit_container.offset_top = 0.0
+	_hit_container.offset_right = 0.0
+	_hit_container.offset_bottom = 0.0
 
 	# 布局改变后同步高亮位置和尺寸
 	_update_selection()
@@ -632,8 +613,12 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		return
 
-	# 有弹窗打开时不响应键盘
-	if _is_active_dialog_visible():
+	# 有覆盖层打开时：Esc 关闭，其余键盘不响应
+	if is_instance_valid(_active_dialog) and _active_dialog.get("visible"):
+		if event.is_action_pressed("ui_cancel") or event.is_action_pressed("escape"):
+			_active_dialog.queue_free()
+			_active_dialog = null
+			get_viewport().set_input_as_handled()
 		return
 
 	if event.is_action_pressed("ui_up"):
@@ -817,9 +802,8 @@ func _start_new_game_in_slot_unchecked(slot: int) -> void:
 	SaveManager.save_game(slot)
 
 	_stop_bgm()
-	SceneManager.pending_spawn_point = "from_cutscene"
 	# 新游戏 → 开场动画 → 星图
-	get_tree().change_scene_to_file("res://scenes/cinematic/opening_cinematic.tscn")
+	SceneManager.change_scene("res://scenes/cinematic/opening_cinematic.tscn", "from_cutscene")
 
 
 func _continue_game() -> void:
@@ -830,8 +814,7 @@ func _continue_game() -> void:
 	print("[TitleScreen] 继续游戏 (slot %d)" % slot)
 	SaveManager.load_game(slot)
 	_stop_bgm()
-	SceneManager.pending_spawn_point = "from_cutscene"
-	get_tree().change_scene_to_file("res://scenes/star_map.tscn")
+	SceneManager.change_scene("res://scenes/star_map.tscn")
 
 
 # ============================================================
@@ -847,7 +830,23 @@ func _on_save_slots() -> void:
 # ============================================================
 
 func _on_achievements() -> void:
-	_show_hint_dialog("成就", "成就系统即将开放，敬请期待。")
+	if is_instance_valid(_active_dialog):
+		return
+	var goal := GOAL_SCENE.instantiate() as Control
+	add_child(goal)
+	_active_dialog = goal
+	# 连接关闭按钮
+	var close_btn := goal.get_node_or_null("Stage/GoalPanel/TitleBar/TextureButton") as TextureButton
+	if close_btn:
+		close_btn.pressed.connect(func():
+			if _active_dialog == goal:
+				_active_dialog = null
+			goal.queue_free()
+		)
+	goal.tree_exiting.connect(func() -> void:
+		if _active_dialog == goal:
+			_active_dialog = null
+	)
 
 
 # ============================================================
@@ -872,31 +871,6 @@ func _on_story_review() -> void:
 
 func _on_quit() -> void:
 	get_tree().quit()
-
-
-# ============================================================
-# 通用提示弹窗
-# ============================================================
-
-func _show_hint_dialog(title_text: String, body_text: String) -> void:
-	var dialog := AcceptDialog.new()
-	dialog.title = title_text
-	dialog.dialog_text = body_text
-	dialog.ok_button_text = "好的"
-	_apply_dialog_panel_style(dialog)
-	_apply_title_button(dialog.get_ok_button())
-	var dlg := dialog
-	dlg.close_requested.connect(func(): if _active_dialog == dlg: _active_dialog = null; dlg.queue_free())
-	dlg.tree_exiting.connect(func(): if _active_dialog == dlg: _active_dialog = null; dlg.queue_free())
-
-	add_child(dialog)
-	_active_dialog = dialog
-	dialog.popup_centered()
-
-
-func _apply_dialog_panel_style(dialog: Window) -> void:
-	if dialog.has_method("add_theme_stylebox_override"):
-		dialog.add_theme_stylebox_override("panel", _paper_panel_style())
 
 
 # ============================================================
@@ -1013,8 +987,7 @@ func _load_selected_slot() -> void:
 	print("[TitleScreen] 加载存档 slot %d" % slot)
 	SaveManager.load_game(slot)
 	_stop_bgm()
-	SceneManager.pending_spawn_point = "from_cutscene"
-	get_tree().change_scene_to_file("res://scenes/star_map.tscn")
+	SceneManager.change_scene("res://scenes/star_map.tscn")
 
 
 func _delete_selected_slot() -> void:
@@ -1030,44 +1003,6 @@ func _delete_selected_slot() -> void:
 # ============================================================
 # 纸雕样式辅助方法（保留 — 弹窗按钮和存档面板按钮仍在使用）
 # ============================================================
-
-func _paper_style(texture: Texture2D, margin: float, tint := Color.WHITE) -> StyleBoxTexture:
-	var style := StyleBoxTexture.new()
-	style.texture = texture
-	style.texture_margin_left = margin
-	style.texture_margin_top = margin
-	style.texture_margin_right = margin
-	style.texture_margin_bottom = margin
-	style.content_margin_left = margin * 0.55
-	style.content_margin_top = margin * 0.45
-	style.content_margin_right = margin * 0.55
-	style.content_margin_bottom = margin * 0.45
-	style.modulate_color = tint
-	return style
-
-
-func _paper_panel_style(tint := Color.WHITE) -> StyleBoxTexture:
-	return _paper_style(PAPER_PANEL, 72.0, tint)
-
-
-func _apply_title_button(button: Button, selected := false, unavailable := false) -> void:
-	button.add_theme_stylebox_override(
-		"normal",
-		_paper_style(PAPER_BUTTON_DISABLED if unavailable else PAPER_BUTTON_NORMAL, 24.0)
-	)
-	button.add_theme_stylebox_override("hover", _paper_style(PAPER_BUTTON_HOVER, 24.0))
-	button.add_theme_stylebox_override("focus", _paper_style(PAPER_BUTTON_HOVER, 24.0))
-	button.add_theme_stylebox_override("pressed", _paper_style(PAPER_BUTTON_PRESSED, 24.0))
-	button.add_theme_stylebox_override("disabled", _paper_style(PAPER_BUTTON_DISABLED, 24.0))
-	button.add_theme_color_override(
-		"font_color",
-		PAPER_INK if selected else (PAPER_DIM if unavailable else PAPER_INK_MUTED)
-	)
-	button.add_theme_color_override("font_hover_color", PAPER_INK)
-	button.add_theme_color_override("font_focus_color", PAPER_INK)
-	button.add_theme_color_override("font_pressed_color", Color(0.92, 0.84, 0.62, 1.0))
-	button.add_theme_color_override("font_disabled_color", PAPER_DIM)
-
 
 func _apply_transparent_button(button: Button) -> void:
 	var empty := StyleBoxEmpty.new()

@@ -1,46 +1,53 @@
 extends RefCounted
-## 存档系统常量与路径工具
-## 静态工具类，提供存档版本号、路径常量、槽位配置
-
+## Save system constants and path helpers.
 class_name SaveConstants
 
-## 当前存档格式版本（语义化版本号）
 const SAVE_VERSION: String = "1.0.0"
 
-## 存档目录
-const SAVE_DIR: String = "user://saves/"
+const DEFAULT_SAVE_DIR: String = "user://saves/"
+const SAVE_DIR: String = DEFAULT_SAVE_DIR
+const LAST_SLOT_PATH: String = DEFAULT_SAVE_DIR + "last_slot.json"
 
-## 最大存档槽位数
 const MAX_SLOTS: int = 3
-
-## 自动存档间隔（秒）
 const AUTO_SAVE_INTERVAL: float = 30.0
-
-## 临时文件后缀
 const TMP_SUFFIX: String = ".tmp"
-
-## 备份文件后缀
 const BAK_SUFFIX: String = ".bak"
 
-## 最后活动槽位记录路径
-const LAST_SLOT_PATH: String = "user://saves/last_slot.json"
+static var _save_dir: String = DEFAULT_SAVE_DIR
 
 
-## 返回指定槽位的存档文件路径
+static func set_save_dir(path: String) -> void:
+	var normalized := path.strip_edges()
+	if normalized.is_empty():
+		normalized = DEFAULT_SAVE_DIR
+	if not normalized.ends_with("/"):
+		normalized += "/"
+	_save_dir = normalized
+
+
+static func reset_save_dir() -> void:
+	_save_dir = DEFAULT_SAVE_DIR
+
+
+static func save_dir() -> String:
+	return _save_dir
+
+
+static func last_slot_path() -> String:
+	return _save_dir + "last_slot.json"
+
+
 static func slot_path(slot: int) -> String:
-	return SAVE_DIR + "save_" + str(slot) + ".json"
+	return _save_dir + "save_" + str(slot) + ".json"
 
 
-## 返回指定槽位的聊天记录文件路径
 static func chat_path(slot: int) -> String:
-	return SAVE_DIR + "chat_" + str(slot) + ".json"
+	return _save_dir + "chat_" + str(slot) + ".json"
 
 
-## 返回指定槽位的临时文件路径（原子写入用）
 static func tmp_path(slot: int) -> String:
-	return SAVE_DIR + "save_" + str(slot) + TMP_SUFFIX
+	return _save_dir + "save_" + str(slot) + TMP_SUFFIX
 
 
-## 返回指定槽位的备份文件路径
 static func bak_path(slot: int) -> String:
-	return SAVE_DIR + "save_" + str(slot) + BAK_SUFFIX
+	return _save_dir + "save_" + str(slot) + BAK_SUFFIX

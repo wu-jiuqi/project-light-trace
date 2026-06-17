@@ -25,6 +25,7 @@ func _ready() -> void:
 	print("[Fragment0762] 漫画过场: 颜色的葬礼 — 灰白小镇")
 	_create_ui()
 	_show_page(0)
+	SceneFader.fade_in()
 
 
 func _create_ui() -> void:
@@ -67,8 +68,9 @@ func _create_ui() -> void:
 	continue_label.name = "ContinueLabel"
 	continue_label.position = Vector2(88, 668)
 	continue_label.size = Vector2(360, 26)
-	continue_label.text = "点击继续   |   Esc 跳过"
+	continue_label.text = "点击继续   |   按 Esc 跳过"
 	continue_label.add_theme_color_override("font_color", Color(0.58, 0.82, 0.94, 0.9))
+	continue_label.add_theme_constant_override("outline_size", 3)
 	continue_label.add_theme_font_size_override("font_size", 14)
 	ui.add_child(continue_label)
 

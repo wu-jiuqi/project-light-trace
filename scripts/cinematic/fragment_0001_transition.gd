@@ -19,8 +19,10 @@ var _current_frame := -1
 
 
 func _ready() -> void:
+	SceneFader.fade_in()
 	fade_overlay.color.a = 1.0
 	skip_hint.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 0.55))
+	skip_hint.add_theme_constant_override("outline_size", 3)
 	skip_hint.add_theme_font_size_override("font_size", 16)
 	_load_frame_paths()
 	if _frame_paths.is_empty():
@@ -28,7 +30,7 @@ func _ready() -> void:
 		_finish_transition()
 		return
 	_show_frame(0)
-	audio_player.play()
+	AudioManager.play_voice("fragment_0001_transition", audio_player.stream, AudioManager.PRIORITY_HIGH, -8.0, 0.0)
 	_fade_in()
 
 
@@ -101,8 +103,7 @@ func _finish_transition() -> void:
 		return
 	is_exiting = true
 	skip_hint.visible = false
-	if audio_player.playing:
-		audio_player.stop()
+	AudioManager.stop_voice(0.1)
 	if _fade_tween != null and _fade_tween.is_valid():
 		_fade_tween.kill()
 
@@ -111,4 +112,4 @@ func _finish_transition() -> void:
 	await _fade_tween.finished
 
 	SceneFader.ensure_black()
-	get_tree().change_scene_to_file(TARGET_SCENE)
+	SceneManager.change_scene(TARGET_SCENE, "", false)

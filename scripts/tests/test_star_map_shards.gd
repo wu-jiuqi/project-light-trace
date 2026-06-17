@@ -27,13 +27,20 @@ func _run() -> void:
 	await process_frame
 	_check(card.visible, "clicking the 0002 shard reveals its detail card")
 	_check(star_map.get_node("UI/DetailCard/TitleLabel").text.contains("#0002"), "0002 detail card is selected")
-	_check(star_map.get_node("UI/DetailCard/EnterBtn").visible, "0002 implemented fragment exposes enter button")
+	_check(not star_map.get_node("UI/DetailCard/EnterBtn").visible, "0002 starts locked in a new game")
+
+	var first_fragment = manager.get_fragment_by_id("0001")
+	_check(manager.complete_fragment(first_fragment), "0001 completion succeeds")
+	_check(manager.get_fragment_by_id("0002").unlocked, "0001 completion unlocks 0002")
+	canvas.select_fragment(1)
+	await process_frame
+	_check(star_map.get_node("UI/DetailCard/EnterBtn").visible, "unlocked 0002 exposes enter button")
 
 	canvas.select_fragment(5)
 	await process_frame
 	_check(card.visible, "clicking a shard reveals its detail card")
 	_check(star_map.get_node("UI/DetailCard/TitleLabel").text.contains("#0762"), "0762 detail card is selected")
-	_check(star_map.get_node("UI/DetailCard/EnterBtn").visible, "implemented fragment exposes enter button")
+	_check(not star_map.get_node("UI/DetailCard/EnterBtn").visible, "0762 remains locked until the linear chain reaches it")
 
 	var fragment = manager.get_fragment_by_id("0762")
 	_check(manager.complete_fragment(fragment), "0762 completion succeeds")

@@ -62,6 +62,7 @@ func _create_visual() -> void:
 	_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_label.add_theme_color_override("font_color", Color(1, 1, 1, 0.85))
 	_label.add_theme_font_size_override("font_size", 10)
+	_label.add_theme_constant_override("outline_size", 3)
 	_label.text = item_name
 	_label.visible = true
 	add_child(_label)
@@ -77,7 +78,7 @@ func _on_body_entered(body: Node2D) -> void:
 	if body.is_in_group("player"):
 		_player_nearby = true
 		if _label:
-			_label.text = "[E] %s" % item_name
+			_label.text = "按 E 拾取 %s" % item_name
 
 
 func _on_body_exited(body: Node2D) -> void:

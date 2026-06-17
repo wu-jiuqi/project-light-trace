@@ -226,29 +226,48 @@ func _apply_interactive_scene(page: Dictionary) -> void:
 		control.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_interactive_host.add_child(scene)
 
+	var fragment_id := str(page.get("fragment_id", "0002")).strip_edges()
+	if fragment_id.is_empty():
+		fragment_id = "0002"
 	var state_key := str(page.get("state_key", "")).strip_edges()
 	var state_value = page.get("state_value", true)
-	var current_value = FragmentManager.get_fragment_state("0002", state_key) if state_key != "" else null
-	_interactive_collect_pending = state_key != "" and current_value != state_value
+	var current_value = FragmentManager.get_fragment_state(fragment_id, state_key) if state_key != "" else null
+	_interactive_collect_pending = state_key != "" and not _state_values_match(current_value, state_value)
 	_continue_hint.text = str(page.get("collect_hint", DEFAULT_COLLECT_HINT)) if _interactive_collect_pending else DEFAULT_CONTINUE_HINT
 	if state_key != "":
 		if scene.has_signal("state_triggered"):
 			scene.state_triggered.connect(func() -> void:
-				_mark_interactive_collected(state_key, state_value)
+				_mark_interactive_collected(fragment_id, state_key, state_value)
 			)
 		elif scene.has_signal("collected"):
 			scene.collected.connect(func() -> void:
-				_mark_interactive_collected(state_key, state_value)
+				_mark_interactive_collected(fragment_id, state_key, state_value)
 			)
 
 
-func _mark_interactive_collected(state_key: String, state_value) -> void:
-	FragmentManager.set_fragment_state("0002", state_key, state_value)
+func _mark_interactive_collected(fragment_id: String, state_key: String, state_value) -> void:
+	FragmentManager.set_fragment_state(fragment_id, state_key, state_value)
 	if SaveManager.get_current_slot() >= 0:
 		SaveManager.save_game()
 	_interactive_collect_pending = false
 	_suppress_release_after_collect = true
 	_continue_hint.text = DEFAULT_COLLECTED_HINT
+
+
+func _state_values_match(current_value, expected_value) -> bool:
+	if current_value == null:
+		return false
+	if expected_value is bool:
+		if current_value is bool:
+			return current_value == expected_value
+		if current_value is int or current_value is float:
+			return (int(current_value) != 0) == expected_value
+	if expected_value is int or expected_value is float:
+		if current_value is bool:
+			return current_value == (int(expected_value) != 0)
+		if current_value is int or current_value is float:
+			return int(current_value) == int(expected_value)
+	return current_value == expected_value
 
 
 func _clear_interactive() -> void:

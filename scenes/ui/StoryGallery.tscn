@@ -32,7 +32,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.03876, 0.025840001, 0.025840001, 0.82000005)
+color = Color(0.039215688, 0.02745098, 0.02745098, 0.81960785)
 
 [node name="Stage" type="Control" parent="." unique_id=302393100]
 anchors_preset = 0

@@ -101,7 +101,7 @@ func try_unlock_white_from_painter() -> bool:
 		if cloth:
 			var label = cloth.get_node_or_null("ClothLabel")
 			if label:
-				label.text = "[E] 揭开灰布"
+				label.text = "按 E 揭开灰布"
 
 	print("[FragmentState] 白色觉醒——老画家引导完成")
 	return true
@@ -255,6 +255,7 @@ func _create_gray_cloth() -> void:
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7, 0.8))
 	label.add_theme_font_size_override("font_size", 10)
+	label.add_theme_constant_override("outline_size", 3)
 	cloth.add_child(label)
 
 	cloth.body_entered.connect(_on_gray_cloth_entered)
@@ -267,7 +268,7 @@ func _create_gray_cloth() -> void:
 
 	# 如果白色已觉醒，更新标签提示
 	if GameManager.is_color_awakened(GameManager.ColorType.WHITE):
-		label.text = "[E] 揭开灰布"
+		label.text = "按 E 揭开灰布"
 
 
 func _create_zhinu_portrait() -> void:
@@ -304,7 +305,7 @@ func _on_gray_cloth_entered(body: Node) -> void:
 		var root = get_parent()
 		if root:
 			var n = root.get_node_or_null("GrayCloth/ClothLabel")
-			if n: n.text = "[E] 揭开灰布"
+			if n: n.text = "按 E 揭开灰布"
 
 
 func _on_gray_cloth_exited(body: Node) -> void:
@@ -417,6 +418,7 @@ func _create_studio_source_mark() -> void:
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.add_theme_color_override("font_color", Color(1, 0.95, 0.7, 0.9))
 	label.add_theme_font_size_override("font_size", 10)
+	label.add_theme_constant_override("outline_size", 3)
 	mark.add_child(label)
 
 	mark.body_entered.connect(_on_source_mark_entered)
@@ -433,7 +435,7 @@ func _on_source_mark_entered(body: Node) -> void:
 	if body.is_in_group("player"):
 		_near_source_mark = true
 		var n = get_parent().get_node_or_null("SourceMark/MarkLabel")
-		if n: n.text = "[E] 解码源印"
+		if n: n.text = "按 E 解码源印"
 
 func _on_source_mark_exited(body: Node) -> void:
 	if body.is_in_group("player"):
@@ -504,7 +506,7 @@ func _trigger_victory() -> void:
 		ChatDialogue.add_npc_msg("[回忆] 你再次见证了六色的汇聚。\n\n记忆不会因为重复而变得更完整——但重温它，也许能让你看到之前错过的东西。")
 		await get_tree().create_timer(2.0).timeout
 		FragmentManager.complete_fragment(FragmentManager.current_fragment)
-		get_tree().change_scene_to_file("res://scenes/star_map.tscn")
+		SceneManager.change_scene("res://scenes/star_map.tscn")
 		return
 
 	# 首次完成：标记 fragment 完成 + 记录源印 + 增加修复进度
@@ -519,4 +521,4 @@ func _trigger_victory() -> void:
 
 	# 返回星图
 	await get_tree().create_timer(2.0).timeout
-	get_tree().change_scene_to_file("res://scenes/star_map.tscn")
+	SceneManager.change_scene("res://scenes/star_map.tscn")

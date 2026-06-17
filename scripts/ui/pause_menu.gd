@@ -6,6 +6,7 @@ const SETTINGS_SCENE: PackedScene = preload("res://scenes/ui/SettingsPanel.tscn"
 const SAVE_SLOT_GOLD := Color(0.92, 0.70, 0.30, 0.98)
 const SAVE_SLOT_OUTLINE := Color(0.0, 0.0, 0.0, 1.0)
 const SAVE_SLOT_OUTLINE_SIZE := 3
+const ESC_CLOSE_BEFORE_PAUSE_GROUP := "esc_close_before_pause"
 
 signal menu_opened
 signal menu_closed
@@ -113,8 +114,28 @@ func _input(event: InputEvent) -> void:
 		_hide_save_slots()
 		get_viewport().set_input_as_handled()
 		return
+	if not is_open and _close_foreground_cancel_panel():
+		get_viewport().set_input_as_handled()
+		return
 	toggle()
 	get_viewport().set_input_as_handled()
+
+
+func _close_foreground_cancel_panel() -> bool:
+	for node in get_tree().get_nodes_in_group(ESC_CLOSE_BEFORE_PAUSE_GROUP):
+		if not is_instance_valid(node) or node == self:
+			continue
+		if node is CanvasItem and not (node as CanvasItem).visible:
+			continue
+		if "is_open" in node and not bool(node.get("is_open")):
+			continue
+		if node.has_method("close_from_cancel_action"):
+			node.call("close_from_cancel_action")
+			return true
+		if node.has_method("close"):
+			node.call("close")
+			return true
+	return false
 
 
 func toggle() -> void:
@@ -266,15 +287,14 @@ func _slot_has_data(slot: int) -> bool:
 func _return_to_title() -> void:
 	close()
 	await get_tree().process_frame
-	get_tree().change_scene_to_file("res://scenes/ui/title_screen.tscn")
+	SceneManager.change_scene("res://scenes/ui/title_screen.tscn")
 
 
 func _return_to_star_map() -> void:
 	close()
 	await get_tree().process_frame
 	_in_fragment = false
-	SceneManager.pending_spawn_point = ""
-	get_tree().change_scene_to_file("res://scenes/star_map.tscn")
+	SceneManager.change_scene("res://scenes/star_map.tscn")
 
 
 func _is_on_title_screen() -> bool:

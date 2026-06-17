@@ -1,0 +1,28 @@
+[gd_scene format=3 uid="uid://le2q8wow3kyn"]
+
+[ext_resource type="Texture2D" uid="uid://djjw2ns8f7ff" path="res://assets/papercraft/fragments/id0003/environment/stone_gate_39.png" id="1_ik78l"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_flbgi"]
+size = Vector2(255.5, 156)
+
+[node name="Door" type="Node2D" unique_id=1802202746]
+
+[node name="Visual" type="Node2D" parent="." unique_id=1554078401]
+
+[node name="Body" type="Sprite2D" parent="Visual" unique_id=204202750]
+position = Vector2(0, -552)
+texture = ExtResource("1_ik78l")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=718834675]
+collision_layer = 4
+collision_mask = 0
+
+[node name="LeftCollision" type="CollisionShape2D" parent="StaticBody2D" unique_id=125517320]
+position = Vector2(-349.75, -75)
+shape = SubResource("RectangleShape2D_flbgi")
+
+[node name="RightCollision" type="CollisionShape2D" parent="StaticBody2D" unique_id=557313582]
+position = Vector2(349, -75)
+shape = SubResource("RectangleShape2D_flbgi")
+
+[node name="BaseMarker" type="Marker2D" parent="." unique_id=1881576059]

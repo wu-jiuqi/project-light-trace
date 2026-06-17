@@ -75,6 +75,10 @@ function checkProjectConfiguration() {
     check(llmClient.includes('"/api/chat/completions"'), '客户端使用同源代理路径');
 
     const preset = fs.readFileSync(path.join(PROJECT_DIR, 'export_presets.cfg'), 'utf8');
+    check(preset.includes('export_filter="scenes"'), 'Web 导出使用场景依赖模式');
+    check(preset.includes('resources/npc_knowledge/*.json'), 'Web 导出显式包含 NPC 知识 JSON');
+    check(preset.includes('variant/thread_support=true'), 'Web 导出启用线程支持');
+    check(preset.includes('variant/coep=true'), 'Web 导出启用 COEP');
     for (const pattern of [
         'build/**',
         'deploy/**',
@@ -191,6 +195,11 @@ async function checkServer() {
         check(page.status === 200, '静态服务支持查询参数');
         check(page.headers['cross-origin-opener-policy'] === 'same-origin', '静态服务返回 COOP');
         check(page.headers['cross-origin-embedder-policy'] === 'require-corp', '静态服务返回 COEP');
+        check(
+            page.headers['cross-origin-opener-policy'] === 'same-origin' &&
+            page.headers['cross-origin-embedder-policy'] === 'require-corp',
+            '静态服务满足 SharedArrayBuffer 跨域隔离前提'
+        );
 
         const traversal = await request(port, '/..%2fpackage.json');
         check(traversal.status === 403, '静态服务阻止目录穿越');

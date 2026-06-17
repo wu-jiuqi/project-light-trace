@@ -1,12 +1,15 @@
 extends Node
-## LLM client with two modes:
-## - builtin: same-origin/local proxy at /api/chat/completions
-## - custom: OpenAI-compatible API configured from SettingsPanel
+## Streaming LLM client.
+##
+## Built-in mode uses the same-origin proxy at /api/chat/completions.
+## Custom mode uses an OpenAI-compatible chat/completions endpoint.
 
 const PROXY_API_PATH = "/api/chat/completions"
 const DEFAULT_PROXY_HOST = "127.0.0.1"
 const DEFAULT_PROXY_PORT = 3000
-const CONNECTION_TIMEOUT = 20.0
+const CONNECT_TIMEOUT = 15.0
+const STREAM_IDLE_TIMEOUT = 30.0
+const REQUEST_TOTAL_TIMEOUT = 120.0
 
 enum State {
 	IDLE,
@@ -38,6 +41,8 @@ var _response_code: int = 0
 var _response_started: bool = false
 var _current_callback: Callable
 var _connection_attempt_time: float = 0.0
+var _request_started_time: float = 0.0
+var _last_activity_time: float = 0.0
 var _stream_mode: bool = false
 var _stream_buffer: String = ""
 var _stream_full_text: String = ""
@@ -62,10 +67,10 @@ func reload_settings() -> void:
 		_api_key = ""
 		_model = ""
 
-	var mode_label := "自定义 OpenAI-compatible API" if _use_custom_api else "官方试玩代理"
+	var mode_label := "custom OpenAI-compatible API" if _use_custom_api else "same-origin proxy"
 	if SettingsManager.llm_mode == SettingsManager.LLM_MODE_CUSTOM and not _settings_error.is_empty():
-		mode_label = "自定义 API 配置未启用：%s" % _settings_error
-	print("[LLMClient] %s 就绪 (%s://%s:%d%s)" % [
+		mode_label = "custom API disabled: %s" % _settings_error
+	print("[LLMClient] ready: %s (%s://%s:%d%s)" % [
 		mode_label,
 		"https" if _ssl else "http",
 		_host,
@@ -143,21 +148,28 @@ func _configure_custom_api(base_url: String) -> void:
 func _process(_delta: float) -> void:
 	if _state in [State.IDLE, State.EMITTING, State.DONE]:
 		return
-	if Time.get_ticks_msec() / 1000.0 - _connection_attempt_time > CONNECTION_TIMEOUT:
-		_fail("请求超时 (%.0fs)" % CONNECTION_TIMEOUT)
+	var now := Time.get_ticks_msec() / 1000.0
+	if _state == State.CONNECTING and now - _connection_attempt_time > CONNECT_TIMEOUT:
+		_fail("connection timeout (%.0fs)" % CONNECT_TIMEOUT)
+		return
+	if _request_started_time > 0.0 and now - _request_started_time > REQUEST_TOTAL_TIMEOUT:
+		_fail("request total timeout (%.0fs)" % REQUEST_TOTAL_TIMEOUT)
+		return
+	if _state in [State.REQUESTING, State.RECEIVING] and now - _last_activity_time > STREAM_IDLE_TIMEOUT:
+		_fail("stream idle timeout (%.0fs)" % STREAM_IDLE_TIMEOUT)
 		return
 	_poll_request()
 
 
 func chat_stream(system_prompt: String, user_message: String, callback: Callable = Callable()) -> void:
 	if _state not in [State.IDLE, State.DONE]:
-		printerr("[LLMClient] 已有请求正在进行中")
+		printerr("[LLMClient] request already in progress")
 		return
 
 	_current_callback = callback
 	reload_settings()
 	if SettingsManager.llm_mode == SettingsManager.LLM_MODE_CUSTOM and not _use_custom_api:
-		_fail("自定义 API 配置无效：%s" % _settings_error)
+		_fail("invalid custom API settings: %s" % _settings_error)
 		return
 
 	var messages = [
@@ -178,14 +190,13 @@ func chat_stream(system_prompt: String, user_message: String, callback: Callable
 			"Accept: text/event-stream",
 			"Authorization: Bearer " + _api_key
 		]
-		_stream_mode = true
 	else:
 		_pending_body = JSON.stringify({"messages": messages, "stream": true})
 		_request_headers = [
 			"Content-Type: application/json",
 			"Accept: text/event-stream"
 		]
-		_stream_mode = true
+	_stream_mode = true
 
 	_response_body = ""
 	_response_code = 0
@@ -197,12 +208,15 @@ func chat_stream(system_prompt: String, user_message: String, callback: Callable
 	var tls_options = TLSOptions.client() if _ssl else null
 	var err = _client.connect_to_host(_host, _port, tls_options)
 	if err != OK:
-		_fail("连接发起失败: %d" % err)
+		_fail("connection start failed: %d" % err)
 		return
 
+	var now := Time.get_ticks_msec() / 1000.0
 	_state = State.CONNECTING
-	_connection_attempt_time = Time.get_ticks_msec() / 1000.0
-	print("[LLMClient] 请求 %s:%d%s (prompt=%d chars)" % [_host, _port, _api_path, system_prompt.length()])
+	_connection_attempt_time = now
+	_request_started_time = now
+	_last_activity_time = now
+	print("[LLMClient] request %s:%d%s (prompt=%d chars)" % [_host, _port, _api_path, system_prompt.length()])
 
 
 func _poll_request() -> void:
@@ -214,13 +228,14 @@ func _poll_request() -> void:
 			if status in [HTTPClient.STATUS_CONNECTING, HTTPClient.STATUS_RESOLVING]:
 				return
 			if status != HTTPClient.STATUS_CONNECTED:
-				_fail("连接失败: status=%d" % status)
+				_fail("connection failed: status=%d" % status)
 				return
 			var err = _client.request(HTTPClient.METHOD_POST, _api_path, _request_headers, _pending_body)
 			if err != OK:
-				_fail("请求发送失败: %d" % err)
+				_fail("request send failed: %d" % err)
 				return
 			_state = State.REQUESTING
+			_last_activity_time = Time.get_ticks_msec() / 1000.0
 
 		State.REQUESTING, State.RECEIVING:
 			if status == HTTPClient.STATUS_REQUESTING:
@@ -229,9 +244,11 @@ func _poll_request() -> void:
 				if not _response_started:
 					_response_started = true
 					_response_code = _client.get_response_code()
+					_last_activity_time = Time.get_ticks_msec() / 1000.0
 				_state = State.RECEIVING
 				var chunk = _client.read_response_body_chunk()
 				if not chunk.is_empty():
+					_last_activity_time = Time.get_ticks_msec() / 1000.0
 					var chunk_text := chunk.get_string_from_utf8()
 					_response_body += chunk_text
 					if _stream_mode and _response_code == 200:
@@ -244,9 +261,9 @@ func _poll_request() -> void:
 				_finish_response()
 				return
 			if status == HTTPClient.STATUS_DISCONNECTED:
-				_fail("连接提前断开")
+				_fail("connection closed early")
 				return
-			_fail("请求异常: status=%d" % status)
+			_fail("request error: status=%d" % status)
 
 
 func _finish_response() -> void:
@@ -257,11 +274,11 @@ func _finish_response() -> void:
 
 	var json = JSON.new()
 	if json.parse(_response_body) != OK:
-		_fail("响应不是合法 JSON")
+		_fail("response is not valid JSON")
 		return
 	var payload = json.get_data()
 	if payload is not Dictionary:
-		_fail("响应格式错误")
+		_fail("invalid response shape")
 		return
 
 	var content := ""
@@ -275,7 +292,7 @@ func _finish_response() -> void:
 		content = _string_or_empty(payload.get("content", ""))
 
 	if content.is_empty():
-		_fail(str(payload.get("error", "未返回文本内容")))
+		_fail(str(payload.get("error", "empty response")))
 		return
 
 	_emit_text_as_stream(content)
@@ -359,7 +376,7 @@ func _complete_stream_response() -> void:
 	stream_completed.emit(_stream_full_text)
 	if _current_callback.is_valid():
 		_current_callback.call(_stream_full_text)
-	print("[LLMClient] 流式响应完成 (%d chars)" % _stream_full_text.length())
+	print("[LLMClient] stream completed (%d chars)" % _stream_full_text.length())
 
 
 func _emit_text_as_stream(content: String) -> void:
@@ -376,7 +393,7 @@ func _emit_text_as_stream(content: String) -> void:
 	stream_completed.emit(content)
 	if _current_callback.is_valid():
 		_current_callback.call(content)
-	print("[LLMClient] 响应完成 (%d chars)" % content.length())
+	print("[LLMClient] response completed (%d chars)" % content.length())
 
 
 func _fail(message: String) -> void:

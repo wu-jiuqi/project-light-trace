@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://c12m6t31glldg"]
+
+[ext_resource type="Texture2D" uid="uid://c8qfrmlwgjlx8" path="res://assets/papercraft/fragments/id0003/characters/npc_02_mirrorspirit_s.png" id="1_6hfi2"]
+[ext_resource type="Script" path="res://scripts/fragment/fragment_0003_npc.gd" id="2_npc"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_k0tlo"]
+size = Vector2(112, 32)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ygefe"]
+radius = 49.0
+height = 136.0
+
+[node name="NpcMirrorspirit" type="CharacterBody2D" unique_id=2074737410]
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("2_npc")
+npc_name = "镜灵"
+npc_role = "仪式守镜者"
+npc_kb_id = "mirrorspirit"
+default_greeting = "镜面静静映着你的倒影。"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=601045597]
+position = Vector2(-1, -13)
+shape = SubResource("RectangleShape2D_k0tlo")
+
+[node name="Visual Node2D" type="Node2D" parent="." unique_id=485806388]
+
+[node name="Visual" type="Sprite2D" parent="Visual Node2D" unique_id=1296392933]
+position = Vector2(0, -84)
+texture = ExtResource("1_6hfi2")
+
+[node name="Shadow Sprite2D" type="Sprite2D" parent="Visual Node2D" unique_id=1686971917]
+
+[node name="FeetMarker Marker2D" type="Marker2D" parent="." unique_id=1529486619]
+
+[node name="InteractionArea Area2D" type="Area2D" parent="." unique_id=105546043]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea Area2D" unique_id=893474802]
+position = Vector2(0, -60)
+shape = SubResource("CapsuleShape2D_ygefe")
+debug_color = Color(0.66201776, 0.5140176, 0, 0.41960785)

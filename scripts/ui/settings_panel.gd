@@ -3,10 +3,14 @@ extends BasePanel
 
 @onready var master_slider: HSlider = $"Stage/SettingsContainer/ContentArea/AudioSection/MasterRow/MasterSlider"
 @onready var bgm_slider: HSlider = $"Stage/SettingsContainer/ContentArea/AudioSection/BgmRow/BgmSlider"
+@onready var ambience_slider: HSlider = get_node_or_null("Stage/SettingsContainer/ContentArea/AudioSection/AmbienceRow/AmbienceSlider") as HSlider
 @onready var sfx_slider: HSlider = $"Stage/SettingsContainer/ContentArea/AudioSection/SfxRow/SfxSlider"
+@onready var voice_slider: HSlider = get_node_or_null("Stage/SettingsContainer/ContentArea/AudioSection/VoiceRow/VoiceSlider") as HSlider
 @onready var master_value: Label = $"Stage/SettingsContainer/ContentArea/AudioSection/MasterRow/MasterValue"
 @onready var bgm_value: Label = $"Stage/SettingsContainer/ContentArea/AudioSection/BgmRow/BgmValue"
+@onready var ambience_value: Label = get_node_or_null("Stage/SettingsContainer/ContentArea/AudioSection/AmbienceRow/AmbienceValue") as Label
 @onready var sfx_value: Label = $"Stage/SettingsContainer/ContentArea/AudioSection/SfxRow/SfxValue"
+@onready var voice_value: Label = get_node_or_null("Stage/SettingsContainer/ContentArea/AudioSection/VoiceRow/VoiceValue") as Label
 @onready var volume_disc: TextureRect = get_node_or_null("Stage/SettingsContainer/ContentArea/AudioSection/VolumeDisc") as TextureRect
 @onready var fullscreen_check: CheckButton = $"Stage/SettingsContainer/ContentArea/DisplaySection/FullscreenRow/FullscreenCheck"
 @onready var llm_mode_option: OptionButton = $"Stage/SettingsContainer/ContentArea/ApiSection/ModeRow/ModeOption"
@@ -32,7 +36,11 @@ func _on_ready() -> void:
 	_connect_button_pressed(close_button, cancel, "Stage/SettingsContainer/TitleBar/CloseButton")
 	master_slider.value_changed.connect(_on_slider_changed.bind("master"))
 	bgm_slider.value_changed.connect(_on_slider_changed.bind("bgm"))
+	if ambience_slider:
+		ambience_slider.value_changed.connect(_on_slider_changed.bind("ambience"))
 	sfx_slider.value_changed.connect(_on_slider_changed.bind("sfx"))
+	if voice_slider:
+		voice_slider.value_changed.connect(_on_slider_changed.bind("voice"))
 	llm_mode_option.item_selected.connect(func(_index: int): _update_api_enabled())
 	base_url_edit.text_changed.connect(func(_text: String): _update_api_enabled())
 	model_edit.text_changed.connect(func(_text: String): _update_api_enabled())
@@ -48,7 +56,11 @@ func load_settings() -> void:
 	SettingsManager.load()
 	master_slider.value = SettingsManager.master_volume * 100.0
 	bgm_slider.value = SettingsManager.bgm_volume * 100.0
+	if ambience_slider:
+		ambience_slider.value = SettingsManager.ambience_volume * 100.0
 	sfx_slider.value = SettingsManager.sfx_volume * 100.0
+	if voice_slider:
+		voice_slider.value = SettingsManager.voice_volume * 100.0
 	fullscreen_check.button_pressed = SettingsManager.fullscreen
 	llm_mode_option.select(1 if SettingsManager.llm_mode == SettingsManager.LLM_MODE_CUSTOM else 0)
 	base_url_edit.text = SettingsManager.llm_base_url
@@ -70,7 +82,9 @@ func save_settings() -> void:
 
 	SettingsManager.master_volume = master_slider.value / 100.0
 	SettingsManager.bgm_volume = bgm_slider.value / 100.0
+	SettingsManager.ambience_volume = (ambience_slider.value / 100.0) if ambience_slider else SettingsManager.ambience_volume
 	SettingsManager.sfx_volume = sfx_slider.value / 100.0
+	SettingsManager.voice_volume = (voice_slider.value / 100.0) if voice_slider else SettingsManager.voice_volume
 	SettingsManager.fullscreen = fullscreen_check.button_pressed
 	SettingsManager.llm_mode = next_llm_mode
 	SettingsManager.llm_base_url = next_base_url
@@ -86,7 +100,11 @@ func save_settings() -> void:
 func cancel() -> void:
 	master_slider.value = _cached_values.get("master", 100.0)
 	bgm_slider.value = _cached_values.get("bgm", 100.0)
+	if ambience_slider:
+		ambience_slider.value = _cached_values.get("ambience", 100.0)
 	sfx_slider.value = _cached_values.get("sfx", 100.0)
+	if voice_slider:
+		voice_slider.value = _cached_values.get("voice", 100.0)
 	fullscreen_check.button_pressed = _cached_values.get("fullscreen", false)
 	llm_mode_option.select(_cached_values.get("llm_index", 0))
 	base_url_edit.text = _cached_values.get("base_url", "")
@@ -98,26 +116,29 @@ func cancel() -> void:
 
 func _on_slider_changed(_value: float, bus: String) -> void:
 	_update_value_labels()
-	var bus_name: String = "Master"
 	var slider: HSlider = master_slider
 	match bus:
 		"bgm":
-			bus_name = "BGM"
 			slider = bgm_slider
+		"ambience":
+			slider = ambience_slider
 		"sfx":
-			bus_name = "SFX"
 			slider = sfx_slider
-	var bus_index := AudioServer.get_bus_index(bus_name)
-	if bus_index >= 0:
-		var db := linear_to_db(maxf(slider.value / 100.0, 0.0001))
-		AudioServer.set_bus_volume_db(bus_index, maxf(db, -80.0))
+		"voice":
+			slider = voice_slider
+	if slider == null:
+		return
+	if AudioManager and AudioManager.has_method("set_channel_volume"):
+		AudioManager.set_channel_volume(bus, slider.value / 100.0)
 
 
 func _cache_snapshot() -> void:
 	_cached_values = {
 		"master": master_slider.value,
 		"bgm": bgm_slider.value,
+		"ambience": ambience_slider.value if ambience_slider else 100.0,
 		"sfx": sfx_slider.value,
+		"voice": voice_slider.value if voice_slider else 100.0,
 		"fullscreen": fullscreen_check.button_pressed,
 		"llm_index": llm_mode_option.selected,
 		"base_url": base_url_edit.text,
@@ -129,7 +150,11 @@ func _cache_snapshot() -> void:
 func _update_value_labels() -> void:
 	master_value.text = "%d%%" % int(master_slider.value)
 	bgm_value.text = "%d%%" % int(bgm_slider.value)
+	if ambience_value and ambience_slider:
+		ambience_value.text = "%d%%" % int(ambience_slider.value)
 	sfx_value.text = "%d%%" % int(sfx_slider.value)
+	if voice_value and voice_slider:
+		voice_value.text = "%d%%" % int(voice_slider.value)
 	if volume_disc:
 		volume_disc.rotation_degrees = -135.0 + (master_slider.value / 100.0) * 270.0
 

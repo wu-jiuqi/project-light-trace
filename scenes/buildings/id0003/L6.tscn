@@ -1,0 +1,39 @@
+[gd_scene format=3 uid="uid://bo346231nbuqb"]
+
+[ext_resource type="Texture2D" uid="uid://r3egt4w71by0" path="res://assets/papercraft/fragments/id0003/environment/yu.png" id="1_r8j5b"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bc7py"]
+size = Vector2(547, 171)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_lkywt"]
+radius = 274.0
+height = 1040.0
+
+[node name="L6" type="Node2D" unique_id=724844568]
+
+[node name="Visual" type="Node2D" parent="." unique_id=589649390]
+
+[node name="Body" type="Sprite2D" parent="Visual" unique_id=923472801]
+position = Vector2(0, -585)
+texture = ExtResource("1_r8j5b")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=16381997]
+collision_layer = 4
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=1443275233]
+position = Vector2(-0.5, -75.5)
+shape = SubResource("RectangleShape2D_bc7py")
+
+[node name="BaseMarker" type="Marker2D" parent="." unique_id=1071687914]
+
+[node name="Interaction" type="Area2D" parent="." unique_id=393362857]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Interaction" unique_id=313039243]
+position = Vector2(0, -280)
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_lkywt")
+debug_color = Color(0.667706, 0.5109785, 0, 0.41960785)

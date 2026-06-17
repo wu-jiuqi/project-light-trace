@@ -148,6 +148,26 @@ const GALLERY_ITEMS: Array[Dictionary] = [
 		"state_key": "source_mark_ticket_collected",
 		"order": 300,
 	},
+	{
+		"id": "jade_0003",
+		"title": "藏玉木盒",
+		"description": "阁楼木盒中藏着的玉。盒盖开启时，月光在玉面上停留了片刻。",
+		"thumbnail": "res://assets/papercraft/fragments/id0003/environment/box_01.png",
+		"image": "res://assets/papercraft/fragments/id0003/environment/box_01.png",
+		"fragment_id": "0003",
+		"state_key": "jade_gallery_collected",
+		"order": 310,
+	},
+	{
+		"id": "moonlight_jade_0003",
+		"title": "月光之印",
+		"description": "启镜之后留下的淡蓝勾玉。它不像奖赏，更像织女把那一秒的月光折好，交到你手里。",
+		"thumbnail": "res://assets/papercraft/fragments/id0003/environment/jade.png",
+		"image": "res://assets/papercraft/fragments/id0003/environment/jade.png",
+		"fragment_id": "0003",
+		"state_key": "jade_collected",
+		"order": 320,
+	},
 ]
 
 @onready var _gallery_card: Control = $Stage/GalleryPanel/Gallery/GalleryCard
