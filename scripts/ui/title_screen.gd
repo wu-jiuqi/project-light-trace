@@ -114,6 +114,7 @@ func _ready() -> void:
 	_setup_settings_panel()
 	_layout_all()
 	get_viewport().size_changed.connect(_layout_all)
+	SceneFader.fade_in()
 
 	_has_saves = _has_occupied_save_slots()
 	_selected = 0  # 默认选中「开始游戏」
@@ -340,8 +341,10 @@ func _layout_hit_areas() -> void:
 		area.position = mapped_rect.position
 		area.size = mapped_rect.size
 
-	_hit_container.position = Vector2.ZERO
-	_hit_container.size = vs
+	_hit_container.offset_left = 0.0
+	_hit_container.offset_top = 0.0
+	_hit_container.offset_right = 0.0
+	_hit_container.offset_bottom = 0.0
 
 	# 布局改变后同步高亮位置和尺寸
 	_update_selection()
@@ -799,9 +802,8 @@ func _start_new_game_in_slot_unchecked(slot: int) -> void:
 	SaveManager.save_game(slot)
 
 	_stop_bgm()
-	SceneManager.pending_spawn_point = "from_cutscene"
 	# 新游戏 → 开场动画 → 星图
-	get_tree().change_scene_to_file("res://scenes/cinematic/opening_cinematic.tscn")
+	SceneManager.change_scene("res://scenes/cinematic/opening_cinematic.tscn", "from_cutscene")
 
 
 func _continue_game() -> void:
@@ -812,8 +814,7 @@ func _continue_game() -> void:
 	print("[TitleScreen] 继续游戏 (slot %d)" % slot)
 	SaveManager.load_game(slot)
 	_stop_bgm()
-	SceneManager.pending_spawn_point = ""
-	get_tree().change_scene_to_file("res://scenes/star_map.tscn")
+	SceneManager.change_scene("res://scenes/star_map.tscn")
 
 
 # ============================================================
@@ -986,8 +987,7 @@ func _load_selected_slot() -> void:
 	print("[TitleScreen] 加载存档 slot %d" % slot)
 	SaveManager.load_game(slot)
 	_stop_bgm()
-	SceneManager.pending_spawn_point = ""
-	get_tree().change_scene_to_file("res://scenes/star_map.tscn")
+	SceneManager.change_scene("res://scenes/star_map.tscn")
 
 
 func _delete_selected_slot() -> void:

@@ -23,9 +23,9 @@ func _run() -> void:
 
 	_check_scene_panel("res://scenes/ui/DialogueBox.tscn", "Stage/DialoguePanel", "chat panel uses texture skin")
 	_check_scene_panel("res://scenes/ui/Backpack.tscn", "Stage/MainNotebook", "backpack scene uses texture skin")
-	_check_scene_panel("res://scenes/ui/DialogueHistory.tscn", "Stage/DialoguePanel", "dialogue history scene uses texture skin")
+	_check_scene_panel("res://scenes/ui/DialogueHistory.tscn", "Stage/LargePage", "dialogue history scene uses texture skin")
 	_check_scene_panel("res://scenes/ui/CluePanel.tscn", "Stage/MainContainer", "clue panel scene uses texture skin")
-	_check_scene_panel("res://scenes/ui/SettingsPanel.tscn", "Stage/SettingsContainer", "settings panel scene uses texture skin")
+	_check_scene_panel("res://scenes/ui/SettingsPanel.tscn", "Stage/LargePage", "settings panel scene uses texture skin")
 	_check_scene_panel("res://scenes/ui/PauseMenu.tscn", "Stage/PauseContainer", "pause menu scene uses texture skin")
 
 	var title_scene = load("res://scenes/ui/title_screen.tscn").instantiate()
@@ -48,10 +48,10 @@ func _run() -> void:
 	current_scene = star_map
 	await process_frame
 	_check(star_map.get_node("BG") is TextureRect, "star map uses generated background")
-	_check(_has_texture_panel(star_map.get_node("UI/DetailCard")), "star map detail card uses texture skin")
+	_check(_has_texture_backed_control(star_map.get_node("UI/DetailCard")), "star map detail card uses texture skin")
 	_check(
-		star_map.get_node("UI/DetailCard/EnterBtn").get_theme_stylebox("normal") is StyleBoxTexture,
-		"star map buttons use texture skin"
+		star_map.get_node("UI/DetailCard/EnterBtn").get_theme_stylebox("normal") is StyleBoxEmpty,
+		"star map buttons use transparent hotspots over texture skin"
 	)
 	_check(not star_map.has_node("UI/FragmentList"), "star map no longer uses fragment list")
 	_check(not star_map.has_node("UI/ProgressBar"), "star map no longer shows progress bar")
@@ -66,12 +66,27 @@ func _has_texture_panel(panel: Panel) -> bool:
 	return panel != null and panel.get_theme_stylebox("panel") is StyleBoxTexture
 
 
+func _has_texture_backed_control(control: Control) -> bool:
+	if control == null:
+		return false
+	var background := control.get_node_or_null("DialogBG") as TextureRect
+	return background != null and background.texture != null
+
+
 func _check_scene_panel(scene_path: String, panel_path: String, message: String) -> void:
 	var scene = load(scene_path).instantiate()
 	root.add_child(scene)
-	var panel := scene.get_node_or_null(panel_path) as Panel
-	_check(_has_texture_panel(panel), message)
+	var surface := scene.get_node_or_null(panel_path) as Control
+	_check(_has_texture_surface(surface), message)
 	scene.queue_free()
+
+
+func _has_texture_surface(surface: Control) -> bool:
+	if surface is Panel:
+		return _has_texture_panel(surface as Panel)
+	if surface is TextureRect:
+		return (surface as TextureRect).texture != null
+	return false
 
 
 func _check_title_hit_layout(title_scene: Control, layout_size: Vector2, message: String) -> void:

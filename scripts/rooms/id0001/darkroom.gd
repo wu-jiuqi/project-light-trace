@@ -375,7 +375,7 @@ func _show_completion_overlay() -> void:
 	return_btn.size = Vector2(180, 44)
 	return_btn.add_theme_font_size_override("font_size", 16)
 	return_btn.pressed.connect(func() -> void:
-		get_tree().change_scene_to_file("res://scenes/star_map.tscn")
+		SceneManager.change_scene("res://scenes/star_map.tscn")
 	)
 	return_btn.pressed.connect(UISoundManager.play_click)
 	button_row.add_child(return_btn)

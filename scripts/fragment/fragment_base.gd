@@ -120,7 +120,7 @@ func _on_fragment_completed() -> void:
 	FragmentManager.complete_fragment(current_fragment)
 	SaveManager.save_game()
 	# 返回星图
-	get_tree().change_scene_to_file("res://scenes/star_map.tscn")
+	SceneManager.change_scene("res://scenes/star_map.tscn")
 
 func _get_random_other_clue() -> String:
 	# 随机获取一个其它碎片的线索
@@ -172,4 +172,4 @@ func _try_interact() -> void:
 func _confirm_exit() -> void:
 	# 确认退出碎片
 	fragment_exited.emit()
-	get_tree().change_scene_to_file("res://scenes/star_map.tscn")
+	SceneManager.change_scene("res://scenes/star_map.tscn")

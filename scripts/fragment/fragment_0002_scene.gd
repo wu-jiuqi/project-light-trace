@@ -356,7 +356,7 @@ func _show_completion_and_return() -> void:
 		_completion_label.visible = true
 	await get_tree().create_timer(1.2).timeout
 	_stop_bgm()
-	get_tree().change_scene_to_file("res://scenes/star_map.tscn")
+	SceneManager.change_scene("res://scenes/star_map.tscn")
 
 
 func _find_npc_by_id(npc_id: String) -> Node:

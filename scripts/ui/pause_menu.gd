@@ -287,15 +287,14 @@ func _slot_has_data(slot: int) -> bool:
 func _return_to_title() -> void:
 	close()
 	await get_tree().process_frame
-	get_tree().change_scene_to_file("res://scenes/ui/title_screen.tscn")
+	SceneManager.change_scene("res://scenes/ui/title_screen.tscn")
 
 
 func _return_to_star_map() -> void:
 	close()
 	await get_tree().process_frame
 	_in_fragment = false
-	SceneManager.pending_spawn_point = ""
-	get_tree().change_scene_to_file("res://scenes/star_map.tscn")
+	SceneManager.change_scene("res://scenes/star_map.tscn")
 
 
 func _is_on_title_screen() -> bool:

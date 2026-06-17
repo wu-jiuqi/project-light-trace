@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://ds2mxs64qsydu"]
 
-[ext_resource type="Script" uid="uid://0001sundialscript" path="res://scripts/buildings/sundial.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://cnxbackkmcm77" path="res://scripts/buildings/sundial.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://cymqqlm5yxpne" path="res://assets/papercraft/fragments/id0001/environment2/fantasy_shop_15.png" id="2_unhck"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_m6hey"]

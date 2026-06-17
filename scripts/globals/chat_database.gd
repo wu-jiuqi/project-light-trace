@@ -1,59 +1,35 @@
 extends Node
 ## 聊天记录混合存储（按存档槽位隔离）
-##   _cache: 每NPC最近N条（deque，LLM用）—— 纯内存，不落盘
-##   _data:  每NPC全部消息（持久化，按槽位独立文件）
-##
-## 文件 user://saves/chat_{slot}.json：{ "blacksmith": [{role,content,timestamp,...},...], ... }
-##
-## 聊天数据仅存储于独立的 chat_{slot}.json 文件中
-## SaveManager 不再内嵌聊天数据到 save_{slot}.json
+##   _cache: 每 NPC 最近 N 条（deque，LLM 用），纯内存
+##   _data: 每 NPC 全部消息，持久化到独立 chat_{slot}.json
 
-const CACHE_SIZE: int = 20  ## LLM注入的最大历史条数
-const SAVE_DIR: String = "user://saves/"
+const CACHE_SIZE: int = 20
 
-## 内存缓存（LLM用）：{ "npc_id": Array[Dictionary] }，上限 CACHE_SIZE
 var _cache: Dictionary = {}
-
-## 全量数据（磁盘）：{ "npc_id": Array[Dictionary] }
 var _data: Dictionary = {}
-
-## 当前绑定的存档槽位
 var _current_slot: int = 0
 
 
-# ============================================================
-# 生命周期
-# ============================================================
-
 func _ready() -> void:
-	# 不在 _ready 中自动加载，由 SaveManager 通过 set_slot() 控制加载时机
+	# 不在 _ready 中自动加载，由 SaveManager 通过 set_slot() 控制加载时机。
 	print("[ChatDatabase] 就绪 | 等待 SaveManager 指定槽位")
 
 
-# ============================================================
-# 槽位切换
-# ============================================================
-
 func set_slot(slot: int) -> void:
-	## 切换到指定槽位：保存当前槽位数据，清空内存，加载新槽位
 	if slot == _current_slot and not _data.is_empty():
-		return  # 同槽位且已有数据，无需重新加载
-	
-	# 保存当前槽位
+		return
+
 	_save()
-	
-	# 切换到新槽位
 	_current_slot = slot
 	_data.clear()
 	_cache.clear()
-	
-	# 尝试从该槽位的会话文件恢复（崩溃恢复）
+
 	_load()
 	print("[ChatDatabase] 切换到槽位 %d | 文件: %s | NPC数: %d" % [slot, _data_path(), _data.size()])
 
 
 func _data_path() -> String:
-	return SAVE_DIR + "chat_%d.json" % _current_slot
+	return SaveConstants.chat_path(_current_slot)
 
 
 func _load() -> void:
@@ -79,7 +55,6 @@ func _load() -> void:
 
 
 func _rebuild_cache() -> void:
-	## 从全量 _data 重建每个 NPC 的最近 N 条缓存
 	_cache.clear()
 	for npc_id in _data:
 		var entries: Array = _data[npc_id]
@@ -92,6 +67,8 @@ func _rebuild_cache() -> void:
 func _save() -> void:
 	if _data.is_empty():
 		return
+	if not DirAccess.dir_exists_absolute(SaveConstants.save_dir()):
+		DirAccess.make_dir_recursive_absolute(SaveConstants.save_dir())
 	var path = _data_path()
 	var file = FileAccess.open(path, FileAccess.WRITE)
 	if not file:
@@ -101,15 +78,11 @@ func _save() -> void:
 	file.close()
 
 
-# ============================================================
-# 写入
-# ============================================================
-
 func log_message(npc_id: String, role: String, content: String, alert_phase: int = 0, suspicion: float = 0.0) -> void:
 	var clean_content := _sanitize_content(content)
 	if clean_content.is_empty() or npc_id.is_empty():
 		return
-	
+
 	var entry = {
 		"role": role,
 		"content": clean_content,
@@ -117,33 +90,26 @@ func log_message(npc_id: String, role: String, content: String, alert_phase: int
 		"alert_phase": alert_phase,
 		"suspicion": snapped(suspicion, 0.01)
 	}
-	
-	# 追加到全量数据
+
 	if not _data.has(npc_id):
 		_data[npc_id] = []
 	_data[npc_id].append(entry)
-	
-	# 追加到内存缓存（保留最近 N 条）
+
 	if not _cache.has(npc_id):
 		_cache[npc_id] = []
 	var cache_arr: Array = _cache[npc_id]
 	cache_arr.append(entry)
 	if cache_arr.size() > CACHE_SIZE:
 		cache_arr.pop_front()
-	
+
 	_save()
 
 
-# ============================================================
-# 查询 —— LLM 上下文（走缓存，O(1)）
-# ============================================================
-
 func get_history_as_text(npc_id: String, max_messages: int = 10) -> String:
-	## 从缓存取最近N条，组装为LLM可注入的纯文本
 	var cache_arr: Array = _cache.get(npc_id, [])
 	if cache_arr.is_empty():
 		return ""
-	
+
 	var start = max(0, cache_arr.size() - max_messages)
 	var lines: Array[String] = ["## 最近对话"]
 	for i in range(start, cache_arr.size()):
@@ -158,28 +124,22 @@ func get_history_as_text(npc_id: String, max_messages: int = 10) -> String:
 			lines.append("玩家: %s" % content)
 		else:
 			lines.append("%s: %s" % [_display_name(npc_id), content])
-	
+
 	return "\n".join(lines)
 
 
-# ============================================================
-# 查询 —— 历史翻看（走全量数据，分页）
-# ============================================================
-
 func get_page(npc_id: String, page: int = 0, page_size: int = 20) -> Dictionary:
-	## 分页查询历史对话（page 0 为最新一页；页内保持从旧到新的阅读顺序）
-	## 返回 { "messages": [...], "total": int, "page": int, "total_pages": int }
 	var all: Array = _data.get(npc_id, [])
 	var total = all.size()
 	var total_pages = max(1, ceili(float(total) / page_size))
 	page = clamp(page, 0, total_pages - 1)
-	
+
 	var end_idx = total - page * page_size
 	var start_idx = max(0, end_idx - page_size)
 	var page_messages: Array = []
 	for i in range(start_idx, end_idx):
 		page_messages.append(all[i])
-	
+
 	return {
 		"messages": page_messages,
 		"total": total,
@@ -201,10 +161,6 @@ func get_statistics() -> Dictionary:
 	return stats
 
 
-# ============================================================
-# 清理
-# ============================================================
-
 func clear_npc_history(npc_id: String) -> void:
 	if _data.has(npc_id):
 		_data.erase(npc_id)
@@ -214,7 +170,6 @@ func clear_npc_history(npc_id: String) -> void:
 
 
 func clear_all_history() -> void:
-	## 清空当前槽位的全部聊天记录（同时删除文件）
 	_data.clear()
 	_cache.clear()
 	var path = _data_path()
@@ -223,32 +178,25 @@ func clear_all_history() -> void:
 	print("[ChatDatabase] 已清空槽位 %d 的全部聊天记录" % _current_slot)
 
 
-# ============================================================
-# 存档集成 —— 供 SaveManager 调用
-# ============================================================
+func clear_memory_only() -> void:
+	_data.clear()
+	_cache.clear()
+
 
 func flush_to_disk() -> void:
-	## 强制将当前内存中的聊天数据写入独立文件
-	## 供 SaveManager 在存档前调用，确保 chat_{slot}.json 与 save_{slot}.json 一致
 	_save()
 
 
 func has_any_data() -> bool:
-	## 返回当前槽位是否有任何聊天数据
 	return not _data.is_empty()
 
 
 func delete_slot_file(slot: int) -> void:
-	## 删除指定槽位的聊天记录文件
-	var path = SAVE_DIR + "chat_%d.json" % slot
+	var path = SaveConstants.chat_path(slot)
 	if FileAccess.file_exists(path):
 		DirAccess.remove_absolute(path)
 		print("[ChatDatabase] 已删除槽位 %d 的聊天记录文件" % slot)
 
-
-# ============================================================
-# 内部
-# ============================================================
 
 func _display_name(npc_id: String) -> String:
 	match npc_id:

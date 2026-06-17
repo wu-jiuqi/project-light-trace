@@ -11,26 +11,41 @@ func _run() -> void:
 	var manager = load("res://scripts/globals/fragment_manager.gd").new()
 	root.add_child(manager)
 
-	var fragment = manager.get_fragment_by_id("0762")
-	_check(fragment != null and fragment.implemented, "0762 is the playable MVP fragment")
-	_check(not fragment.completed, "0762 starts unrepaired")
-	_check(manager.enter_fragment(fragment), "implemented fragment enters directly")
-
+	var fragment_0001 = manager.get_fragment_by_id("0001")
 	var fragment_0002 = manager.get_fragment_by_id("0002")
-	_check(fragment_0002 != null and fragment_0002.implemented, "0002 is now playable from the star map")
-	_check(manager.enter_fragment(fragment_0002), "0002 implemented fragment enters directly")
+	var fragment_0003 = manager.get_fragment_by_id("0003")
+	var placeholder_0004 = manager.get_fragment_by_id("0004")
 
-	var placeholder = manager.get_fragment_by_id("0003")
-	_check(placeholder != null and not placeholder.implemented, "placeholder fragment is marked unimplemented")
-	_check(not manager.enter_fragment(placeholder), "placeholder fragment cannot be entered")
+	_check(fragment_0001 != null and fragment_0001.implemented, "0001 is implemented")
+	_check(fragment_0002 != null and fragment_0002.implemented, "0002 is implemented")
+	_check(fragment_0003 != null and fragment_0003.implemented, "0003 is implemented")
+	_check(placeholder_0004 != null and not placeholder_0004.implemented, "0004 is still a placeholder")
 
-	_check(manager.complete_fragment(fragment), "first completion changes state")
-	_check(fragment.completed, "fragment is marked completed")
-	_check(manager.pending_completion_animation_id == "0762", "completion schedules star-map animation")
-	_check(manager.consume_completion_animation_id() == "0762", "star-map animation id is consumed once")
+	_check(manager.enter_fragment(fragment_0001), "0001 can be entered at game start")
+	_check(not manager.enter_fragment(fragment_0002), "locked 0002 cannot be entered at game start")
+	_check(not manager.enter_fragment(fragment_0003), "locked 0003 cannot be entered at game start")
+
+	manager.set_fragment_state("0001", "test_progress", 7)
+	_check(manager.enter_fragment(fragment_0001), "re-entering without reset succeeds")
+	_check(manager.get_fragment_state("0001", "test_progress") == 7, "normal entry preserves fragment state")
+	_check(manager.enter_fragment(fragment_0001, true), "explicit reset entry succeeds")
+	_check(manager.get_fragment_state("0001", "test_progress") == null, "explicit reset clears fragment state")
+
+	_check(manager.complete_fragment(fragment_0001), "0001 completion changes state")
+	_check(fragment_0001.completed, "0001 is marked completed")
+	_check(fragment_0002.unlocked, "0001 completion unlocks 0002")
+	_check(manager.pending_completion_animation_id == "0001", "completion schedules star-map animation")
+	_check(manager.consume_completion_animation_id() == "0001", "star-map animation id is consumed once")
 	_check(manager.consume_completion_animation_id() == "", "consumed animation id is cleared")
-	_check(not manager.complete_fragment(fragment), "repeat completion is idempotent")
-	_check(manager.pending_completion_animation_id == "", "repeat completion does not reschedule animation")
+	_check(not manager.complete_fragment(fragment_0001), "repeat completion is idempotent")
+
+	_check(manager.enter_fragment(fragment_0002), "unlocked 0002 can be entered")
+	_check(manager.complete_fragment(fragment_0002), "0002 completion changes state")
+	_check(fragment_0003.unlocked, "0002 completion unlocks 0003")
+	_check(manager.enter_fragment(fragment_0003), "unlocked 0003 can be entered")
+
+	placeholder_0004.unlocked = true
+	_check(not manager.enter_fragment(placeholder_0004), "unimplemented 0004 cannot be entered even when unlocked")
 
 	manager.queue_free()
 	if _failures == 0:

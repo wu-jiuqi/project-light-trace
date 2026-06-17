@@ -25,6 +25,7 @@ func _ready() -> void:
 	print("[Fragment0762] 漫画过场: 颜色的葬礼 — 灰白小镇")
 	_create_ui()
 	_show_page(0)
+	SceneFader.fade_in()
 
 
 func _create_ui() -> void:

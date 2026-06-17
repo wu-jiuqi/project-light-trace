@@ -1040,7 +1040,7 @@ func _on_return_to_star_map() -> void:
 	"""胜利画面 [返回星图] 按钮回调"""
 	print("[Fragment0001] 玩家选择返回星图")
 	_stop_bgm()
-	get_tree().change_scene_to_file("res://scenes/star_map.tscn")
+	SceneManager.change_scene("res://scenes/star_map.tscn")
 
 
 func _on_continue_playing() -> void:
@@ -1106,7 +1106,7 @@ func _modify_compliance(delta: int, reason: String) -> void:
 		var timer := get_tree().create_timer(3.0)
 		timer.timeout.connect(func() -> void:
 			_stop_bgm()
-			get_tree().change_scene_to_file("res://scenes/star_map.tscn")
+			SceneManager.change_scene("res://scenes/star_map.tscn")
 		)
 
 

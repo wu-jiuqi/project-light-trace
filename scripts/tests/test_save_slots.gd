@@ -11,6 +11,12 @@ func _run() -> void:
 	var manager = root.get_node("SaveManager")
 	var game_manager = root.get_node("GameManager")
 	var fragment_manager = root.get_node("FragmentManager")
+	manager._stop_auto_save()
+	manager.set("_current_slot", -1)
+	manager.save_data = {}
+	root.get_node("ChatDatabase").clear_memory_only()
+	SaveConstants.set_save_dir("user://test_saves/")
+	manager._ensure_save_dir()
 	for slot in range(SaveConstants.MAX_SLOTS):
 		manager.delete_slot(slot)
 
@@ -63,13 +69,16 @@ func _run() -> void:
 
 	manager.delete_slot(2)
 	_check(manager.get_current_slot() == -1, "deleting the active slot clears active state")
-	_check(not FileAccess.file_exists("user://saves/last_slot.json"), "deleting the active slot clears last slot")
+	_check(not FileAccess.file_exists(SaveConstants.last_slot_path()), "deleting the active slot clears last slot")
 	manager._on_auto_save()
-	_check(not FileAccess.file_exists("user://saves/save_2.json"), "auto save does not recreate a deleted slot")
+	_check(not FileAccess.file_exists(SaveConstants.slot_path(2)), "auto save does not recreate a deleted slot")
 	_check(not manager.save_game(), "saving without an active slot is rejected")
 
 	for slot in range(SaveConstants.MAX_SLOTS):
 		manager.delete_slot(slot)
+	SaveConstants.reset_save_dir()
+	manager._ensure_save_dir()
+	root.get_node("ChatDatabase").clear_memory_only()
 	if _failures == 0:
 		print("[SUMMARY] save slot regression checks passed")
 	quit(_failures)

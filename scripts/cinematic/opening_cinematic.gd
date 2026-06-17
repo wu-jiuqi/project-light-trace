@@ -79,6 +79,7 @@ func _ready() -> void:
 	click_hint.add_theme_constant_override("outline_size", 3)
 	click_hint.text = HINT_TEXT_PAGE
 	_show_first_panel()
+	SceneFader.fade_in()
 	# 播放入场动画 BGM（55秒版本，结尾自动淡出）
 	_start_bgm()
 

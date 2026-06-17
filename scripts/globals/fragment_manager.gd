@@ -152,7 +152,7 @@ func get_available_fragments() -> Array[FragmentData]:
 # 碎片进入 / 完成
 # ============================================================
 
-func enter_fragment(fragment: FragmentData) -> bool:
+func enter_fragment(fragment: FragmentData, reset_run: bool = false) -> bool:
 	if not fragment.unlocked:
 		return false
 	if not fragment.implemented:
@@ -169,7 +169,8 @@ func enter_fragment(fragment: FragmentData) -> bool:
 	var was_completed: bool = fragment.completed
 	
 	current_fragment = fragment
-	GameManager.reset_fragment()
+	if reset_run:
+		reset_fragment_run(fragment.id)
 	
 	# 设置重玩标记（在 reset_fragment 之后，避免被重置）
 	is_replay_mode = was_completed
@@ -177,6 +178,17 @@ func enter_fragment(fragment: FragmentData) -> bool:
 	fragment_entered.emit(fragment.id)
 	print("[FragmentManager] 进入碎片 %s: %s (replay=%s)" % [fragment.id, fragment.name, is_replay_mode])
 	return true
+
+
+func reset_fragment_run(fragment_id: String = "") -> void:
+	var target_id := fragment_id
+	if target_id.is_empty() and current_fragment != null:
+		target_id = current_fragment.id
+	if target_id.is_empty():
+		return
+	if GameManager:
+		GameManager.items_used.clear()
+	reset_fragment_states(target_id)
 
 
 func complete_fragment(fragment: FragmentData) -> bool:
@@ -287,7 +299,8 @@ func reset_fragment_states(fragment_id: String) -> void:
 			}
 			print("[FragmentManager] 碎片 %s 的专属状态已重置" % fragment_id)
 		_:
-			printerr("[FragmentManager] 未知碎片状态重置请求: %s" % fragment_id)
+			_fragment_states.erase(fragment_id)
+			print("[FragmentManager] 碎片 %s 无专属默认状态，已清除运行态" % fragment_id)
 
 
 # ============================================================

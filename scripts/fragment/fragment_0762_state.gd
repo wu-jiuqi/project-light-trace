@@ -506,7 +506,7 @@ func _trigger_victory() -> void:
 		ChatDialogue.add_npc_msg("[回忆] 你再次见证了六色的汇聚。\n\n记忆不会因为重复而变得更完整——但重温它，也许能让你看到之前错过的东西。")
 		await get_tree().create_timer(2.0).timeout
 		FragmentManager.complete_fragment(FragmentManager.current_fragment)
-		get_tree().change_scene_to_file("res://scenes/star_map.tscn")
+		SceneManager.change_scene("res://scenes/star_map.tscn")
 		return
 
 	# 首次完成：标记 fragment 完成 + 记录源印 + 增加修复进度
@@ -521,4 +521,4 @@ func _trigger_victory() -> void:
 
 	# 返回星图
 	await get_tree().create_timer(2.0).timeout
-	get_tree().change_scene_to_file("res://scenes/star_map.tscn")
+	SceneManager.change_scene("res://scenes/star_map.tscn")

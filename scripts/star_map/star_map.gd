@@ -148,7 +148,7 @@ func _update_detail_card() -> void:
 	if fragment.completed:
 		detail_body.text += "\n\n源印：%s" % fragment.source_mark_name
 	if not fragment.unlocked:
-		detail_body.text += "\n\nLocked: complete the current fragment to unlock this one."
+		detail_body.text += "\n\n已锁定：完成当前碎片后解锁。"
 		enter_btn.visible = false
 		_detail_selected = 1
 	elif fragment.implemented:
@@ -258,11 +258,11 @@ func _on_enter_btn_pressed() -> void:
 	var transition_scene_path := String(FRAGMENT_TRANSITION_SCENES.get(selected_fragment.id, ""))
 	if not transition_scene_path.is_empty() and ResourceLoader.exists(transition_scene_path):
 		_stop_bgm()
-		get_tree().change_scene_to_file(transition_scene_path)
+		SceneManager.change_scene(transition_scene_path)
 		return
 	if selected_fragment.scene_path and ResourceLoader.exists(selected_fragment.scene_path):
 		_stop_bgm()
-		get_tree().change_scene_to_file(selected_fragment.scene_path)
+		SceneManager.change_scene(selected_fragment.scene_path)
 	else:
 		printerr("[StarMap] 碎片场景不存在: %s" % selected_fragment.scene_path)
 

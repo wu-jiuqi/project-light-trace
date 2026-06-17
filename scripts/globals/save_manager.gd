@@ -44,8 +44,8 @@ func _ready() -> void:
 
 
 func _ensure_save_dir() -> void:
-	if not DirAccess.dir_exists_absolute(SaveConstants.SAVE_DIR):
-		DirAccess.make_dir_recursive_absolute(SaveConstants.SAVE_DIR)
+	if not DirAccess.dir_exists_absolute(SaveConstants.save_dir()):
+		DirAccess.make_dir_recursive_absolute(SaveConstants.save_dir())
 
 
 # ============================================================
@@ -138,6 +138,7 @@ func save_game(slot: int = -1) -> bool:
 	ChatDatabase.flush_to_disk()
 
 	# 2. 组装存档字典
+	_ensure_save_dir()
 	var save_dict: Dictionary = _assemble_save_dict(slot)
 	if save_dict.is_empty():
 		printerr("[SaveManager] 存档失败: 无法组装存档字典")
@@ -593,8 +594,8 @@ func delete_slot(slot: int) -> void:
 		ChatDatabase.clear_all_history()
 		_current_slot = -1
 		save_data = {}
-		if FileAccess.file_exists(SaveConstants.LAST_SLOT_PATH):
-			DirAccess.remove_absolute(SaveConstants.LAST_SLOT_PATH)
+		if FileAccess.file_exists(SaveConstants.last_slot_path()):
+			DirAccess.remove_absolute(SaveConstants.last_slot_path())
 
 	ChatDatabase.delete_slot_file(slot)
 	if not has_any_save_files():
@@ -613,8 +614,8 @@ func clear_active_slot() -> void:
 	_stop_auto_save()
 	_current_slot = -1
 	save_data = {}
-	if FileAccess.file_exists(SaveConstants.LAST_SLOT_PATH):
-		DirAccess.remove_absolute(SaveConstants.LAST_SLOT_PATH)
+	if FileAccess.file_exists(SaveConstants.last_slot_path()):
+		DirAccess.remove_absolute(SaveConstants.last_slot_path())
 	FragmentManager.reset_all_fragments()
 
 
@@ -635,9 +636,9 @@ func get_current_slot() -> int:
 
 
 func _read_last_slot() -> int:
-	if not FileAccess.file_exists(SaveConstants.LAST_SLOT_PATH):
+	if not FileAccess.file_exists(SaveConstants.last_slot_path()):
 		return _current_slot
-	var file = FileAccess.open(SaveConstants.LAST_SLOT_PATH, FileAccess.READ)
+	var file = FileAccess.open(SaveConstants.last_slot_path(), FileAccess.READ)
 	if file:
 		var json = JSON.new()
 		if json.parse(file.get_as_text()) == OK:
@@ -653,7 +654,8 @@ func _read_last_slot() -> int:
 
 
 func _write_last_slot(slot: int) -> void:
-	var file = FileAccess.open(SaveConstants.LAST_SLOT_PATH, FileAccess.WRITE)
+	_ensure_save_dir()
+	var file = FileAccess.open(SaveConstants.last_slot_path(), FileAccess.WRITE)
 	if file:
 		file.store_string(JSON.stringify({"slot": slot}))
 		file.close()

@@ -448,7 +448,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		if angle_panel.visible:
 			_close_angle_panel()
 		else:
-			get_tree().change_scene_to_file("res://scenes/star_map.tscn")
+			SceneManager.change_scene("res://scenes/star_map.tscn")
 		get_viewport().set_input_as_handled()
 	elif angle_panel.visible:
 		if event.is_action_pressed("ui_left"):
@@ -727,7 +727,7 @@ func _complete_fragment() -> void:
 	SaveManager.save_game()
 	_show_message("晨曦之印", "源印归位。星图已更新。\n测试原型将在片刻后返回星图。", 4.0)
 	await get_tree().create_timer(1.8).timeout
-	get_tree().change_scene_to_file("res://scenes/star_map.tscn")
+	SceneManager.change_scene("res://scenes/star_map.tscn")
 
 
 func observe_sundial_for_test(id: String) -> void:
