@@ -39,6 +39,8 @@ func _run() -> void:
 
 	if _failures == 0:
 		print("[SUMMARY] clue panel Esc regression checks passed")
+	await process_frame
+	await create_timer(0.2).timeout
 	quit(_failures)
 
 

@@ -44,7 +44,14 @@ func _run() -> void:
 
 	if _failures == 0:
 		print("[SUMMARY] 0001 sundial puzzle smoke test passed")
+	await create_timer(6.4).timeout
+	if current_scene != null:
+		current_scene.queue_free()
+	current_scene = null
+	root.get_node("AudioManager").stop_all()
 	root.get_node("ChatDatabase").clear_memory_only()
+	await process_frame
+	await create_timer(0.2).timeout
 	quit(_failures)
 
 

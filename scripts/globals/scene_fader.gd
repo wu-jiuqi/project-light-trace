@@ -25,14 +25,20 @@ func ensure_black() -> void:
 func fade_out_and_switch(scene: String) -> void:
 	if _changing:
 		return
+	await fade_out()
+
+	SceneManager._raw_switch(scene)
+
+
+func fade_out(duration := 0.25) -> void:
+	if _changing:
+		return
 	_changing = true
 	is_fading = true
 
 	var t = create_tween()
-	t.tween_property(_fader, "color:a", 1.0, 0.25)
+	t.tween_property(_fader, "color:a", 1.0, duration)
 	await t.finished
-
-	SceneManager._raw_switch(scene)
 
 
 ## 淡入（新场景 ready 后调用）

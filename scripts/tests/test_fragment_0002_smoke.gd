@@ -31,6 +31,10 @@ func _run() -> void:
 
 	if _failures == 0:
 		print("[SUMMARY] fragment 0002 smoke test passed")
+	current_scene = null
+	root.get_node("AudioManager").stop_all()
+	await process_frame
+	await create_timer(0.2).timeout
 	quit(_failures)
 
 
@@ -66,14 +70,18 @@ func _check_scene(scene_path: String, exit_path: String, target_scene: String) -
 			emitted["spawn_point"] = spawn_point
 		, CONNECT_ONE_SHOT)
 		scene_fader.set("_changing", true)
+		scene_manager.set("_loading_transition_active", true)
 		exit_node.interact()
 		_check(scene_manager.pending_spawn_point == "Default", "%s exit interaction sets pending spawn" % scene_path)
 		_check(emitted.get("target_scene", "") == target_scene, "%s exit interaction requests expected scene" % scene_path)
 		_check(emitted.get("spawn_point", "") == "Default", "%s exit interaction requests Default spawn" % scene_path)
+		scene_manager.set("_loading_transition_active", false)
+		scene_manager.set("_pending_loading_target", "")
 		scene_fader.set("_changing", false)
 		scene_manager.pending_spawn_point = ""
 
 	scene.queue_free()
+	current_scene = null
 	await process_frame
 
 
@@ -112,6 +120,7 @@ func _check_ticket_check_flow_scene() -> void:
 	await process_frame
 
 	scene.queue_free()
+	current_scene = null
 	await process_frame
 
 	var conductor_scene: Node = load("res://scenes/fragments/fragment_0002.tscn").instantiate()
@@ -122,7 +131,11 @@ func _check_ticket_check_flow_scene() -> void:
 	var conductor := conductor_scene.get_node_or_null("WorldRoot/NpcConductor")
 	_check(conductor != null, "fragment 0002 scene has conductor")
 	_check(conductor != null and conductor_scene.handle_npc_interaction(conductor), "conductor interaction is handled by fragment route")
+	if root.get_node("ChatDialogue").is_open:
+		root.get_node("ChatDialogue").close()
+	await create_timer(0.4).timeout
 	conductor_scene.queue_free()
+	current_scene = null
 	await process_frame
 
 

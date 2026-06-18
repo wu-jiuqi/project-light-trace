@@ -34,6 +34,8 @@ var _holding := false
 var _interactive_collect_pending := false
 var _suppress_release_after_collect := false
 var _auto_collect_token := 0
+var _cover_tween: Tween = null
+var _cover_tween_token := 0
 
 
 func _ready() -> void:
@@ -51,6 +53,10 @@ func _ready() -> void:
 	_layout_to_viewport()
 
 
+func _exit_tree() -> void:
+	_cancel_cover_tween()
+
+
 func open_for_npc(npc_id: String, pages: Array) -> void:
 	_npc_id = npc_id
 	_pages = pages.duplicate(true)
@@ -66,6 +72,8 @@ func open_for_npc(npc_id: String, pages: Array) -> void:
 
 func close_monologue() -> void:
 	var closing_id := _npc_id
+	_cover_tween_token += 1
+	_cancel_cover_tween()
 	_clear_interactive()
 	visible = false
 	set_process(false)
@@ -176,14 +184,27 @@ func _show_next_page() -> void:
 
 
 func _fade_cover_then_stream() -> void:
+	_cover_tween_token += 1
+	var token := _cover_tween_token
+	_cancel_cover_tween()
 	var color := _cover.color
 	color.a = 0.0
 	_cover.color = color
-	var tween := create_tween()
-	tween.tween_property(_cover, "color:a", COVER_TARGET_ALPHA, COVER_FADE_SECONDS)
-	await tween.finished
-	if visible:
-		_start_stream()
+	_cover_tween = create_tween()
+	_cover_tween.tween_property(_cover, "color:a", COVER_TARGET_ALPHA, COVER_FADE_SECONDS)
+	_cover_tween.finished.connect(func() -> void:
+		if token != _cover_tween_token:
+			return
+		_cover_tween = null
+		if visible:
+			_start_stream()
+	, CONNECT_ONE_SHOT)
+
+
+func _cancel_cover_tween() -> void:
+	if _cover_tween != null and _cover_tween is Tween and _cover_tween.is_valid():
+		_cover_tween.kill()
+	_cover_tween = null
 
 
 func _start_stream() -> void:

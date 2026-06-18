@@ -29,15 +29,44 @@ func _run() -> void:
 
 	await create_timer(0.8).timeout
 	await process_frame
+	_check(
+		root.get_node_or_null("LoadingScreen") != null,
+		"star map enter shows loading screen before fragment transition"
+	)
+
+	await create_timer(3.0).timeout
+	await process_frame
 
 	var fader = root.get_node("SceneFader")
 	var fade_rect := fader.get_child(0) as ColorRect
 	_check(current_scene != null and current_scene.scene_file_path == "res://scenes/cinematic/fragment_0001_transition.tscn", "star map enters fragment transition scene")
 	_check(fade_rect != null and fade_rect.color.a < 0.2, "fragment transition reveals itself after star map scene fade")
 
+	if current_scene != null and current_scene.has_method("_finish_transition"):
+		current_scene.call("_finish_transition")
+	await create_timer(0.9).timeout
+	await process_frame
+	_check(
+		root.get_node_or_null("LoadingScreen") != null,
+		"fragment transition end shows loading screen before gameplay"
+	)
+
+	for i in range(16):
+		if current_scene != null and current_scene.scene_file_path == "res://scenes/fragments/fragment_0001.tscn":
+			break
+		await create_timer(0.5).timeout
+		await process_frame
+	_check(
+		current_scene != null and current_scene.scene_file_path == "res://scenes/fragments/fragment_0001.tscn",
+		"fragment transition loading screen completes to gameplay scene"
+	)
+
 	if current_scene != null:
 		current_scene.queue_free()
 	current_scene = null
+	root.get_node("AudioManager").stop_bgm(0.0)
+	await process_frame
+	await create_timer(0.2).timeout
 	fragment_manager.reset_all_fragments()
 	root.get_node("ChatDatabase").clear_memory_only()
 

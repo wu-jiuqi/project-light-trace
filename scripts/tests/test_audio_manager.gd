@@ -30,6 +30,9 @@ func _run() -> void:
 
 	if _failures == 0:
 		print("[SUMMARY] audio manager checks passed")
+	audio_manager.stop_all()
+	await process_frame
+	await create_timer(0.2).timeout
 	quit(_failures)
 
 

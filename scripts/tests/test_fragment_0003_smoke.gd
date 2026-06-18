@@ -26,6 +26,10 @@ func _run() -> void:
 
 	if _failures == 0:
 		print("[SUMMARY] fragment 0003 smoke test passed")
+	current_scene = null
+	root.get_node("AudioManager").stop_all()
+	await process_frame
+	await create_timer(0.2).timeout
 	quit(_failures)
 
 
@@ -95,7 +99,9 @@ func _check_main_scene(manager: Node) -> void:
 	_check(str(clue_panel.clues[0].get("description", "")) == "燃净手", "inscription clue preserves collection order")
 	_check(str(clue_panel.clues[1].get("image", "")).ends_with("jade.png"), "jade clue includes its image")
 
+	await create_timer(4.2).timeout
 	scene.queue_free()
+	current_scene = null
 	await process_frame
 
 
@@ -122,7 +128,9 @@ func _check_loft_scene(manager: Node) -> void:
 	scene.call("_restore_scene_visuals")
 	_check(not scene.get_node("WorldRoot/Box").visible, "collected jade keeps the box hidden after returning")
 
+	await create_timer(4.2).timeout
 	scene.queue_free()
+	current_scene = null
 	await process_frame
 
 

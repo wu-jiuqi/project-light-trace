@@ -112,4 +112,4 @@ func _finish_transition() -> void:
 	await _fade_tween.finished
 
 	SceneFader.ensure_black()
-	SceneManager.change_scene(TARGET_SCENE, "", false)
+	SceneManager.change_scene(TARGET_SCENE)

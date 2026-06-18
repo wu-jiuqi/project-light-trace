@@ -19,6 +19,10 @@ func _run() -> void:
 
 	if _failures == 0:
 		print("[SUMMARY] fragment 0004 smoke test passed")
+	current_scene = null
+	root.get_node("AudioManager").stop_all()
+	await process_frame
+	await create_timer(0.2).timeout
 	quit(_failures)
 
 
@@ -109,8 +113,9 @@ func _check_main_scene(manager: Node) -> void:
 		_check(npc.is_in_group("npc"), "%s is configured as an NPC" % npc.name)
 		_check("npc_kb_id" in npc and not str(npc.npc_kb_id).is_empty(), "%s has a kb id" % npc.name)
 
-	await create_timer(2.1).timeout
+	await create_timer(4.2).timeout
 	scene.queue_free()
+	current_scene = null
 	await process_frame
 
 
@@ -136,8 +141,9 @@ func _check_passage_scene(manager: Node) -> void:
 		var collected_blueprints: Dictionary = manager.get_fragment_state("0004", "collected_blueprints")
 		_check(int(collected_blueprints.get(blueprint_id, 0)) == 1, "%s writes collected_blueprints" % blueprint_id)
 
-	await create_timer(2.0).timeout
+	await create_timer(4.2).timeout
 	scene.queue_free()
+	current_scene = null
 	await process_frame
 
 

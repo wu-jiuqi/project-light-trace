@@ -57,6 +57,13 @@ func _run() -> void:
 	_check(not star_map.has_node("UI/ProgressBar"), "star map no longer shows progress bar")
 	_check(not star_map.has_node("UI/DecryptBtn"), "star map no longer exposes decrypt action")
 
+	if current_scene != null:
+		current_scene.queue_free()
+	current_scene = null
+	root.get_node("AudioManager").stop_all()
+	await process_frame
+	await create_timer(0.2).timeout
+
 	if _failures == 0:
 		print("[SUMMARY] UI skin regression checks passed")
 	quit(_failures)

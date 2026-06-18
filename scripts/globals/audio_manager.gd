@@ -49,6 +49,41 @@ func _ready() -> void:
 	_create_voice_player()
 
 
+func _exit_tree() -> void:
+	stop_all()
+
+
+func stop_all() -> void:
+	stop_bgm(0.0)
+	_kill_tween(_voice_tween)
+	_voice_tween = null
+	_kill_tween(_voice_duck_tween)
+	_voice_duck_tween = null
+	if _voice_player != null:
+		_voice_player.stop()
+		_voice_player.stream = null
+	_voice_priority = PRIORITY_LOW
+	_bgm_duck_db = 0.0
+
+	for player in _sfx_players:
+		player.stop()
+		player.stream = null
+	for i in _sfx_priorities.size():
+		_sfx_priorities[i] = PRIORITY_LOW
+	for i in _sfx_started_at.size():
+		_sfx_started_at[i] = 0
+
+	for id in _ambience_tweens.keys():
+		_kill_tween(_ambience_tweens[id])
+	_ambience_tweens.clear()
+	for player in _ambience_players.values():
+		if is_instance_valid(player):
+			player.stop()
+			player.stream = null
+			player.queue_free()
+	_ambience_players.clear()
+
+
 func play_bgm(stream: AudioStream, id: String = "", fade: float = 0.5, volume_db: float = 0.0, loop: bool = true) -> void:
 	if stream == null:
 		return
@@ -60,6 +95,7 @@ func play_bgm(stream: AudioStream, id: String = "", fade: float = 0.5, volume_db
 		return
 
 	_kill_tween(_bgm_tween)
+	_bgm_tween = null
 	var previous := current
 	var next_index := 1 - _bgm_active_index
 	var next := _bgm_players[next_index]
@@ -76,6 +112,7 @@ func play_bgm(stream: AudioStream, id: String = "", fade: float = 0.5, volume_db
 	if fade <= 0.0:
 		if previous.playing:
 			previous.stop()
+		previous.stream = null
 		next.volume_db = target_db
 		return
 
@@ -87,17 +124,25 @@ func play_bgm(stream: AudioStream, id: String = "", fade: float = 0.5, volume_db
 		_bgm_tween.chain().tween_callback(func() -> void:
 			if previous.playing:
 				previous.stop()
+			previous.stream = null
 		)
 
 
 func stop_bgm(fade: float = 0.35) -> void:
 	_kill_tween(_bgm_tween)
+	_bgm_tween = null
 	var current := _bgm_players[_bgm_active_index]
 	_current_bgm_id = ""
+	for player in _bgm_players:
+		if player != current:
+			player.stop()
+			player.stream = null
 	if not current.playing:
+		current.stream = null
 		return
 	if fade <= 0.0:
 		current.stop()
+		current.stream = null
 		current.volume_db = SILENT_DB
 		return
 	_bgm_tween = create_tween()
@@ -105,6 +150,7 @@ func stop_bgm(fade: float = 0.35) -> void:
 	_bgm_tween.tween_callback(func() -> void:
 		if current.playing:
 			current.stop()
+		current.stream = null
 	)
 
 
@@ -123,6 +169,7 @@ func play_ambience(id: String, stream: AudioStream, fade: float = 0.5, priority:
 	player.stream = stream
 	player.set_meta("priority", priority)
 	_kill_tween(_ambience_tweens.get(id))
+	_ambience_tweens.erase(id)
 	if not player.playing:
 		player.volume_db = SILENT_DB
 		player.play()
@@ -139,6 +186,7 @@ func stop_ambience(id: String, fade: float = 0.35) -> void:
 	if player == null:
 		return
 	_kill_tween(_ambience_tweens.get(id))
+	_ambience_tweens.erase(id)
 	if fade <= 0.0:
 		player.stop()
 		player.queue_free()
@@ -177,6 +225,7 @@ func play_voice(id: String, stream: AudioStream, priority: int = PRIORITY_NORMAL
 	if _voice_player.playing and priority < _voice_priority:
 		return
 	_kill_tween(_voice_tween)
+	_voice_tween = null
 	_voice_player.stop()
 	_voice_player.stream = stream
 	_voice_player.bus = BUS_VOICE
@@ -189,17 +238,21 @@ func play_voice(id: String, stream: AudioStream, priority: int = PRIORITY_NORMAL
 
 func stop_voice(fade: float = 0.15) -> void:
 	if not _voice_player.playing:
+		_voice_player.stream = null
 		_apply_bgm_duck(0.0)
 		return
 	_kill_tween(_voice_tween)
+	_voice_tween = null
 	if fade <= 0.0:
 		_voice_player.stop()
+		_voice_player.stream = null
 		_apply_bgm_duck(0.0)
 		return
 	_voice_tween = create_tween()
 	_voice_tween.tween_property(_voice_player, "volume_db", SILENT_DB, fade)
 	_voice_tween.tween_callback(func() -> void:
 		_voice_player.stop()
+		_voice_player.stream = null
 		_voice_player.volume_db = 0.0
 		_apply_bgm_duck(0.0)
 	)
@@ -303,6 +356,7 @@ func _apply_bgm_duck(duck_db: float) -> void:
 	if not current.playing:
 		return
 	_kill_tween(_voice_duck_tween)
+	_voice_duck_tween = null
 	_voice_duck_tween = create_tween()
 	_voice_duck_tween.tween_property(current, "volume_db", _current_bgm_volume_db + _bgm_duck_db, 0.18)
 

@@ -39,8 +39,11 @@ func _run() -> void:
 	if current_scene != null:
 		current_scene.queue_free()
 	current_scene = null
+	root.get_node("AudioManager").stop_all()
 	SaveConstants.reset_save_dir()
 	root.get_node("ChatDatabase").clear_memory_only()
+	await process_frame
+	await create_timer(0.2).timeout
 
 	if _failures == 0:
 		print("[SUMMARY] title-to-star-map flow checks passed")

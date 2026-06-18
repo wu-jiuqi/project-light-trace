@@ -56,6 +56,12 @@ func _run() -> void:
 	_check(card.visible, "revealed mask zone remains selectable")
 
 	manager.reset_all_fragments()
+	if current_scene != null:
+		current_scene.queue_free()
+	current_scene = null
+	root.get_node("AudioManager").stop_all()
+	await process_frame
+	await create_timer(0.2).timeout
 	if _failures == 0:
 		print("[SUMMARY] star-map shard interaction checks passed")
 	quit(_failures)
