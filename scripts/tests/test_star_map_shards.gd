@@ -36,21 +36,22 @@ func _run() -> void:
 	await process_frame
 	_check(star_map.get_node("UI/DetailCard/EnterBtn").visible, "unlocked 0002 exposes enter button")
 
-	canvas.select_fragment(5)
+	canvas.select_fragment(4)
 	await process_frame
 	_check(card.visible, "clicking a shard reveals its detail card")
-	_check(star_map.get_node("UI/DetailCard/TitleLabel").text.contains("#0762"), "0762 detail card is selected")
-	_check(not star_map.get_node("UI/DetailCard/EnterBtn").visible, "0762 remains locked until the linear chain reaches it")
+	_check(star_map.get_node("UI/DetailCard/TitleLabel").text.contains("#0047"), "0047 detail card is selected")
+	_check(not star_map.get_node("UI/DetailCard/EnterBtn").visible, "0047 remains locked until the linear chain reaches it")
 
-	var fragment = manager.get_fragment_by_id("0762")
-	_check(manager.complete_fragment(fragment), "0762 completion succeeds")
+	var fragment = manager.get_fragment_by_id("0004")
+	fragment.unlocked = true
+	_check(manager.complete_fragment(fragment), "0004 completion succeeds")
 	var animation_id = manager.consume_completion_animation_id()
 	canvas.configure(manager.fragments, animation_id)
-	_check(not canvas.is_fragment_revealed(5), "completed mask begins its reveal animation covered")
+	_check(not canvas.is_fragment_revealed(3), "completed mask begins its reveal animation covered")
 	await create_timer(1.4).timeout
-	_check(canvas.is_fragment_revealed(5), "completed mask fades out to reveal the star map")
+	_check(canvas.is_fragment_revealed(3), "completed mask fades out to reveal the star map")
 
-	canvas.select_fragment(5)
+	canvas.select_fragment(3)
 	await process_frame
 	_check(card.visible, "revealed mask zone remains selectable")
 

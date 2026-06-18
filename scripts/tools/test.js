@@ -28,11 +28,11 @@ function walk(directory) {
 }
 
 function checkJsonFiles() {
-    const roots = ['resources', path.join('design', 'id0762', 'npcs', 'knowledge'), 'AI资源库'];
-    for (const root of roots) {
-        for (const file of walk(path.join(PROJECT_DIR, root)).filter(name => name.endsWith('.json'))) {
-            try {
-                const payload = JSON.parse(fs.readFileSync(file, 'utf8'));
+    const roots = ['LLM', 'assets/papercraft/manifests'];
+	for (const root of roots) {
+		for (const file of walk(path.join(PROJECT_DIR, root)).filter(name => name.endsWith('.json'))) {
+			try {
+                const payload = JSON.parse(fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, ''));
                 check(true, `JSON 可解析: ${path.relative(PROJECT_DIR, file)}`);
                 if (Array.isArray(payload.chunks) && Number.isInteger(payload._total_chunks)) {
                     check(
@@ -42,23 +42,9 @@ function checkJsonFiles() {
                 }
             } catch (error) {
                 check(false, `JSON 可解析: ${path.relative(PROJECT_DIR, file)} (${error.message})`);
-            }
-        }
-    }
-
-    const runtimeKnowledge = path.join(PROJECT_DIR, 'resources', 'npc_knowledge');
-    const designKnowledge = path.join(PROJECT_DIR, 'design', 'id0762', 'npcs', 'knowledge');
-    for (const file of walk(runtimeKnowledge).filter(name => name.endsWith('.json'))) {
-        const counterpart = path.join(designKnowledge, path.basename(file));
-        check(fs.existsSync(counterpart), `知识库设计镜像存在: ${path.basename(file)}`);
-        if (!fs.existsSync(counterpart)) continue;
-        const runtimePayload = JSON.parse(fs.readFileSync(file, 'utf8'));
-        const designPayload = JSON.parse(fs.readFileSync(counterpart, 'utf8'));
-        check(
-            JSON.stringify(runtimePayload) === JSON.stringify(designPayload),
-            `知识库设计镜像一致: ${path.basename(file)}`
-        );
-    }
+			}
+		}
+	}
 }
 
 function checkProjectConfiguration() {
@@ -76,14 +62,13 @@ function checkProjectConfiguration() {
 
     const preset = fs.readFileSync(path.join(PROJECT_DIR, 'export_presets.cfg'), 'utf8');
     check(preset.includes('export_filter="scenes"'), 'Web 导出使用场景依赖模式');
-    check(preset.includes('resources/npc_knowledge/*.json'), 'Web 导出显式包含 NPC 知识 JSON');
+    check(preset.includes('LLM/**/*.json'), 'Web 导出显式包含当前 NPC 知识 JSON');
     check(preset.includes('variant/thread_support=true'), 'Web 导出启用线程支持');
     check(preset.includes('variant/coep=true'), 'Web 导出启用 COEP');
     for (const pattern of [
         'build/**',
         'deploy/**',
         'addons/**',
-        'AI资源库/**',
         'generated/**',
         'scripts/tools/**',
         'scripts/tests/**',
@@ -101,9 +86,7 @@ function checkProjectConfiguration() {
     );
 
     const uiAssets = [
-        'title_background.png',
         'star_map_background.png',
-        'glass_four_point_star.png',
         'panel_frame.svg',
         'panel_frame_soft.svg',
         'button_normal.svg',
@@ -118,26 +101,19 @@ function checkProjectConfiguration() {
         check(fs.existsSync(path.join(PROJECT_DIR, 'assets', 'ui', asset)), `UI 美术资源存在: ${asset}`);
     }
 
-    for (const asset of [
-        'assets/cutscenes/id0762/comic_01_descent.png',
-        'assets/cutscenes/id0762/comic_02_threads.png',
-        'assets/cutscenes/id0762/comic_03_market.png',
-        'assets/fragments/id0762/zhinu_portrait.png',
-    ]) {
-        check(fs.existsSync(path.join(PROJECT_DIR, asset)), `0762 美术资源存在: ${asset}`);
-    }
-
     const webUiFiles = [
         'scenes/star_map.tscn',
         'scripts/star_map/star_map.gd',
         'scripts/star_map/star_shard_canvas.gd',
-        'scripts/fragment/fragment_0762.gd',
+        'scripts/fragment/fragment_0001.gd',
+        'scripts/fragment/fragment_0002_scene.gd',
+        'scripts/fragment/fragment_0003_scene.gd',
+        'scripts/fragment/fragment_0004_scene.gd',
         'scripts/ui/title_screen.gd',
         'scripts/ui/pause_menu.gd',
         'scripts/ui/backpack_ui.gd',
         'scripts/ui/chat_dialogue.gd',
         'scripts/systems/inventory_manager.gd',
-        'scripts/fragment/fragment_0762_state.gd',
     ];
     const unsupportedWebGlyphs = ['🔒', '🔓', '⏳', '🔍', '✅', '💎', '🚀', '🎒', '❓', '📜', '🪻', '🔥', '🚫', '⚠️', '✦', '▶', '◀', '▼'];
     const webUiSource = webUiFiles
@@ -148,10 +124,10 @@ function checkProjectConfiguration() {
     }
 
     const fragmentRuntime = [
-        'scripts/fragment/fragment_0762_state.gd',
         'scripts/fragment/npc_controller.gd',
     ].map(file => fs.readFileSync(path.join(PROJECT_DIR, file), 'utf8')).join('\n');
-    check(!fragmentRuntime.includes('自画像'), '0762 运行时不再残留老画家自画像文案');
+    check(!fragmentRuntime.includes('fragment_0762'), '当前运行时不再引用旧版 0762 碎片');
+    check(!fragmentRuntime.includes('wanted_system'), '当前运行时不再引用旧追捕系统');
 }
 
 function request(port, requestPath, options = {}) {

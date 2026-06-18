@@ -134,7 +134,6 @@ func _check_rag() -> void:
 		"memory_stage": "initial",
 		"alert_level": 0,
 		"trust_level": 0,
-		"awakened_colors": [],
 		"awakened_count": 0,
 	}
 	for npc_id in ["conductor"]:

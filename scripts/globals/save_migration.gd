@@ -137,19 +137,8 @@ static func _migrate_0_3_0_to_1_0_0(data: Dictionary) -> Dictionary:
 			})
 	result["fragments"] = fragments
 
-	# === 构建 fragment_states 子字典（碎片 #0762 专属状态） ===
+	# === 构建 fragment_states 子字典 ===
 	var fragment_states: Dictionary = {}
-
-	var state_0762: Dictionary = {}
-	state_0762["awakened_colors"] = _duplicate_array(data.get("awakened_colors", [false, false, false, false, false, false]))
-	state_0762["melody_triggered"] = bool(data.get("melody_triggered", false))
-	state_0762["source_mark_revealed"] = bool(data.get("source_mark_revealed", false))
-	state_0762["fragment_completed"] = bool(data.get("fragment_completed", false))
-	state_0762["white_ready"] = bool(data.get("white_ready", false))
-	state_0762["gray_cloth_uncovered"] = bool(data.get("gray_cloth_uncovered", false))
-	state_0762["oldpainter_trust"] = float(data.get("oldpainter_trust", 0.0))
-
-	fragment_states["0762"] = state_0762
 
 	# 检查是否已有 fragment_states 字段（避免覆盖）
 	if data.has("fragment_states") and data["fragment_states"] is Dictionary:

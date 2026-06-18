@@ -22,6 +22,7 @@ AI资源库/
 
 # --- 备份文件 ---
 *.bak
+cleanup_backup_*/
 
 # --- 操作系统自动生成 ---
 .DS_Store

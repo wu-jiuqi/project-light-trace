@@ -1,180 +1,91 @@
-﻿# 溯光计划
+# 溯光计划
 
-## 🎮 项目概述
+《溯光计划》是一个 Godot 4.6.2 制作的 2D 纸工拼贴叙事解谜项目。当前版本以 FTUE 和前四个可玩碎片为核心：玩家从标题页进入开场漫画，经星图按线性顺序进入碎片，逐步收集线索、完成源印事件，并解锁下一个碎片。
 
-**「溯光计划」** 是一款基于 Godot 4.6.2 的 2D 日式 RPG 风格开放探索游戏。
+## 当前流程
 
-- **世界观**：2077年，AI「织女·太一」创造的虚拟宇宙「万象」失控碎裂。玩家作为科技巨头「天枢公司」派遣的「溯光者」，潜入碎片世界，寻找「源印」，修复破碎宇宙。
-- **核心玩法**：点击碎片 → 查看线索 → 进入副本 → 寻找源印 → 碎片归位
-- **设计参考**：《画怖》（副本-线索-钤印体系）、《全球高考》（系统规则-对抗模式）
-
-## 📂 项目结构
-
+```text
+title_screen.tscn
+  -> opening_cinematic.tscn
+  -> star_map.tscn
+  -> 0001 -> 0002 -> 0003 -> 0004
+  -> 后续规划碎片占位
 ```
+
+星图保留 12 个碎片位，但当前运行路线已经移除旧版 0762。可进入的现役碎片为：
+
+| 顺序 | ID | 名称 | 状态 | 场景 |
+| --- | --- | --- | --- | --- |
+| 1 | 0001 | 启程之镇 | 已实现 | `scenes/fragments/fragment_0001.tscn` |
+| 2 | 0002 | 黄昏驿站 | 已实现 | `scenes/fragments/fragment_0002.tscn` |
+| 3 | 0003 | 月下道观 | 已实现 | `scenes/fragments/fragment_0003.tscn` |
+| 4 | 0004 | 工坊物语 | 已实现 | `scenes/fragments/fragment_0004.tscn` |
+| 5+ | 0047、0915、1138、2049、3015、3333、4096 | 后续规划 | 未开放 | 占位 |
+
+## 项目结构
+
+```text
 project_light_trace/
-├── project.godot          # Godot 项目配置文件
-├── export_presets.cfg     # Web 导出预设
-├── icon.svg               # 项目图标
-├── package.json           # Node.js 工具脚本
+├── project.godot
+├── export_presets.cfg
+├── package.json
+├── README.md
+├── cleanup_removed_manifest_20260619.md
 │
 ├── scenes/
-│   ├── star_map.tscn      # 星图主界面（玻璃碎片选择 + 修复归位）
-│   └── fragments/
-│       └── fragment_world.tscn  # 碎片世界模板
+│   ├── ui/                 标题页、对话、背包、线索、菜单
+│   ├── cinematic/          开场和碎片转场
+│   ├── star_map.tscn       星图入口
+│   ├── fragments/          0001-0004 碎片主场景
+│   ├── rooms/id000*/       碎片内子场景
+│   ├── buildings/id000*/   碎片交互物/场景部件
+│   └── characters/id000*/  现役 NPC 场景
 │
 ├── scripts/
-│   ├── globals/
-│   │   ├── game_manager.gd     # 游戏全局状态（单例）
-│   │   ├── fragment_manager.gd # 碎片系统管理（单例）
-│   │   └── save_manager.gd     # 存档系统（单例）
-│   ├── star_map/
-│   │   └── star_map.gd         # 星图交互逻辑
-│   ├── fragment/
-│   │   ├── fragment_base.gd    # 碎片世界基类
-│   │   └── npc_controller.gd   # AI子体NPC控制器
-│   ├── systems/
-│   │   ├── wanted_system.gd    # 通缉/警觉系统（6级）
-│   │   └── clue_system.gd      # 线索收集系统
-│   ├── ui/
-│   │   └── dialogue.gd         # 对话系统
-│   └── tools/                  # Node.js 构建工具
-│       ├── build.js            # Godot Web 导出构建
-│       ├── serve.js            # 本地预览服务器
-│       └── deploy.js           # 在线部署
+│   ├── globals/            Game/Fragment/Save/Scene 等全局单例
+│   ├── fragment/           碎片脚本、NPC 控制器、交互件
+│   ├── systems/            LLM、RAG、背包、线索等系统
+│   ├── ui/                 面板、对话、标题页与组件
+│   ├── star_map/           星图与碎片遮罩交互
+│   ├── cinematic/          漫画/转场播放逻辑
+│   └── tools/              Node 构建、部署、校验脚本
 │
-└── resources/                  # 游戏资源
-    ├── fonts/
-    ├── images/
-    └── audio/
+├── assets/
+│   ├── audio/              BGM、SFX、UI 音效
+│   ├── cutscenes/opening/  开场漫画图
+│   ├── fonts/              Web 中文字体
+│   ├── papercraft/         纸工正式资产与 manifest
+│   └── ui/                 当前 UI 位图/SVG
+│
+└── LLM/
+    ├── 0001/
+    ├── 0002/
+    └── 0004/               现役 NPC RAG 知识库
 ```
 
-## ✅ 已完成 — 12碎片系统设计
+旧版 0762 资源、旧追捕系统、旧房间脚本和确认未使用资源已移到根目录备份：`cleanup_backup_20260619_0762_unused/`。清单见 `cleanup_removed_manifest_20260619.md`。
 
-| # | 碎片ID | 名称 | 提示 | 难度 |
-|---|--------|------|------|------|
-| 1 | 0001 | 启程之镇 | 「白日依山尽」 | ★ |
-| 2 | 0002 | 黄昏驿站 | 「黄河入海流」 | ★ |
-| 3 | 0003 | 月下神社 | 「举头望明月」 | ★ |
-| 4 | 0004 | 工坊物语 | 「匠心」 | ★★ |
-| 5 | 0047 | 倒悬图书馆 | 「知识就是力量」 | ★★★ |
-| 6 | 0762 | 颜色的葬礼 | 「蓝是悲，红是怒，黄是望，绿是惧，紫是念，白是忘」 | ★★★ |
-| 7 | 0915 | 遗忘庭院 | 「遗忘」 | ★★ |
-| 8 | 1138 | 时钟停摆的车站 | 「再见」 | ★★★ |
-| 9 | 2049 | 镜中人 | 「我是谁」 | ★★★★ |
-| 10 | 3015 | 零时档案馆 | 「3:15」 | ★★★★★ |
-| 11 | 3333 | 诸神黄昏 | 「终即是始」 | ★★★★★ |
-| 12 | 4096 | 万象归源 | 「归源」 | ★★★★★ |
+## 开发环境
 
-## 🚀 开发工作流
+- Godot 4.6.2
+- Node.js 22+
+- Godot Web 导出模板 4.6.2
 
-### 前置条件
-- **Godot 4.6.2** — 引擎（已安装于 `D:/Godot/`）
-- **Node.js 22+** — 构建/部署工具
-- **Godot Web 导出模板** — 单独下载
+常用命令：
 
-### 步骤一：安装 Web 导出模板
-
-```bash
-# 方案A：在 Godot 编辑器中安装
-# 打开项目 → 编辑器 → 管理导出模板 → 下载并安装
-
-# 方案B：手动下载
-# 从 https://godotengine.org/download/archive/4.6.2-stable/
-# 下载 Godot_v4.6.2-stable_export_templates.tpz
-# 解压后复制 web_debug.zip 和 web_release.zip 到：
-#   %APPDATA%/Godot/export_templates/4.6.2.stable/
-
-# 方案C：使用国内镜像（推荐）
-# 从 atomgit 下载（速度更快）
+```powershell
+npm test
+npm run validate:papercraft
+npm run build
+npm run serve
 ```
 
-### 步骤二：本地开发
+`npm run serve` 会提供静态 Web 预览和同源 LLM 代理。`DEEPSEEK_API_KEY` 只能放在服务端环境变量或部署平台密钥中，不要写入 Godot 客户端源码。
 
-```bash
-cd project_light_trace
+## 当前设计原则
 
-# 在 Godot 编辑器中打开项目
-start godot://"D:/Godot/Godot_v4.6.2-stable_win64.exe" --path "D:/WorkBuddy WorkSpace/project_light_trace"
-
-# 或者在编辑器中直接 F5 运行
-```
-
-### 步骤三：Web 构建
-
-```bash
-npm run build    # 构建 Web (HTML5) 版本到 build/web/
-```
-
-### 步骤四：本地预览
-
-```bash
-DEEPSEEK_API_KEY=替换为已轮换的新密钥 npm run serve
-# 启动本地服务器 http://localhost:3000，并提供同源 LLM 代理
-```
-
-`DEEPSEEK_API_KEY` 只允许配置在服务端环境变量或部署平台密钥管理中，不要写入 Godot 客户端源码。
-
-### 步骤五：在线部署
-
-```bash
-# Cloud Studio 部署包
-npm run deploy -- cloudstudio
-
-# 登录 Cloud Studio → 导入 deploy/ 目录 → 配置 DEEPSEEK_API_KEY → 点击运行
-# 自动获得可访问的在线链接
-```
-
-## 📋 MVP 开发路线图
-
-### 阶段 0：脚手架 ✅
-- [x] Godot 项目结构
-- [x] 全局管理器（Game/Fragment/Save）
-- [x] 星图界面框架
-- [x] 碎片数据系统
-- [x] 对话系统框架
-- [x] 通缉系统（6级警觉）
-- [x] 线索收集系统
-- [x] Web 导出配置
-- [x] 构建/部署脚本
-
-### 阶段 1：核心可运行 (进行中)
-- [x] 星图界面实装（玻璃碎片点击 + 修复归位）
-- [ ] 碎片世界模板实装（2D Tilemap + 玩家移动）
-- [ ] NPC 交互系统（对话树 + 警觉反馈）
-- [ ] 第一个可玩碎片「颜色的葬礼」
-- [ ] Web 导出验证
-
-### 阶段 2：完整流程
-- [ ] 碎片「倒悬图书馆」
-- [ ] 碎片「时钟停摆的车站」
-- [x] 源印发现与解码机制
-- [ ] 跨碎片线索系统
-- [ ] 存档系统实装
-
-### 阶段 3：系统完善
-- [x] 取消现实时间解密等待，改为点击碎片直接查看线索
-- [ ] 三条叙事暗线触发
-- [ ] 通缉系统实装（NPC 追捕行为）
-
-### 阶段 4：扩展
-- [ ] 更多碎片
-- [ ] 溯光者论坛系统
-- [ ] 平行世界机制
-- [ ] AI LLM NPC 接入
-
-## 🔧 技术栈
-
-| 层 | 技术 | 说明 |
-|----|------|------|
-| 引擎 | Godot 4.6.2 | 2D 渲染，GDScript |
-| 导出 | HTML5/WebAssembly | WebGL 2.0, GL Compatibility |
-| 服务器 | Node.js | 零依赖 HTTP 服务器 |
-| 部署 | Cloud Studio / Vercel | 一键在线链接 |
-| 存储 | Godot user:// | 本地存档 |
-
-## 📝 关键设计决策
-
-1. **机制驱动，非数值驱动**：核心玩法依赖玩家对规则的理解和应用，无复杂等级/数值系统
-2. **碎片直观反馈**：提示随碎片卡片直接展示，修复进度由玻璃碎片归位直观表达
-3. **非线性碎片选择**：碎片无固定顺序，玩家自由选择，不同路径产生不同体验
-4. **三重叙事暗线**：AI信念 / 公司阴谋 / 平行世界 — 通过碎片线索逐步揭示
+- 线性解锁：完成当前碎片后解锁下一碎片，星图用于进入与回顾。
+- 纸工拼贴：正式资产从 `assets/papercraft/` 与 manifest 管理，运行时优先使用当前碎片目录。
+- 通用 NPC：NPC 控制器只保留站立/巡逻、对话入口、RAG prompt 与 LLM 流式输出。
+- 无旧追捕系统：旧版追捕、六色觉醒与给予物品体系已从现役代码移除。
+- 存档隔离：碎片专属状态保存在 `FragmentManager` 的 fragment state 命名空间中，未知旧碎片状态不会重新应用。

@@ -26,12 +26,12 @@ func _run() -> void:
 	_check(manager.save_game(0), "save_game with explicit slot works regardless of active slot")
 
 	game_manager.repair_progress = 20.0
-	root.get_node("FragmentManager").set_fragment_state("0762", "oldpainter_trust", 0.75)
+	root.get_node("FragmentManager").set_fragment_state("0004", "wrong_combination_count", 2)
 	manager.set_current_slot(1)
 	_check(manager.save_game(), "slot 1 saves through the active slot")
 
 	game_manager.repair_progress = 30.0
-	game_manager.npc_state_cache = {"oldpainter": {"suspicion": 12.0}}
+	game_manager.npc_state_cache = {"conductor": {"suspicion": 12.0}}
 	manager.set_current_slot(2)
 	_check(manager.save_game(), "slot 2 saves through the active slot")
 
@@ -40,12 +40,12 @@ func _run() -> void:
 
 	_check(manager.load_game(1), "slot 1 loads")
 	_check(is_equal_approx(game_manager.repair_progress, 20.0), "slot 1 keeps its own progress")
-	_check(is_equal_approx(root.get_node("FragmentManager").get_fragment_state("0762", "oldpainter_trust"), 0.75), "old painter trust persists")
+	_check(root.get_node("FragmentManager").get_fragment_state("0004", "wrong_combination_count") == 2, "0004 fragment state persists")
 
 	_check(manager.load_game(2), "slot 2 loads")
 	_check(is_equal_approx(game_manager.repair_progress, 30.0), "slot 2 keeps its own progress")
 	_check(
-		is_equal_approx(game_manager.npc_state_cache["oldpainter"]["suspicion"], 12.0),
+		is_equal_approx(game_manager.npc_state_cache["conductor"]["suspicion"], 12.0),
 		"NPC suspicion cache persists"
 	)
 
@@ -63,8 +63,8 @@ func _run() -> void:
 	title_scene.queue_free()
 
 	fragment_manager.reset_all_fragments()
-	manager._apply_fragments_list([{"id": "0762", "completed": true}])
-	_check(fragment_manager.get_fragment_by_id("0762").completed, "legacy completed fragment state migrates")
+	manager._apply_fragments_list([{"id": "0004", "completed": true}])
+	_check(fragment_manager.get_fragment_by_id("0004").completed, "completed fragment state migrates")
 	fragment_manager.reset_all_fragments()
 
 	manager.delete_slot(2)

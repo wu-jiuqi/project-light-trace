@@ -15,8 +15,8 @@ func _run() -> void:
 
 	var fragment_manager = root.get_node("FragmentManager")
 	fragment_manager.reset_all_fragments()
-	var fragment_0762 = fragment_manager.get_fragment_by_id("0762")
-	fragment_0762.unlocked = true
+	var fragment_0004 = fragment_manager.get_fragment_by_id("0004")
+	fragment_0004.unlocked = true
 
 	var star_map = load("res://scenes/star_map.tscn").instantiate()
 	root.add_child(star_map)
@@ -25,7 +25,7 @@ func _run() -> void:
 	await create_timer(0.45).timeout
 
 	var canvas = star_map.get_node("FragmentContainer/ShardCanvas")
-	canvas.select_fragment(5)
+	canvas.select_fragment(3)
 	await process_frame
 	star_map.call("_on_enter_btn_pressed")
 
@@ -34,7 +34,7 @@ func _run() -> void:
 
 	var fader = root.get_node("SceneFader")
 	var fade_rect := fader.get_child(0) as ColorRect
-	_check(current_scene != null and current_scene.scene_file_path == "res://scenes/fragments/fragment_0762.tscn", "star map enters direct fragment scene")
+	_check(current_scene != null and current_scene.scene_file_path == "res://scenes/cinematic/fragment_0004_transition.tscn", "star map enters 0004 transition scene")
 	_check(fade_rect != null and fade_rect.color.a < 0.2, "direct fragment reveals itself after star map scene fade")
 
 	if current_scene != null:

@@ -1,10 +1,6 @@
 extends Node
 ## 游戏全局状态管理器
 ## 管理游戏核心状态：当前阶段、修复进度、暗线揭示状态等
-##
-## 碎片 #0762 专属状态（awakened_colors, melody_triggered 等）
-## 已迁移至 FragmentManager._fragment_states["0762"]
-## GameManager 保留操作方法，内部委托给 FragmentManager
 
 # === 游戏阶段 ===
 enum GamePhase {
@@ -19,7 +15,7 @@ enum GamePhase {
 # === 全局状态变量 ===
 var current_phase: int = GamePhase.INIT
 var repair_progress: float = 0.0          # 0.0 ~ 1.0 修复进度
-var total_fragments: int = 12              # MVP：12个碎片
+var total_fragments: int = 11              # 当前线性路线的规划碎片数
 var repaired_fragments: int = 0
 var player_name: String = "溯光者-07"
 var company_name: String = "天枢公司"
@@ -36,18 +32,10 @@ var collected_clues: Array[String] = []
 var source_mark_log: Array[Dictionary] = []  # 已解码的源印记录
 var items_used: Dictionary = {}             # 已被消耗的物品（交给NPC后标记）
 
-# === 碎片 #0762 六色觉醒系统常量 ===
-## 实际数据存储在 FragmentManager._fragment_states["0762"] 中
-## GameManager 保留以下常量和操作方法，内部委托 FragmentManager
-enum ColorType { RED, BLUE, YELLOW, GREEN, PURPLE, WHITE }
-const COLOR_NAME: Array[String] = ["红", "蓝", "黄", "绿", "紫", "白"]
-const COLOR_NPC: Array[String] = ["blacksmith", "florist", "baker", "gravekeeper", "violinist", "statue"]
-signal color_awakened(color_type: int, npc_id: String)
-
 # === NPC 状态持久化（跨场景/重进房间不重置） ===
 ## 格式: { "scene_name:npc_kb_id": { "position_x":float, "position_y":float, "suspicion":float, "alert_phase":int, "doubts":bool } }
 var npc_state_cache: Dictionary = {}
-var npc_visit_count: Dictionary = { "gravekeeper": 0 }
+var npc_visit_count: Dictionary = {}
 
 func save_npc_state(scene_name: String, npc_kb_id: String, pos: Vector2, suspicion: float, alert_phase: int, doubts: bool) -> void:
 	var key = "%s:%s" % [scene_name, npc_kb_id]
@@ -61,48 +49,13 @@ func load_npc_state(scene_name: String, npc_kb_id: String) -> Dictionary:
 	return npc_state_cache.get(key, {})
 
 func clear_npc_state(scene_name: String) -> void:
-	## 清除指定场景的所有NPC状态（用于颜色觉醒等重置场景）
+	## 清除指定场景的所有NPC状态（用于重新挑战或场景重置）
 	var to_remove: Array[String] = []
 	for key in npc_state_cache:
 		if key.begins_with(scene_name + ":"):
 			to_remove.append(key)
 	for key in to_remove:
 		npc_state_cache.erase(key)
-
-
-# ============================================================
-# 六色觉醒操作（委托 FragmentManager 存储）
-# ============================================================
-
-func get_awakened_colors() -> Array:
-	## 返回 awakened_colors 数组的副本
-	var colors = FragmentManager.get_fragment_state("0762", "awakened_colors")
-	if colors is Array and colors.size() == 6:
-		return colors.duplicate()
-	return [false, false, false, false, false, false]
-
-func awaken_color(color_type: int) -> void:
-	if color_type < 0 or color_type >= 6: return
-	var colors: Array = FragmentManager.get_fragment_state("0762", "awakened_colors")
-	if colors.size() != 6:
-		colors = [false, false, false, false, false, false]
-	if colors[color_type]: return
-	colors[color_type] = true
-	FragmentManager.set_fragment_state("0762", "awakened_colors", colors)
-	print("[GameManager] 颜色觉醒: %s → %s (%d/6)" % [COLOR_NAME[color_type], COLOR_NPC[color_type], _count_awakened()])
-	color_awakened.emit(color_type, COLOR_NPC[color_type])
-
-func is_color_awakened(color_type: int) -> bool:
-	var colors: Array = FragmentManager.get_fragment_state("0762", "awakened_colors")
-	if colors.size() != 6:
-		return false
-	return colors[color_type] if color_type >= 0 and color_type < colors.size() else false
-
-func _count_awakened() -> int:
-	var colors: Array = FragmentManager.get_fragment_state("0762", "awakened_colors")
-	var c = 0
-	for a in colors: if a: c += 1
-	return c
 
 
 # ============================================================
@@ -168,11 +121,8 @@ func new_game() -> void:
 	collected_clues.clear()
 	source_mark_log.clear()
 	items_used.clear()
-	npc_visit_count = {"gravekeeper": 0}
+	npc_visit_count.clear()
 	npc_state_cache.clear()
-	
-	# 重置碎片 #0762 专属状态（委托 FragmentManager）
-	FragmentManager.reset_fragment_states("0762")
 	
 	# 重置所有碎片完成状态
 	FragmentManager.reset_all_fragments()
@@ -183,15 +133,13 @@ func new_game() -> void:
 
 
 func reset_fragment() -> void:
-	## 重新挑战关卡时重置关卡内进度（保留跨存档的对话历史与NPC信任/警觉状态）
+	## 重新挑战关卡时重置关卡内进度（保留跨存档的对话历史与NPC状态）
 	## 对话历史 (ChatDatabase) 和 NPC 状态缓存 (npc_state_cache) 跟随存档持久化，
 	## 不会在重新进入关卡时清除——玩家可以通过加载存档找回之前的对话记录。
 	items_used.clear()
 	
-	if FragmentManager.current_fragment != null and FragmentManager.current_fragment.id in ["0002", "0762"]:
+	if FragmentManager.current_fragment != null and FragmentManager.current_fragment.id in ["0002", "0003", "0004"]:
 		FragmentManager.reset_fragment_states(FragmentManager.current_fragment.id)
-	else:
-		FragmentManager.reset_fragment_states("0762")
 	
 	print("[GameManager] 碎片关卡内进度已重置（对话历史与NPC信任状态已保留）")
 
@@ -294,7 +242,7 @@ func from_dict(data: Dictionary) -> void:
 	if visits is Dictionary:
 		npc_visit_count = visits.duplicate()
 	else:
-		npc_visit_count = {"gravekeeper": 0}
+		npc_visit_count.clear()
 
 	var tutorial_data = data.get("tutorial", {})
 	if tutorial_data is Dictionary and TutorialManager and TutorialManager.has_method("from_dict"):

@@ -200,13 +200,13 @@ func delete_slot_file(slot: int) -> void:
 
 func _display_name(npc_id: String) -> String:
 	match npc_id:
-		"blacksmith": return "老霍"
-		"florist": return "阿莲"
-		"baker": return "老唐"
-		"gravekeeper": return "老崔"
-		"violinist": return "薇拉"
-		"oldpainter": return "老顾"
-		"innkeeper": return "冯婶"
+		"linguide": return "林指导"
+		"chentechnology": return "陈技术"
+		"wangdirector": return "王主管"
+		"zhaosecurity": return "赵安保"
+		"conductor": return "检票员"
+		"gearleft": return "齿轮·左"
+		"springright": return "弹簧·右"
 	return npc_id
 
 

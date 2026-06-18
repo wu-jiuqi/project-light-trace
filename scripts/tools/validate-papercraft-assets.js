@@ -9,10 +9,10 @@ const REQUIRED_DIRECTORIES = [
   "assets/papercraft/core/references",
   "assets/papercraft/core/materials",
   "assets/papercraft/core/ui",
-  "assets/papercraft/fragments/id0762/environment",
-  "assets/papercraft/fragments/id0762/characters",
-  "assets/papercraft/fragments/id0762/props",
-  "assets/papercraft/fragments/id0762/fx",
+  "assets/papercraft/fragments/id0001",
+  "assets/papercraft/fragments/id0002",
+  "assets/papercraft/fragments/id0003",
+  "assets/papercraft/fragments/id0004",
   "assets/papercraft/manifests",
 ];
 
@@ -38,7 +38,6 @@ const GENERATION_MODES = new Set([
 const MILESTONES = new Set([
   "golden_reference",
   "vertical_slice",
-  "id0762_full",
   "global_ui",
 ]);
 

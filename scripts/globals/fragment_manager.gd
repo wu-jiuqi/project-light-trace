@@ -2,8 +2,7 @@ extends Node
 ## 碎片管理器
 ## 管理所有碎片的开放、进入、修复与星图归位状态。
 ##
-## 碎片专属状态（如 #0762 的 awakened_colors 等）存储于
-## _fragment_states 字典中，按 fragment_id 命名空间隔离。
+## 碎片专属状态存储于 _fragment_states 字典中，按 fragment_id 命名空间隔离。
 
 
 class FragmentData:
@@ -48,12 +47,12 @@ var pending_completion_animation_id: String = ""
 var pending_unlocked_fragment_id: String = ""
 
 const LINEAR_UNLOCK_ORDER: Array[String] = [
-	"0001", "0002", "0003", "0004", "0047", "0762",
+	"0001", "0002", "0003", "0004", "0047",
 	"0915", "1138", "2049", "3015", "3333", "4096",
 ]
 
 # === 碎片专属状态存储 ===
-## 格式: { "0762": { "awakened_colors": [...], "melody_triggered": false, ... }, ... }
+## 格式: { "0002": { "seat_selection": {...} }, ... }
 var _fragment_states: Dictionary = {}
 
 # === 重玩模式标记 ===
@@ -78,7 +77,6 @@ func _initialize_fragments() -> void:
 		FragmentData.new("0003", "月下道观", "玉兔道观", "「举头望明月」", "月光之印", 1, false, "res://scenes/fragments/fragment_0003.tscn", true),
 		FragmentData.new("0004", "工坊物语", "齿轮工坊", "「匠心」", "匠魂之印", 2, false, "res://scenes/fragments/fragment_0004.tscn", true),
 		FragmentData.new("0047", "倒悬图书馆", "知识之塔", "「知识就是力量」", "真理之印", 3, true, "res://scenes/fragments/fragment_0047.tscn"),
-		FragmentData.new("0762", "颜色的葬礼", "灰白小镇", "「蓝是悲，红是怒，黄是望，绿是惧，紫是念，白是忘」", "情感之印", 3, true, "res://scenes/fragments/fragment_0762.tscn", true),
 		FragmentData.new("0915", "遗忘庭院", "记忆庭院", "「遗忘」", "记忆之印", 2, false, "res://scenes/fragments/fragment_0915.tscn"),
 		FragmentData.new("1138", "时钟停摆的车站", "永驻站", "「再见」", "时间之印", 3, true, "res://scenes/fragments/fragment_1138.tscn"),
 		FragmentData.new("2049", "镜中人", "双面町", "「我是谁」", "自我之印", 4, true, "res://scenes/fragments/fragment_2049.tscn"),
@@ -128,15 +126,6 @@ func _ensure_default_fragment_states() -> void:
 			"wrong_combination_count": 0,
 			"pendulum_broadcasts": {},
 		}
-	_fragment_states["0762"] = {
-		"awakened_colors": [false, false, false, false, false, false],
-		"melody_triggered": false,
-		"source_mark_revealed": false,
-		"fragment_completed": false,
-		"white_ready": false,
-		"gray_cloth_uncovered": false,
-		"oldpainter_trust": 0.0,
-	}
 
 
 # ============================================================
@@ -308,17 +297,6 @@ func reset_fragment_states(fragment_id: String) -> void:
 				"pendulum_broadcasts": {},
 			}
 			print("[FragmentManager] Fragment %s state reset" % fragment_id)
-		"0762":
-			_fragment_states["0762"] = {
-				"awakened_colors": [false, false, false, false, false, false],
-				"melody_triggered": false,
-				"source_mark_revealed": false,
-				"fragment_completed": false,
-				"white_ready": false,
-				"gray_cloth_uncovered": false,
-				"oldpainter_trust": 0.0,
-			}
-			print("[FragmentManager] 碎片 %s 的专属状态已重置" % fragment_id)
 		_:
 			_fragment_states.erase(fragment_id)
 			print("[FragmentManager] 碎片 %s 无专属默认状态，已清除运行态" % fragment_id)
@@ -396,8 +374,11 @@ func apply_fragment_states(states: Dictionary) -> void:
 		return
 	
 	for fragment_id in states:
+		var clean_fragment_id := str(fragment_id)
+		if get_fragment_by_id(clean_fragment_id) == null:
+			continue
 		var state_data = states[fragment_id]
 		if state_data is Dictionary:
-			_fragment_states[fragment_id] = state_data.duplicate(true)
+			_fragment_states[clean_fragment_id] = state_data.duplicate(true)
 	
 	print("[FragmentManager] 已应用 %d 个碎片的专属状态" % states.size())

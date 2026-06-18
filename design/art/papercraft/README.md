@@ -16,14 +16,13 @@
 
 1. `design/art/papercraft/style_bible.md`：决定全局画风、尺度、材质、动画方式和文件规范。
 2. `assets/papercraft/manifests/*.json`：决定实际需要生产和验收的文件。
-3. `design/id0762/art_spec_角色美术规格.md` 与 `design/id0762/art_spec_地图美术规格.md`：决定 #0762 的角色外观、空间尺寸、剧情锚点和区域细节。
-4. `design/id0762/角色精灵图_AI提示词.md`：仅保留为旧链接入口，不包含现役 Prompt。
+3. `design/story/` 与 `design/ux/`：决定当前线性碎片路线、FTUE 和叙事节奏。
+4. 各碎片目录中的现役 scene/script：决定实际落地范围，以 0001-0004 为当前可玩基线。
 
 ## 资产清单
 
 - `assets/papercraft/manifests/core.json`：全局材质、UI、标题页和星图。
 - `assets/papercraft/manifests/id0001.json`：碎片 #0001 角色立绘。
-- `assets/papercraft/manifests/id0762.json`：碎片 #0762「颜色的葬礼」。
 
 ## 当前生产范围
 
@@ -37,6 +36,6 @@ npm run validate:papercraft
 
 ## 现有文档关系
 
-- `design/id0762/art_spec_角色美术规格.md` 和 `design/id0762/art_spec_地图美术规格.md` 已升级为纸工版，继续作为 #0762 的叙事、角色锚点和地图内容依据。
-- `design/id0762/角色精灵图_AI提示词.md` 是旧像素管线记录。纸工资产不再使用其中的 `32x32` 精灵表约束。
-- `assets/concept_art/paper-cardboard-style-v1-innkeeper-gray-eaves-inn.png` 是第一张气氛锚点，不可直接切片当作正式资产。
+- `design/art/papercraft/style_bible.md` 负责全局风格约束。
+- `assets/papercraft/manifests/*.json` 负责当前正式资产清单。
+- `assets/concept_art/` 下的历史气氛图仅作参考，不作为运行时正式资产。

@@ -9,10 +9,9 @@ core/references/                 黄金参考组
 core/materials/                  固定纸张纹理板
 core/ui/                         标题页、星图、对话、背包与菜单组件
 fragments/id0001/characters/     #0001 人物立绘
-fragments/id0762/environment/    灰白镇环境模块
-fragments/id0762/characters/     #0762 整片纸偶
-fragments/id0762/props/          #0762 道具
-fragments/id0762/fx/             #0762 残留色与觉醒特效
+fragments/id0002/                #0002 驿站资源
+fragments/id0003/                #0003 道观资源
+fragments/id0004/                #0004 工坊资源
 manifests/                       资产生产清单
 ```
 

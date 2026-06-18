@@ -8,7 +8,14 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	var save_manager = root.get_node("SaveManager")
+	save_manager._stop_auto_save()
+	save_manager.set("_current_slot", -1)
+	save_manager.save_data = {}
+	root.get_node("ChatDatabase").clear_memory_only()
+
 	var manager = root.get_node("FragmentManager")
+	manager.reset_all_fragments()
 	var fragment = manager.get_fragment_by_id("0003")
 	_check(fragment != null and fragment.implemented, "0003 is available from the star map")
 
@@ -46,8 +53,8 @@ func _check_main_scene(manager: Node) -> void:
 		player.global_position.y = layer_marker.global_position.y - feet.position.y - 10.0
 		scene.call("_update_camera_zoom")
 		scene.call("_update_depth_layer_transparency", 999.0)
-		_check(camera.zoom.is_equal_approx(Vector2(1.9, 1.9)), "camera zoom matches 0001 above the layer marker")
-		_check(is_equal_approx(depth_layer_1.modulate.a, 0.35), "DepthLayer_1 fades above the layer marker")
+		_check(camera.zoom.is_equal_approx(Vector2(1.1, 1.1)), "camera zoom matches current 0003 above the layer marker")
+		_check(is_equal_approx(depth_layer_1.modulate.a, 0.2), "DepthLayer_1 fades above the layer marker")
 		player.global_position.y = layer_marker.global_position.y - feet.position.y + 10.0
 		scene.call("_update_camera_zoom")
 		scene.call("_update_depth_layer_transparency", 999.0)

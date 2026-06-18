@@ -8,6 +8,13 @@ func _init() -> void:
 
 
 func _run() -> void:
+	var save_manager = root.get_node("SaveManager")
+	save_manager._stop_auto_save()
+	save_manager.set("_current_slot", -1)
+	save_manager.save_data = {}
+	root.get_node("ChatDatabase").clear_memory_only()
+	root.get_node("FragmentManager").reset_all_fragments()
+
 	var fragment_scene = load("res://scenes/fragments/fragment_0001.tscn").instantiate()
 	root.add_child(fragment_scene)
 	current_scene = fragment_scene
@@ -37,6 +44,7 @@ func _run() -> void:
 
 	if _failures == 0:
 		print("[SUMMARY] 0001 sundial puzzle smoke test passed")
+	root.get_node("ChatDatabase").clear_memory_only()
 	quit(_failures)
 
 

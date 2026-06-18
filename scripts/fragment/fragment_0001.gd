@@ -758,7 +758,6 @@ func get_game_state(npc_id: String = "") -> Dictionary:
 		"memory_stage": stage,
 		"alert_level": 0,
 		"trust_level": 0,
-		"awakened_colors": [],
 		"awakened_count": 0
 	}
 
@@ -943,7 +942,7 @@ func _complete_fragment() -> void:
 	vbox.add_child(source_row)
 
 	var source_icon: Label = Label.new()
-	source_icon.text = "✦"
+	source_icon.text = "*"
 	source_icon.add_theme_font_size_override("font_size", 22)
 	source_icon.add_theme_color_override("font_color", Color(1.0, 0.72, 0.24, 1.0))
 	source_row.add_child(source_icon)

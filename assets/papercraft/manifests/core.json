@@ -49,7 +49,7 @@
       "status": "ready",
       "generation": "effect_composite",
       "requiredFor": "golden_reference",
-      "notes": "已冻结 fresh 20260604 v03：立体书/纸板舞台式 #0762 小镇过场，约 65% 灰白遗忘区域侵蚀约 35% 彩色生命区域；彩色必须落在红瓦、蓝天白云、绿色植物、黄色炉光、紫色音符纸片等具体物件上；底部保留字幕安全区"
+      "notes": "已冻结 fresh 20260604 v03：立体书/纸板舞台式碎片过场，约 65% 灰白遗忘区域侵蚀约 35% 彩色生命区域；彩色必须落在具体物件上；底部保留字幕安全区"
     },
     {
       "id": "ref_star_map",
@@ -130,7 +130,7 @@
       "path": "assets/papercraft/core/ui/title_background.png",
       "category": "ui",
       "role": "标题页多层纸板舞台",
-      "status": "ready",
+      "status": "planned",
       "generation": "ui_component",
       "requiredFor": "global_ui",
       "notes": "按 ref_ui_components 的登记簿旅店 / 书脊装订方向生产：深色纸板底、展开旧书页、底部票据按钮位；中央保留标题文字安全区，无内嵌文字"
@@ -140,7 +140,7 @@
       "path": "assets/papercraft/core/ui/star_map_background.png",
       "category": "ui",
       "role": "星图深色纸板底",
-      "status": "ready",
+      "status": "planned",
       "generation": "ui_component",
       "requiredFor": "global_ui",
       "notes": "按 ref_star_map 单独生产，不套用本轮登记簿卡槽样式：深色纸板底、描图纸星场、克制银点高光；保留星图界面后续独立深化空间"
@@ -150,7 +150,7 @@
       "path": "assets/papercraft/core/ui/button_normal.png",
       "category": "ui",
       "role": "普通按钮",
-      "status": "ready",
+      "status": "planned",
       "generation": "ui_component",
       "requiredFor": "global_ui",
       "notes": "旧书页标签按钮，铜钉固定，中央留空给运行时文字"
@@ -160,7 +160,7 @@
       "path": "assets/papercraft/core/ui/title_menu_panel.png",
       "category": "ui",
       "role": "标题页菜单纸面与金属夹边",
-      "status": "ready",
+      "status": "planned",
       "generation": "ui_component",
       "requiredFor": "global_ui",
       "notes": "首页菜单专用承托面：干净旧书页底、暗金属左右夹边、四角铆钉和低对比书写线；避免与按钮文字和按钮边框冲突"
@@ -170,7 +170,7 @@
       "path": "assets/papercraft/core/ui/button_hover.png",
       "category": "ui",
       "role": "悬停按钮",
-      "status": "ready",
+      "status": "planned",
       "generation": "reference_edit",
       "requiredFor": "global_ui",
       "notes": "在普通按钮基础上增加抬高投影和轻微铜色高光，中央留空给运行时文字"
@@ -180,7 +180,7 @@
       "path": "assets/papercraft/core/ui/button_pressed.png",
       "category": "ui",
       "role": "按下按钮",
-      "status": "ready",
+      "status": "planned",
       "generation": "reference_edit",
       "requiredFor": "global_ui",
       "notes": "压低的深色索引条按钮，阴影收短、边缘压痕更明显，中央留空给运行时文字"
@@ -190,7 +190,7 @@
       "path": "assets/papercraft/core/ui/button_disabled.png",
       "category": "ui",
       "role": "禁用按钮",
-      "status": "ready",
+      "status": "planned",
       "generation": "reference_edit",
       "requiredFor": "global_ui",
       "notes": "灰卡纸低对比禁用态，保留轮廓和铜钉但弱化投影，中央留空给运行时文字"
@@ -200,7 +200,7 @@
       "path": "assets/papercraft/core/ui/dialogue_panel.png",
       "category": "ui",
       "role": "对话框",
-      "status": "ready",
+      "status": "planned",
       "generation": "ui_component",
       "requiredFor": "vertical_slice",
       "notes": "横向展开旧登记簿主面板，左侧书脊装订环、上方姓名条、左右旧书页正文留白；无内嵌文字"
@@ -210,7 +210,7 @@
       "path": "assets/papercraft/core/ui/detail_card.png",
       "category": "ui",
       "role": "星图碎片详情卡",
-      "status": "ready",
+      "status": "planned",
       "generation": "ui_component",
       "requiredFor": "global_ui",
       "notes": "登记簿体系内的详情卡 motif：灰卡纸、浅网格、旅店线稿装饰和折角；仅作结构与装饰，不承载必须阅读的信息"
@@ -220,7 +220,7 @@
       "path": "assets/papercraft/core/ui/pause_tabs.png",
       "category": "ui",
       "role": "暂停菜单纸质标签页",
-      "status": "ready",
+      "status": "planned",
       "generation": "ui_component",
       "requiredFor": "global_ui",
       "notes": "剪贴簿夹层中的纸质标签页组，使用旧书页、灰卡纸和纤维纸区分层级；横线仅作文字安全区提示"
@@ -230,7 +230,7 @@
       "path": "assets/papercraft/core/ui/backpack_notebook.png",
       "category": "ui",
       "role": "背包剪贴簿",
-      "status": "ready",
+      "status": "planned",
       "generation": "ui_component",
       "requiredFor": "global_ui",
       "notes": "背包剪贴簿卡槽，牛皮纸封底、旧书页格线、票据口袋、折角与四角铜钉；格线仅作收纳结构"
@@ -240,7 +240,7 @@
       "path": "assets/papercraft/core/ui/star_shard_tracing_paper.png",
       "category": "ui",
       "role": "星图描图纸碎片",
-      "status": "ready",
+      "status": "planned",
       "generation": "ui_component",
       "requiredFor": "global_ui",
       "notes": "从 ref_star_map 的描图纸 / 银点语言派生的 UI 装饰碎片，透明纸感和四芒星轮廓保留，后续正式星图碎片仍需从母图本地切割"

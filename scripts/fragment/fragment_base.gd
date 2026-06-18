@@ -3,24 +3,13 @@ extends Node2D
 ## 所有碎片世界场景的基础模板，提供通用功能
 
 # 预加载依赖脚本（非单例，按需实例化）
-const WantedSystemScript = preload("res://scripts/systems/wanted_system.gd")
 const ClueSystemScript = preload("res://scripts/systems/clue_system.gd")
-
-# 警觉等级常量（对齐 WantedSystem.AlertLevel）
-const ALERT_SAFE = 0
-const ALERT_SUSPICIOUS = 1
-const ALERT_INVESTIGATING = 2
-const ALERT_ALERTED = 3
-const ALERT_HUNTING = 4
-const ALERT_LOCKDOWN = 5
 
 @onready var player: CharacterBody2D = $Player
 @onready var npc_container: Node2D = $NPCs
 @onready var ui_layer: CanvasLayer = $UILayer
-@onready var wanted_indicator: Control = $UILayer/WantedIndicator
 @onready var clue_notification: Control = $UILayer/ClueNotification
 
-var wanted_system: Node = null
 var clue_system: Node = null
 var current_fragment: FragmentManager.FragmentData
 
@@ -38,13 +27,6 @@ func _ready() -> void:
 	fragment_loaded.emit(current_fragment.id)
 
 func _init_systems() -> void:
-	# 初始化通缉系统
-	wanted_system = WantedSystemScript.new()
-	wanted_system.name = "WantedSystem"
-	add_child(wanted_system)
-	wanted_system.alert_level_changed.connect(_on_alert_changed)
-	wanted_system.suspicion_changed.connect(_on_suspicion_changed)
-	
 	# 初始化线索系统
 	clue_system = ClueSystemScript.new()
 	clue_system.name = "ClueSystem"
@@ -56,38 +38,6 @@ func _init_systems() -> void:
 func _load_fragment_data() -> void:
 	current_fragment = FragmentManager.current_fragment
 	# 子类重写以加载特定碎片数据
-
-func _on_alert_changed(new_level: int, _old_level: int) -> void:
-	match new_level:
-		ALERT_SAFE:
-			wanted_indicator.modulate = Color(0, 0, 0, 0)
-		ALERT_SUSPICIOUS:
-			_update_wanted_indicator("可疑", Color.YELLOW)
-		ALERT_INVESTIGATING:
-			_update_wanted_indicator("调查中", Color.ORANGE)
-		ALERT_ALERTED:
-			_update_wanted_indicator("警戒!", Color.RED)
-		ALERT_HUNTING:
-			_update_wanted_indicator("追捕!!", Color.CRIMSON)
-		ALERT_LOCKDOWN:
-			wanted_indicator.modulate = Color.DARK_RED
-			# 全城锁定效果
-			_on_lockdown()
-
-func _update_wanted_indicator(text: String, color: Color) -> void:
-	wanted_indicator.modulate = color
-	var label = wanted_indicator.get_node_or_null("Label")
-	if label:
-		label.text = text
-
-func _on_suspicion_changed(current: float, _max_val: float) -> void:
-	var bar = wanted_indicator.get_node_or_null("ProgressBar")
-	if bar:
-		bar.value = current
-
-func _on_lockdown() -> void:
-	print("[FragmentWorld] 全城锁定！")
-	# 子类可重写以实现专门的锁定效果
 
 func _on_clue_discovered(clue: Dictionary) -> void:
 	clue_notification.show()

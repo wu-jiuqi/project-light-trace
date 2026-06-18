@@ -405,7 +405,6 @@ func get_game_state(_npc_kb_id: String) -> Dictionary:
 		"memory_stage": "initial",
 		"alert_level": 0,
 		"trust_level": 0,
-		"awakened_colors": [],
 		"awakened_count": 0,
 	}
 

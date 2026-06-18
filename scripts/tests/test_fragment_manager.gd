@@ -14,12 +14,14 @@ func _run() -> void:
 	var fragment_0001 = manager.get_fragment_by_id("0001")
 	var fragment_0002 = manager.get_fragment_by_id("0002")
 	var fragment_0003 = manager.get_fragment_by_id("0003")
-	var placeholder_0004 = manager.get_fragment_by_id("0004")
+	var fragment_0004 = manager.get_fragment_by_id("0004")
+	var placeholder_0047 = manager.get_fragment_by_id("0047")
 
 	_check(fragment_0001 != null and fragment_0001.implemented, "0001 is implemented")
 	_check(fragment_0002 != null and fragment_0002.implemented, "0002 is implemented")
 	_check(fragment_0003 != null and fragment_0003.implemented, "0003 is implemented")
-	_check(placeholder_0004 != null and not placeholder_0004.implemented, "0004 is still a placeholder")
+	_check(fragment_0004 != null and fragment_0004.implemented, "0004 is implemented")
+	_check(placeholder_0047 != null and not placeholder_0047.implemented, "0047 is still a placeholder")
 
 	_check(manager.enter_fragment(fragment_0001), "0001 can be entered at game start")
 	_check(not manager.enter_fragment(fragment_0002), "locked 0002 cannot be entered at game start")
@@ -43,9 +45,13 @@ func _run() -> void:
 	_check(manager.complete_fragment(fragment_0002), "0002 completion changes state")
 	_check(fragment_0003.unlocked, "0002 completion unlocks 0003")
 	_check(manager.enter_fragment(fragment_0003), "unlocked 0003 can be entered")
+	_check(manager.complete_fragment(fragment_0003), "0003 completion changes state")
+	_check(fragment_0004.unlocked, "0003 completion unlocks 0004")
+	_check(manager.enter_fragment(fragment_0004), "unlocked 0004 can be entered")
+	_check(manager.complete_fragment(fragment_0004), "0004 completion changes state")
+	_check(placeholder_0047.unlocked, "0004 completion unlocks 0047")
 
-	placeholder_0004.unlocked = true
-	_check(not manager.enter_fragment(placeholder_0004), "unimplemented 0004 cannot be entered even when unlocked")
+	_check(not manager.enter_fragment(placeholder_0047), "unimplemented 0047 cannot be entered even when unlocked")
 
 	manager.queue_free()
 	if _failures == 0:
