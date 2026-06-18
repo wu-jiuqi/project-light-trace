@@ -4,6 +4,13 @@ class_name PlayerController
 
 const SoftShadow = preload("res://scripts/fragment/soft_shadow.gd")
 
+## 物品拾取 SFX — 通用交互音效
+const SFX_PICKUP := preload("res://assets/audio/sfx/ui_item_pickup.wav")
+const SFX_PICKUP_VOLUME_DB: float = -4.0
+## 通用交互确认 SFX — 比拾取音更轻，避免盖过专用音效
+const SFX_INTERACT := preload("res://assets/audio/sfx/ui_interact_confirm.wav")
+const SFX_INTERACT_VOLUME_DB: float = -10.0
+
 ## 交互提示变更信号，供 HUD/UI 层监听显示提示文字
 signal interact_hint_changed(show: bool, hint_text: String)
 
@@ -47,6 +54,20 @@ var _facing_right: bool = true      ## 当前朝向（true=右，false=左）
 var _is_flipping: bool = false
 const FLIP_DURATION: float = 0.18   ## 翻转动画时长（秒）
 
+# ============================================================
+# 脚步声
+# ============================================================
+## 4 个脚步声变体（纸板触感，匹配 SWAY_SPEED=10.0 的摇摆频率）
+var _footstep_streams: Array[AudioStream] = []
+## 上一帧 sin(_sway_time) 值，用于零交叉检测
+var _prev_sway_sin: float = 0.0
+## 上一帧是否在移动（避免静止→移动瞬间触发误判）
+var _was_moving: bool = false
+## 上一帧播放的脚步索引（避免连续重复同一变体）,-1=无
+var _last_footstep_idx: int = -1
+## 脚步声增益（SFX 总线混音前衰减）
+const FOOTSTEP_VOLUME_DB: float = -6.0
+
 
 func _ready() -> void:
 	add_to_group("player")
@@ -68,6 +89,9 @@ func _ready() -> void:
 		_try_spawn(spawn_name)
 
 	print("[PlayerController] 就绪，速度: %.0f 位置: %s" % [speed, global_position])
+
+	# 预加载脚步声资源
+	_load_footsteps()
 
 
 ## 初始化场景中已有的 InteractionArea，设置形状并连接信号
@@ -212,6 +236,7 @@ func _input(event: InputEvent) -> void:
 			_interact_with_interactable(_closest_interactable)
 		elif _closest_npc and is_instance_valid(_closest_npc) and not _closest_npc.is_queued_for_deletion():
 			if _try_fragment_npc_interaction(_closest_npc):
+				_play_interact_sfx()
 				return
 			_interact_with_nearest_npc()
 		elif _closest_interactable and is_instance_valid(_closest_interactable) and not _closest_interactable.is_queued_for_deletion():
@@ -393,6 +418,7 @@ func _interact_with_nearest_npc() -> void:
 		if TutorialManager and TutorialManager.has_method("mark_interaction"):
 			TutorialManager.mark_interaction("npc", str(_closest_npc.name))
 		if ChatDialogue.is_open:
+			_play_interact_sfx()
 			_closest_npc.start_dialogue()
 		else:
 			push_warning("[Player] 对话UI未能打开，取消 NPC TALKING 状态切换")
@@ -441,6 +467,7 @@ func _interact_with_interactable(obj: Node2D) -> void:
 	# 优先调用对象的 interact 方法
 	if obj.has_method("interact"):
 		obj.interact()
+		_play_interact_sfx()
 		if TutorialManager and TutorialManager.has_method("mark_interaction"):
 			TutorialManager.mark_interaction("interactable", str(obj.name))
 		print("[Player] 与 %s 交互 (interact)" % obj.name)
@@ -449,6 +476,7 @@ func _interact_with_interactable(obj: Node2D) -> void:
 	# 其次发送 interacted 信号
 	if obj.has_signal("interacted"):
 		obj.interacted.emit()
+		_play_interact_sfx()
 		if TutorialManager and TutorialManager.has_method("mark_interaction"):
 			TutorialManager.mark_interaction("interactable", str(obj.name))
 		print("[Player] 触发 %s 的 interacted 信号" % obj.name)
@@ -456,6 +484,11 @@ func _interact_with_interactable(obj: Node2D) -> void:
 
 	# 默认行为：发送交互信号
 	print("[Player] 与 %s 交互（默认）" % obj.name)
+
+
+func _play_interact_sfx() -> void:
+	if AudioManager and AudioManager.has_method("play_sfx"):
+		AudioManager.play_sfx(SFX_INTERACT, AudioManager.PRIORITY_NORMAL, SFX_INTERACT_VOLUME_DB)
 
 
 # ============================================================
@@ -489,8 +522,9 @@ func _interact_with_pickup(pickup: Area2D) -> void:
 	# 优先调用 PickupItem 自身的 _pickup() 方法（pickup_item.gd）
 	if pickup.has_method("_pickup"):
 		var pname: String = pickup.item_name if "item_name" in pickup else "物品"
-		pickup._pickup()
-		print("[Player] 拾取物品: %s" % pname)
+		var picked = pickup._pickup()
+		if picked == true:
+			print("[Player] 拾取物品: %s" % pname)
 		return
 
 	# 降级：手动通过 InventoryManager 拾取
@@ -498,6 +532,8 @@ func _interact_with_pickup(pickup: Area2D) -> void:
 		var item_id: int = pickup.item_id
 		var pname: String = pickup.item_name if "item_name" in pickup else "物品"
 		if InventoryManager.add_item(item_id):
+			if AudioManager and AudioManager.has_method("play_sfx"):
+				AudioManager.play_sfx(SFX_PICKUP, AudioManager.PRIORITY_NORMAL, SFX_PICKUP_VOLUME_DB)
 			print("[Player] 拾取物品: %s (id=%d)" % [pname, item_id])
 			pickup.queue_free()
 		return
@@ -505,8 +541,9 @@ func _interact_with_pickup(pickup: Area2D) -> void:
 	# 检查父节点（某些物品 Area2D 是子节点）
 	var parent = pickup.get_parent()
 	if parent and is_instance_valid(parent) and parent.has_method("_pickup"):
-		parent._pickup()
-		print("[Player] 通过父节点拾取物品: %s" % parent.name)
+		var parent_picked = parent._pickup()
+		if parent_picked == true:
+			print("[Player] 通过父节点拾取物品: %s" % parent.name)
 		return
 
 
@@ -535,14 +572,17 @@ func _try_generic_interact() -> void:
 		# 通用交互：检查对象是否有 interact 方法或信号
 		if parent and parent.has_method("interact"):
 			parent.interact(self)
+			_play_interact_sfx()
 			print("[Player] 与 %s 交互 (interact)" % parent.name)
 			return
 		if parent and parent.has_signal("interacted"):
 			parent.interacted.emit(self)
+			_play_interact_sfx()
 			print("[Player] 触发 %s 的 interacted 信号" % parent.name)
 			return
 		if area.has_method("interact"):
 			area.interact(self)
+			_play_interact_sfx()
 			print("[Player] 与 %s 交互 (interact)" % area.name)
 			return
 
@@ -660,18 +700,71 @@ func _start_flip(to_right: bool) -> void:
 	tween.tween_callback(func(): _is_flipping = false)
 
 
-## 更新走路左右摇摆（正弦振荡 rotation）
+## 更新走路左右摇摆（正弦振荡 rotation）+ 脚步声音效
 func _update_sway(delta: float, is_moving: bool) -> void:
 	if is_moving:
 		_sway_time += delta * SWAY_SPEED
-		_visual_root.rotation_degrees = sin(_sway_time) * SWAY_AMPLITUDE
+		var current_sin := sin(_sway_time)
+		_visual_root.rotation_degrees = current_sin * SWAY_AMPLITUDE
+
+		# 零交叉检测：sin 穿越 0 → 一步（每周期两步，匹配摇摆频率）
+		if _was_moving:
+			if (_prev_sway_sin <= 0.0 and current_sin > 0.0) or \
+			   (_prev_sway_sin >= 0.0 and current_sin < 0.0):
+				_play_footstep()
+
+		_prev_sway_sin = current_sin
+		_was_moving = true
 	else:
 		_settle_sway(delta)
+		_was_moving = false
+		_prev_sway_sin = 0.0
+		_last_footstep_idx = -1
 
 
 ## 静止时摇摆逐渐归零
 func _settle_sway(delta: float) -> void:
 	_visual_root.rotation_degrees = lerpf(_visual_root.rotation_degrees, 0.0, delta * 6.0)
+
+
+## 预加载 4 个脚步声变体（WAV → AudioStream）
+func _load_footsteps() -> void:
+	var paths := [
+		"res://assets/audio/sfx/footstep_01.wav",
+		"res://assets/audio/sfx/footstep_02.wav",
+		"res://assets/audio/sfx/footstep_03.wav",
+		"res://assets/audio/sfx/footstep_04.wav",
+	]
+	for p in paths:
+		var stream := load(p) as AudioStream
+		if stream:
+			_footstep_streams.append(stream)
+		else:
+			push_warning("[PlayerController] 无法加载脚步声: %s" % p)
+
+	if not _footstep_streams.is_empty():
+		print("[PlayerController] 脚步声已加载: %d 个变体" % _footstep_streams.size())
+
+
+## 播放一步脚步声（随机选变体，避免连续重复）
+func _play_footstep() -> void:
+	if _footstep_streams.is_empty():
+		return
+	if not AudioManager:
+		return
+
+	# 随机选一个变体，避免与上一步重复
+	var count := _footstep_streams.size()
+	var idx: int
+	if count == 1:
+		idx = 0
+	else:
+		idx = randi() % count
+		if idx == _last_footstep_idx:
+			idx = (idx + 1) % count
+
+	_last_footstep_idx = idx
+	AudioManager.play_sfx(_footstep_streams[idx], AudioManager.PRIORITY_LOW, FOOTSTEP_VOLUME_DB)
 
 
 # ============================================================

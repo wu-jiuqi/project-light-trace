@@ -2,6 +2,9 @@ extends Area2D
 ## 可拾取物品 — 绕过 Godot 4.6.2 Area2D+Label tscn Bug
 ## Label 在 _ready() 中动态创建
 
+const SFX_PICKUP := preload("res://assets/audio/sfx/ui_item_pickup.wav")
+const SFX_PICKUP_VOLUME_DB: float = -4.0
+
 @export var item_id: int = 0
 @export var item_name: String = "物品"
 @export var item_color: Color = Color(1, 0.5, 0.5, 1)
@@ -21,7 +24,6 @@ func _ready() -> void:
 		position = Vector2(item_pos_x, item_pos_y)
 	collision_layer = 8  # layer 8: 可交互物品，供玩家 InteractionArea 检测
 	collision_mask = 1   # 检测 layer 1: 物理体（玩家 CharacterBody2D）
-	set_process(true)
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
 	_create_visual()
@@ -68,12 +70,6 @@ func _create_visual() -> void:
 	add_child(_label)
 
 
-func _process(_delta: float) -> void:
-	if not _player_nearby: return
-	if Input.is_action_just_pressed("interact"):
-		_pickup()
-
-
 func _on_body_entered(body: Node2D) -> void:
 	if body.is_in_group("player"):
 		_player_nearby = true
@@ -88,15 +84,24 @@ func _on_body_exited(body: Node2D) -> void:
 			_label.text = item_name
 
 
-func _pickup() -> void:
+func _pickup() -> bool:
 	if _is_picked_up:
-		return
+		return false
 	_is_picked_up = true
 
-	if not InventoryManager.has_method("add_item"): return
+	if not InventoryManager.has_method("add_item"):
+		_is_picked_up = false
+		return false
 	if InventoryManager.add_item(item_id):
+		# 播放拾取 SFX — 纸工世界通用物品交互音效
+		if AudioManager and AudioManager.has_method("play_sfx"):
+			AudioManager.play_sfx(SFX_PICKUP, AudioManager.PRIORITY_NORMAL, SFX_PICKUP_VOLUME_DB)
 		print("[PickupItem] 拾取: %s" % item_name)
 		queue_free()
+		return true
+
+	_is_picked_up = false
+	return false
 
 
 func _load_texture(path: String) -> Texture2D:

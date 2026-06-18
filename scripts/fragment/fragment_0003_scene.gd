@@ -4,6 +4,7 @@ const PLAYER_SCENE: PackedScene = preload("res://scenes/characters/player/player
 const DIALOGUE_BOX_SCENE: PackedScene = preload("res://scenes/ui/DialogueBox.tscn")
 const CLUE_PANEL_SCENE: PackedScene = preload("res://scenes/ui/CluePanel.tscn")
 const INTERACTABLE_SCRIPT: Script = preload("res://scripts/fragment/fragment_0003_interactable.gd")
+const CAMERA_RIG_SCRIPT: Script = preload("res://scripts/stage/camera_rig.gd")
 
 const DESIGN_SIZE := Vector2(1280.0, 720.0)
 const PLAYER_VISUAL_SCALE := Vector2(2.2, 2.2)
@@ -17,6 +18,8 @@ const BOX_CLOSED_TEXTURE := "res://assets/papercraft/fragments/id0003/environmen
 const BOX_OPEN_TEXTURE := "res://assets/papercraft/fragments/id0003/environment/box_01.png"
 const JADE_TEXTURE := "res://assets/papercraft/fragments/id0003/environment/jade.png"
 const BGM_FRAGMENT_0003 = preload("res://assets/audio/0003.mp3")
+const SFX_PICKUP := preload("res://assets/audio/sfx/ui_item_pickup.wav")
+const SFX_PICKUP_VOLUME_DB: float = -4.0
 
 const STEP_ORDER: Array[String] = ["wash", "burn", "offer", "clap", "moon"]
 const STEP_STATE_KEYS := {
@@ -334,14 +337,17 @@ func _configure_moon_area() -> void:
 func _setup_camera() -> void:
 	if _player == null:
 		return
-	_camera = get_node_or_null("WorldRoot/CameraRig/Camera2D") as Camera2D
+	var camera_rig := _ensure_camera_rig()
+	_camera = camera_rig.get_node_or_null("Camera2D") as Camera2D if camera_rig != null else null
 	if _camera == null:
 		_camera = Camera2D.new()
 		_camera.name = "Camera2D"
-		_player.add_child(_camera)
-	else:
-		_camera.reparent(_player, false)
+		if camera_rig != null:
+			camera_rig.add_child(_camera)
+		else:
+			add_child(_camera)
 	_camera.position = Vector2.ZERO
+	_camera.offset = Vector2.ZERO
 	_camera.enabled = true
 	_camera.position_smoothing_enabled = false
 	_camera.limit_left = 0
@@ -353,6 +359,22 @@ func _setup_camera() -> void:
 	_depth_layer_1 = get_node_or_null("WorldRoot/DepthLayer/DepthLayer_1") as CanvasItem
 	_update_camera_zoom()
 	_update_depth_layer_transparency(999.0)
+	if camera_rig != null and camera_rig.has_method("snap_to_target"):
+		camera_rig.snap_to_target(_player)
+
+
+func _ensure_camera_rig() -> Node2D:
+	var world_root := get_node_or_null("WorldRoot") as Node2D
+	if world_root == null:
+		return null
+	var camera_rig := world_root.get_node_or_null("CameraRig") as Node2D
+	if camera_rig == null:
+		camera_rig = Node2D.new()
+		camera_rig.name = "CameraRig"
+		world_root.add_child(camera_rig)
+	if camera_rig.get_script() == null:
+		camera_rig.set_script(CAMERA_RIG_SCRIPT)
+	return camera_rig
 
 
 func _update_camera_zoom() -> void:
@@ -463,6 +485,7 @@ func _collect_inscription(lamp_id: String) -> void:
 	if lamp_id not in order:
 		order.append(lamp_id)
 		FragmentManager.set_fragment_state(FRAGMENT_ID, "inscription_order", order)
+		_play_pickup_sfx()
 		_show_message("你记下了刻字：%s" % INSCRIPTION_CHARS.get(lamp_id, ""))
 	if _state_int("wash_hands") == 1 and _state_int("lantern_lit") == 0:
 		_attempt_ritual_step("burn")
@@ -470,6 +493,8 @@ func _collect_inscription(lamp_id: String) -> void:
 
 
 func _collect_jade() -> void:
+	if _state_int("jade_collected") == 0:
+		_play_pickup_sfx()
 	FragmentManager.set_fragment_state(FRAGMENT_ID, "jade_collected", 1)
 	FragmentManager.set_fragment_state(FRAGMENT_ID, "jade_gallery_collected", 1)
 	_show_message("你收起了玉。")
@@ -792,3 +817,8 @@ func _start_bgm() -> void:
 func _stop_bgm() -> void:
 	AudioManager.stop_bgm(0.25)
 	print("[Fragment0003] BGM 已停止")
+
+
+func _play_pickup_sfx() -> void:
+	if AudioManager and AudioManager.has_method("play_sfx"):
+		AudioManager.play_sfx(SFX_PICKUP, AudioManager.PRIORITY_NORMAL, SFX_PICKUP_VOLUME_DB)

@@ -10,9 +10,12 @@ extends Node2D
 @export var vertical_follow_speed: float = 2.5
 ## 每深一层（更远的 DepthLayer），镜头额外偏上多少，实现"镜头整体推进"效果
 @export var depth_layer_y_push: float = 50.0
+@export var target_group: StringName = &"player"
 
 ## Camera2D 子节点引用
 var _camera: Camera2D = null
+var _target: Node2D = null
+var _has_snapped_to_target := false
 ## 当前玩家所在深度层编号（1=前景, 2=中景, 3=远景）
 var _current_depth_layer: int = 1
 ## 上一次检测到的深度层（避免重复计算）
@@ -42,22 +45,41 @@ func _process(delta: float) -> void:
 	_detect_depth_layer(player.global_position.y)
 
 	# 计算目标位置 = 玩家位置 + 垂直偏移 + 深度层推进
+	var target_pos: Vector2 = _get_target_position(player)
+	if not _has_snapped_to_target:
+		global_position = target_pos
+		_has_snapped_to_target = true
+		return
+
+	# 差异化速率平滑跟随
+	var x_weight: float = clampf(horizontal_follow_speed * delta, 0.0, 1.0)
+	var y_weight: float = clampf(vertical_follow_speed * delta, 0.0, 1.0)
+	var new_x: float = lerp(global_position.x, target_pos.x, x_weight)
+	var new_y: float = lerp(global_position.y, target_pos.y, y_weight)
+
+	global_position = Vector2(new_x, new_y)
+
+
+func snap_to_target(target: Node2D = null) -> void:
+	var resolved_target := target if target != null else _find_player()
+	if resolved_target == null:
+		return
+	_detect_depth_layer(resolved_target.global_position.y)
+	global_position = _get_target_position(resolved_target)
+	_has_snapped_to_target = true
+
+
+func _get_target_position(player: Node2D) -> Vector2:
 	var layer_push: float = 0.0
 	if _current_depth_layer == 2:
 		layer_push = depth_layer_y_push
 	elif _current_depth_layer == 3:
 		layer_push = depth_layer_y_push * 2.0
 
-	var target_pos: Vector2 = Vector2(
+	return Vector2(
 		player.global_position.x,
 		player.global_position.y - vertical_offset - layer_push
 	)
-
-	# 差异化速率平滑跟随
-	var new_x: float = lerp(global_position.x, target_pos.x, horizontal_follow_speed * delta)
-	var new_y: float = lerp(global_position.y, target_pos.y, vertical_follow_speed * delta)
-
-	global_position = Vector2(new_x, new_y)
 
 
 ## 检测玩家当前所在的深度层
@@ -80,7 +102,11 @@ func _detect_depth_layer(player_y: float) -> void:
 
 ## 查找玩家节点（通过 group "player"）
 func _find_player() -> Node2D:
-	var players = get_tree().get_nodes_in_group("player")
-	if players.size() > 0:
-		return players[0] as Node2D
+	if _target != null and is_instance_valid(_target) and not _target.is_queued_for_deletion():
+		return _target
+	var players = get_tree().get_nodes_in_group(target_group)
+	for player in players:
+		if player is Node2D:
+			_target = player as Node2D
+			return _target
 	return null

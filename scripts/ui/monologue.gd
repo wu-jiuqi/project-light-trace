@@ -33,6 +33,7 @@ var _hold_time := 0.0
 var _holding := false
 var _interactive_collect_pending := false
 var _suppress_release_after_collect := false
+var _auto_collect_token := 0
 
 
 func _ready() -> void:
@@ -78,6 +79,7 @@ func close_monologue() -> void:
 	_skip_hint.visible = false
 	_interactive_collect_pending = false
 	_suppress_release_after_collect = false
+	_auto_collect_token += 1
 	_npc_id = ""
 	_pages.clear()
 	monologue_finished.emit(closing_id)
@@ -162,12 +164,14 @@ func _show_next_page() -> void:
 	_visible_chars = 0
 	_interactive_collect_pending = false
 	_suppress_release_after_collect = false
+	_auto_collect_token += 1
 	_continue_hint.text = DEFAULT_CONTINUE_HINT
 
 	var page: Dictionary = _pages[_page_index]
 	_full_text = str(page.get("text", ""))
 	_apply_page_texture(str(page.get("image_path", "")))
 	_apply_interactive_scene(page)
+	_apply_auto_collect(page, _auto_collect_token)
 	_fade_cover_then_stream()
 
 
@@ -245,12 +249,35 @@ func _apply_interactive_scene(page: Dictionary) -> void:
 			)
 
 
-func _mark_interactive_collected(fragment_id: String, state_key: String, state_value) -> void:
+func _apply_auto_collect(page: Dictionary, token: int) -> void:
+	if not bool(page.get("auto_collect", false)):
+		return
+	var fragment_id := str(page.get("fragment_id", "0002")).strip_edges()
+	if fragment_id.is_empty():
+		fragment_id = "0002"
+	var state_key := str(page.get("state_key", "")).strip_edges()
+	if state_key.is_empty():
+		return
+	var state_value = page.get("state_value", true)
+	var current_value = FragmentManager.get_fragment_state(fragment_id, state_key)
+	if _state_values_match(current_value, state_value):
+		_continue_hint.text = DEFAULT_COLLECTED_HINT
+		return
+	_interactive_collect_pending = true
+	_continue_hint.text = str(page.get("collect_hint", "收集中..."))
+	var delay := maxf(0.0, float(page.get("auto_collect_delay", 0.35)))
+	if delay > 0.0:
+		await get_tree().create_timer(delay).timeout
+	if visible and token == _auto_collect_token:
+		_mark_interactive_collected(fragment_id, state_key, state_value, false)
+
+
+func _mark_interactive_collected(fragment_id: String, state_key: String, state_value, suppress_release: bool = true) -> void:
 	FragmentManager.set_fragment_state(fragment_id, state_key, state_value)
 	if SaveManager.get_current_slot() >= 0:
 		SaveManager.save_game()
 	_interactive_collect_pending = false
-	_suppress_release_after_collect = true
+	_suppress_release_after_collect = suppress_release
 	_continue_hint.text = DEFAULT_COLLECTED_HINT
 
 

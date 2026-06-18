@@ -168,6 +168,16 @@ const GALLERY_ITEMS: Array[Dictionary] = [
 		"state_key": "jade_collected",
 		"order": 320,
 	},
+	{
+		"id": "forgeheart_seal_0004",
+		"title": "匠魂之印",
+		"description": "齿轮工坊交出的源印。它证明一个造物不必先证明有用，才被允许存在。",
+		"thumbnail": "res://assets/papercraft/fragments/id0004/environment/04result.png",
+		"image": "res://assets/papercraft/fragments/id0004/environment/04result.png",
+		"fragment_id": "0004",
+		"state_key": "forgeheart_collected",
+		"order": 330,
+	},
 ]
 
 @onready var _gallery_card: Control = $Stage/GalleryPanel/Gallery/GalleryCard

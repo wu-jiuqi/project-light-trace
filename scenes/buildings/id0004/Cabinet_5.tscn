@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://bcpy6hjh84cd1"]
+
+[ext_resource type="Texture2D" uid="uid://dd7gqvw5oev28" path="res://assets/papercraft/fragments/id0004/environment/guizi5.png" id="1_fp48w"]
+
+[node name="Cabinet5" type="Node2D" unique_id=847909682]
+
+[node name="Visual" type="Node2D" parent="." unique_id=756635350]
+
+[node name="Body" type="Sprite2D" parent="Visual" unique_id=223739606]
+texture = ExtResource("1_fp48w")
+
+[node name="L1" type="Area2D" parent="." unique_id=1405084493]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="L1" unique_id=1162926840]
+polygon = PackedVector2Array(272, -336, 576, -336, 576, 72, 224, 72, 224, -280)
+
+[node name="L2" type="Area2D" parent="." unique_id=588201969]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="L2" unique_id=1801526570]
+polygon = PackedVector2Array(-624, -256, -232, -256, -232, 72, -624, 72)
+
+[node name="L3" type="Area2D" parent="." unique_id=1242214955]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="L3" unique_id=911882654]
+polygon = PackedVector2Array(-192, -320, 168, -320, 168, 72, -192, 72)

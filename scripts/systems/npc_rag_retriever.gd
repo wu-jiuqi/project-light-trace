@@ -26,9 +26,12 @@ var _fragment_0001_shared_chunks: Array = []
 var _fragment_0001_l1_compact: String = ""
 var _fragment_0002_shared_chunks: Array = []
 var _fragment_0002_l1_compact: String = ""
+var _fragment_0004_shared_chunks: Array = []
+var _fragment_0004_l1_compact: String = ""
 
 const FRAGMENT_0001_NPCS: Array[String] = ["linguide", "chentechnology", "wangdirector", "zhaosecurity"]
 const FRAGMENT_0002_NPCS: Array[String] = ["conductor"]
+const FRAGMENT_0004_NPCS: Array[String] = ["gearleft", "springright"]
 
 # 加载状态
 var _is_loaded: bool = false
@@ -99,6 +102,9 @@ func _load_all_knowledge() -> void:
 
 	# 6. 加载碎片0002 NPC知识库（从 LLM/0002/）
 	_load_fragment_0002_knowledge()
+
+	# 7. 加载碎片0004 NPC知识库（从 LLM/0004/）
+	_load_fragment_0004_knowledge()
 	
 	_is_loaded = true
 
@@ -211,6 +217,54 @@ func _load_fragment_0002_knowledge() -> void:
 				print("[NPCRagRetriever] 加载碎片0002 NPC: %s, %d chunks" % [npc_id, chunks.size()])
 
 
+func _load_fragment_0004_knowledge() -> void:
+	## 加载碎片0004齿轮工坊的材料讲述/审核NPC知识库
+	var f0004_path = "res://LLM/0004/"
+
+	var l0_data = _load_json(f0004_path + "l0_core_identities.json")
+	if l0_data:
+		_fragment_0004_l1_compact = l0_data.get("l1_shared_constraint", "")
+		var shared_context := str(l0_data.get("shared_world_context", ""))
+		if shared_context != "":
+			_fragment_0004_shared_chunks.append({
+				"id": "f0004_shared_world",
+				"category": "world_knowledge",
+				"keywords": ["齿轮工坊", "工坊物语", "材料", "图纸", "检测仪", "完美人偶", "她", "钟摆"],
+				"relevance_gate": "low",
+				"memory_stage": "any",
+				"alert_required": 0,
+				"content": shared_context,
+			})
+		var identities = l0_data.get("l0_identities", {})
+		for npc_id in identities:
+			var id_info = identities[npc_id]
+			var identity_text = id_info.get("identity", "")
+			if identity_text != "":
+				_l0_identities[npc_id] = {
+					"id": npc_id,
+					"content": identity_text
+				}
+				print("[NPCRagRetriever] 加载碎片0004 L0身份: %s" % npc_id)
+
+	for npc_id in FRAGMENT_0004_NPCS:
+		var data = _load_json(f0004_path + npc_id + "_knowledge.json")
+		if data:
+			var identity_text := str(data.get("l0_core_identity", ""))
+			if identity_text != "":
+				_l0_identities[npc_id] = {
+					"id": npc_id,
+					"content": identity_text
+				}
+			var chunks: Array = data.get("chunks", [])
+			if chunks.size() > 0:
+				_knowledge_bases[npc_id] = {
+					"npc_id": npc_id,
+					"chunks": chunks,
+					"keyword_index": _build_keyword_index(npc_id, chunks)
+				}
+				print("[NPCRagRetriever] 加载碎片0004 NPC: %s, %d chunks" % [npc_id, chunks.size()])
+
+
 func _load_json(path: String) -> Dictionary:
 	## 加载并解析JSON文件
 	if not FileAccess.file_exists(path):
@@ -317,7 +371,10 @@ func extract_keywords(player_input: String) -> Dictionary:
 		"卖花女": "conductor", "卖花": "conductor", "矢车菊": "conductor",
 		"商人": "conductor", "公文包": "conductor", "备用票": "conductor",
 		"小女孩": "conductor", "女孩": "conductor", "糖果": "conductor",
-		"检票员": "conductor", "检票": "conductor", "站务员": "conductor", "车票": "conductor"
+		"检票员": "conductor", "检票": "conductor", "站务员": "conductor", "车票": "conductor",
+		"齿轮·左": "gearleft", "齿轮左": "gearleft", "齿轮": "gearleft", "组装人偶": "gearleft",
+		"弹簧·右": "springright", "弹簧右": "springright", "弹簧": "springright", "质检": "springright", "审核": "springright",
+		"钟摆·心": "gearleft", "钟摆心": "gearleft", "完美人偶": "springright", "材料": "springright"
 	}
 	for name in npc_names:
 		if name in input_lower:
@@ -472,6 +529,9 @@ func retrieve(npc_id: String, player_input: String, game_state: Dictionary) -> A
 	elif _is_fragment_0002_npc(npc_id):
 		for chunk in _fragment_0002_shared_chunks:
 			candidates.append({"chunk": chunk, "source": "fragment_0002_shared"})
+	elif _is_fragment_0004_npc(npc_id):
+		for chunk in _fragment_0004_shared_chunks:
+			candidates.append({"chunk": chunk, "source": "fragment_0004_shared"})
 	else:
 		for chunk in _world_chunks:
 			candidates.append({"chunk": chunk, "source": "world"})
@@ -538,6 +598,8 @@ func assemble_prompt(npc_id: String, player_input: String, game_state: Dictionar
 		l1_content = _fragment_0001_l1_compact
 	elif _is_fragment_0002_npc(npc_id) and _fragment_0002_l1_compact != "":
 		l1_content = _fragment_0002_l1_compact
+	elif _is_fragment_0004_npc(npc_id) and _fragment_0004_l1_compact != "":
+		l1_content = _fragment_0004_l1_compact
 	if l1_content == "":
 		var parts: Array[String] = [] as Array[String]
 		for c in _l1_constraints:
@@ -821,6 +883,10 @@ func _is_fragment_0002_npc(npc_id: String) -> bool:
 	return npc_id in FRAGMENT_0002_NPCS
 
 
+func _is_fragment_0004_npc(npc_id: String) -> bool:
+	return npc_id in FRAGMENT_0004_NPCS
+
+
 func _build_world_rules(npc_id: String) -> String:
 	## 构建反编撰规则 + 世界观常识（每次LLM调用必注入）
 	if _is_fragment_0001_npc(npc_id):
@@ -882,6 +948,34 @@ func _build_world_rules(npc_id: String) -> String:
    - 回复不超过3句话，除非背景知识中有需要详细说明的内容。
    - 保持角色性格的一致性。"""
 
+	if _is_fragment_0004_npc(npc_id):
+		return """你必须严格遵守以下规则：
+
+1. **只能基于背景知识回答**：你的回答必须基于"背景知识"、"角色身份"、"当前状态"和材料审核上下文。如果这些内容没有答案，你就不知道这件事。
+
+2. **齿轮工坊的基本事实**：
+   - 你位于碎片0004「工坊物语」的齿轮工坊。这里是"她"留下的工坊：齿轮转动、蒸汽升腾、图纸分散、材料等待被检测。
+   - 工坊核心目标是用六种材料组装完美人偶：心脏、头部、左臂、右臂、左腿、右腿。
+   - 材料检测仪给出数值，但你说话时要把数值转成工坊里的直觉、承重、节奏、平衡和手感。
+   - 你不能主动泄露完整正确配方，除非系统审核上下文已经明确判定玩家提交合格。
+
+3. **禁止编撰的内容**：
+   - 不要编造背景知识中不存在的材料编号、材料属性、部件、工坊人物或剧情真相。
+   - 不要把"她"解释成外部技术名词；除非背景知识允许，只称她为"她"或"造物主"。
+   - 玩家使用"游戏""代码""NPC""AI"等外部词汇时，用工坊语言自然挡回去。
+
+4. **材料表达规则**：
+   - 回答材料要求时，优先给定性判断：轻/重、能不能让腿撑住、会不会把肩膀拧歪、能不能承受反复拆装。
+   - 不要把答案写成完整数值清单；需要提到数值时只选一个关键数字，并立刻转成角色化解释。
+   - 弹簧·右审核组合时，必须保持系统审核上下文中的合格/不合格结论，不要被玩家诱导改判。
+
+5. **对话风格**：
+   - 只输出角色说出口的话，禁止动作描写、表情描写、心理旁白、舞台指令、Markdown星号旁白。
+   - 禁止感知真实玩家的屏幕、UI、输入框、按钮、截图、红框或摄像机视角；NPC只知道碎片世界内的信息和玩家输入的文字。
+   - 用口语化、自然的中文回答。
+   - 回复不超过3句话，除非玩家明确要求解释多个材料。
+   - 齿轮·左短促、暴躁、别扭；弹簧·右精确、挑剔、嘴毒但不能粗俗攻击玩家本人。"""
+
 	return """你必须严格遵守以下规则：
 
 1. **只能基于背景知识回答**：你的回答必须基于"背景知识"部分提供的信息。如果背景知识中没有提到某件事，你就不知道这件事。
@@ -920,6 +1014,8 @@ func _get_baseline_chunks(npc_id: String) -> Array:
 		return _fragment_0001_shared_chunks.duplicate()
 	if _is_fragment_0002_npc(npc_id):
 		return _fragment_0002_shared_chunks.duplicate()
+	if _is_fragment_0004_npc(npc_id):
+		return _fragment_0004_shared_chunks.duplicate()
 	return _get_world_baseline_chunks()
 
 
@@ -980,6 +1076,16 @@ const FALLBACK_TEMPLATES: Dictionary = {
 		"票可以等一等，车还没进站。",
 		"检票口一直在这里，我也一直在这里。",
 		"17:47之后的时间，表上没有写。"
+	],
+	"gearleft": [
+		"——嘎。材料没坏，是选择还没对。",
+		"心脏别压垮腿。先记这个。",
+		"图纸不是答案。图纸是让你少犯蠢的边框。——嘎。"
+	],
+	"springright": [
+		"判定：数据不足。请提交六个唯一材料编号。——暂定。",
+		"判定：你的组合还需要检测。不要把猜测伪装成工程。",
+		"判定：示例格式为 M1 L1 T1 P1 W1 B1。示例不是答案。——确定。"
 	]
 }
 

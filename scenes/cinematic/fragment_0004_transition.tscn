@@ -1,0 +1,51 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/cinematic/fragment_0004_transition.gd" id="1_script"]
+[ext_resource type="AudioStream" path="res://assets/papercraft/fragments/id0004/animation/0004pv_audio.ogg" id="2_audio"]
+
+[node name="Fragment0004Transition" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_script")
+
+[node name="FrameView" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="AudioPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_audio")
+bus = &"Master"
+
+[node name="SkipHint" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.82
+anchor_top = 0.02
+anchor_right = 0.99
+anchor_bottom = 0.06
+theme_override_colors/font_color = Color(1, 1, 1, 0.55)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 16
+text = "按 Esc 跳过"
+horizontal_alignment = 2
+
+[node name="FadeOverlay" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)

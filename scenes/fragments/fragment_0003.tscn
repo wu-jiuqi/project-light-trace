@@ -18,6 +18,7 @@
 [ext_resource type="PackedScene" uid="uid://bo346231nbuqb" path="res://scenes/buildings/id0003/L6.tscn" id="16_7kxq0"]
 [ext_resource type="PackedScene" uid="uid://dio7vpkoutvgm" path="res://scenes/buildings/id0003/AncientWell.tscn" id="17_7r8pv"]
 [ext_resource type="Script" uid="uid://kg430sx0ke1c" path="res://scripts/fragment/fragment_0003_scene.gd" id="18_scene"]
+[ext_resource type="Script" uid="uid://cpookq7xs8qki" path="res://scripts/stage/camera_rig.gd" id="19_camrig"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_km8ee"]
 distance = 0.13787842
@@ -189,8 +190,9 @@ debug_color = Color(0.6443393, 0.5231255, 5.7756904e-07, 0.41960785)
 position = Vector2(467, 631)
 
 [node name="CameraRig" type="Node2D" parent="WorldRoot" unique_id=403366039]
+script = ExtResource("19_camrig")
 
 [node name="Camera2D" type="Camera2D" parent="WorldRoot/CameraRig" unique_id=910341603]
-position = Vector2(640, 360)
+position = Vector2(0, 0)
 
 [node name="UIRoot" type="CanvasLayer" parent="." unique_id=53121810]

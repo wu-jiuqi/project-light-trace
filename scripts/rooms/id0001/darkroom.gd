@@ -3,6 +3,8 @@ extends Node2D
 ## 所有 UI 节点在 darkroom.tscn 中，可手动调整位置/大小/颜色
 
 const EXIT_SCENE: String = "res://scenes/fragments/fragment_0001.tscn"
+const SFX_PICKUP := preload("res://assets/audio/sfx/ui_item_pickup.wav")
+const SFX_PICKUP_VOLUME_DB: float = -4.0
 
 @export_range(0, 1, 1) var darkroom_note_collected: int = 0
 
@@ -201,6 +203,7 @@ func _collect_darkroom_note() -> void:
 		return
 	darkroom_note_collected = 1
 	FragmentManager.set_fragment_state("0001", "darkroom_note_collected", darkroom_note_collected)
+	_play_pickup_sfx()
 	_refresh_note_collect_hint()
 	if SaveManager.get_current_slot() >= 0:
 		SaveManager.save_game()
@@ -240,6 +243,7 @@ func _collect_darkroom_emblem() -> void:
 	if FragmentManager.get_fragment_state("0001", "darkroom_emblem_collected") == true:
 		return
 	FragmentManager.set_fragment_state("0001", "darkroom_emblem_collected", true)
+	_play_pickup_sfx()
 	if SaveManager.get_current_slot() >= 0:
 		SaveManager.save_game()
 
@@ -410,6 +414,11 @@ func _on_exit_clicked(_viewport: Node, event: InputEvent, _shape_idx: int) -> vo
 func _go_back() -> void:
 	print("[Darkroom] 返回启程之镇 (OutDoor)")
 	SceneManager.change_scene(EXIT_SCENE, "OutDoor")
+
+
+func _play_pickup_sfx() -> void:
+	if AudioManager and AudioManager.has_method("play_sfx"):
+		AudioManager.play_sfx(SFX_PICKUP, AudioManager.PRIORITY_NORMAL, SFX_PICKUP_VOLUME_DB)
 
 
 # ============================================================

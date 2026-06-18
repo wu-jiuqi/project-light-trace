@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://dure5qmyifulb"]
+
+[ext_resource type="Texture2D" uid="uid://n086vfwg4ewx" path="res://assets/papercraft/fragments/id0004/environment/desktop.png" id="1_isp8i"]
+[ext_resource type="PackedScene" uid="uid://dm3k8ou3bjujs" path="res://scenes/buildings/id0004/Pad.tscn" id="2_u37x2"]
+
+[node name="Desktop" type="Node2D" unique_id=1361789279]
+
+[node name="Visual" type="Node2D" parent="." unique_id=1753623184]
+
+[node name="Body" type="Sprite2D" parent="Visual" unique_id=1207151205]
+position = Vector2(635, 384.99997)
+scale = Vector2(0.9019139, 1.0223167)
+texture = ExtResource("1_isp8i")
+
+[node name="Pad" parent="." unique_id=646137221 instance=ExtResource("2_u37x2")]
+position = Vector2(562.00006, 260)
+scale = Vector2(0.5515571, 0.67413217)

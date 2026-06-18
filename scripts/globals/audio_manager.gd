@@ -35,7 +35,7 @@ var _voice_duck_tween: Tween = null
 
 var _channel_volumes: Dictionary = {
 	"master": 1.0,
-	"bgm": 1.0,
+	"bgm": 0.55,
 	"ambience": 1.0,
 	"sfx": 1.0,
 	"voice": 1.0,

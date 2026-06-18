@@ -1,6 +1,9 @@
 extends Node
 class_name ClickCollectibleScene
 
+const SFX_PICKUP := preload("res://assets/audio/sfx/ui_item_pickup.wav")
+const SFX_PICKUP_VOLUME_DB: float = -4.0
+
 signal collected()
 signal state_triggered()
 
@@ -99,6 +102,7 @@ func _collect(area: Area2D) -> void:
 	if collect_once and _collected:
 		return
 	_collected = true
+	_play_pickup_sfx()
 	if disable_after_collect:
 		for candidate in _areas:
 			candidate.input_pickable = false
@@ -107,6 +111,11 @@ func _collect(area: Area2D) -> void:
 	collected.emit()
 	state_triggered.emit()
 	get_viewport().set_input_as_handled()
+
+
+func _play_pickup_sfx() -> void:
+	if AudioManager and AudioManager.has_method("play_sfx"):
+		AudioManager.play_sfx(SFX_PICKUP, AudioManager.PRIORITY_NORMAL, SFX_PICKUP_VOLUME_DB)
 
 
 func _on_area_mouse_entered() -> void:

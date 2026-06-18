@@ -14,7 +14,7 @@ const LOCAL_HTTP_PREFIXES := [
 ]
 
 static var master_volume: float = 1.0
-static var bgm_volume: float = 1.0
+static var bgm_volume: float = 0.55
 static var ambience_volume: float = 1.0
 static var sfx_volume: float = 1.0
 static var voice_volume: float = 1.0

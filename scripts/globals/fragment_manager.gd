@@ -75,8 +75,8 @@ func _initialize_fragments() -> void:
 	fragments = [
 		FragmentData.new("0001", "启程之镇", "晨曦镇", "「白日依山尽」", "晨曦之印", 1, false, "res://scenes/fragments/fragment_0001.tscn", true),
 		FragmentData.new("0002", "黄昏驿站", "落霞驿站", "「黄河入海流」", "归途之印", 1, false, "res://scenes/fragments/fragment_0002.tscn", true),
-		FragmentData.new("0003", "月下神社", "玉兔神社", "「举头望明月」", "月光之印", 1, false, "res://scenes/fragments/fragment_0003.tscn", true),
-		FragmentData.new("0004", "工坊物语", "齿轮工坊", "「匠心」", "匠魂之印", 2, false, "res://scenes/fragments/fragment_0004.tscn"),
+		FragmentData.new("0003", "月下道观", "玉兔道观", "「举头望明月」", "月光之印", 1, false, "res://scenes/fragments/fragment_0003.tscn", true),
+		FragmentData.new("0004", "工坊物语", "齿轮工坊", "「匠心」", "匠魂之印", 2, false, "res://scenes/fragments/fragment_0004.tscn", true),
 		FragmentData.new("0047", "倒悬图书馆", "知识之塔", "「知识就是力量」", "真理之印", 3, true, "res://scenes/fragments/fragment_0047.tscn"),
 		FragmentData.new("0762", "颜色的葬礼", "灰白小镇", "「蓝是悲，红是怒，黄是望，绿是惧，紫是念，白是忘」", "情感之印", 3, true, "res://scenes/fragments/fragment_0762.tscn", true),
 		FragmentData.new("0915", "遗忘庭院", "记忆庭院", "「遗忘」", "记忆之印", 2, false, "res://scenes/fragments/fragment_0915.tscn"),
@@ -117,6 +117,16 @@ func _ensure_default_fragment_states() -> void:
 			"ritual_sequence_invalid": false,
 			"inscription_order": [],
 			"completed": false,
+		}
+	if not _fragment_states.has("0004"):
+		_fragment_states["0004"] = {
+			"collected_materials": {},
+			"collected_blueprints": {},
+			"completed": false,
+			"assembly_solved": false,
+			"forgeheart_collected": false,
+			"wrong_combination_count": 0,
+			"pendulum_broadcasts": {},
 		}
 	_fragment_states["0762"] = {
 		"awakened_colors": [false, false, false, false, false, false],
@@ -285,6 +295,17 @@ func reset_fragment_states(fragment_id: String) -> void:
 				"ritual_sequence_invalid": false,
 				"inscription_order": [],
 				"completed": false,
+			}
+			print("[FragmentManager] Fragment %s state reset" % fragment_id)
+		"0004":
+			_fragment_states["0004"] = {
+				"collected_materials": {},
+				"collected_blueprints": {},
+				"completed": false,
+				"assembly_solved": false,
+				"forgeheart_collected": false,
+				"wrong_combination_count": 0,
+				"pendulum_broadcasts": {},
 			}
 			print("[FragmentManager] Fragment %s state reset" % fragment_id)
 		"0762":

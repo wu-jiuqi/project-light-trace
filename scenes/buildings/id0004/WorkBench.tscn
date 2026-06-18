@@ -1,0 +1,39 @@
+[gd_scene format=3 uid="uid://381ncccr0wjr"]
+
+[ext_resource type="Texture2D" uid="uid://c8hcr2nvdxywa" path="res://assets/papercraft/fragments/id0004/environment/workbench_54.png" id="1_d0fun"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_d0fun"]
+size = Vector2(1193, 248)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_tvsy3"]
+radius = 400.0
+height = 1450.0
+
+[node name="WorkBench" type="Node2D" unique_id=1894148687]
+
+[node name="Visual" type="Node2D" parent="." unique_id=185004409]
+
+[node name="Body" type="Sprite2D" parent="Visual" unique_id=942818805]
+position = Vector2(0, -601)
+texture = ExtResource("1_d0fun")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=1031261841]
+collision_layer = 4
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=18509633]
+position = Vector2(-3.5, -114)
+shape = SubResource("RectangleShape2D_d0fun")
+
+[node name="Interaction" type="Area2D" parent="." unique_id=812500127]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Interaction" unique_id=2001406615]
+position = Vector2(0, -351)
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_tvsy3")
+debug_color = Color(0.6562608, 0.51703876, 0, 0.41960785)
+
+[node name="BaseMarker" type="Marker2D" parent="." unique_id=1071182027]

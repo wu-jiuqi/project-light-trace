@@ -2,6 +2,8 @@ extends Control
 class_name SourceMarkTicketOverlay
 
 const DESIGN_SIZE := Vector2(1280.0, 720.0)
+const SFX_PICKUP := preload("res://assets/audio/sfx/ui_item_pickup.wav")
+const SFX_PICKUP_VOLUME_DB: float = -4.0
 
 signal collected()
 
@@ -50,8 +52,14 @@ func _on_ticket_texture_gui_input(event: InputEvent) -> void:
 
 func _collect_ticket() -> void:
 	FragmentManager.set_fragment_state("0002", "source_mark_ticket_collected", true)
+	_play_pickup_sfx()
 	close_overlay()
 	collected.emit()
+
+
+func _play_pickup_sfx() -> void:
+	if AudioManager and AudioManager.has_method("play_sfx"):
+		AudioManager.play_sfx(SFX_PICKUP, AudioManager.PRIORITY_NORMAL, SFX_PICKUP_VOLUME_DB)
 
 
 func _apply_texture() -> void:

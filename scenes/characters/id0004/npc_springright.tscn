@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://bn64r8kdklf57"]
+
+[ext_resource type="Texture2D" uid="uid://dy3pnbniwu4k" path="res://assets/papercraft/fragments/id0004/characters/character_02_s.png" id="1_8rjjc"]
+[ext_resource type="Script" path="res://scripts/fragment/fragment_0004_npc.gd" id="2_npc_script"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_umo1f"]
+size = Vector2(59, 27)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_8rjjc"]
+radius = 32.0
+height = 132.0
+
+[node name="NpcSpringright" type="CharacterBody2D" unique_id=312050863]
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("2_npc_script")
+npc_name = "弹簧·右"
+npc_role = "工坊自动人偶"
+npc_kb_id = "springright"
+default_greeting = "暂定：右侧结构需要平衡。请把图纸和材料带到桌上。"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1823228776]
+position = Vector2(-1.5, -13.5)
+shape = SubResource("RectangleShape2D_umo1f")
+
+[node name="Visual Node2D" type="Node2D" parent="." unique_id=539572551]
+
+[node name="Visual" type="Sprite2D" parent="Visual Node2D" unique_id=878133529]
+position = Vector2(0, -91)
+texture = ExtResource("1_8rjjc")
+
+[node name="Shadow Sprite2D" type="Sprite2D" parent="Visual Node2D" unique_id=627227707]
+
+[node name="FeetMarker Marker2D" type="Marker2D" parent="." unique_id=135631510]
+
+[node name="InteractionArea Area2D" type="Area2D" parent="." unique_id=232232173]
+collision_layer = 8
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea Area2D" unique_id=1890988794]
+position = Vector2(0, -66)
+shape = SubResource("CapsuleShape2D_8rjjc")
+debug_color = Color(0.6480311, 0.5212647, 7.70092e-07, 0.41960785)

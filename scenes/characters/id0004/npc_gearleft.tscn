@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://cebxmur45fxs8"]
+
+[ext_resource type="Texture2D" uid="uid://ca2i2ooq4fdc5" path="res://assets/papercraft/fragments/id0004/characters/npc_01_gearleft_s.png" id="1_8hm44"]
+[ext_resource type="Script" path="res://scripts/fragment/fragment_0004_npc.gd" id="2_npc_script"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_j3pxo"]
+size = Vector2(44, 21)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_8hm44"]
+radius = 30.0
+height = 120.0
+
+[node name="NpcGearleft" type="CharacterBody2D" unique_id=1150254266]
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("2_npc_script")
+npc_name = "齿轮·左"
+npc_role = "工坊自动人偶"
+npc_kb_id = "gearleft"
+default_greeting = "——嘎。材料没有坏，是我还没学会怎么选择它们。"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1842673870]
+position = Vector2(0, -12.5)
+shape = SubResource("RectangleShape2D_j3pxo")
+
+[node name="Visual Node2D" type="Node2D" parent="." unique_id=729761258]
+
+[node name="Visual" type="Sprite2D" parent="Visual Node2D" unique_id=1062559420]
+position = Vector2(0, -91)
+texture = ExtResource("1_8hm44")
+
+[node name="Shadow Sprite2D" type="Sprite2D" parent="Visual Node2D" unique_id=1070878184]
+
+[node name="FeetMarker Marker2D" type="Marker2D" parent="." unique_id=28154043]
+
+[node name="InteractionArea Area2D" type="Area2D" parent="." unique_id=1287479146]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea Area2D" unique_id=353440851]
+position = Vector2(0, -56)
+shape = SubResource("CapsuleShape2D_8hm44")
+debug_color = Color(0.64250636, 0.5240419, 0, 0.41960785)

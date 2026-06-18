@@ -1,25 +1,204 @@
-[gd_scene format=3 uid="uid://b0p3jdhxx8kac"]
+[gd_scene format=3 uid="uid://d1xweawi1hpf7"]
 
 [ext_resource type="Texture2D" uid="uid://dgnlfac4rjuhv" path="res://assets/papercraft/fragments/id0004/environment/main.png" id="1_ce4h8"]
-[ext_resource type="Texture2D" uid="uid://c8hcr2nvdxywa" path="res://assets/papercraft/fragments/id0004/environment/workbench_54.png" id="2_ee31s"]
-[ext_resource type="Texture2D" path="res://assets/papercraft/fragments/id0004/material/qingtong.png" id="3_ee31s"]
+[ext_resource type="PackedScene" uid="uid://381ncccr0wjr" path="res://scenes/buildings/id0004/WorkBench.tscn" id="1_ee31s"]
+[ext_resource type="PackedScene" uid="uid://cebxmur45fxs8" path="res://scenes/characters/id0004/npc_gearleft.tscn" id="2_ee31s"]
+[ext_resource type="PackedScene" uid="uid://bn64r8kdklf57" path="res://scenes/characters/id0004/npc_springright.tscn" id="3_0n88g"]
+[ext_resource type="Script" uid="uid://8qckt47ex8x3" path="res://scripts/fragment/fragment_0004_scene.gd" id="4_fragment_script"]
+[ext_resource type="Script" uid="uid://cpookq7xs8qki" path="res://scripts/stage/camera_rig.gd" id="5_camrig"]
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_ee31s"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ee31s"]
+size = Vector2(63, 24)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ce4h8"]
+size = Vector2(63.75, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_s04q1"]
+size = Vector2(77, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_41mqo"]
+size = Vector2(62.625, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_55kef"]
+size = Vector2(69, 34)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_obrw7"]
+size = Vector2(48.75, 22)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0n88g"]
+size = Vector2(127, 57)
 
 [node name="Fragment0004" type="Node2D" unique_id=533096102]
+script = ExtResource("4_fragment_script")
 
-[node name="front" type="Node2D" parent="." unique_id=439405438]
+[node name="WorldRoot" type="Node2D" parent="." unique_id=439405438]
+y_sort_enabled = true
 
-[node name="main" type="Sprite2D" parent="front" unique_id=750761508]
-position = Vector2(644.5, 360.00003)
-scale = Vector2(0.75897133, 0.7651435)
+[node name="DepthLayer" type="Node2D" parent="WorldRoot" unique_id=1434794000]
+y_sort_enabled = true
+
+[node name="DepthLayer_1" type="Node2D" parent="WorldRoot/DepthLayer" unique_id=208426550]
+y_sort_enabled = true
+
+[node name="WorkBench" parent="WorldRoot/DepthLayer/DepthLayer_1" unique_id=1894148687 instance=ExtResource("1_ee31s")]
+position = Vector2(727, 623)
+scale = Vector2(0.17994756, 0.12107024)
+
+[node name="NpcGearleft" parent="WorldRoot/DepthLayer" unique_id=1150254266 instance=ExtResource("2_ee31s")]
+position = Vector2(283, 662)
+scale = Vector2(0.7, 0.7)
+
+[node name="NpcSpringright" parent="WorldRoot/DepthLayer" unique_id=312050863 instance=ExtResource("3_0n88g")]
+position = Vector2(917, 698)
+scale = Vector2(0.705, 0.705)
+
+[node name="Background" type="Node2D" parent="WorldRoot" unique_id=211840689]
+metadata/_edit_lock_ = true
+
+[node name="BG" type="Sprite2D" parent="WorldRoot/Background" unique_id=750761508]
+z_index = -5
+position = Vector2(639.99994, 360)
+scale = Vector2(0.76555014, 0.7651434)
 texture = ExtResource("1_ce4h8")
+metadata/_edit_lock_ = true
 
-[node name="workbench" type="Sprite2D" parent="front" unique_id=1104293088]
-position = Vector2(528, 568.00006)
-scale = Vector2(0.17040467, 0.11857055)
-texture = ExtResource("2_ee31s")
+[node name="SpawnPoints" type="Node2D" parent="WorldRoot" unique_id=1114561100]
 
-[node name="Sprite2D" type="Sprite2D" parent="front" unique_id=994698151]
-visible = false
-position = Vector2(336.00003, 632)
-scale = Vector2(0.4106858, 0.39154705)
-texture = ExtResource("3_ee31s")
+[node name="Default" type="Marker2D" parent="WorldRoot/SpawnPoints" unique_id=323655459]
+position = Vector2(623, 671)
+
+[node name="AirWall" type="Node2D" parent="WorldRoot" unique_id=115320685]
+
+[node name="AirWall_Up" type="StaticBody2D" parent="WorldRoot/AirWall" unique_id=1042625732]
+collision_layer = 4
+collision_mask = 0
+metadata/_edit_lock_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/AirWall/AirWall_Up" unique_id=326942034]
+position = Vector2(623, 477)
+rotation = -3.1415925
+shape = SubResource("WorldBoundaryShape2D_ee31s")
+
+[node name="AirWall_Down" type="StaticBody2D" parent="WorldRoot/AirWall" unique_id=1191295210]
+position = Vector2(1246, 1177)
+rotation = 3.1415927
+collision_layer = 4
+collision_mask = 0
+metadata/_edit_lock_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/AirWall/AirWall_Down" unique_id=589713807]
+position = Vector2(623, 477)
+rotation = -3.1415925
+shape = SubResource("WorldBoundaryShape2D_ee31s")
+
+[node name="AirWall_Left" type="StaticBody2D" parent="WorldRoot/AirWall" unique_id=1800010946]
+position = Vector2(-257, 1256.0001)
+rotation = 4.712389
+scale = Vector2(1.0167758, 0.9737473)
+collision_layer = 4
+collision_mask = 0
+metadata/_edit_lock_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/AirWall/AirWall_Left" unique_id=1141587947]
+position = Vector2(638.29224, 511.4263)
+rotation = -3.1415925
+shape = SubResource("WorldBoundaryShape2D_ee31s")
+
+[node name="AirWall_Right" type="StaticBody2D" parent="WorldRoot/AirWall" unique_id=1825019047]
+position = Vector2(1445, 9.999996)
+rotation = 1.5707964
+scale = Vector2(1.0167758, 0.9737473)
+collision_layer = 4
+collision_mask = 0
+metadata/_edit_lock_ = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/AirWall/AirWall_Right" unique_id=620363079]
+position = Vector2(597.96857, 507.3184)
+rotation = -3.1415925
+shape = SubResource("WorldBoundaryShape2D_ee31s")
+
+[node name="Intereaction" type="Node2D" parent="WorldRoot" unique_id=2096232290]
+
+[node name="Passage" type="Area2D" parent="WorldRoot/Intereaction" unique_id=2133623474]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/Intereaction/Passage" unique_id=1456239858]
+position = Vector2(330, 512)
+shape = SubResource("RectangleShape2D_ee31s")
+debug_color = Color(0.6556411, 0.5173607, 5.7756904e-07, 0.41960785)
+
+[node name="Cabinet_1" type="Area2D" parent="WorldRoot/Intereaction" unique_id=513311148]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/Intereaction/Cabinet_1" unique_id=63397185]
+position = Vector2(460.125, 486)
+shape = SubResource("RectangleShape2D_ce4h8")
+debug_color = Color(0.65551007, 0.51742876, 1.92523e-07, 0.41960785)
+
+[node name="Cabinet_2" type="Area2D" parent="WorldRoot/Intereaction" unique_id=1099226633]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/Intereaction/Cabinet_2" unique_id=629062813]
+position = Vector2(543.5, 486)
+shape = SubResource("RectangleShape2D_s04q1")
+debug_color = Color(0.6565888, 0.51686823, 0, 0.41960785)
+
+[node name="Cabinet_3" type="Area2D" parent="WorldRoot/Intereaction" unique_id=861488135]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/Intereaction/Cabinet_3" unique_id=1019362667]
+position = Vector2(684.3125, 487)
+shape = SubResource("RectangleShape2D_41mqo")
+debug_color = Color(0.6414176, 0.52458346, 0, 0.41960785)
+
+[node name="Cabinet_4" type="Area2D" parent="WorldRoot/Intereaction" unique_id=778523401]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/Intereaction/Cabinet_4" unique_id=2086890473]
+position = Vector2(834.5, 486)
+shape = SubResource("RectangleShape2D_55kef")
+debug_color = Color(0.65181166, 0.5193366, 7.70092e-07, 0.41960785)
+
+[node name="Cabinet_5" type="Area2D" parent="WorldRoot/Intereaction" unique_id=263301014]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/Intereaction/Cabinet_5" unique_id=2089103905]
+position = Vector2(917, 499)
+shape = SubResource("RectangleShape2D_obrw7")
+debug_color = Color(0.65112317, 0.5196895, 0, 0.41960785)
+
+[node name="Collision" type="Node2D" parent="WorldRoot" unique_id=1700070132]
+
+[node name="Passage" type="StaticBody2D" parent="WorldRoot/Collision" unique_id=875672121]
+collision_layer = 4
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/Collision/Passage" unique_id=285449745]
+position = Vector2(349, 490)
+shape = SubResource("RectangleShape2D_0n88g")
+
+[node name="LayerMarker" type="Node2D" parent="WorldRoot" unique_id=1908546233]
+
+[node name="Layer1_2" type="Marker2D" parent="WorldRoot/LayerMarker" unique_id=1977323342]
+position = Vector2(623, 542)
+
+[node name="CameraRig" type="Node2D" parent="WorldRoot" unique_id=452320073]
+script = ExtResource("5_camrig")
+
+[node name="Camera2D" type="Camera2D" parent="WorldRoot/CameraRig" unique_id=1630662516]
+
+[node name="UIRoot" type="CanvasLayer" parent="." unique_id=405715701]

@@ -33,9 +33,12 @@ func _check_main_scene(manager: Node) -> void:
 	_check(scene.has_node("UIRoot/DialogueBox"), "main scene provides DialogueBox under UIRoot")
 	_check(scene.has_node("UIRoot/CluePanel"), "main scene provides the Tab clue panel")
 	var player := scene.get("_player") as CharacterBody2D
-	var camera := player.get_node_or_null("Camera2D") as Camera2D if player != null else null
-	_check(camera != null, "camera is attached to the player")
+	var camera_rig := scene.get_node_or_null("WorldRoot/CameraRig") as Node2D
+	var camera := camera_rig.get_node_or_null("Camera2D") as Camera2D if camera_rig != null else null
+	_check(camera_rig != null and camera_rig.get_script() != null, "main scene uses CameraRig")
+	_check(camera != null, "camera is attached to CameraRig")
 	if camera != null:
+		_check(camera.offset.is_equal_approx(Vector2.ZERO), "camera offset is reset")
 		_check(camera.limit_right == 1280 and camera.limit_bottom == 720, "camera is limited to 1280x720")
 		var layer_marker := scene.get_node("WorldRoot/LayerMarker/Layer1_2") as Marker2D
 		var feet := player.get_node("FeetMarker Marker2D") as Marker2D

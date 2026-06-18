@@ -1,0 +1,121 @@
+[gd_scene format=3 uid="uid://cxmfjtp8wocie"]
+
+[ext_resource type="Texture2D" uid="uid://dt0ltrc02p8vj" path="res://assets/papercraft/fragments/id0004/environment/zoulang.png" id="1_vkag7"]
+[ext_resource type="Script" uid="uid://5b1pwy38fhlh" path="res://scripts/fragment/fragment_0004_passage.gd" id="2_passage_script"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_x4wxj"]
+size = Vector2(208, 34)
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_x4wxj"]
+distance = 343.99997
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_h0uaf"]
+size = Vector2(48, 169)
+
+[node name="Passage" type="Node2D" unique_id=108744031]
+script = ExtResource("2_passage_script")
+
+[node name="WorldRoot" type="Node2D" parent="." unique_id=1999354441]
+
+[node name="Background" type="Node2D" parent="WorldRoot" unique_id=1930793504]
+z_index = -5
+
+[node name="BG" type="Sprite2D" parent="WorldRoot/Background" unique_id=759847084]
+z_index = -5
+position = Vector2(636, 356)
+scale = Vector2(0.77033484, 0.77364504)
+texture = ExtResource("1_vkag7")
+metadata/_edit_lock_ = true
+
+[node name="Head" type="Area2D" parent="WorldRoot" unique_id=500429948]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="WorldRoot/Head" unique_id=1683413945]
+polygon = PackedVector2Array(480, 168, 480, 280, 608, 280, 608, 168)
+
+[node name="Heart" type="Area2D" parent="WorldRoot" unique_id=1474960761]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="WorldRoot/Heart" unique_id=594541541]
+polygon = PackedVector2Array(664, 168, 664, 280, 784, 280, 784, 168)
+
+[node name="LeftArm" type="Area2D" parent="WorldRoot" unique_id=1174306050]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="WorldRoot/LeftArm" unique_id=567288597]
+polygon = PackedVector2Array(448, 296, 448, 416, 592, 416, 592, 296)
+
+[node name="RightArm" type="Area2D" parent="WorldRoot" unique_id=1666411366]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="WorldRoot/RightArm" unique_id=1207052266]
+polygon = PackedVector2Array(672, 296, 672, 416, 816, 416, 816, 296)
+
+[node name="LeftLeg" type="Area2D" parent="WorldRoot" unique_id=863293687]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="WorldRoot/LeftLeg" unique_id=1220908930]
+polygon = PackedVector2Array(480, 432, 480, 560, 608, 560, 608, 432)
+
+[node name="RightLeg" type="Area2D" parent="WorldRoot" unique_id=1641765345]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/RightLeg" unique_id=111642617]
+position = Vector2(936, 600)
+shape = SubResource("RectangleShape2D_x4wxj")
+debug_color = Color(0.649686, 0.52042353, 0, 0.41960785)
+
+[node name="AirWall" type="Node2D" parent="WorldRoot" unique_id=1486605730]
+
+[node name="AirWall_Up" type="StaticBody2D" parent="WorldRoot/AirWall" unique_id=800666354]
+collision_layer = 4
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/AirWall/AirWall_Up" unique_id=957251707]
+position = Vector2(632, 240)
+rotation = -3.1415925
+shape = SubResource("WorldBoundaryShape2D_x4wxj")
+
+[node name="AirWall_Down" type="StaticBody2D" parent="WorldRoot/AirWall" unique_id=2027303589]
+position = Vector2(1264, 1288)
+rotation = 3.1415927
+collision_layer = 4
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/AirWall/AirWall_Down" unique_id=912060585]
+position = Vector2(632, 240)
+rotation = -3.1415925
+shape = SubResource("WorldBoundaryShape2D_x4wxj")
+
+[node name="AirWall_Left" type="StaticBody2D" parent="WorldRoot/AirWall" unique_id=812571481]
+position = Vector2(888, 1224)
+rotation = 3.1415927
+collision_layer = 4
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/AirWall/AirWall_Left" unique_id=1927402673]
+position = Vector2(1200.0001, 583.99994)
+rotation = -1.5707964
+shape = SubResource("WorldBoundaryShape2D_x4wxj")
+
+[node name="AirWall_Right" type="StaticBody2D" parent="WorldRoot/AirWall" unique_id=1197584560]
+position = Vector2(1264, 1288)
+rotation = 3.1415927
+collision_layer = 4
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/AirWall/AirWall_Right" unique_id=2066149315]
+position = Vector2(-335.99994, 648.0001)
+rotation = 1.5707964
+shape = SubResource("WorldBoundaryShape2D_x4wxj")
+
+[node name="Interaction" type="Node2D" parent="WorldRoot" unique_id=879036914]
+
+[node name="JumpInteractionArea" type="Area2D" parent="WorldRoot/Interaction" unique_id=1935520811]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldRoot/Interaction/JumpInteractionArea" unique_id=1496435210]
+position = Vector2(1248, 635.5)
+shape = SubResource("RectangleShape2D_h0uaf")
+debug_color = Color(0.6504338, 0.52004194, 0, 0.41960785)
+
+[node name="SpawnPoints" type="Node2D" parent="WorldRoot" unique_id=1920221036]
+
+[node name="Default" type="Marker2D" parent="WorldRoot/SpawnPoints" unique_id=328206157]
+position = Vector2(1184, 680)
