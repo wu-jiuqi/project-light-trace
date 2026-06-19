@@ -111,9 +111,7 @@ function checkProjectConfiguration() {
         'scripts/fragment/fragment_0004_scene.gd',
         'scripts/ui/title_screen.gd',
         'scripts/ui/pause_menu.gd',
-        'scripts/ui/backpack_ui.gd',
         'scripts/ui/chat_dialogue.gd',
-        'scripts/systems/inventory_manager.gd',
     ];
     const unsupportedWebGlyphs = ['🔒', '🔓', '⏳', '🔍', '✅', '💎', '🚀', '🎒', '❓', '📜', '🪻', '🔥', '🚫', '⚠️', '✦', '▶', '◀', '▼'];
     const webUiSource = webUiFiles

@@ -812,7 +812,9 @@ func _continue_game() -> void:
 		_show_save_not_found_dialog()
 		return
 	print("[TitleScreen] 继续游戏 (slot %d)" % slot)
-	SaveManager.load_game(slot)
+	if not SaveManager.load_game(slot):
+		_show_save_not_found_dialog()
+		return
 	_stop_bgm()
 	SceneManager.change_scene("res://scenes/star_map.tscn")
 
@@ -985,7 +987,9 @@ func _load_selected_slot() -> void:
 		return
 	var slot := _slot_selected
 	print("[TitleScreen] 加载存档 slot %d" % slot)
-	SaveManager.load_game(slot)
+	if not SaveManager.load_game(slot):
+		_show_save_not_found_dialog()
+		return
 	_stop_bgm()
 	SceneManager.change_scene("res://scenes/star_map.tscn")
 

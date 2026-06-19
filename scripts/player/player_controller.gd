@@ -1,12 +1,9 @@
 extends CharacterBody2D
 class_name PlayerController
-## 玩家移动控制器 + 跨场景出生点自定位 + NPC/物品交互
+## 玩家移动控制器 + 跨场景出生点自定位 + NPC/物件交互
 
 const SoftShadow = preload("res://scripts/fragment/soft_shadow.gd")
 
-## 物品拾取 SFX — 通用交互音效
-const SFX_PICKUP := preload("res://assets/audio/sfx/ui_item_pickup.wav")
-const SFX_PICKUP_VOLUME_DB: float = -4.0
 ## 通用交互确认 SFX — 比拾取音更轻，避免盖过专用音效
 const SFX_INTERACT := preload("res://assets/audio/sfx/ui_interact_confirm.wav")
 const SFX_INTERACT_VOLUME_DB: float = -10.0
@@ -20,10 +17,6 @@ signal interact_hint_changed(show: bool, hint_text: String)
 var _nearby_npcs: Array[Node2D] = []
 ## 最近的可交互NPC
 var _closest_npc: Node2D = null
-## 当前在交互范围内的可拾取物品列表
-var _nearby_pickups: Array[Area2D] = []
-## 最近的可拾取物品
-var _closest_pickup: Area2D = null
 ## 当前在交互范围内的可交互物件（日晷等）
 var _nearby_interactables: Array[Node2D] = []
 ## 最近的可交互物件
@@ -105,7 +98,7 @@ func _setup_interaction_area() -> void:
 	if _interaction_area:
 		# 设置 collision_layer 和 collision_mask
 		_interaction_area.collision_layer = 0  # 不占用任何层
-		_interaction_area.collision_mask = 2 | 4 | 8  # 检测 layer 2 (可交互物件/日晷) + layer 4 (NPC) + layer 8 (物品)
+		_interaction_area.collision_mask = 2 | 4  # 检测 layer 2 (可交互物件/日晷) + layer 4 (NPC)
 
 		# 为 InteractionArea/CollisionShape2D 赋予形状
 		var shape_node = _interaction_area.get_node_or_null("CollisionShape2D") as CollisionShape2D
@@ -137,10 +130,8 @@ func set_controls_locked(locked: bool) -> void:
 	if locked:
 		velocity = Vector2.ZERO
 		_nearby_npcs.clear()
-		_nearby_pickups.clear()
 		_nearby_interactables.clear()
 		_closest_npc = null
-		_closest_pickup = null
 		_closest_interactable = null
 		_update_interact_hint()
 	else:
@@ -180,8 +171,8 @@ func _try_spawn(spawn_name: String) -> void:
 
 
 func _physics_process(delta: float) -> void:
-	# 对话或背包打开时锁定移动
-	if _controls_locked or ChatDialogue.is_open or InventoryManager.backpack_open:
+	# 对话打开时锁定移动
+	if _controls_locked or ChatDialogue.is_open:
 		velocity = Vector2.ZERO
 		move_and_slide()
 		_settle_sway(delta)
@@ -220,10 +211,6 @@ func _input(event: InputEvent) -> void:
 			_nearby_npcs.size(),
 			_closest_npc.npc_name if _closest_npc and is_instance_valid(_closest_npc) else "无"
 		])
-		print("  附近物品: %d 个 | 最近: %s" % [
-			_nearby_pickups.size(),
-			_closest_pickup.item_name if _closest_pickup and is_instance_valid(_closest_pickup) and "item_name" in _closest_pickup else "无"
-		])
 		print("  附近物件: %d 个 | 最近: %s" % [
 			_nearby_interactables.size(),
 			_closest_interactable.name if _closest_interactable and is_instance_valid(_closest_interactable) else "无"
@@ -241,8 +228,6 @@ func _input(event: InputEvent) -> void:
 			_interact_with_nearest_npc()
 		elif _closest_interactable and is_instance_valid(_closest_interactable) and not _closest_interactable.is_queued_for_deletion():
 			_interact_with_interactable(_closest_interactable)
-		elif _closest_pickup and is_instance_valid(_closest_pickup) and not _closest_pickup.is_queued_for_deletion():
-			_interact_with_pickup(_closest_pickup)
 		else:
 			# 尝试通用交互
 			_try_generic_interact()
@@ -260,7 +245,7 @@ func _on_interaction_zone_entered(zone: Area2D) -> void:
 	if not is_instance_valid(zone) or zone.is_queued_for_deletion():
 		return
 
-	# 判断是 NPC InteractionZone、可交互物件 还是可拾取物品
+	# 判断是 NPC InteractionZone 还是可交互物件
 	var parent = zone.get_parent()
 
 	if _is_npc_node(parent):
@@ -275,13 +260,6 @@ func _on_interaction_zone_entered(zone: Area2D) -> void:
 			_nearby_interactables.append(parent)
 			_update_closest_interactable()
 			print("[Player] 进入可交互物件范围: %s" % parent.name)
-	elif _is_pickup_item(zone):
-		# 可拾取物品
-		if zone not in _nearby_pickups:
-			_nearby_pickups.append(zone)
-			_update_closest_pickup()
-			var pname: String = zone.item_name if "item_name" in zone else "物品"
-			print("[Player] 进入物品交互范围: %s" % pname)
 
 
 func _on_interaction_zone_exited(zone: Area2D) -> void:
@@ -302,29 +280,6 @@ func _on_interaction_zone_exited(zone: Area2D) -> void:
 		_nearby_interactables.erase(parent)
 		_update_closest_interactable()
 		print("[Player] 离开可交互物件范围: %s" % parent.name)
-
-	# 可拾取物品
-	if zone in _nearby_pickups:
-		var item_name_str: String = zone.item_name if "item_name" in zone else "物品"
-		_nearby_pickups.erase(zone)
-		_update_closest_pickup()
-		print("[Player] 离开物品交互范围: %s" % item_name_str)
-
-
-## 判断一个 Area2D 是否为可拾取物品
-func _is_pickup_item(zone: Area2D) -> bool:
-	# 方式1: 在 pickup 分组中
-	if zone.is_in_group("pickup"):
-		return true
-	# 方式2: 有 item_name 属性（pickup_item.gd 的特征）
-	if "item_name" in zone:
-		return true
-	# 方式3: 父节点是 PickupItem 类型
-	var parent = zone.get_parent()
-	if parent and parent.is_in_group("pickup"):
-		return true
-	return false
-
 
 func _is_npc_node(node: Node) -> bool:
 	if not node or not is_instance_valid(node):
@@ -355,7 +310,6 @@ func _refresh_interaction_overlaps() -> void:
 		return
 
 	_nearby_npcs.clear()
-	_nearby_pickups.clear()
 	_nearby_interactables.clear()
 
 	for zone in _interaction_area.get_overlapping_areas():
@@ -369,9 +323,6 @@ func _refresh_interaction_overlaps() -> void:
 		elif parent and is_instance_valid(parent) and parent.is_in_group("interactable"):
 			if parent not in _nearby_interactables:
 				_nearby_interactables.append(parent)
-		elif _is_pickup_item(zone):
-			if zone not in _nearby_pickups:
-				_nearby_pickups.append(zone)
 
 	for body in _interaction_area.get_overlapping_bodies():
 		if body == self or not _is_npc_node(body):
@@ -381,7 +332,6 @@ func _refresh_interaction_overlaps() -> void:
 
 	_update_closest_npc()
 	_update_closest_interactable()
-	_update_closest_pickup()
 
 
 func _update_closest_npc() -> void:
@@ -492,67 +442,11 @@ func _play_interact_sfx() -> void:
 
 
 # ============================================================
-# 可拾取物品交互
-# ============================================================
-
-func _update_closest_pickup() -> void:
-	var closest: Area2D = null
-	var closest_dist: float = INF
-
-	for pickup in _nearby_pickups:
-		if not is_instance_valid(pickup):
-			continue
-		var dist = global_position.distance_to(pickup.global_position)
-		if dist < closest_dist:
-			closest_dist = dist
-			closest = pickup
-
-	if _closest_pickup != closest:
-		_closest_pickup = closest
-
-	# 更新交互提示显示
-	_update_interact_hint()
-
-
-func _interact_with_pickup(pickup: Area2D) -> void:
-	if not is_instance_valid(pickup) or pickup.is_queued_for_deletion():
-		_closest_pickup = null
-		return
-
-	# 优先调用 PickupItem 自身的 _pickup() 方法（pickup_item.gd）
-	if pickup.has_method("_pickup"):
-		var pname: String = pickup.item_name if "item_name" in pickup else "物品"
-		var picked = pickup._pickup()
-		if picked == true:
-			print("[Player] 拾取物品: %s" % pname)
-		return
-
-	# 降级：手动通过 InventoryManager 拾取
-	if "item_id" in pickup:
-		var item_id: int = pickup.item_id
-		var pname: String = pickup.item_name if "item_name" in pickup else "物品"
-		if InventoryManager.add_item(item_id):
-			if AudioManager and AudioManager.has_method("play_sfx"):
-				AudioManager.play_sfx(SFX_PICKUP, AudioManager.PRIORITY_NORMAL, SFX_PICKUP_VOLUME_DB)
-			print("[Player] 拾取物品: %s (id=%d)" % [pname, item_id])
-			pickup.queue_free()
-		return
-
-	# 检查父节点（某些物品 Area2D 是子节点）
-	var parent = pickup.get_parent()
-	if parent and is_instance_valid(parent) and parent.has_method("_pickup"):
-		var parent_picked = parent._pickup()
-		if parent_picked == true:
-			print("[Player] 通过父节点拾取物品: %s" % parent.name)
-		return
-
-
-# ============================================================
 # 通用交互（其他可交互对象）
 # ============================================================
 
 func _try_generic_interact() -> void:
-	## 当附近没有 NPC 和 pickup 时，尝试向场景中的可交互对象发送交互信号
+	## 当附近没有 NPC 时，尝试向场景中的可交互对象发送交互信号
 	# 查找 _interaction_area 范围内所有重叠的 Area2D
 	if not _interaction_area:
 		return
@@ -563,10 +457,8 @@ func _try_generic_interact() -> void:
 			continue
 		var parent = area.get_parent()
 
-		# 跳过已处理的 NPC 和 pickup
+		# 跳过已处理的 NPC
 		if parent and parent.has_method("start_dialogue"):
-			continue
-		if _is_pickup_item(area):
 			continue
 
 		# 通用交互：检查对象是否有 interact 方法或信号
@@ -591,7 +483,7 @@ func _try_generic_interact() -> void:
 # 交互提示 UI 更新
 # ============================================================
 
-## 定期清理已回收（queue_free）的 NPC / pickup 引用
+## 定期清理已回收（queue_free）的 NPC / 可交互物件引用
 func _cleanup_nearby_lists() -> void:
 	var needs_update: bool = false
 
@@ -602,15 +494,6 @@ func _cleanup_nearby_lists() -> void:
 			valid_npcs.append(npc)
 	if valid_npcs.size() != _nearby_npcs.size():
 		_nearby_npcs = valid_npcs
-		needs_update = true
-
-	# 清理已失效的物品引用
-	var valid_pickups: Array[Area2D] = []
-	for pickup in _nearby_pickups:
-		if is_instance_valid(pickup) and not pickup.is_queued_for_deletion():
-			valid_pickups.append(pickup)
-	if valid_pickups.size() != _nearby_pickups.size():
-		_nearby_pickups = valid_pickups
 		needs_update = true
 
 	# 清理已失效的可交互物件引用
@@ -629,14 +512,10 @@ func _cleanup_nearby_lists() -> void:
 	if _closest_interactable and (not is_instance_valid(_closest_interactable) or _closest_interactable.is_queued_for_deletion()):
 		_closest_interactable = null
 		needs_update = true
-	if _closest_pickup and (not is_instance_valid(_closest_pickup) or _closest_pickup.is_queued_for_deletion()):
-		_closest_pickup = null
-		needs_update = true
 
 	if needs_update:
 		_update_closest_npc()
 		_update_closest_interactable()
-		_update_closest_pickup()
 		_update_interact_hint()
 
 func _update_interact_hint() -> void:
@@ -655,9 +534,6 @@ func _update_interact_hint() -> void:
 		if "display_name" in _closest_interactable and not str(_closest_interactable.display_name).is_empty():
 			name_str = str(_closest_interactable.display_name)
 		interact_hint_changed.emit(true, "按 E 观察 %s" % name_str)
-	elif _closest_pickup and is_instance_valid(_closest_pickup) and not _closest_pickup.is_queued_for_deletion():
-		var item_name_str: String = _closest_pickup.item_name if "item_name" in _closest_pickup else "物品"
-		interact_hint_changed.emit(true, "按 E 拾取 %s" % item_name_str)
 	else:
 		interact_hint_changed.emit(false, "")
 

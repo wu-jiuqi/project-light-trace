@@ -181,12 +181,7 @@ func _assemble_save_dict(slot: int) -> Dictionary:
 	var ts: float = Time.get_unix_time_from_system()
 	var save_name: String = _resolve_save_name(slot)
 
-	# 合并 GameManager 和 InventoryManager 的序列化数据
 	var global_dict: Dictionary = GameManager.to_dict()
-	var inv_dict: Dictionary = InventoryManager.to_dict()
-	# inventory 合入 global（保持向后兼容）
-	for key in inv_dict:
-		global_dict[key] = inv_dict[key]
 
 	var fragments: Array = FragmentManager.get_fragments_list()
 	var fragment_states: Dictionary = FragmentManager.get_fragment_states_dict()
@@ -209,7 +204,6 @@ func _disassemble_save_dict(data: Dictionary) -> void:
 	# 恢复全局状态
 	var global_data: Dictionary = data.get("global", {})
 	GameManager.from_dict(global_data)
-	InventoryManager.from_dict(global_data)
 
 	# 恢复碎片完成状态和专属状态
 	FragmentManager.reset_all_fragments()

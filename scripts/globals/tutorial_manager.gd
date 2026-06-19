@@ -26,10 +26,6 @@ var _observed_distance: float = 0.0
 
 func _ready() -> void:
 	_ensure_overlay()
-	if InventoryManager and InventoryManager.has_signal("item_added"):
-		InventoryManager.item_added.connect(_on_item_added)
-	if InventoryManager and InventoryManager.has_signal("backpack_toggled"):
-		InventoryManager.backpack_toggled.connect(_on_backpack_toggled)
 
 
 func reset_for_new_game() -> void:
@@ -179,12 +175,3 @@ func _ensure_overlay() -> void:
 	_overlay = FTUEOverlayScript.new()
 	_overlay.name = "FTUEOverlay"
 	get_tree().root.call_deferred("add_child", _overlay)
-
-
-func _on_item_added(_item_id: int) -> void:
-	show_tip_once("first_item", "获得的物品会进入背包。按 B 可以查看。", 4.0)
-
-
-func _on_backpack_toggled(is_open: bool) -> void:
-	if is_open:
-		show_tip_once("first_backpack_open", "背包中的物品可能会改变 NPC 的回应。", 3.5)

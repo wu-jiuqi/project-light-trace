@@ -22,7 +22,6 @@ func _run() -> void:
 	await process_frame
 
 	_check_scene_panel("res://scenes/ui/DialogueBox.tscn", "Stage/DialoguePanel", "chat panel uses texture skin")
-	_check_scene_panel("res://scenes/ui/Backpack.tscn", "Stage/MainNotebook", "backpack scene uses texture skin")
 	_check_scene_panel("res://scenes/ui/DialogueHistory.tscn", "Stage/LargePage", "dialogue history scene uses texture skin")
 	_check_scene_panel("res://scenes/ui/CluePanel.tscn", "Stage/MainContainer", "clue panel scene uses texture skin")
 	_check_scene_panel("res://scenes/ui/SettingsPanel.tscn", "Stage/LargePage", "settings panel scene uses texture skin")

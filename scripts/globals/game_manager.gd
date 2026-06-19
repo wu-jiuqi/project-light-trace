@@ -74,8 +74,9 @@ func is_item_used(key: String) -> bool:
 # ============================================================
 
 func record_npc_visit(npc_kb_id: String) -> void:
-	if not npc_visit_count.has(npc_kb_id): return
-	npc_visit_count[npc_kb_id] += 1
+	if npc_kb_id.is_empty():
+		return
+	npc_visit_count[npc_kb_id] = int(npc_visit_count.get(npc_kb_id, 0)) + 1
 
 func get_visit_count(npc_kb_id: String) -> int: return npc_visit_count.get(npc_kb_id, 0)
 
