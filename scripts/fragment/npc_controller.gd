@@ -186,24 +186,25 @@ func send_player_message(message: String) -> void:
 	if clean_message == "":
 		return
 	_llm_last_input = clean_message
-	ChatDatabase.log_message(npc_kb_id, "player", clean_message, 0, 0.0)
 
 	if LLMClient.is_busy():
 		ChatDialogue.add_npc_msg("请稍等，我还在思考刚才的问题。")
 		return
 
 	var game_state := _build_game_state()
+	var history_messages: Array = game_state.get("history_messages", [])
 	var prompt := _build_prompt(clean_message, game_state)
 	if prompt.strip_edges() == "":
 		ChatDialogue.add_npc_msg(get_fallback_response())
 		return
+	ChatDatabase.log_message(npc_kb_id, "player", clean_message, 0, 0.0)
 
 	_disconnect_stream_signals()
 	LLMClient.stream_token.connect(_on_stream_token)
 	LLMClient.stream_completed.connect(_on_stream_completed)
 	LLMClient.stream_failed.connect(_on_stream_failed)
 	ChatDialogue.stream_begin()
-	LLMClient.chat_stream(prompt, clean_message)
+	LLMClient.chat_stream(prompt, clean_message, history_messages, Callable(), npc_kb_id)
 
 
 func _build_prompt(player_input: String, game_state: Dictionary) -> String:
@@ -224,7 +225,7 @@ func _build_game_state() -> Dictionary:
 		"trust_level": 0,
 		"alert_level": 0,
 		"alert_context": "",
-		"chat_history": ChatDatabase.get_history_as_text(npc_kb_id, DIALOGUE_HISTORY_LIMIT),
+		"history_messages": ChatDatabase.get_history_messages(npc_kb_id, DIALOGUE_HISTORY_LIMIT),
 	}
 	if get_tree().current_scene != null:
 		state["scene_name"] = get_tree().current_scene.name

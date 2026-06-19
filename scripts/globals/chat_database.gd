@@ -128,6 +128,28 @@ func get_history_as_text(npc_id: String, max_messages: int = 10) -> String:
 	return "\n".join(lines)
 
 
+func get_history_messages(npc_id: String, max_messages: int = 10) -> Array:
+	var cache_arr: Array = _cache.get(npc_id, [])
+	if cache_arr.is_empty():
+		return []
+
+	var start = max(0, cache_arr.size() - max_messages)
+	var messages: Array = []
+	for i in range(start, cache_arr.size()):
+		var row = cache_arr[i]
+		if row is not Dictionary:
+			continue
+		var role := str(row.get("role", ""))
+		var content := _sanitize_content(_value_to_string(row.get("content", "")))
+		if content.is_empty():
+			continue
+		if role == "player":
+			messages.append({"role": "user", "content": content})
+		elif role == "npc":
+			messages.append({"role": "assistant", "content": content})
+	return messages
+
+
 func get_page(npc_id: String, page: int = 0, page_size: int = 20) -> Dictionary:
 	var all: Array = _data.get(npc_id, [])
 	var total = all.size()

@@ -82,6 +82,22 @@ npm run serve
 
 `npm run serve` 会提供静态 Web 预览和同源 LLM 代理。`DEEPSEEK_API_KEY` 只能放在服务端环境变量或部署平台密钥中，不要写入 Godot 客户端源码。
 
+## CNB 预览部署
+
+CNB 使用分支隔离，避免 `onlyPreview: true` 阻断日常开发入口：
+
+- `dev` 分支：日常开发分支，保留完整云原生开发环境和 Docker service。
+- `main` 分支：公开试玩分支，仅用于 CNB 预览和镜像发布。
+- 更新 Web 产物时，先运行 `npm run build` 和 `npm run deploy cnb`，确认 `deploy/` 后再合并到 `main`。
+
+`main` 分支 push 会用根目录 `Dockerfile` 构建镜像，并由 `.cnb.yml` 的仅预览模式执行：
+
+```bash
+docker run -d --network host -e PORT=8686 -e CNB_API_ENDPOINT -e CNB_REPO_SLUG -e CNB_TOKEN <image>:latest
+```
+
+CNB 预览服务必须监听 `0.0.0.0:8686`。官方试玩默认使用 CNB 内置 OpenAI-compatible LLM：`${CNB_API_ENDPOINT}/${CNB_REPO_SLUG}/-/ai-ide/v2/chat/completions`，令牌只通过服务端环境变量 `CNB_TOKEN` 注入。预览环境 `keepAliveTimeout` 为 1 小时；试玩时请及时使用游戏内存档，容器回收会丢失未保存的运行态。
+
 ## 当前设计原则
 
 - 线性解锁：完成当前碎片后解锁下一碎片，星图用于进入与回顾。

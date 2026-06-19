@@ -5,6 +5,7 @@
   "scripts": {
     "build": "node scripts/tools/build.js",
     "serve": "node scripts/tools/serve.js",
+    "serve:cnb": "node scripts/tools/serve.js",
     "deploy": "node scripts/tools/deploy.js",
     "dev": "npm run build && npm run serve",
     "test": "node scripts/tools/test.js",

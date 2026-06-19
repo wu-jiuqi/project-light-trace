@@ -1,8 +1,9 @@
 /**
- * 溯光计划 - 部署包生成脚本
+ * Shuoguang Project - deployment package helper.
  *
- * local:       启动本地 Web 服务
- * cloudstudio: 生成包含静态资源、同源代理和 COOP/COEP 头的部署包
+ * local:       start the shared local preview server.
+ * cloudstudio: generate static assets plus a shared server wrapper.
+ * cnb:         generate static assets used by the CNB Docker image.
  */
 
 const fs = require('fs');
@@ -13,30 +14,57 @@ const BUILD_DIR = path.join(PROJECT_DIR, 'build', 'web');
 const DEPLOY_DIR = path.join(PROJECT_DIR, 'deploy');
 const PLATFORM = process.argv[2] || 'local';
 
-if (!fs.existsSync(path.join(BUILD_DIR, 'index.html'))) {
-    console.error('[ERROR] 未找到构建产物，请先运行: npm run build');
-    process.exit(1);
+function requireBuildOutput() {
+    if (!fs.existsSync(path.join(BUILD_DIR, 'index.html'))) {
+        console.error('[ERROR] Build output is missing. Run: npm run build');
+        process.exit(1);
+    }
 }
 
-if (PLATFORM === 'local') {
-    require('./serve.js').createServer().listen(parseInt(process.env.PORT, 10) || 3000, () => {
-        console.log('[SUCCESS] 本地服务已启动: http://localhost:3000');
-    });
-} else if (PLATFORM === 'cloudstudio') {
+function writeSharedServerWrapper(relativeRequirePath) {
+    fs.writeFileSync(path.join(DEPLOY_DIR, 'server.js'), [
+        `const { DEFAULT_HOST, createServer } = require('${relativeRequirePath}');`,
+        "const port = parseInt(process.env.PORT, 10) || 8686;",
+        "createServer().listen(port, DEFAULT_HOST, () => {",
+        "    console.log(`Shuoguang preview listening on http://${DEFAULT_HOST}:${port}`);",
+        "});",
+        "",
+    ].join('\n'));
+}
+
+function generateDeployPackage(platform) {
+    requireBuildOutput();
     fs.rmSync(DEPLOY_DIR, { recursive: true, force: true });
     fs.mkdirSync(DEPLOY_DIR, { recursive: true });
     for (const file of fs.readdirSync(BUILD_DIR)) {
         fs.copyFileSync(path.join(BUILD_DIR, file), path.join(DEPLOY_DIR, file));
     }
-    fs.copyFileSync(path.join(__dirname, 'serve.js'), path.join(DEPLOY_DIR, 'server.js'));
-    fs.writeFileSync(path.join(DEPLOY_DIR, '.cloudstudio.yaml'), JSON.stringify({
-        name: '溯光计划',
-        port: 8080,
-        command: 'PORT=8080 node server.js',
-    }, null, 2));
-    console.log('[SUCCESS] Cloud Studio 部署包已生成:', DEPLOY_DIR);
-    console.log('[INFO] 部署前请在平台密钥管理中设置 DEEPSEEK_API_KEY。');
+
+    const deployToolsDir = path.join(DEPLOY_DIR, 'scripts', 'tools');
+    fs.mkdirSync(deployToolsDir, { recursive: true });
+    fs.copyFileSync(path.join(__dirname, 'serve.js'), path.join(deployToolsDir, 'serve.js'));
+    writeSharedServerWrapper('./scripts/tools/serve.js');
+
+    if (platform === 'cloudstudio') {
+        fs.writeFileSync(path.join(DEPLOY_DIR, '.cloudstudio.yaml'), JSON.stringify({
+            name: 'Shuoguang Project',
+            port: 8080,
+            command: 'HOST=0.0.0.0 PORT=8080 node server.js',
+        }, null, 2));
+    }
+
+    console.log('[SUCCESS] Deploy package generated:', DEPLOY_DIR);
+}
+
+if (PLATFORM === 'local') {
+    const { DEFAULT_HOST, createServer } = require('./serve.js');
+    const port = parseInt(process.env.PORT, 10) || 3000;
+    createServer().listen(port, DEFAULT_HOST, () => {
+        console.log(`[SUCCESS] Local preview started: http://${DEFAULT_HOST}:${port}`);
+    });
+} else if (PLATFORM === 'cloudstudio' || PLATFORM === 'cnb') {
+    generateDeployPackage(PLATFORM);
 } else {
-    console.error('[ERROR] 未知部署平台:', PLATFORM);
+    console.error('[ERROR] Unknown deploy platform:', PLATFORM);
     process.exit(1);
 }

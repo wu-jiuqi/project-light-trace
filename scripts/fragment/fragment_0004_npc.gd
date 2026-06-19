@@ -75,6 +75,7 @@ func send_player_message(message: String) -> void:
 		_notify_completion_if_ready()
 		return
 
+	var history_messages: Array = game_state.get("history_messages", [])
 	if not npc_kb_id.is_empty():
 		ChatDatabase.log_message(npc_kb_id, "player", message, 0, 0.0)
 
@@ -85,7 +86,7 @@ func send_player_message(message: String) -> void:
 	LLMClient.stream_token.connect(_on_stream_token)
 	LLMClient.stream_completed.connect(_on_stream_completed)
 	LLMClient.stream_failed.connect(_on_stream_failed)
-	LLMClient.chat_stream(system_prompt, message)
+	LLMClient.chat_stream(system_prompt, message, history_messages, Callable(), npc_kb_id)
 
 
 func can_give_item() -> bool:
@@ -101,7 +102,7 @@ func _collect_game_state(message: String, state: Node) -> Dictionary:
 		"alert_level": 0,
 		"trust_level": 0,
 		"npc_mood": _get_npc_mood(blueprint_count, material_count),
-		"chat_history": ChatDatabase.get_history_as_text(npc_kb_id, 8) if not npc_kb_id.is_empty() else "",
+		"history_messages": ChatDatabase.get_history_messages(npc_kb_id, 8) if not npc_kb_id.is_empty() else [],
 		"alert_context": _build_0004_context(message, state, blueprint_count, material_count),
 		"_local_fallback": ""
 	}
@@ -206,6 +207,7 @@ func _on_stream_token(token: String) -> void:
 func _on_stream_completed(full_text: String) -> void:
 	_disconnect_stream_signals()
 	var clean_text := _clean_model_dialogue_text(full_text)
+	clean_text = _guard_springright_audit_text(clean_text)
 	if clean_text == "":
 		clean_text = _llm_fallback_response
 	ChatDialogue.stream_end(clean_text)
@@ -219,6 +221,46 @@ func _on_stream_failed(_error: String) -> void:
 	ChatDialogue.stream_end("")
 	ChatDialogue.add_npc_msg(_llm_fallback_response)
 	_notify_completion_if_ready()
+
+
+func _guard_springright_audit_text(text: String) -> String:
+	if npc_kb_id != "springright":
+		return text
+	var local_audit := _llm_fallback_response.strip_edges()
+	if local_audit == "":
+		return text
+	var model_text := text.strip_edges()
+	if model_text == "":
+		return local_audit
+	if _leaks_full_correct_combination(model_text):
+		return local_audit
+	if _audit_conclusion_conflicts(local_audit, model_text):
+		return local_audit
+	return model_text
+
+
+func _audit_conclusion_conflicts(local_audit: String, model_text: String) -> bool:
+	var local_pass := _contains_pass_conclusion(local_audit)
+	var local_fail := _contains_fail_conclusion(local_audit)
+	var model_pass := _contains_pass_conclusion(model_text)
+	var model_fail := _contains_fail_conclusion(model_text)
+	return (local_pass and model_fail) or (local_fail and model_pass and not model_fail)
+
+
+func _contains_pass_conclusion(text: String) -> bool:
+	return "合格" in text and not ("不合格" in text)
+
+
+func _contains_fail_conclusion(text: String) -> bool:
+	return "不合格" in text
+
+
+func _leaks_full_correct_combination(text: String) -> bool:
+	var normalized := text.to_upper()
+	for material_id in Data.CORRECT_COMBINATION:
+		if not (str(material_id).to_upper() in normalized):
+			return false
+	return true
 
 
 func _notify_completion_if_ready() -> void:

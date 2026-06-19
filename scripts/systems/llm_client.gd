@@ -161,10 +161,14 @@ func _process(_delta: float) -> void:
 	_poll_request()
 
 
-func chat_stream(system_prompt: String, user_message: String, callback: Callable = Callable()) -> void:
+func chat_stream(system_prompt: String, user_message: String, history_messages: Variant = [], callback: Callable = Callable(), npc_id: String = "") -> void:
 	if _state not in [State.IDLE, State.DONE]:
 		printerr("[LLMClient] request already in progress")
 		return
+
+	if history_messages is Callable:
+		callback = history_messages
+		history_messages = []
 
 	_current_callback = callback
 	reload_settings()
@@ -172,10 +176,7 @@ func chat_stream(system_prompt: String, user_message: String, callback: Callable
 		_fail("invalid custom API settings: %s" % _settings_error)
 		return
 
-	var messages = [
-		{"role": "system", "content": system_prompt},
-		{"role": "user", "content": user_message}
-	]
+	var messages = _build_messages(system_prompt, user_message, history_messages)
 
 	if _use_custom_api:
 		_pending_body = JSON.stringify({
@@ -191,7 +192,7 @@ func chat_stream(system_prompt: String, user_message: String, callback: Callable
 			"Authorization: Bearer " + _api_key
 		]
 	else:
-		_pending_body = JSON.stringify({"messages": messages, "stream": true})
+		_pending_body = JSON.stringify({"npc_id": npc_id, "messages": messages, "stream": true})
 		_request_headers = [
 			"Content-Type: application/json",
 			"Accept: text/event-stream"
@@ -217,6 +218,23 @@ func chat_stream(system_prompt: String, user_message: String, callback: Callable
 	_request_started_time = now
 	_last_activity_time = now
 	print("[LLMClient] request %s:%d%s (prompt=%d chars)" % [_host, _port, _api_path, system_prompt.length()])
+
+
+func _build_messages(system_prompt: String, user_message: String, history_messages: Variant) -> Array:
+	var messages: Array = [{"role": "system", "content": system_prompt}]
+	if history_messages is Array:
+		for entry in history_messages:
+			if entry is not Dictionary:
+				continue
+			var role := str(entry.get("role", ""))
+			if role not in ["user", "assistant"]:
+				continue
+			var content := _string_or_empty(entry.get("content", "")).strip_edges()
+			if content == "":
+				continue
+			messages.append({"role": role, "content": content})
+	messages.append({"role": "user", "content": user_message})
+	return messages
 
 
 func _poll_request() -> void:

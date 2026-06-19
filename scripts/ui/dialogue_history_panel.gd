@@ -43,7 +43,7 @@ func open_for_npc(npc_id: String, npc_name: String) -> void:
 func add_message(speaker: String, text: String) -> void:
 	if history_display == null:
 		return
-	history_display.text += "[b]%s[/b] %s\n" % [speaker, text]
+	history_display.text += "[b]%s[/b] %s\n" % [_escape_bbcode(speaker), _escape_bbcode(text)]
 	scroll_to_bottom()
 
 
@@ -99,9 +99,9 @@ func _load_page() -> void:
 			continue
 		var time_str := _format_time(int(msg.get("timestamp", 0)))
 		if role == "player":
-			output += "[right][color=#7A6B5C]%s[/color] [color=#4f79a8]You[/color]: %s[/right]\n\n" % [time_str, content]
+			output += "[right][color=#7A6B5C]%s[/color] [color=#4f79a8]You[/color]: %s[/right]\n\n" % [time_str, _escape_bbcode(content)]
 		else:
-			output += "[color=#7A6B5C]%s[/color] [color=#B28E51]%s[/color]: %s\n\n" % [time_str, _npc_name, content]
+			output += "[color=#7A6B5C]%s[/color] [color=#B28E51]%s[/color]: %s\n\n" % [time_str, _escape_bbcode(_npc_name), _escape_bbcode(content)]
 	history_display.text = output
 
 
@@ -186,3 +186,7 @@ func _sanitize_content(value: Variant) -> String:
 	if value == null:
 		return ""
 	return str(value).replace("<null>", "").strip_edges()
+
+
+func _escape_bbcode(text: String) -> String:
+	return text.replace("[", "[lb]")

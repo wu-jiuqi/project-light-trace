@@ -496,7 +496,7 @@ func stream_begin() -> void:
 func stream_add(token: String) -> void:
 	if not _ensure_required_dialogue_nodes("stream_add"):
 		return
-	_stream_pending_text += token
+	_stream_pending_text += _escape_bbcode(token)
 	if _stream_text.is_empty():
 		_flush_stream_text(1.0 / STREAM_CHARS_PER_SECOND)
 
@@ -504,7 +504,7 @@ func stream_add(token: String) -> void:
 func stream_end(full_text: String) -> void:
 	if not _ensure_required_dialogue_nodes("stream_end"):
 		return
-	_stream_final_text = full_text
+	_stream_final_text = _escape_bbcode(full_text)
 	_stream_finish_requested = true
 	if _stream_pending_text.is_empty():
 		_finish_stream_text()
@@ -532,7 +532,7 @@ func _flush_stream_text(delta: float) -> void:
 	_stream_flush_progress = maxf(0.0, _stream_flush_progress - float(chars_to_flush))
 	if _stream_flush_progress > float(STREAM_MAX_CHARS_PER_FRAME):
 		_stream_flush_progress = float(STREAM_MAX_CHARS_PER_FRAME)
-	_chat_display.text = _base_text + "[outline_size=2][outline_color=black][color=#D4B86A][%s][/color][/outline_color][/outline_size] %s" % [npc_name, _stream_text]
+	_chat_display.text = _base_text + "[outline_size=2][outline_color=black][color=#D4B86A][%s][/color][/outline_color][/outline_size] %s" % [_escape_bbcode(npc_name), _stream_text]
 
 	if _stream_pending_text.is_empty() and _stream_finish_requested:
 		_finish_stream_text()
@@ -544,7 +544,7 @@ func _finish_stream_text() -> void:
 	_stream_text = ""
 	_stream_pending_text = ""
 	_stream_flush_progress = 0.0
-	_chat_display.text = _base_text + "[outline_size=2][outline_color=black][color=#D4B86A][%s][/color][/outline_color][/outline_size] %s\n" % [npc_name, _stream_final_text]
+	_chat_display.text = _base_text + "[outline_size=2][outline_color=black][color=#D4B86A][%s][/color][/outline_color][/outline_size] %s\n" % [_escape_bbcode(npc_name), _stream_final_text]
 	_base_text = _chat_display.text
 	_stream_final_text = ""
 	_stream_finish_requested = false
@@ -624,7 +624,7 @@ func _clear_continue_prompt_style() -> void:
 func add_player_msg(text: String) -> void:
 	if not _ensure_required_dialogue_nodes("add_player_msg"):
 		return
-	_chat_display.text += "[right][color=#5599cc][ 你 ][/color] %s[/right]\n" % text
+	_chat_display.text += "[right][color=#5599cc][ 你 ][/color] %s[/right]\n" % _escape_bbcode(text)
 	_base_text = _chat_display.text
 
 
@@ -656,7 +656,7 @@ func _do_send(text: String = "") -> void:
 	_input_box.editable = false
 	_send_btn.disabled = true
 	
-	_chat_display.text += "[right][color=#5599cc][ 你 ][/color] %s[/right]\n" % msg
+	_chat_display.text += "[right][color=#5599cc][ 你 ][/color] %s[/right]\n" % _escape_bbcode(msg)
 	_base_text = _chat_display.text
 	
 	player_message_sent.emit(msg)
@@ -682,8 +682,12 @@ func _add_npc_msg(text: String) -> void:
 	if _chat_display == null:
 		push_error("[ChatDialogue] _add_npc_msg 失败：ChatDisplay 为空")
 		return
-	_chat_display.text += "[outline_size=2][outline_color=black][color=#D4B86A][%s][/color][/outline_color][/outline_size] %s\n" % [npc_name, text]
+	_chat_display.text += "[outline_size=2][outline_color=black][color=#D4B86A][%s][/color][/outline_color][/outline_size] %s\n" % [_escape_bbcode(npc_name), _escape_bbcode(text)]
 	_base_text = _chat_display.text
+
+
+func _escape_bbcode(text: String) -> String:
+	return text.replace("[", "[lb]")
 
 
 func _input_restore() -> void:
