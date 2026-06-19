@@ -131,7 +131,7 @@ function assertSameOriginRequest(req) {
         throw Object.assign(new Error('cross-site requests are not allowed'), { statusCode: 403 });
     }
 
-    // For same-origin requests browsers may omit Origin — allow them through
+    // For same-origin requests browsers may omit Origin; allow them through
     // as long as Sec-Fetch-Site confirms same-origin (or header is absent, which
     // happens with WebAssembly-originated requests that still stay in-process).
     if (fetchSite === 'same-origin' || fetchSite === 'none') {
@@ -142,7 +142,7 @@ function assertSameOriginRequest(req) {
     const origin = req.headers.origin || req.headers.referer;
     if (!origin) {
         // If neither Sec-Fetch-Site nor Origin is present the request probably
-        // comes from the same-origin WebAssembly runtime — allow it.
+        // comes from the same-origin WebAssembly runtime; allow it.
         return;
     }
 

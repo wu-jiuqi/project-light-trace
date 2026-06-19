@@ -238,6 +238,35 @@ async function checkServer() {
         await new Promise(resolve => prodServer.close(resolve));
     }
 
+    const prodNoOrigin = loadServe({
+        NODE_ENV: 'production',
+        LLM_PROVIDER: 'deepseek',
+        DEEPSEEK_API_KEY: '',
+    });
+    const prodNoOriginServer = prodNoOrigin.createServer();
+    await new Promise(resolve => prodNoOriginServer.listen(0, '127.0.0.1', resolve));
+    const prodNoOriginPort = prodNoOriginServer.address().port;
+    try {
+        const wasmStyleRequest = await request(prodNoOriginPort, '/api/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Host': 'game.example',
+            },
+            body: JSON.stringify({
+                npc_id: 'test',
+                stream: true,
+                messages: [
+                    { role: 'system', content: 'system' },
+                    { role: 'user', content: 'ping' },
+                ],
+            }),
+        });
+        check(wasmStyleRequest.status === 503, 'production proxy allows requests without Origin/Referer headers');
+    } finally {
+        await new Promise(resolve => prodNoOriginServer.close(resolve));
+    }
+
     const cnbEnv = {
         LLM_PROVIDER: 'cnb',
         CNB_API_ENDPOINT: 'https://api.cnb.cool',

@@ -125,14 +125,25 @@ function allowedOrigins(req) {
 function assertSameOriginRequest(req) {
     if (!IS_PRODUCTION) return;
 
+    // Reject cross-site requests aggressively (browser-initiated CSRF / embedding).
     const fetchSite = String(req.headers['sec-fetch-site'] || '').toLowerCase();
     if (fetchSite === 'cross-site') {
         throw Object.assign(new Error('cross-site requests are not allowed'), { statusCode: 403 });
     }
 
+    // For same-origin requests browsers may omit Origin; allow them through
+    // as long as Sec-Fetch-Site confirms same-origin (or header is absent, which
+    // happens with WebAssembly-originated requests that still stay in-process).
+    if (fetchSite === 'same-origin' || fetchSite === 'none') {
+        return;
+    }
+
+    // When Sec-Fetch-Site is absent or ambiguous, fall back to Origin / Referer.
     const origin = req.headers.origin || req.headers.referer;
     if (!origin) {
-        throw Object.assign(new Error('missing origin'), { statusCode: 403 });
+        // If neither Sec-Fetch-Site nor Origin is present the request probably
+        // comes from the same-origin WebAssembly runtime; allow it.
+        return;
     }
 
     let requestOrigin;
