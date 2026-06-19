@@ -32,12 +32,24 @@ function writeSharedServerWrapper(relativeRequirePath) {
     ].join('\n'));
 }
 
+function copyRecursive(src, dest) {
+    const stat = fs.statSync(src);
+    if (stat.isDirectory()) {
+        fs.mkdirSync(dest, { recursive: true });
+        for (const child of fs.readdirSync(src)) {
+            copyRecursive(path.join(src, child), path.join(dest, child));
+        }
+        return;
+    }
+    fs.copyFileSync(src, dest);
+}
+
 function generateDeployPackage(platform) {
     requireBuildOutput();
     fs.rmSync(DEPLOY_DIR, { recursive: true, force: true });
     fs.mkdirSync(DEPLOY_DIR, { recursive: true });
     for (const file of fs.readdirSync(BUILD_DIR)) {
-        fs.copyFileSync(path.join(BUILD_DIR, file), path.join(DEPLOY_DIR, file));
+        copyRecursive(path.join(BUILD_DIR, file), path.join(DEPLOY_DIR, file));
     }
 
     const deployToolsDir = path.join(DEPLOY_DIR, 'scripts', 'tools');

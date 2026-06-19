@@ -106,7 +106,11 @@ function checkProjectConfiguration() {
     check(cnb.includes('keepAliveTimeout: 3600000'), 'CNB preview keepAliveTimeout is documented in config');
 
     const deployServer = read('deploy/server.js');
-    check(deployServer.includes("require('../scripts/tools/serve.js')"), 'deploy server delegates to shared serve.js');
+    check(
+        deployServer.includes("require('../scripts/tools/serve.js')") ||
+        deployServer.includes("require('./scripts/tools/serve.js')"),
+        'deploy server delegates to shared serve.js'
+    );
     check(!deployServer.includes('DEEPSEEK_API_KEY') && !deployServer.includes('https.request'), 'deploy server has no independent LLM proxy');
 
     const serve = read('scripts/tools/serve.js');
@@ -137,7 +141,12 @@ function checkProjectConfiguration() {
 
     const preset = read('export_presets.cfg');
     check(preset.includes('export_filter="scenes"'), 'Web export uses scene dependency mode');
-    check(preset.includes('LLM/**/*.json'), 'Web export includes active NPC knowledge JSON');
+    check(
+        preset.includes('LLM/0001/*.json') &&
+        preset.includes('LLM/0002/*.json') &&
+        preset.includes('LLM/0004/*.json'),
+        'Web export maps active NPC knowledge JSON to base or fragment packs'
+    );
     check(preset.includes('variant/thread_support=true'), 'Web export enables threads');
     check(preset.includes('variant/coep=true'), 'Web export enables COEP');
 }

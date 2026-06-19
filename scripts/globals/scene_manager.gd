@@ -23,7 +23,9 @@ func change_scene(target_scene_path: String, spawn_point_name: String = "", use_
 	scene_changing.emit(target_scene_path, spawn_point_name)
 	print("[SceneManager] changing scene: %s (spawn: %s)" % [target_scene_path, spawn_point_name])
 
-	if use_fade and _should_use_loading_screen(target_scene_path):
+	if _requires_pack_loading(target_scene_path):
+		_change_scene_with_loading_screen(target_scene_path)
+	elif use_fade and _should_use_loading_screen(target_scene_path):
 		_change_scene_with_loading_screen(target_scene_path)
 	elif use_fade:
 		SceneFader.fade_out_and_switch(target_scene_path)
@@ -51,9 +53,29 @@ func get_pending_loading_target() -> String:
 func _should_use_loading_screen(target_scene_path: String) -> bool:
 	if target_scene_path == STAR_MAP_SCENE and _is_title_to_star_map_flow():
 		return false
+	if _has_pack_for_scene(target_scene_path):
+		return ResourceLoader.exists(LOADING_SCREEN_SCENE)
 	return target_scene_path != LOADING_SCREEN_SCENE \
 			and ResourceLoader.exists(LOADING_SCREEN_SCENE) \
 			and ResourceLoader.exists(target_scene_path)
+
+
+func _requires_pack_loading(target_scene_path: String) -> bool:
+	return _has_pack_for_scene(target_scene_path) and not _is_pack_loaded_for_scene(target_scene_path)
+
+
+func _has_pack_for_scene(target_scene_path: String) -> bool:
+	var manager := get_node_or_null("/root/WebPackManager")
+	return manager != null \
+			and manager.has_method("has_pack_for_scene") \
+			and bool(manager.call("has_pack_for_scene", target_scene_path))
+
+
+func _is_pack_loaded_for_scene(target_scene_path: String) -> bool:
+	var manager := get_node_or_null("/root/WebPackManager")
+	return manager == null \
+			or not manager.has_method("is_pack_loaded_for_scene") \
+			or bool(manager.call("is_pack_loaded_for_scene", target_scene_path))
 
 
 func _is_title_to_star_map_flow() -> bool:

@@ -32,6 +32,11 @@ const FRAGMENT_0004_NPCS: Array[String] = ["gearleft", "springright"]
 # 加载状态
 var _is_loaded: bool = false
 var _load_error: String = ""
+var _fragment_knowledge_loaded: Dictionary = {
+	"0001": false,
+	"0002": false,
+	"0004": false,
+}
 
 
 # ============================================================
@@ -46,8 +51,6 @@ func _ready() -> void:
 func _load_all_knowledge() -> void:
 	## 加载现役碎片知识库JSON文件
 	_load_fragment_0001_knowledge()
-	_load_fragment_0002_knowledge()
-	_load_fragment_0004_knowledge()
 	
 	_is_loaded = true
 
@@ -86,6 +89,7 @@ func _load_fragment_0001_knowledge() -> void:
 				_knowledge_bases[npc_id] = kb
 				_collect_fragment_0001_shared_chunks(chunks)
 				print("[NPCRagRetriever] 加载碎片0001 NPC: %s, %d chunks" % [npc_id, chunks.size()])
+	_fragment_knowledge_loaded["0001"] = true
 
 
 func _collect_fragment_0001_shared_chunks(chunks: Array) -> void:
@@ -99,9 +103,11 @@ func _collect_fragment_0001_shared_chunks(chunks: Array) -> void:
 func _load_fragment_0002_knowledge() -> void:
 	## 加载碎片0002黄昏驿站的检票员知识库（仅conductor，其知识包含全部6个NPC信息）
 	var f0002_path = "res://LLM/0002/"
+	var loaded_any := false
 
 	var shared_data = _load_json(f0002_path + "l0_shared_identity.json")
 	if shared_data:
+		loaded_any = true
 		var shared_context := str(shared_data.get("shared_world_context", ""))
 		if shared_context != "":
 			_fragment_0002_shared_chunks.append({
@@ -144,6 +150,7 @@ func _load_fragment_0002_knowledge() -> void:
 	for npc_id in FRAGMENT_0002_NPCS:
 		var data = _load_json(f0002_path + npc_id + "_knowledge.json")
 		if data:
+			loaded_any = true
 			var identity_text := str(data.get("l0_core_identity", ""))
 			if identity_text != "":
 				_l0_identities[npc_id] = {
@@ -158,14 +165,18 @@ func _load_fragment_0002_knowledge() -> void:
 					"keyword_index": _build_keyword_index(npc_id, chunks)
 				}
 				print("[NPCRagRetriever] 加载碎片0002 NPC: %s, %d chunks" % [npc_id, chunks.size()])
+	if loaded_any:
+		_fragment_knowledge_loaded["0002"] = true
 
 
 func _load_fragment_0004_knowledge() -> void:
 	## 加载碎片0004齿轮工坊的材料讲述/审核NPC知识库
 	var f0004_path = "res://LLM/0004/"
+	var loaded_any := false
 
 	var l0_data = _load_json(f0004_path + "l0_core_identities.json")
 	if l0_data:
+		loaded_any = true
 		_fragment_0004_l1_compact = l0_data.get("l1_shared_constraint", "")
 		var shared_context := str(l0_data.get("shared_world_context", ""))
 		if shared_context != "":
@@ -192,6 +203,7 @@ func _load_fragment_0004_knowledge() -> void:
 	for npc_id in FRAGMENT_0004_NPCS:
 		var data = _load_json(f0004_path + npc_id + "_knowledge.json")
 		if data:
+			loaded_any = true
 			var identity_text := str(data.get("l0_core_identity", ""))
 			if identity_text != "":
 				_l0_identities[npc_id] = {
@@ -206,6 +218,8 @@ func _load_fragment_0004_knowledge() -> void:
 					"keyword_index": _build_keyword_index(npc_id, chunks)
 				}
 				print("[NPCRagRetriever] 加载碎片0004 NPC: %s, %d chunks" % [npc_id, chunks.size()])
+	if loaded_any:
+		_fragment_knowledge_loaded["0004"] = true
 
 
 func _load_json(path: String) -> Dictionary:
@@ -433,6 +447,15 @@ func _is_stage_accessible(chunk_stage: String, current_stage: String) -> bool:
 	return current_order >= required_order
 
 
+func _ensure_npc_knowledge(npc_id: String) -> void:
+	if _is_fragment_0001_npc(npc_id) and not bool(_fragment_knowledge_loaded.get("0001", false)):
+		_load_fragment_0001_knowledge()
+	elif _is_fragment_0002_npc(npc_id) and not bool(_fragment_knowledge_loaded.get("0002", false)):
+		_load_fragment_0002_knowledge()
+	elif _is_fragment_0004_npc(npc_id) and not bool(_fragment_knowledge_loaded.get("0004", false)):
+		_load_fragment_0004_knowledge()
+
+
 # ============================================================
 # 主检索函数
 # ============================================================
@@ -440,6 +463,7 @@ func _is_stage_accessible(chunk_stage: String, current_stage: String) -> bool:
 func retrieve(npc_id: String, player_input: String, game_state: Dictionary) -> Array:
 	## 检索最相关的知识块（L2+L3+L4），返回按score降序排列的chunks
 	## game_state = { "memory_stage": "initial", "alert_level": 0, "trust_level": 0 }
+	_ensure_npc_knowledge(npc_id)
 	
 	if not _is_loaded:
 		print("[NPCRagRetriever] 警告: 知识库未加载")
@@ -517,6 +541,7 @@ func retrieve(npc_id: String, player_input: String, game_state: Dictionary) -> A
 func assemble_prompt(npc_id: String, player_input: String, game_state: Dictionary) -> String:
 	## 组装完整System Prompt: L0 + L0.5 + L1 + 检索结果 + 警觉上下文
 	## 返回可直接发送至LLM API的system prompt字符串
+	_ensure_npc_knowledge(npc_id)
 	
 	# 1. L0 核心身份
 	var l0 = _l0_identities.get(npc_id, {})

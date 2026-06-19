@@ -40,13 +40,25 @@ var _channel_volumes: Dictionary = {
 	"sfx": 1.0,
 	"voice": 1.0,
 }
+var _web_audio_unlocked := true
+var _pending_bgm: Dictionary = {}
+var _pending_voice: Dictionary = {}
 
 
 func _ready() -> void:
+	_web_audio_unlocked = not OS.has_feature("web")
+	set_process_input(OS.has_feature("web"))
 	_ensure_audio_buses()
 	_create_bgm_players()
 	_create_sfx_pool()
 	_create_voice_player()
+
+
+func _input(event: InputEvent) -> void:
+	if _web_audio_unlocked:
+		return
+	if _is_audio_unlock_event(event):
+		_unlock_web_audio()
 
 
 func _exit_tree() -> void:
@@ -86,6 +98,15 @@ func stop_all() -> void:
 
 func play_bgm(stream: AudioStream, id: String = "", fade: float = 0.5, volume_db: float = 0.0, loop: bool = true) -> void:
 	if stream == null:
+		return
+	if _should_defer_web_audio():
+		_pending_bgm = {
+			"stream": stream,
+			"id": id,
+			"fade": fade,
+			"volume_db": volume_db,
+			"loop": loop,
+		}
 		return
 	var next_id := id if not id.is_empty() else stream.resource_path
 	var current := _bgm_players[_bgm_active_index]
@@ -129,6 +150,7 @@ func play_bgm(stream: AudioStream, id: String = "", fade: float = 0.5, volume_db
 
 
 func stop_bgm(fade: float = 0.35) -> void:
+	_pending_bgm.clear()
 	_kill_tween(_bgm_tween)
 	_bgm_tween = null
 	var current := _bgm_players[_bgm_active_index]
@@ -222,6 +244,15 @@ func play_sfx(stream: AudioStream, priority: int = PRIORITY_NORMAL, volume_db: f
 func play_voice(id: String, stream: AudioStream, priority: int = PRIORITY_NORMAL, duck_bgm_db: float = -6.0, volume_db: float = 0.0) -> void:
 	if stream == null:
 		return
+	if _should_defer_web_audio():
+		_pending_voice = {
+			"id": id,
+			"stream": stream,
+			"priority": priority,
+			"duck_bgm_db": duck_bgm_db,
+			"volume_db": volume_db,
+		}
+		return
 	if _voice_player.playing and priority < _voice_priority:
 		return
 	_kill_tween(_voice_tween)
@@ -237,6 +268,7 @@ func play_voice(id: String, stream: AudioStream, priority: int = PRIORITY_NORMAL
 
 
 func stop_voice(fade: float = 0.15) -> void:
+	_pending_voice.clear()
 	if not _voice_player.playing:
 		_voice_player.stream = null
 		_apply_bgm_duck(0.0)
@@ -394,3 +426,42 @@ func _set_bus_volume(bus_name: String, linear: float) -> void:
 func _kill_tween(tween) -> void:
 	if tween != null and tween is Tween and tween.is_valid():
 		tween.kill()
+
+
+func _should_defer_web_audio() -> bool:
+	return OS.has_feature("web") and not _web_audio_unlocked
+
+
+func _is_audio_unlock_event(event: InputEvent) -> bool:
+	if event is InputEventMouseButton:
+		return event.pressed
+	if event is InputEventScreenTouch:
+		return event.pressed
+	if event is InputEventKey:
+		return event.pressed and not event.echo
+	return false
+
+
+func _unlock_web_audio() -> void:
+	_web_audio_unlocked = true
+	set_process_input(false)
+	if not _pending_bgm.is_empty():
+		var pending_bgm := _pending_bgm.duplicate()
+		_pending_bgm.clear()
+		play_bgm(
+			pending_bgm.get("stream"),
+			str(pending_bgm.get("id", "")),
+			float(pending_bgm.get("fade", 0.0)),
+			float(pending_bgm.get("volume_db", 0.0)),
+			bool(pending_bgm.get("loop", true))
+		)
+	if not _pending_voice.is_empty():
+		var pending_voice := _pending_voice.duplicate()
+		_pending_voice.clear()
+		play_voice(
+			str(pending_voice.get("id", "")),
+			pending_voice.get("stream"),
+			int(pending_voice.get("priority", PRIORITY_NORMAL)),
+			float(pending_voice.get("duck_bgm_db", -6.0)),
+			float(pending_voice.get("volume_db", 0.0))
+		)

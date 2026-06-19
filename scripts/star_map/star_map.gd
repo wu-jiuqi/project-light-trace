@@ -257,7 +257,7 @@ func _on_enter_btn_pressed() -> void:
 	if not FragmentManager.enter_fragment(selected_fragment):
 		return
 	var transition_scene_path := String(FRAGMENT_TRANSITION_SCENES.get(selected_fragment.id, ""))
-	if not transition_scene_path.is_empty() and ResourceLoader.exists(transition_scene_path):
+	if not transition_scene_path.is_empty():
 		_stop_bgm()
 		SceneManager.change_scene(transition_scene_path)
 		return

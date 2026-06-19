@@ -219,6 +219,8 @@ func unlock_next_fragment(completed_id: String) -> String:
 		next_fragment.unlocked = true
 		pending_unlocked_fragment_id = next_id
 		print("[FragmentManager] Linear unlock: %s -> %s" % [completed_id, next_id])
+		if WebPackManager and WebPackManager.has_method("prefetch_pack"):
+			WebPackManager.prefetch_pack(next_id)
 	return next_id
 
 
