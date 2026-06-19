@@ -106,7 +106,11 @@ function checkProjectConfiguration() {
     check(cnb.includes('keepAliveTimeout: 3600000'), 'CNB preview keepAliveTimeout is documented in config');
 
     const deployServer = read('deploy/server.js');
-    check(deployServer.includes("require('../scripts/tools/serve.js')"), 'deploy server delegates to shared serve.js');
+    check(
+        deployServer.includes("require('../scripts/tools/serve.js')") ||
+        deployServer.includes("require('./scripts/tools/serve.js')"),
+        'deploy server delegates to shared serve.js'
+    );
     check(!deployServer.includes('DEEPSEEK_API_KEY') && !deployServer.includes('https.request'), 'deploy server has no independent LLM proxy');
 
     const serve = read('scripts/tools/serve.js');

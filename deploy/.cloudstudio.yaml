@@ -1,5 +1,0 @@
-{
-  "name": "溯光计划",
-  "port": 8080,
-  "command": "PORT=8080 node server.js"
-}

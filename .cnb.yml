@@ -1,6 +1,9 @@
 main:
   push:
-    - stages:
+    - git:
+        enable: true
+        lfs: true
+      stages:
         - name: build-and-push-image
           script: |
             docker build -t ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}:latest .
