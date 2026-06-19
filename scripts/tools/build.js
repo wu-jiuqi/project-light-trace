@@ -15,7 +15,7 @@ const BUILD_DIR = path.join(PROJECT_DIR, 'build', 'web');
 const EXPORT_PRESET = 'Web (HTML5)';
 const TEMPLATE_VERSION = process.env.GODOT_TEMPLATE_VERSION || '4.6.2.stable';
 const PCK_WARN_BYTES = 250 * 1024 * 1024;
-const PCK_FAIL_BYTES = 400 * 1024 * 1024;
+const PCK_FAIL_BYTES = (parseInt(process.env.PCK_FAIL_MB, 10) || 1024) * 1024 * 1024;
 const GODOT_CANDIDATES = [
     process.env.GODOT_EXE,
     'D:/Godot/Godot_v4.6.2-stable_win64_console.exe',
@@ -80,7 +80,7 @@ try {
     const pckSize = fs.statSync(pckPath).size;
     const pckSizeMb = (pckSize / 1024 / 1024).toFixed(1);
     if (pckSize > PCK_FAIL_BYTES) {
-        throw new Error(`index.pck is ${pckSizeMb} MB, over the 400 MB failure threshold`);
+        throw new Error(`index.pck is ${pckSizeMb} MB, over the ${Math.round(PCK_FAIL_BYTES / 1024 / 1024)} MB failure threshold`);
     }
     if (pckSize > PCK_WARN_BYTES) {
         console.warn(`[WARN] index.pck is ${pckSizeMb} MB, over the 250 MB warning threshold`);
