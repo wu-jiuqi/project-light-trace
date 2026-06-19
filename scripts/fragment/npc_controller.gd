@@ -185,6 +185,10 @@ func send_player_message(message: String) -> void:
 	var clean_message := message.strip_edges()
 	if clean_message == "":
 		return
+	var fragment_state := _resolve_fragment_state()
+	if fragment_state != null and fragment_state.has_method("handle_npc_player_message"):
+		if fragment_state.handle_npc_player_message(self, clean_message):
+			return
 	_llm_last_input = clean_message
 
 	if LLMClient.is_busy():
