@@ -53,6 +53,10 @@ function sha256File(filePath) {
     return hash.digest('hex');
 }
 
+function formatMb(bytes) {
+    return (bytes / (1024 * 1024)).toFixed(1);
+}
+
 function findGodot() {
     for (const candidate of GODOT_CANDIDATES) {
         if (candidate.includes('/') || candidate.includes('\\')) {
@@ -91,6 +95,12 @@ function validatePack(godotExe, pckPath) {
     }
     console.log('[PASS] PCK startup smoke test');
 }
+
+// 清理上次构建残留，避免 UID 冲突
+if (fs.existsSync(BUILD_DIR)) {
+    fs.rmSync(BUILD_DIR, { recursive: true, force: true });
+}
+fs.mkdirSync(BUILD_DIR, { recursive: true });
 
 const godotExe = findGodot();
 if (!godotExe) {
@@ -153,6 +163,10 @@ function exportRelease(godotExe) {
         pck_sha256: pckSha256,
     }, null, 2) + '\n', 'utf8');
     console.log('[SUCCESS] Web 构建完成:', fs.readdirSync(BUILD_DIR).join(', '));
+}
+
+try {
+    exportRelease(godotExe);
 } catch (error) {
     fs.rmSync(BUILD_DIR, { recursive: true, force: true });
     console.error('[ERROR] Web 构建失败:', error.message);

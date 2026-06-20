@@ -1,7 +1,8 @@
 extends Control
 
 const MONOLOGUE_SCENE: PackedScene = preload("res://scenes/ui/Monologue.tscn")
-const BGM_FRAGMENT_0004: AudioStream = preload("res://assets/audio/0004.mp3")
+const BGM_PATH_0004 := "res://assets/audio/0004.mp3"
+var _bgm_stream_0004: AudioStream = null
 const FRAGMENT_ID := "0004"
 const STAR_MAP_SCENE := "res://scenes/star_map.tscn"
 const SOURCE_MARK_NAME := "匠魂之印"
@@ -110,4 +111,10 @@ func _complete_fragment_and_return() -> void:
 
 
 func _start_bgm() -> void:
-	AudioManager.play_bgm(BGM_FRAGMENT_0004, "fragment_0004", 0.45, -10.0, true)
+	if _bgm_stream_0004 == null:
+		if ResourceLoader.exists(BGM_PATH_0004):
+			_bgm_stream_0004 = load(BGM_PATH_0004) as AudioStream
+		else:
+			push_warning("[Fragment0004End] BGM file not found: %s" % BGM_PATH_0004)
+			return
+	AudioManager.play_bgm(_bgm_stream_0004, "fragment_0004", 0.45, -10.0, true)

@@ -4,7 +4,8 @@ const Data = preload("res://scripts/fragment/fragment_0004_data.gd")
 const PLAYER_SCENE: PackedScene = preload("res://scenes/characters/player/player.tscn")
 const DIALOGUE_BOX_SCENE: PackedScene = preload("res://scenes/ui/DialogueBox.tscn")
 const INTERACTABLE_SCRIPT: Script = preload("res://scripts/fragment/fragment_0004_interactable.gd")
-const BGM_FRAGMENT_0004: AudioStream = preload("res://assets/audio/0004.mp3")
+const BGM_PATH_0004 := "res://assets/audio/0004.mp3"
+var _bgm_stream_0004: AudioStream = null
 const SFX_PICKUP := preload("res://assets/audio/sfx/ui_item_pickup.wav")
 const SFX_PICKUP_VOLUME_DB: float = -4.0
 
@@ -433,5 +434,11 @@ func get_blueprint_pages_for_test(blueprint_id: String) -> Array:
 
 
 func _start_bgm() -> void:
-	AudioManager.play_bgm(BGM_FRAGMENT_0004, "fragment_0004", 0.45, -10.0, true)
+	if _bgm_stream_0004 == null:
+		if ResourceLoader.exists(BGM_PATH_0004):
+			_bgm_stream_0004 = load(BGM_PATH_0004) as AudioStream
+		else:
+			push_warning("[Fragment0004Passage] BGM file not found: %s" % BGM_PATH_0004)
+			return
+	AudioManager.play_bgm(_bgm_stream_0004, "fragment_0004", 0.45, -10.0, true)
 	print("[Fragment0004Passage] BGM started")

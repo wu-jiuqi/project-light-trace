@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://ct3j6k1ix2dyo"
-path="res://.godot/imported/ui_source_mark_reveal.wav-17c8c5897acb2074d8037d558d654a4e.sample"
+path="res://.godot/imported/ui_source_mark_reveal.wav-24869126d628fceb9f7c80ba6bad8ab8.sample"
 
 [deps]
 
-source_file="res://build/web/assets/audio/ui/ui_source_mark_reveal.wav"
-dest_files=["res://.godot/imported/ui_source_mark_reveal.wav-17c8c5897acb2074d8037d558d654a4e.sample"]
+source_file="res://assets/audio/ui/ui_source_mark_reveal.wav"
+dest_files=["res://.godot/imported/ui_source_mark_reveal.wav-24869126d628fceb9f7c80ba6bad8ab8.sample"]
 
 [params]
 

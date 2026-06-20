@@ -5,7 +5,8 @@ const Content = preload("res://scripts/fragment/fragment_0002_content.gd")
 const MONOLOGUE_SCENE: PackedScene = preload("res://scenes/ui/Monologue.tscn")
 const SEAT_TABLE_SCENE: PackedScene = preload("res://scenes/buildings/id0002/seat_table.tscn")
 const SOURCE_MARK_TICKET_SCENE: PackedScene = preload("res://scenes/ui/SourceMarkTicketOverlay.tscn")
-const BGM_FRAGMENT_0002 = preload("res://assets/audio/0002.mp3")
+const BGM_PATH_0002 := "res://assets/audio/0002.mp3"
+var _bgm_stream_0002: AudioStream = null
 const DESIGN_SIZE := Vector2(1280.0, 720.0)
 const PLAYER_VISUAL_SCALE := Vector2(2.2, 2.2)
 const CONTINUE_PROMPT := "点击任意位置继续"
@@ -367,7 +368,13 @@ func _find_npc_by_id(npc_id: String) -> Node:
 
 
 func _start_bgm() -> void:
-	AudioManager.play_bgm(BGM_FRAGMENT_0002, "fragment_0002", 0.45, -10.0, true)
+	if _bgm_stream_0002 == null:
+		if ResourceLoader.exists(BGM_PATH_0002):
+			_bgm_stream_0002 = load(BGM_PATH_0002) as AudioStream
+		else:
+			push_warning("[Fragment0002] BGM file not found: %s" % BGM_PATH_0002)
+			return
+	AudioManager.play_bgm(_bgm_stream_0002, "fragment_0002", 0.45, -10.0, true)
 	print("[Fragment0002] BGM 已开始循环播放")
 
 

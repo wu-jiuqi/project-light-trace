@@ -17,7 +17,8 @@ const END_SCENE := "res://scenes/cinematic/fragment_0003_end.tscn"
 const BOX_CLOSED_TEXTURE := "res://assets/papercraft/fragments/id0003/environment/box_02.png"
 const BOX_OPEN_TEXTURE := "res://assets/papercraft/fragments/id0003/environment/box_01.png"
 const JADE_TEXTURE := "res://assets/papercraft/fragments/id0003/environment/jade.png"
-const BGM_FRAGMENT_0003 = preload("res://assets/audio/0003.mp3")
+const BGM_PATH_0003 := "res://assets/audio/0003.mp3"
+var _bgm_stream_0003: AudioStream = null
 const SFX_PICKUP := preload("res://assets/audio/sfx/ui_item_pickup.wav")
 const SFX_PICKUP_VOLUME_DB: float = -4.0
 
@@ -810,7 +811,13 @@ func get_cover_scale_for_test(viewport_size: Vector2) -> float:
 
 
 func _start_bgm() -> void:
-	AudioManager.play_bgm(BGM_FRAGMENT_0003, "fragment_0003", 0.45, -10.0, true)
+	if _bgm_stream_0003 == null:
+		if ResourceLoader.exists(BGM_PATH_0003):
+			_bgm_stream_0003 = load(BGM_PATH_0003) as AudioStream
+		else:
+			push_warning("[Fragment0003] BGM file not found: %s" % BGM_PATH_0003)
+			return
+	AudioManager.play_bgm(_bgm_stream_0003, "fragment_0003", 0.45, -10.0, true)
 	print("[Fragment0003] BGM 已开始循环播放")
 
 
