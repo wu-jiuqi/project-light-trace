@@ -17,10 +17,13 @@ const http = require('http');
 const https = require('https');
 const path = require('path');
 
-const DEFAULT_BUILD_DIR = path.join(__dirname, '..', '..', 'build', 'web');
+const PROJECT_OR_PACKAGE_DIR = path.resolve(__dirname, '..', '..');
+const DEFAULT_BUILD_DIR = path.join(PROJECT_OR_PACKAGE_DIR, 'build', 'web');
 const BUILD_DIR = path.resolve(
     process.env.SHUOGUANG_WEB_ROOT ||
-    (fs.existsSync(path.join(__dirname, 'index.html')) ? __dirname : DEFAULT_BUILD_DIR)
+    (fs.existsSync(path.join(PROJECT_OR_PACKAGE_DIR, 'index.html'))
+        ? PROJECT_OR_PACKAGE_DIR
+        : DEFAULT_BUILD_DIR)
 );
 const DEFAULT_HOST = process.env.HOST || '127.0.0.1';
 const DEFAULT_PORT = parseInt(process.env.PORT, 10) || 3000;
@@ -51,6 +54,7 @@ const MIME = {
     '.ogg': 'audio/ogg',
     '.mp3': 'audio/mpeg',
     '.wav': 'audio/wav',
+    '.mp4': 'video/mp4',
 };
 
 const WEB_HEADERS = {
@@ -313,13 +317,52 @@ function handleStatic(req, res, pathname) {
         send(res, 403, { 'Content-Type': 'text/plain; charset=utf-8' }, 'Forbidden');
         return;
     }
-    fs.readFile(filePath, (error, data) => {
-        if (error) {
+    fs.stat(filePath, (statError, stat) => {
+        if (statError || !stat.isFile()) {
             send(res, 404, { 'Content-Type': 'text/plain; charset=utf-8' }, 'Not Found');
             return;
         }
         const ext = path.extname(filePath).toLowerCase();
-        send(res, 200, { 'Content-Type': MIME[ext] || 'application/octet-stream' }, data);
+        const range = req.headers.range;
+        if (ext === '.mp4' && range) {
+            const match = /^bytes=(\d*)-(\d*)$/.exec(range);
+            if (!match) {
+                send(res, 416, { 'Content-Range': `bytes */${stat.size}` });
+                return;
+            }
+            const suffixLength = match[1] === '' ? Number(match[2]) : 0;
+            const start = suffixLength > 0 ? Math.max(stat.size - suffixLength, 0) : Number(match[1]);
+            const requestedEnd = match[1] === '' || match[2] === '' ? stat.size - 1 : Number(match[2]);
+            const end = Math.min(requestedEnd, stat.size - 1);
+            if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start < 0 || start > end) {
+                send(res, 416, { 'Content-Range': `bytes */${stat.size}` });
+                return;
+            }
+            const headers = {
+                ...WEB_HEADERS,
+                'Cache-Control': 'no-cache',
+                'Content-Type': MIME[ext],
+                'Accept-Ranges': 'bytes',
+                'Content-Range': `bytes ${start}-${end}/${stat.size}`,
+                'Content-Length': end - start + 1,
+            };
+            res.writeHead(206, headers);
+            if (req.method === 'HEAD') {
+                res.end();
+                return;
+            }
+            fs.createReadStream(filePath, { start, end }).pipe(res);
+            return;
+        }
+        fs.readFile(filePath, (error, data) => {
+            if (error) {
+                send(res, 404, { 'Content-Type': 'text/plain; charset=utf-8' }, 'Not Found');
+                return;
+            }
+            const headers = { 'Content-Type': MIME[ext] || 'application/octet-stream' };
+            if (ext === '.mp4') headers['Accept-Ranges'] = 'bytes';
+            send(res, 200, headers, data);
+        });
     });
 }
 

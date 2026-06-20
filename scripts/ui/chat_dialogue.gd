@@ -725,12 +725,14 @@ func _load_npc_portrait(npc_ctrl: Node) -> Texture2D:
 
 	var fragment_dir := _get_portrait_fragment_dir(npc_ctrl)
 	var portrait_dir := "res://assets/papercraft/fragments/%s/characters" % fragment_dir
-	var files := DirAccess.get_files_at(portrait_dir)
-	for file_name in files:
-		if file_name.ends_with("_l.png") and file_name.find(npc_id) != -1:
-			var path := "%s/%s" % [portrait_dir, file_name]
-			if ResourceLoader.exists(path):
-				return load(path) as Texture2D
+
+	# DirAccess.get_files_at() fails inside .pck archives on some platforms.
+	# Use ResourceLoader.exists() with known naming pattern: npc_NN_<kb_id>_l.png
+	for i in range(1, 21):
+		var file_name := "npc_%02d_%s_l.png" % [i, npc_id]
+		var path := "%s/%s" % [portrait_dir, file_name]
+		if ResourceLoader.exists(path):
+			return load(path) as Texture2D
 
 	push_warning("[ChatDialogue] No large portrait found for npc_id=%s in %s" % [npc_id, portrait_dir])
 	return null

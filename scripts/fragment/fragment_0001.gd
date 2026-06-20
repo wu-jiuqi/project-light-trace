@@ -9,7 +9,7 @@ const BGM_FRAGMENT_0001 = preload("res://assets/audio/bgm/bgm_fragment_0001_loop
 const LIN_NOTE_TEXTURE: Texture2D = preload("res://assets/papercraft/fragments/id0001/environment2/LinNote.png")
 const LIN_NOTE_SCRIPT: Script = preload("res://scripts/fragment/lin_note_interactable.gd")
 const TV_SCENE: PackedScene = preload("res://scenes/buildings/id0001/TV.tscn")
-const TV_VIDEO_STREAM: VideoStream = preload("res://assets/papercraft/fragments/id0001/environment2/ad.ogv")
+const TV_VIDEO_PATH := "res://assets/papercraft/fragments/id0001/environment2/ad.ogv"
 const STONE_TEXTURE: Texture2D = preload("res://assets/papercraft/fragments/id0001/environment2/stone_tablet.png")
 const SFX_SOURCE_MARK_REVEAL := preload("res://assets/audio/ui/ui_source_mark_reveal.wav")
 
@@ -95,6 +95,7 @@ var _tv_node: Node2D = null
 var _tv_viewer: Control = null
 var _tv_viewer_tv: Node2D = null
 var _tv_close_block_until_msec: int = 0
+var _tv_video_stream: VideoStream = null
 @export_range(0, 1, 1) var stone_collected: int = 0
 var _stone_node: Node2D = null
 var _stone_viewer: Control = null
@@ -148,6 +149,10 @@ func _ready() -> void:
 	if TutorialManager and TutorialManager.has_method("start_fragment_0001"):
 		TutorialManager.start_fragment_0001()
 	print("[Fragment0001] 启程之镇就绪 — E键观测日晷 | Tab键查看线索")
+
+
+func _exit_tree() -> void:
+	_stop_tv_video()
 
 
 func _prepare_fragment_context() -> void:
@@ -1858,14 +1863,60 @@ func _play_tv_video_once() -> void:
 	var video_player := _get_tv_video_player()
 	if video_player == null:
 		return
-	video_player.stream = TV_VIDEO_STREAM
+	if OS.has_feature("web"):
+		_play_tv_video_web(video_player)
+		return
+	if _tv_video_stream == null:
+		_tv_video_stream = load(TV_VIDEO_PATH) as VideoStream
+	if _tv_video_stream == null:
+		push_warning("[Fragment0001] Failed to load TV video: %s" % TV_VIDEO_PATH)
+		return
+	video_player.stream = _tv_video_stream
 	video_player.loop = false
 	video_player.stop()
 	video_player.stream_position = 0.0
 	video_player.play()
 
 
+func _play_tv_video_web(video_player: VideoStreamPlayer) -> void:
+	var viewport_size := get_viewport_rect().size
+	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
+		return
+	var transform := video_player.get_global_transform_with_canvas()
+	var corners := PackedVector2Array([
+		transform * Vector2.ZERO,
+		transform * Vector2(video_player.size.x, 0.0),
+		transform * video_player.size,
+		transform * Vector2(0.0, video_player.size.y),
+	])
+	var min_point := corners[0]
+	var max_point := corners[0]
+	for point in corners:
+		min_point.x = minf(min_point.x, point.x)
+		min_point.y = minf(min_point.y, point.y)
+		max_point.x = maxf(max_point.x, point.x)
+		max_point.y = maxf(max_point.y, point.y)
+	var rect := Rect2(min_point, max_point - min_point)
+	JavaScriptBridge.eval(
+		"window.__shuoguangPlayTvVideo && window.__shuoguangPlayTvVideo(%f,%f,%f,%f,%f,%f);" % [
+			rect.position.x,
+			rect.position.y,
+			rect.size.x,
+			rect.size.y,
+			viewport_size.x,
+			viewport_size.y,
+		],
+		true
+	)
+
+
 func _stop_tv_video() -> void:
+	if OS.has_feature("web"):
+		JavaScriptBridge.eval(
+			"window.__shuoguangStopTvVideo && window.__shuoguangStopTvVideo();",
+			true
+		)
+		return
 	var video_player := _get_tv_video_player()
 	if video_player:
 		video_player.stop()

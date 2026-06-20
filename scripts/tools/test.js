@@ -51,11 +51,15 @@ function request(port, requestPath, options = {}) {
         }, res => {
             const chunks = [];
             res.on('data', chunk => chunks.push(chunk));
-            res.on('end', () => resolve({
-                status: res.statusCode,
-                headers: res.headers,
-                body: Buffer.concat(chunks).toString('utf8'),
-            }));
+            res.on('end', () => {
+                const bodyBuffer = Buffer.concat(chunks);
+                resolve({
+                    status: res.statusCode,
+                    headers: res.headers,
+                    body: bodyBuffer.toString('utf8'),
+                    bodyBuffer,
+                });
+            });
         });
         req.on('error', reject);
         if (options.body) req.write(options.body);
@@ -106,7 +110,7 @@ function checkProjectConfiguration() {
     check(cnb.includes('keepAliveTimeout: 3600000'), 'CNB preview keepAliveTimeout is documented in config');
 
     const deployServer = read('deploy/server.js');
-    check(deployServer.includes("require('../scripts/tools/serve.js')"), 'deploy server delegates to shared serve.js');
+    check(deployServer.includes("require('./scripts/tools/serve.js')"), 'deploy server delegates to its packaged shared serve.js');
     check(!deployServer.includes('DEEPSEEK_API_KEY') && !deployServer.includes('https.request'), 'deploy server has no independent LLM proxy');
 
     const serve = read('scripts/tools/serve.js');
@@ -115,6 +119,7 @@ function checkProjectConfiguration() {
     check(serve.includes('Sec-Fetch-Site'.toLowerCase()) || serve.includes('sec-fetch-site'), 'serve.js checks Fetch Metadata');
     check(serve.includes('LLM_RATE_LIMIT_MAX'), 'serve.js has rate limiting');
     check(serve.includes('CORP_POLICY'), 'serve.js has configurable CORP policy');
+    check(serve.includes('PROJECT_OR_PACKAGE_DIR'), 'serve.js resolves packaged deploy assets from the deploy root');
 
     const llmClient = read('scripts/systems/llm_client.gd');
     check(!/sk-[A-Za-z0-9_-]{20,}/.test(llmClient), 'client source has no provider key');
@@ -145,20 +150,88 @@ function checkProjectConfiguration() {
     check(f0004Npc.includes('Data.CORRECT_COMBINATION'), 'fragment 0004 blocks full correct combination leaks');
 
     const preset = read('export_presets.cfg');
-    check(preset.includes('export_filter="scenes"'), 'Web export uses scene dependency mode');
+    check(preset.includes('export_filter="resources"'), 'Web export includes selected scenes and standalone resources');
+    check(preset.includes('scripts/**/*.gd'), 'Web export includes runtime scripts used by global classes and autoloads');
+    check(preset.includes('assets/ui/**/*.svg'), 'Web export includes UI theme SVG dependencies');
+    check(preset.includes('"res://assets/ui/panel_frame.svg"'), 'Web export explicitly selects UI theme resources');
     check(preset.includes('LLM/**/*.json'), 'Web export includes active NPC knowledge JSON');
+    check(preset.includes('assets/papercraft/**/*.png'), 'Web export includes runtime-loaded papercraft PNG assets');
+    check(preset.includes('assets/papercraft/**/*.jpg'), 'Web export includes JPG papercraft animation frames');
+    check(preset.includes('assets/papercraft/**/*.jpeg'), 'Web export includes JPEG papercraft animation frames');
+    check(preset.includes('"res://scenes/ui/LoadingScreen.tscn"'), 'Web export explicitly selects LoadingScreen scene');
     check(preset.includes('variant/thread_support=true'), 'Web export enables threads');
     check(preset.includes('variant/coep=true'), 'Web export enables COEP');
+
+    const papercraftFiles = walk(path.join(PROJECT_DIR, 'assets', 'papercraft', 'fragments'));
+    const animationFrames = papercraftFiles.filter(file =>
+        /[\\/]animation[\\/]frames[\\/].+\.jpe?g$/i.test(file)
+    );
+    const frameGroups = new Map();
+    for (const frame of animationFrames) {
+        const parts = path.relative(PROJECT_DIR, frame).split(path.sep);
+        const fragment = parts[3];
+        frameGroups.set(fragment, (frameGroups.get(fragment) || 0) + 1);
+    }
+    check(frameGroups.size >= 4, 'papercraft export covers all current animation frame groups');
+    for (const [fragment, count] of Array.from(frameGroups.entries()).sort()) {
+        check(count >= 240, `${fragment} has a complete exported JPG animation frame set`);
+    }
+    const frameImportFiles = animationFrames.map(file => `${file}.import`);
+    check(
+        frameImportFiles.every(file => fs.existsSync(file) && fs.readFileSync(file, 'utf8').includes('compress/mode=1')),
+        'papercraft JPG animation frames use lossy import compression to keep Web PCK size controlled'
+    );
+    check(
+        papercraftFiles.filter(file => /[\\/]characters[\\/].+_l\.png$/i.test(file)).length >= 14,
+        'papercraft export covers runtime-loaded NPC large portraits'
+    );
+
+    const build = read('scripts/tools/build.js');
+    const deploy = read('scripts/tools/deploy.js');
+    const webAudioGate = read('scripts/tools/web-audio-gate.js');
+    check(build.includes('applyWebAudioGate'), 'build applies WebAudio gesture gate');
+    check(build.includes('WEB_TV_VIDEO_SOURCE'), 'build copies the browser-native TV video');
+    check(build.includes('WEB_AUDIO_SOURCE') && build.includes('WEB_AUDIO_OUTPUT'), 'build copies browser-native audio assets');
+    check(build.includes("BUILD_MARKER = '.build-complete.json'"), 'build writes a completion marker');
+    check(build.includes('validatePack'), 'build smoke-tests the exported PCK');
+    check(build.includes('fs.rmSync(BUILD_DIR'), 'failed builds remove partial output');
+    check(deploy.includes('applyWebAudioGate'), 'deploy applies WebAudio gesture gate');
+    check(deploy.includes('pck_sha256'), 'deploy verifies the completed PCK hash');
+    check(deploy.includes('DEPLOY_STAGING_DIR'), 'deploy assembles output in a staging directory');
+    check(webAudioGate.includes('audio-start-gate'), 'WebAudio gate injects a start overlay');
+    check(webAudioGate.includes('captureGodotAudioContext'), 'WebAudio gate captures the Godot audio context');
+    check(webAudioGate.includes('__godotAudioContext'), 'WebAudio gate resumes the captured Godot audio context');
+    check(webAudioGate.includes('__shuoguangResumeGodotAudio'), 'Godot input can request a real browser AudioContext resume');
+    check(webAudioGate.includes('primeAudioContext'), 'WebAudio gate primes the output inside the user gesture');
+    check(webAudioGate.includes('createNativeAudioBridge'), 'Web bootstrap provides a native media audio fallback');
+    check(webAudioGate.includes('__shuoguangNativeAudio'), 'Web bootstrap exposes the native audio bridge');
+    check(webAudioGate.includes('beginGameAfterAudioGesture'), 'Web engine startup waits for a user gesture');
+    check(webAudioGate.includes("audioStartGate?.classList.add('hidden');\n\\t\\t\\taudioStartGate?.setAttribute('aria-disabled', 'true');\n\\t\\t\\tsetStatusMode('progress');"), 'Web loading progress is not covered by the audio gate');
+    check(webAudioGate.includes("window.__godotAudioContext.state === 'running'") || read('scripts/globals/audio_manager.gd').includes("window.__godotAudioContext.state === 'running'"), 'Web audio unlock requires a running Godot context');
+    check(webAudioGate.includes('__shuoguangPlayTvVideo'), 'Web bootstrap exposes native browser video playback');
+    check(webAudioGate.includes('fragment-0001-tv.mp4'), 'Web video bridge uses the exported MP4 asset');
+
+    const fragment0001 = read('scripts/fragment/fragment_0001.gd');
+    const tvScene = read('scenes/buildings/id0001/TV.tscn');
+    check(fragment0001.includes('_play_tv_video_web'), 'fragment 0001 uses the browser video bridge on Web');
+    check(!fragment0001.includes('preload("res://assets/papercraft/fragments/id0001/environment2/ad.ogv")'), 'Web startup does not preload the Theora video');
+    check(!tvScene.includes('ext_resource type="VideoStream"'), 'TV scene does not initialize a Theora decoder during scene loading');
 }
 
 async function checkServer() {
     const { BUILD_DIR, createServer, getProviderConfig, sanitizeMessages } = loadServe();
     const indexPath = path.join(BUILD_DIR, 'index.html');
+    const videoPath = path.join(BUILD_DIR, 'fragment-0001-tv.mp4');
     const buildDirExisted = fs.existsSync(BUILD_DIR);
     const createdIndex = !fs.existsSync(indexPath);
+    const createdVideo = !fs.existsSync(videoPath);
     if (createdIndex) {
         fs.mkdirSync(BUILD_DIR, { recursive: true });
         fs.writeFileSync(indexPath, '<!doctype html><title>test</title>', 'utf8');
+    }
+    if (createdVideo) {
+        fs.mkdirSync(BUILD_DIR, { recursive: true });
+        fs.writeFileSync(videoPath, Buffer.from('0123456789', 'ascii'));
     }
 
     const server = createServer();
@@ -170,6 +243,13 @@ async function checkServer() {
         check(page.headers['cross-origin-opener-policy'] === 'same-origin', 'static service returns COOP');
         check(page.headers['cross-origin-embedder-policy'] === 'require-corp', 'static service returns COEP');
         check(page.headers['cross-origin-resource-policy'] === 'same-origin', 'static service returns CORP');
+
+        const videoRange = await request(port, '/fragment-0001-tv.mp4', {
+            headers: { Range: 'bytes=2-5' },
+        });
+        check(videoRange.status === 206, 'video service supports byte ranges');
+        check(videoRange.headers['content-range']?.startsWith('bytes 2-5/'), 'video range response reports the selected bytes');
+        check(videoRange.bodyBuffer.length === 4, 'video range response returns only the selected bytes');
 
         const traversal = await request(port, '/..%2fpackage.json');
         check(traversal.status === 403, 'static service blocks traversal');
@@ -210,6 +290,7 @@ async function checkServer() {
         check(invalidRoleRejected, 'proxy sanitizer rejects invalid roles');
     } finally {
         await new Promise(resolve => server.close(resolve));
+        if (createdVideo) fs.rmSync(videoPath, { force: true });
         if (createdIndex) {
             fs.rmSync(indexPath, { force: true });
             if (!buildDirExisted) fs.rmSync(BUILD_DIR, { recursive: true, force: true });

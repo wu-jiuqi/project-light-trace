@@ -32,6 +32,10 @@ var _voice_player: AudioStreamPlayer = null
 var _voice_tween: Tween = null
 var _voice_priority: int = PRIORITY_LOW
 var _voice_duck_tween: Tween = null
+var _web_audio_unlocked: bool = true
+var _pending_bgm: Dictionary = {}
+var _pending_ambiences: Dictionary = {}
+var _pending_voice: Dictionary = {}
 
 var _channel_volumes: Dictionary = {
 	"master": 1.0,
@@ -43,10 +47,30 @@ var _channel_volumes: Dictionary = {
 
 
 func _ready() -> void:
+	_web_audio_unlocked = _read_web_audio_unlocked_state()
+	set_process(OS.has_feature("web") and not _web_audio_unlocked)
+	print("[AudioManager] ready web=%s unlocked=%s" % [OS.has_feature("web"), _web_audio_unlocked])
 	_ensure_audio_buses()
 	_create_bgm_players()
 	_create_sfx_pool()
 	_create_voice_player()
+
+
+func _process(_delta: float) -> void:
+	if not _web_audio_unlocked and _read_web_audio_unlocked_state():
+		_unlock_web_audio()
+
+
+func _input(event: InputEvent) -> void:
+	if _web_audio_unlocked:
+		return
+	if OS.has_feature("web") and _is_audio_unlock_event(event):
+		# The browser, not Godot input alone, is the source of truth. Marking the
+		# channel unlocked before AudioContext.resume() succeeds drops queued audio.
+		JavaScriptBridge.eval(
+			"window.__shuoguangResumeGodotAudio && window.__shuoguangResumeGodotAudio();",
+			true
+		)
 
 
 func _exit_tree() -> void:
@@ -54,6 +78,11 @@ func _exit_tree() -> void:
 
 
 func stop_all() -> void:
+	_pending_bgm.clear()
+	_pending_ambiences.clear()
+	_pending_voice.clear()
+	if _has_web_native_audio():
+		_web_audio_call({"method": "stop_all"})
 	stop_bgm(0.0)
 	_kill_tween(_voice_tween)
 	_voice_tween = null
@@ -87,7 +116,29 @@ func stop_all() -> void:
 func play_bgm(stream: AudioStream, id: String = "", fade: float = 0.5, volume_db: float = 0.0, loop: bool = true) -> void:
 	if stream == null:
 		return
+	if _should_defer_audio_start():
+		print("[AudioManager] queued BGM until WebAudio unlock: %s" % id)
+		_pending_bgm = {
+			"stream": stream,
+			"id": id,
+			"fade": fade,
+			"volume_db": volume_db,
+			"loop": loop,
+		}
+		return
 	var next_id := id if not id.is_empty() else stream.resource_path
+	if _has_web_native_audio() and not stream.resource_path.is_empty():
+		_current_bgm_id = next_id
+		_current_bgm_volume_db = volume_db
+		_web_audio_call({
+			"method": "play_bgm",
+			"path": stream.resource_path,
+			"id": next_id,
+			"volume_db": volume_db,
+			"loop": loop,
+		})
+		print("[AudioManager] native Web BGM started: %s" % next_id)
+		return
 	var current := _bgm_players[_bgm_active_index]
 	if _current_bgm_id == next_id and current.playing:
 		_current_bgm_volume_db = volume_db
@@ -104,6 +155,7 @@ func play_bgm(stream: AudioStream, id: String = "", fade: float = 0.5, volume_db
 	next.bus = BUS_BGM
 	next.volume_db = SILENT_DB
 	next.play()
+	print("[AudioManager] BGM started: %s" % next_id)
 	_bgm_active_index = next_index
 	_current_bgm_id = next_id
 	_current_bgm_volume_db = volume_db
@@ -129,8 +181,13 @@ func play_bgm(stream: AudioStream, id: String = "", fade: float = 0.5, volume_db
 
 
 func stop_bgm(fade: float = 0.35) -> void:
+	_pending_bgm.clear()
 	_kill_tween(_bgm_tween)
 	_bgm_tween = null
+	if _has_web_native_audio():
+		_web_audio_call({"method": "stop_bgm", "fade": fade})
+		_current_bgm_id = ""
+		return
 	var current := _bgm_players[_bgm_active_index]
 	_current_bgm_id = ""
 	for player in _bgm_players:
@@ -157,6 +214,25 @@ func stop_bgm(fade: float = 0.35) -> void:
 func play_ambience(id: String, stream: AudioStream, fade: float = 0.5, priority: int = PRIORITY_NORMAL, volume_db: float = 0.0, loop: bool = true) -> void:
 	if id.is_empty() or stream == null:
 		return
+	if _should_defer_audio_start():
+		_pending_ambiences[id] = {
+			"id": id,
+			"stream": stream,
+			"fade": fade,
+			"priority": priority,
+			"volume_db": volume_db,
+			"loop": loop,
+		}
+		return
+	if _has_web_native_audio() and not stream.resource_path.is_empty():
+		_web_audio_call({
+			"method": "play_ambience",
+			"id": id,
+			"path": stream.resource_path,
+			"volume_db": volume_db,
+			"loop": loop,
+		})
+		return
 	var player := _ambience_players.get(id) as AudioStreamPlayer
 	if player == null:
 		player = AudioStreamPlayer.new()
@@ -182,6 +258,10 @@ func play_ambience(id: String, stream: AudioStream, fade: float = 0.5, priority:
 
 
 func stop_ambience(id: String, fade: float = 0.35) -> void:
+	_pending_ambiences.erase(id)
+	if _has_web_native_audio():
+		_web_audio_call({"method": "stop_ambience", "id": id, "fade": fade})
+		return
 	var player := _ambience_players.get(id) as AudioStreamPlayer
 	if player == null:
 		return
@@ -206,6 +286,15 @@ func stop_ambience(id: String, fade: float = 0.35) -> void:
 func play_sfx(stream: AudioStream, priority: int = PRIORITY_NORMAL, volume_db: float = 0.0) -> void:
 	if stream == null or _sfx_players.is_empty():
 		return
+	if _should_defer_audio_start():
+		return
+	if _has_web_native_audio() and not stream.resource_path.is_empty():
+		_web_audio_call({
+			"method": "play_sfx",
+			"path": stream.resource_path,
+			"volume_db": volume_db,
+		})
+		return
 	var index := _choose_sfx_player(priority)
 	if index < 0:
 		return
@@ -222,7 +311,26 @@ func play_sfx(stream: AudioStream, priority: int = PRIORITY_NORMAL, volume_db: f
 func play_voice(id: String, stream: AudioStream, priority: int = PRIORITY_NORMAL, duck_bgm_db: float = -6.0, volume_db: float = 0.0) -> void:
 	if stream == null:
 		return
+	if _should_defer_audio_start():
+		_pending_voice = {
+			"id": id,
+			"stream": stream,
+			"priority": priority,
+			"duck_bgm_db": duck_bgm_db,
+			"volume_db": volume_db,
+		}
+		return
 	if _voice_player.playing and priority < _voice_priority:
+		return
+	if _has_web_native_audio() and not stream.resource_path.is_empty():
+		_voice_priority = priority
+		_apply_bgm_duck(duck_bgm_db)
+		_web_audio_call({
+			"method": "play_voice",
+			"id": id,
+			"path": stream.resource_path,
+			"volume_db": volume_db,
+		})
 		return
 	_kill_tween(_voice_tween)
 	_voice_tween = null
@@ -237,6 +345,12 @@ func play_voice(id: String, stream: AudioStream, priority: int = PRIORITY_NORMAL
 
 
 func stop_voice(fade: float = 0.15) -> void:
+	_pending_voice.clear()
+	if _has_web_native_audio():
+		_web_audio_call({"method": "stop_voice", "fade": fade})
+		_voice_priority = PRIORITY_LOW
+		_apply_bgm_duck(0.0)
+		return
 	if not _voice_player.playing:
 		_voice_player.stream = null
 		_apply_bgm_duck(0.0)
@@ -268,11 +382,21 @@ func set_channel_volume(channel: String, linear: float) -> void:
 
 
 func apply_volumes(master: float, bgm: float, sfx: float, ambience: float = 1.0, voice: float = 1.0) -> void:
+	print("[AudioManager] volumes master=%.2f bgm=%.2f sfx=%.2f ambience=%.2f voice=%.2f" % [master, bgm, sfx, ambience, voice])
 	set_channel_volume("master", master)
 	set_channel_volume("bgm", bgm)
 	set_channel_volume("sfx", sfx)
 	set_channel_volume("ambience", ambience)
 	set_channel_volume("voice", voice)
+	if _has_web_native_audio():
+		_web_audio_call({
+			"method": "set_volumes",
+			"master": master,
+			"bgm": bgm,
+			"sfx": sfx,
+			"ambience": ambience,
+			"voice": voice,
+		})
 
 
 func get_current_bgm_id() -> String:
@@ -352,6 +476,9 @@ func _choose_sfx_player(priority: int) -> int:
 
 func _apply_bgm_duck(duck_db: float) -> void:
 	_bgm_duck_db = duck_db
+	if _has_web_native_audio():
+		_web_audio_call({"method": "duck_bgm", "duck_db": duck_db})
+		return
 	var current := _bgm_players[_bgm_active_index]
 	if not current.playing:
 		return
@@ -389,6 +516,92 @@ func _set_bus_volume(bus_name: String, linear: float) -> void:
 		return
 	var db := linear_to_db(maxf(linear, 0.0001))
 	AudioServer.set_bus_volume_db(bus_index, maxf(db, SILENT_DB))
+
+
+func _read_web_audio_unlocked_state() -> bool:
+	if not OS.has_feature("web"):
+		return true
+	return bool(JavaScriptBridge.eval(
+		"window.__shuoguangNativeAudio ? Boolean(window.__shuoguangNativeAudio.isUnlocked()) : Boolean(window.__shuoguangUserActivatedAudio && window.__godotAudioContext && window.__godotAudioContext.state === 'running')",
+		true
+	))
+
+
+func _has_web_native_audio() -> bool:
+	if not OS.has_feature("web"):
+		return false
+	return bool(JavaScriptBridge.eval("Boolean(window.__shuoguangNativeAudio)", true))
+
+
+func _web_audio_call(request: Dictionary) -> void:
+	if not _has_web_native_audio():
+		return
+	var payload := JSON.stringify(request)
+	JavaScriptBridge.eval(
+		"window.__shuoguangNativeAudio && window.__shuoguangNativeAudio.handle(%s);" % payload,
+		true
+	)
+
+
+func _should_defer_audio_start() -> bool:
+	return OS.has_feature("web") and not _web_audio_unlocked
+
+
+func _is_audio_unlock_event(event: InputEvent) -> bool:
+	if event is InputEventMouseButton:
+		return event.pressed
+	if event is InputEventScreenTouch:
+		return event.pressed
+	if event is InputEventKey:
+		return event.pressed and not event.echo
+	if event is InputEventJoypadButton:
+		return event.pressed
+	return false
+
+
+func _unlock_web_audio() -> void:
+	_web_audio_unlocked = true
+	set_process(false)
+	print("[AudioManager] WebAudio unlocked; flushing pending playback")
+	if OS.has_feature("web"):
+		JavaScriptBridge.eval("window.__shuoguangUserActivatedAudio = true;", true)
+	call_deferred("_flush_pending_audio")
+
+
+func _flush_pending_audio() -> void:
+	if not _pending_bgm.is_empty():
+		var pending_bgm := _pending_bgm.duplicate()
+		_pending_bgm.clear()
+		play_bgm(
+			pending_bgm["stream"],
+			str(pending_bgm["id"]),
+			float(pending_bgm["fade"]),
+			float(pending_bgm["volume_db"]),
+			bool(pending_bgm["loop"])
+		)
+
+	var ambiences := _pending_ambiences.values()
+	_pending_ambiences.clear()
+	for pending in ambiences:
+		play_ambience(
+			str(pending["id"]),
+			pending["stream"],
+			float(pending["fade"]),
+			int(pending["priority"]),
+			float(pending["volume_db"]),
+			bool(pending["loop"])
+		)
+
+	if not _pending_voice.is_empty():
+		var pending_voice := _pending_voice.duplicate()
+		_pending_voice.clear()
+		play_voice(
+			str(pending_voice["id"]),
+			pending_voice["stream"],
+			int(pending_voice["priority"]),
+			float(pending_voice["duck_bgm_db"]),
+			float(pending_voice["volume_db"])
+		)
 
 
 func _kill_tween(tween) -> void:

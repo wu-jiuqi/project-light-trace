@@ -3,6 +3,7 @@ extends Control
 const TARGET_SCENE := "res://scenes/fragments/fragment_0004.tscn"
 const FRAME_DIR := "res://assets/papercraft/fragments/id0004/animation/frames"
 const FRAME_RATE := 24.0
+const FRAME_COUNT := 240
 const FADE_IN_DURATION := 0.35
 const FADE_OUT_DURATION := 0.35
 
@@ -57,17 +58,21 @@ func _input(event: InputEvent) -> void:
 
 func _load_frame_paths() -> void:
 	var dir := DirAccess.open(FRAME_DIR)
-	if dir == null:
-		return
-
-	dir.list_dir_begin()
-	var file_name := dir.get_next()
-	while not file_name.is_empty():
-		if not dir.current_is_dir() and file_name.get_extension().to_lower() == "jpg":
-			_frame_paths.append("%s/%s" % [FRAME_DIR, file_name])
-		file_name = dir.get_next()
-	dir.list_dir_end()
+	if dir != null:
+		dir.list_dir_begin()
+		var file_name := dir.get_next()
+		while not file_name.is_empty():
+			if not dir.current_is_dir() and file_name.get_extension().to_lower() == "jpg":
+				_frame_paths.append("%s/%s" % [FRAME_DIR, file_name])
+			file_name = dir.get_next()
+		dir.list_dir_end()
 	_frame_paths.sort()
+
+	if _frame_paths.is_empty():
+		for frame_number in range(1, FRAME_COUNT + 1):
+			var frame_path := "%s/frame_%04d.jpg" % [FRAME_DIR, frame_number]
+			if ResourceLoader.exists(frame_path, "Texture2D"):
+				_frame_paths.append(frame_path)
 
 
 func _show_frame(frame_index: int) -> void:

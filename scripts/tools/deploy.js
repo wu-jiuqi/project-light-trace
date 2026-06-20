@@ -7,22 +7,65 @@
  */
 
 const fs = require('fs');
+const crypto = require('crypto');
 const path = require('path');
+const { applyWebAudioGate } = require('./web-audio-gate.js');
 
 const PROJECT_DIR = path.resolve(__dirname, '..', '..');
 const BUILD_DIR = path.join(PROJECT_DIR, 'build', 'web');
 const DEPLOY_DIR = path.join(PROJECT_DIR, 'deploy');
+const DEPLOY_STAGING_DIR = path.join(PROJECT_DIR, 'deploy.tmp');
 const PLATFORM = process.argv[2] || 'local';
+const BUILD_MARKER = '.build-complete.json';
+
+function sha256File(filePath) {
+    const hash = crypto.createHash('sha256');
+    const buffer = Buffer.allocUnsafe(1024 * 1024);
+    const fd = fs.openSync(filePath, 'r');
+    try {
+        let bytesRead;
+        do {
+            bytesRead = fs.readSync(fd, buffer, 0, buffer.length, null);
+            if (bytesRead > 0) hash.update(buffer.subarray(0, bytesRead));
+        } while (bytesRead > 0);
+    } finally {
+        fs.closeSync(fd);
+    }
+    return hash.digest('hex');
+}
 
 function requireBuildOutput() {
-    if (!fs.existsSync(path.join(BUILD_DIR, 'index.html'))) {
+    const requiredFiles = [
+        'index.html',
+        'index.js',
+        'index.wasm',
+        'index.pck',
+        'fragment-0001-tv.mp4',
+        BUILD_MARKER,
+    ];
+    const missingFiles = requiredFiles.filter(file => !fs.existsSync(path.join(BUILD_DIR, file)));
+    if (missingFiles.length > 0) {
         console.error('[ERROR] Build output is missing. Run: npm run build');
+        process.exit(1);
+    }
+    let marker;
+    try {
+        marker = JSON.parse(fs.readFileSync(path.join(BUILD_DIR, BUILD_MARKER), 'utf8'));
+    } catch (error) {
+        console.error('[ERROR] Build completion marker is invalid. Run: npm run build');
+        process.exit(1);
+    }
+    const pckPath = path.join(BUILD_DIR, 'index.pck');
+    const pckSize = fs.statSync(pckPath).size;
+    const pckSha256 = sha256File(pckPath);
+    if (marker.pck_size !== pckSize || marker.pck_sha256 !== pckSha256) {
+        console.error('[ERROR] Build files do not match their completion marker. Run: npm run build');
         process.exit(1);
     }
 }
 
-function writeSharedServerWrapper(relativeRequirePath) {
-    fs.writeFileSync(path.join(DEPLOY_DIR, 'server.js'), [
+function writeSharedServerWrapper(relativeRequirePath, outputDir = DEPLOY_DIR) {
+    fs.writeFileSync(path.join(outputDir, 'server.js'), [
         `const { DEFAULT_HOST, createServer } = require('${relativeRequirePath}');`,
         "const port = parseInt(process.env.PORT, 10) || 8686;",
         "createServer().listen(port, DEFAULT_HOST, () => {",
@@ -34,24 +77,34 @@ function writeSharedServerWrapper(relativeRequirePath) {
 
 function generateDeployPackage(platform) {
     requireBuildOutput();
-    fs.rmSync(DEPLOY_DIR, { recursive: true, force: true });
-    fs.mkdirSync(DEPLOY_DIR, { recursive: true });
+    fs.rmSync(DEPLOY_STAGING_DIR, { recursive: true, force: true });
+    fs.mkdirSync(DEPLOY_STAGING_DIR, { recursive: true });
     for (const file of fs.readdirSync(BUILD_DIR)) {
-        fs.copyFileSync(path.join(BUILD_DIR, file), path.join(DEPLOY_DIR, file));
+        const source = path.join(BUILD_DIR, file);
+        const destination = path.join(DEPLOY_STAGING_DIR, file);
+        if (fs.statSync(source).isDirectory()) {
+            fs.cpSync(source, destination, { recursive: true });
+        } else {
+            fs.copyFileSync(source, destination);
+        }
     }
+    applyWebAudioGate(path.join(DEPLOY_STAGING_DIR, 'index.html'));
 
-    const deployToolsDir = path.join(DEPLOY_DIR, 'scripts', 'tools');
+    const deployToolsDir = path.join(DEPLOY_STAGING_DIR, 'scripts', 'tools');
     fs.mkdirSync(deployToolsDir, { recursive: true });
     fs.copyFileSync(path.join(__dirname, 'serve.js'), path.join(deployToolsDir, 'serve.js'));
-    writeSharedServerWrapper('./scripts/tools/serve.js');
+    writeSharedServerWrapper('./scripts/tools/serve.js', DEPLOY_STAGING_DIR);
 
     if (platform === 'cloudstudio') {
-        fs.writeFileSync(path.join(DEPLOY_DIR, '.cloudstudio.yaml'), JSON.stringify({
+        fs.writeFileSync(path.join(DEPLOY_STAGING_DIR, '.cloudstudio.yaml'), JSON.stringify({
             name: 'Shuoguang Project',
             port: 8080,
             command: 'HOST=0.0.0.0 PORT=8080 node server.js',
         }, null, 2));
     }
+
+    fs.rmSync(DEPLOY_DIR, { recursive: true, force: true });
+    fs.renameSync(DEPLOY_STAGING_DIR, DEPLOY_DIR);
 
     console.log('[SUCCESS] Deploy package generated:', DEPLOY_DIR);
 }

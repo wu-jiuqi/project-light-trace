@@ -2,7 +2,6 @@
 
 [ext_resource type="Texture2D" uid="uid://dvdh56tn2i8k" path="res://assets/papercraft/fragments/id0001/environment2/tianshu_monitor.png" id="1_03fqu"]
 [ext_resource type="Script" uid="uid://c4r728pab4rhf" path="res://scripts/fragment/tv_interactable.gd" id="2_tvscript"]
-[ext_resource type="VideoStream" uid="uid://canohv7fbb0to" path="res://assets/papercraft/fragments/id0001/environment2/ad.ogv" id="3_ad"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4ando"]
 size = Vector2(1095, 287)
@@ -55,4 +54,3 @@ offset_top = 37.0
 offset_right = 1280.0
 offset_bottom = 757.0
 scale = Vector2(0.705, 0.705)
-stream = ExtResource("3_ad")
