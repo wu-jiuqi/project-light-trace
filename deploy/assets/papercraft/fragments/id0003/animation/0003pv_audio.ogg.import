@@ -2,13 +2,13 @@
 
 importer="oggvorbisstr"
 type="AudioStreamOggVorbis"
-uid="uid://c3dchet4safkg"
-path="res://.godot/imported/0003pv_audio.ogg-7622cf001043ed798c2d76fc8ba4052f.oggvorbisstr"
+uid="uid://dbbxdsrvcfc5i"
+path="res://.godot/imported/0003pv_audio.ogg-6d91fb2602a64063deae01d31fa8421b.oggvorbisstr"
 
 [deps]
 
-source_file="res://deploy/assets/papercraft/fragments/id0003/animation/0003pv_audio.ogg"
-dest_files=["res://.godot/imported/0003pv_audio.ogg-7622cf001043ed798c2d76fc8ba4052f.oggvorbisstr"]
+source_file="res://build/web/assets/papercraft/fragments/id0003/animation/0003pv_audio.ogg"
+dest_files=["res://.godot/imported/0003pv_audio.ogg-6d91fb2602a64063deae01d31fa8421b.oggvorbisstr"]
 
 [params]
 
