@@ -60,22 +60,16 @@ func _should_use_loading_screen(target_scene_path: String) -> bool:
 			and ResourceLoader.exists(target_scene_path)
 
 
-func _requires_pack_loading(target_scene_path: String) -> bool:
-	return _has_pack_for_scene(target_scene_path) and not _is_pack_loaded_for_scene(target_scene_path)
+func _requires_pack_loading(_target_scene_path: String) -> bool:
+	return false
 
 
-func _has_pack_for_scene(target_scene_path: String) -> bool:
-	var manager := get_node_or_null("/root/WebPackManager")
-	return manager != null \
-			and manager.has_method("has_pack_for_scene") \
-			and bool(manager.call("has_pack_for_scene", target_scene_path))
+func _has_pack_for_scene(_target_scene_path: String) -> bool:
+	return false
 
 
-func _is_pack_loaded_for_scene(target_scene_path: String) -> bool:
-	var manager := get_node_or_null("/root/WebPackManager")
-	return manager == null \
-			or not manager.has_method("is_pack_loaded_for_scene") \
-			or bool(manager.call("is_pack_loaded_for_scene", target_scene_path))
+func _is_pack_loaded_for_scene(_target_scene_path: String) -> bool:
+	return true
 
 
 func _is_title_to_star_map_flow() -> bool:
