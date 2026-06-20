@@ -1,7 +1,7 @@
 extends Control
 
 const MONOLOGUE_SCENE: PackedScene = preload("res://scenes/ui/Monologue.tscn")
-const BGM_PATH_0004 := "res://assets/audio/0004.mp3"
+const BGM_PATH_0004 := "res://assets/audio/bgm/bgm_fragment_0004_loop.ogg"
 var _bgm_stream_0004: AudioStream = null
 const FRAGMENT_ID := "0004"
 const STAR_MAP_SCENE := "res://scenes/star_map.tscn"
