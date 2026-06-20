@@ -7,7 +7,7 @@ path="res://.godot/imported/0003.mp3-bc0ff9d0b76a89530da8587e0208da86.mp3str"
 
 [deps]
 
-source_file="res://build/web/assets/audio/0003.mp3"
+source_file="res://deploy/assets/audio/0003.mp3"
 dest_files=["res://.godot/imported/0003.mp3-bc0ff9d0b76a89530da8587e0208da86.mp3str"]
 
 [params]
