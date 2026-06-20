@@ -75,6 +75,18 @@ function writeSharedServerWrapper(relativeRequirePath, outputDir = DEPLOY_DIR) {
     ].join('\n'));
 }
 
+function copyRecursive(src, dest) {
+    const stat = fs.statSync(src);
+    if (stat.isDirectory()) {
+        fs.mkdirSync(dest, { recursive: true });
+        for (const child of fs.readdirSync(src)) {
+            copyRecursive(path.join(src, child), path.join(dest, child));
+        }
+        return;
+    }
+    fs.copyFileSync(src, dest);
+}
+
 function generateDeployPackage(platform) {
     requireBuildOutput();
     fs.rmSync(DEPLOY_STAGING_DIR, { recursive: true, force: true });

@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://bksm4vo2b3tp1"
-path="res://.godot/imported/ui_interact_confirm.wav-d895803b450eb8354464c62231dbf4a3.sample"
+path="res://.godot/imported/ui_interact_confirm.wav-04e436abdde3a22958a1b2ef8d3fc9cf.sample"
 
 [deps]
 
-source_file="res://assets/audio/sfx/ui_interact_confirm.wav"
-dest_files=["res://.godot/imported/ui_interact_confirm.wav-d895803b450eb8354464c62231dbf4a3.sample"]
+source_file="res://deploy/assets/audio/sfx/ui_interact_confirm.wav"
+dest_files=["res://.godot/imported/ui_interact_confirm.wav-04e436abdde3a22958a1b2ef8d3fc9cf.sample"]
 
 [params]
 

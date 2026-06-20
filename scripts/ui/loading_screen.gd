@@ -38,6 +38,8 @@ var _is_loading_scene := false
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if not WebPackManager.pack_download_progress.is_connected(_on_pack_download_progress):
+		WebPackManager.pack_download_progress.connect(_on_pack_download_progress)
 	_target_progress = clampf(initial_progress, 0.0, 100.0)
 	_display_progress = _target_progress
 	_apply_skin()
@@ -84,6 +86,18 @@ func start_scene_load(target_scene_path: String) -> void:
 	_target_progress = 2.0
 	_display_progress = 0.0
 	_status_label.text = "读取场景档案"
+
+	if WebPackManager.has_pack_for_scene(_loading_target_path):
+		_status_label.text = "正在加载下一段记忆..."
+		var pack_ok := await WebPackManager.ensure_pack_for_scene(_loading_target_path)
+		if not pack_ok:
+			printerr("[LoadingScreen] pack load failed before scene load: %s" % _loading_target_path)
+			_is_loading_scene = false
+			if SceneManager.has_method("_abort_loading_transition"):
+				SceneManager._abort_loading_transition(_loading_target_path)
+			return
+		_target_progress = maxf(_target_progress, 48.0)
+		_status_label.text = "资源包已就绪，读取场景档案"
 
 	var err := ResourceLoader.load_threaded_request(_loading_target_path, "PackedScene")
 	if err != OK:
@@ -135,6 +149,17 @@ func _update_progress_ui() -> void:
 	_progress_glow.visible = value > 1.0
 	_progress_glow.size.x = maxf(10.0, bar_width * value / 100.0)
 	_progress_glow.modulate.a = 0.23 + 0.18 * sin(_elapsed * 4.0)
+
+
+func _on_pack_download_progress(_pack_id: String, downloaded_bytes: int, total_bytes: int) -> void:
+	if not _is_loading_scene:
+		return
+	_status_label.text = "正在加载下一段记忆..."
+	if total_bytes > 0:
+		var ratio := clampf(float(downloaded_bytes) / float(total_bytes), 0.0, 1.0)
+		_target_progress = maxf(_target_progress, 2.0 + ratio * 44.0)
+	else:
+		_target_progress = minf(44.0, _target_progress + 0.25)
 
 
 func _try_start_scene_manager_request() -> void:
