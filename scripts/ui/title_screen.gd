@@ -135,6 +135,7 @@ func _setup_hit_areas() -> void:
 	for i in _hit_areas.size():
 		var idx := i  # 捕获循环变量，避免 lambda 闭包引用同一变量
 		var area := _hit_areas[i]
+		area.mouse_filter = Control.MOUSE_FILTER_STOP
 		area.gui_input.connect(func(event: InputEvent):
 			if event is InputEventMouseButton \
 					and event.button_index == MOUSE_BUTTON_LEFT \
@@ -614,6 +615,21 @@ func _input(event: InputEvent) -> void:
 		return
 
 	# 有覆盖层打开时：Esc 关闭，其余键盘不响应
+	if event is InputEventMouseMotion:
+		var hover_index := _hit_test_main_button(event.position)
+		if hover_index >= 0 and hover_index != _selected:
+			_on_button_hovered(hover_index)
+		return
+
+	if event is InputEventMouseButton \
+			and event.button_index == MOUSE_BUTTON_LEFT \
+			and event.pressed:
+		var pressed_index := _hit_test_main_button(event.position)
+		if pressed_index >= 0:
+			_on_button_pressed(pressed_index)
+			get_viewport().set_input_as_handled()
+			return
+
 	if is_instance_valid(_active_dialog) and _active_dialog.get("visible"):
 		if event.is_action_pressed("ui_cancel") or event.is_action_pressed("escape"):
 			_active_dialog.queue_free()
@@ -659,6 +675,14 @@ func _on_button_pressed(index: int) -> void:
 	_selected = index
 	_update_selection()
 	_execute_selection()
+
+
+func _hit_test_main_button(position: Vector2) -> int:
+	for i in _hit_areas.size():
+		var area := _hit_areas[i]
+		if area != null and area.visible and area.get_global_rect().has_point(position):
+			return i
+	return -1
 
 
 func _execute_selection() -> void:
