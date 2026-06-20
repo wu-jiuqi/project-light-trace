@@ -134,6 +134,12 @@ function assertSameOriginRequest(req) {
         throw Object.assign(new Error('cross-site requests are not allowed'), { statusCode: 403 });
     }
 
+    // When the browser confirms same-origin via Sec-Fetch-Site, allow the
+    // request even without an Origin header. Programmatic HTTP clients
+    // (e.g. Godot's Emscripten HTTPClient via XMLHttpRequest/fetch) may not
+    // send Origin for same-origin requests.
+    if (fetchSite === 'same-origin') return;
+
     const origin = req.headers.origin || req.headers.referer;
     if (!origin) {
         throw Object.assign(new Error('missing origin'), { statusCode: 403 });

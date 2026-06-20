@@ -127,28 +127,34 @@ function allowedOrigins(req) {
 }
 
 function assertSameOriginRequest(req) {
-    if (!IS_PRODUCTION) return;
+	if (!IS_PRODUCTION) return;
 
-    const fetchSite = String(req.headers['sec-fetch-site'] || '').toLowerCase();
-    if (fetchSite === 'cross-site') {
-        throw Object.assign(new Error('cross-site requests are not allowed'), { statusCode: 403 });
-    }
+	const fetchSite = String(req.headers['sec-fetch-site'] || '').toLowerCase();
+	if (fetchSite === 'cross-site') {
+		throw Object.assign(new Error('cross-site requests are not allowed'), { statusCode: 403 });
+	}
 
-    const origin = req.headers.origin || req.headers.referer;
-    if (!origin) {
-        throw Object.assign(new Error('missing origin'), { statusCode: 403 });
-    }
+	// When the browser confirms same-origin via Sec-Fetch-Site, allow the
+	// request even without an Origin header. Programmatic HTTP clients
+	// (e.g. Godot's Emscripten HTTPClient via XMLHttpRequest/fetch) may not
+	// send Origin for same-origin requests.
+	if (fetchSite === 'same-origin') return;
 
-    let requestOrigin;
-    try {
-        requestOrigin = new URL(origin).origin;
-    } catch {
-        throw Object.assign(new Error('invalid origin'), { statusCode: 403 });
-    }
+	const origin = req.headers.origin || req.headers.referer;
+	if (!origin) {
+		throw Object.assign(new Error('missing origin'), { statusCode: 403 });
+	}
 
-    if (!allowedOrigins(req).includes(requestOrigin)) {
-        throw Object.assign(new Error('origin is not allowed'), { statusCode: 403 });
-    }
+	let requestOrigin;
+	try {
+		requestOrigin = new URL(origin).origin;
+	} catch {
+		throw Object.assign(new Error('invalid origin'), { statusCode: 403 });
+	}
+
+	if (!allowedOrigins(req).includes(requestOrigin)) {
+		throw Object.assign(new Error('origin is not allowed'), { statusCode: 403 });
+	}
 }
 
 function sanitizeMessages(payload) {
