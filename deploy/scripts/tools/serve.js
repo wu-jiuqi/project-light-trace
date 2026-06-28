@@ -329,8 +329,19 @@ function handleStatic(req, res, pathname) {
             return;
         }
         const ext = path.extname(filePath).toLowerCase();
+        const contentType = MIME[ext] || 'application/octet-stream';
+        const baseHeaders = {
+            ...WEB_HEADERS,
+            'Cache-Control': 'no-cache',
+            'Content-Type': contentType,
+            'Content-Length': stat.size,
+        };
+        if (ext === '.mp4' || ext === '.pck' || ext === '.wasm') {
+            baseHeaders['Accept-Ranges'] = 'bytes';
+        }
+
         const range = req.headers.range;
-        if (ext === '.mp4' && range) {
+        if (range) {
             const match = /^bytes=(\d*)-(\d*)$/.exec(range);
             if (!match) {
                 send(res, 416, { 'Content-Range': `bytes */${stat.size}` });
@@ -345,9 +356,7 @@ function handleStatic(req, res, pathname) {
                 return;
             }
             const headers = {
-                ...WEB_HEADERS,
-                'Cache-Control': 'no-cache',
-                'Content-Type': MIME[ext],
+                ...baseHeaders,
                 'Accept-Ranges': 'bytes',
                 'Content-Range': `bytes ${start}-${end}/${stat.size}`,
                 'Content-Length': end - start + 1,
@@ -360,15 +369,21 @@ function handleStatic(req, res, pathname) {
             fs.createReadStream(filePath, { start, end }).pipe(res);
             return;
         }
-        fs.readFile(filePath, (error, data) => {
-            if (error) {
+
+        res.writeHead(200, baseHeaders);
+        if (req.method === 'HEAD') {
+            res.end();
+            return;
+        }
+        const stream = fs.createReadStream(filePath);
+        stream.on('error', () => {
+            if (!res.headersSent) {
                 send(res, 404, { 'Content-Type': 'text/plain; charset=utf-8' }, 'Not Found');
                 return;
             }
-            const headers = { 'Content-Type': MIME[ext] || 'application/octet-stream' };
-            if (ext === '.mp4') headers['Accept-Ranges'] = 'bytes';
-            send(res, 200, headers, data);
+            res.destroy();
         });
+        stream.pipe(res);
     });
 }
 
@@ -389,6 +404,22 @@ function createServer() {
     });
 }
 
+function formatBytes(bytes) {
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function logStaticRootSummary() {
+    console.log('[INFO] Static root:', BUILD_DIR);
+    for (const file of ['index.html', 'index.js', 'index.wasm', 'index.pck']) {
+        const filePath = path.join(BUILD_DIR, file);
+        if (!fs.existsSync(filePath)) {
+            console.warn(`[WARN] Static asset missing: ${file}`);
+            continue;
+        }
+        console.log(`[INFO] Static asset: ${file} (${formatBytes(fs.statSync(filePath).size)})`);
+    }
+}
+
 if (require.main === module) {
     const port = parseInt(process.argv[2], 10) || DEFAULT_PORT;
     createServer().listen(port, DEFAULT_HOST, () => {
@@ -396,7 +427,7 @@ if (require.main === module) {
         console.log('  Shuoguang Project - Web preview and LLM proxy');
         console.log(`  http://${DEFAULT_HOST}:${port}`);
         console.log('='.repeat(50));
-        console.log('[INFO] Static root:', BUILD_DIR);
+        logStaticRootSummary();
         console.log('[INFO] LLM provider:', PROVIDER);
     });
 }
